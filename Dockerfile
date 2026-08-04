@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.26
+ARG GO_VERSION=1.26.5
 ARG NODE_VERSION=24
 FROM node:${NODE_VERSION}-alpine AS uilayer
 
@@ -15,7 +15,7 @@ RUN yarn install
 
 COPY ./web-app .
 
-RUN yarn build
+RUN yarn build && ./optimize-embed.sh
 
 USER node
 

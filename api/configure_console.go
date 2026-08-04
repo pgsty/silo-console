@@ -44,6 +44,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	"github.com/klauspost/compress/gzhttp"
+	"github.com/klauspost/compress/gzip"
 
 	portal_ui "github.com/minio/console/web-app"
 	"github.com/minio/pkg/v3/env"
@@ -405,7 +406,8 @@ func FileServerMiddleware(next http.Handler) http.Handler {
 	if err != nil {
 		panic(err)
 	}
-	spaFileHandler := wrapHandlerSinglePageApplication(requestBounce(http.FileServer(http.FS(buildFs))))
+	assetHandler := precompressedAssetsHandler(buildFs, http.FileServer(http.FS(buildFs)))
+	spaFileHandler := wrapHandlerSinglePageApplication(requestBounce(assetHandler))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Server", globalAppName) // do not add version information
@@ -415,6 +417,11 @@ func FileServerMiddleware(next http.Handler) http.Handler {
 		case strings.HasPrefix(r.URL.Path, "/api"):
 			next.ServeHTTP(w, r)
 		default:
+			if r.Method != http.MethodGet && r.Method != http.MethodHead {
+				w.Header().Set("Allow", "GET, HEAD")
+				http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+				return
+			}
 			spaFileHandler.ServeHTTP(w, r)
 		}
 	})
@@ -607,4 +614,97 @@ func requestBounce(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(w, r)
 	})
+}
+
+// precompressedAssetsHandler serves static assets that were gzip-compressed
+// at build time (web-app/optimize-embed.sh), so the binary embeds ~1/3 of the
+// raw payload. Assets are emitted as-is with Content-Encoding: gzip for the
+// near-universal clients that accept it and decompressed on the fly for the
+// rest. Requests without a .gz sibling fall through to the regular file
+// server (index.html, fonts, images).
+func precompressedAssetsHandler(fsys fs.FS, fallback http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			w.Header().Set("Allow", "GET, HEAD")
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		name := strings.TrimPrefix(path.Clean(r.URL.Path), "/")
+		if name == "" || name == "." {
+			fallback.ServeHTTP(w, r)
+			return
+		}
+		gzBytes, err := fs.ReadFile(fsys, name+".gz")
+		if err != nil {
+			fallback.ServeHTTP(w, r)
+			return
+		}
+		if w.Header().Get("Content-Type") == "" {
+			w.Header().Set("Content-Type", mimedb.TypeByExtension(filepath.Ext(name)))
+		}
+		w.Header().Add("Vary", "Accept-Encoding")
+		if acceptsGzip(r.Header.Get("Accept-Encoding")) {
+			w.Header().Set("Content-Encoding", "gzip")
+			w.Header().Set("Content-Length", strconv.Itoa(len(gzBytes)))
+			if r.Method != http.MethodHead {
+				w.Write(gzBytes)
+			}
+			return
+		}
+		zr, err := gzip.NewReader(bytes.NewReader(gzBytes))
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		defer zr.Close()
+		raw, err := io.ReadAll(zr)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Length", strconv.Itoa(len(raw)))
+		if r.Method != http.MethodHead {
+			w.Write(raw)
+		}
+	})
+}
+
+// acceptsGzip applies the Accept-Encoding quality rules relevant to the
+// precompressed asset handler. An explicit gzip entry takes precedence over a
+// wildcard, including gzip;q=0, which requires an identity response.
+func acceptsGzip(header string) bool {
+	gzipQ, wildcardQ := -1.0, -1.0
+	for _, item := range strings.Split(header, ",") {
+		parts := strings.Split(item, ";")
+		coding := strings.ToLower(strings.TrimSpace(parts[0]))
+		if coding != "gzip" && coding != "*" {
+			continue
+		}
+
+		quality := 1.0
+		for _, parameter := range parts[1:] {
+			keyValue := strings.SplitN(strings.TrimSpace(parameter), "=", 2)
+			if len(keyValue) != 2 || !strings.EqualFold(strings.TrimSpace(keyValue[0]), "q") {
+				continue
+			}
+			parsed, err := strconv.ParseFloat(strings.TrimSpace(keyValue[1]), 64)
+			if err != nil || parsed < 0 || parsed > 1 {
+				quality = 0
+			} else {
+				quality = parsed
+			}
+			break
+		}
+
+		if coding == "gzip" && quality > gzipQ {
+			gzipQ = quality
+		}
+		if coding == "*" && quality > wildcardQ {
+			wildcardQ = quality
+		}
+	}
+	if gzipQ >= 0 {
+		return gzipQ > 0
+	}
+	return wildcardQ > 0
 }

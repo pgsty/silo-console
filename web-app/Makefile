@@ -8,6 +8,7 @@ build-static:
 	@echo "Building frontend static assets to 'build'"
 	@if [ -f "${NVM_DIR}/nvm.sh" ]; then \. "${NVM_DIR}/nvm.sh" && nvm install && nvm use; fi && \
 	  yarn build
+	@./optimize-embed.sh
 
 build-static-istanbul-coverage:
 	@echo "Building frontend static assets to 'build'"
