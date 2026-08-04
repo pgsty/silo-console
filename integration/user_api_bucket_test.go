@@ -2619,7 +2619,7 @@ func SetMultiBucketReplication(accessKey, secretKey, targetURL, region, originBu
 		{
 			"accessKey":"Q3AM3UQ867SPQQA43P2F",
 			"secretKey":"zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
-			"targetURL":"https://play.min.io",
+			"targetURL":"https://s3.example.com",
 			"region":"",
 			"bucketsRelation":[
 				{

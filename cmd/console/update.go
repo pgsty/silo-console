@@ -72,7 +72,7 @@ func getUpdateReaderFromURL(u string, transport http.RoundTripper) (io.ReadClose
 // const defaultPubKey = "RWTx5Zr1tiHQLwG9keckT0c45M3AGeHD6IvimQHpyRywVWGbP1aVSGav"
 
 func getLatestRelease(tr http.RoundTripper) (string, error) {
-	releaseURL := "https://api.github.com/repos/georgmangold/console/releases/latest"
+	releaseURL := "https://api.github.com/repos/pgsty/silo-console/releases/latest"
 
 	body, _, err := getUpdateReaderFromURL(releaseURL, tr)
 	if err != nil {
@@ -144,11 +144,20 @@ func IsDocker() bool {
 // update console in-place
 var updateCmd = cli.Command{
 	Name:   "update",
-	Usage:  "update console to latest release",
+	Usage:  "update SILO Console to latest release",
 	Action: updateInplace,
 }
 
+// automaticUpdatesEnabled keeps the update implementation available while the
+// SILO release artifact and signature contract is being established.
+const automaticUpdatesEnabled = false
+
 func updateInplace(_ *cli.Context) error {
+	if !automaticUpdatesEnabled {
+		fmt.Println("Automatic updates are temporarily disabled for SILO Console.")
+		return nil
+	}
+
 	transport := getUpdateTransport(30 * time.Second)
 	rel, err := getLatestRelease(transport)
 	if err != nil {
@@ -172,14 +181,17 @@ func updateInplace(_ *cli.Context) error {
 
 	// Check if we are docker environment, return docker update command
 	if IsDocker() {
-		fmt.Println("Your are running 'console' inside a cointainer use:")
-		fmt.Printf("docker pull ghcr.io/georgmangold/console:%s\n", rel)
+		fmt.Println("You are running SILO Console inside a container. Use:")
+		fmt.Printf("docker pull ghcr.io/pgsty/silo-console:%s\n", rel)
 		return nil
 	}
 
-	platformFile := fmt.Sprintf("console-%s-%s", runtime.GOOS, runtime.GOARCH)
-	checksumURL := fmt.Sprintf("https://github.com/georgmangold/console/releases/download/%s/console_%s_checksums.txt", rel, latest)
-	consoleBin := fmt.Sprintf("https://github.com/georgmangold/console/releases/download/%s/%s", rel, platformFile)
+	platformFile := fmt.Sprintf("silo-console-%s-%s", runtime.GOOS, runtime.GOARCH)
+	if runtime.GOOS == "windows" {
+		platformFile += ".exe"
+	}
+	checksumURL := fmt.Sprintf("https://github.com/pgsty/silo-console/releases/download/%s/silo-console_%s_checksums.txt", rel, latest)
+	consoleBin := fmt.Sprintf("https://github.com/pgsty/silo-console/releases/download/%s/%s", rel, platformFile)
 
 	fmt.Printf("Downloading checksum file: %s\n", checksumURL)
 	expectedChecksum, err := fetchChecksum(checksumURL, platformFile)
@@ -218,7 +230,7 @@ func updateInplace(_ *cli.Context) error {
 	barReader := bar.NewProxyReader(reader)
 	if err = selfupdate.Apply(barReader, opts); err != nil {
 		bar.Finish()
-		fmt.Println("unable to update binary: %w", err)
+		fmt.Printf("unable to update binary: %v\n", err)
 		if rerr := selfupdate.RollbackError(err); rerr != nil {
 			return fmt.Errorf("unable to update binary: %w", rerr)
 		}
@@ -226,6 +238,6 @@ func updateInplace(_ *cli.Context) error {
 	}
 
 	bar.Finish()
-	fmt.Printf("Updated 'console' to latest release %s\n", rel)
+	fmt.Printf("Updated SILO Console to latest release %s\n", rel)
 	return nil
 }

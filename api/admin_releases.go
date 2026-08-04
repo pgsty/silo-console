@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/minio/console/pkg/utils"
@@ -34,8 +35,8 @@ import (
 )
 
 var (
-	releaseServiceHostEnvVar  = "RELEASE_SERVICE_HOST"
-	defaultReleaseServiceHost = "https://enterprise-updates.ic.min.dev"
+	siloReleaseServiceHostEnvVar = "SILO_RELEASE_SERVICE_HOST"
+	releaseServiceHostEnvVar     = "RELEASE_SERVICE_HOST"
 )
 
 func registerReleasesHandlers(api *operations.ConsoleAPI) {
@@ -70,6 +71,9 @@ func GetReleaseListResponse(_ *models.Principal, params release.ListReleasesPara
 
 func releaseList(ctx context.Context, repo, currentRelease, search, filter string) (*models.ReleaseListResponse, *CodedAPIError) {
 	serviceURL := getReleaseServiceURL()
+	if serviceURL == "" {
+		return &models.ReleaseListResponse{Results: []*models.ReleaseInfo{}}, nil
+	}
 	clientIP := utils.ClientIPFromContext(ctx)
 	releases, err := getReleases(serviceURL, repo, currentRelease, search, filter, clientIP)
 	if err != nil {
@@ -79,8 +83,16 @@ func releaseList(ctx context.Context, repo, currentRelease, search, filter strin
 }
 
 func getReleaseServiceURL() string {
-	host := env.Get(releaseServiceHostEnvVar, defaultReleaseServiceHost)
-	return fmt.Sprintf("%s/releases", host)
+	host := env.Get(siloReleaseServiceHostEnvVar, "")
+	if host == "" {
+		// Compatibility fallback for existing deployments. There is no default:
+		// an operator must explicitly opt in to an update catalog service.
+		host = env.Get(releaseServiceHostEnvVar, "")
+	}
+	if host == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s/releases", strings.TrimRight(host, "/"))
 }
 
 func getReleases(endpoint, repo, currentRelease, search, filter, clientIP string) (*models.ReleaseListResponse, error) {

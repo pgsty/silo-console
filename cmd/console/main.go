@@ -97,13 +97,13 @@ func newApp(name string) *cli.App {
 	app := cli.NewApp()
 	app.Name = name
 	app.Version = pkg.Version + " - " + pkg.ShortCommitID
-	app.Author = "Georg Mangold"
-	app.Usage = "Console Server"
-	app.Description = "Console Server Admin UI for MinIO Server"
+	app.Author = "Pigsty"
+	app.Usage = "SILO Console Server"
+	app.Description = "Browser-based administration UI for SILO object storage"
 	app.Copyright = "AGPLv3"
 	app.Compiled, _ = time.Parse(time.RFC3339, pkg.ReleaseTime)
 	app.Commands = commands
-	app.HideHelpCommand = true // Hide `help, h` command, we already have `minio --help`.
+	app.HideHelpCommand = true // Hide `help, h`; the global `--help` remains available.
 	app.CustomAppHelpTemplate = consoleHelpTemplate
 	app.CommandNotFound = func(_ *cli.Context, command string) {
 		console.Printf("‘%s’ is not a console sub-command. See ‘console --help’.\n", command)

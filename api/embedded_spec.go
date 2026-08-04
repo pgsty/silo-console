@@ -8357,8 +8357,8 @@ func init() {
     "key": {
       "type": "oauth2",
       "flow": "accessCode",
-      "authorizationUrl": "http://min.io",
-      "tokenUrl": "http://min.io"
+      "authorizationUrl": "https://auth.example.com/oauth/authorize",
+      "tokenUrl": "https://auth.example.com/oauth/token"
     }
   },
   "security": [
@@ -16902,8 +16902,8 @@ func init() {
     "key": {
       "type": "oauth2",
       "flow": "accessCode",
-      "authorizationUrl": "http://min.io",
-      "tokenUrl": "http://min.io"
+      "authorizationUrl": "https://auth.example.com/oauth/authorize",
+      "tokenUrl": "https://auth.example.com/oauth/token"
     }
   },
   "security": [

@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -43,15 +44,15 @@ type ReleasesTestSuite struct {
 func (suite *ReleasesTestSuite) SetupSuite() {
 	suite.assert = assert.New(suite.T())
 	suite.getServer = httptest.NewServer(http.HandlerFunc(suite.getHandler))
-	suite.currentServer, suite.isServerSet = os.LookupEnv(releaseServiceHostEnvVar)
-	os.Setenv(releaseServiceHostEnvVar, suite.getServer.URL)
+	suite.currentServer, suite.isServerSet = os.LookupEnv(siloReleaseServiceHostEnvVar)
+	os.Setenv(siloReleaseServiceHostEnvVar, suite.getServer.URL)
 }
 
 func (suite *ReleasesTestSuite) TearDownSuite() {
 	if suite.isServerSet {
-		os.Setenv(releaseServiceHostEnvVar, suite.currentServer)
+		os.Setenv(siloReleaseServiceHostEnvVar, suite.currentServer)
 	} else {
-		os.Unsetenv(releaseServiceHostEnvVar)
+		os.Unsetenv(siloReleaseServiceHostEnvVar)
 	}
 }
 
@@ -101,4 +102,22 @@ func (suite *ReleasesTestSuite) TestGetReleasesWithoutError() {
 
 func TestReleases(t *testing.T) {
 	suite.Run(t, new(ReleasesTestSuite))
+}
+
+func TestReleaseServiceDisabledByDefault(t *testing.T) {
+	t.Setenv(siloReleaseServiceHostEnvVar, "")
+	t.Setenv(releaseServiceHostEnvVar, "")
+
+	assert.Empty(t, getReleaseServiceURL())
+	releases, apiErr := releaseList(context.Background(), "", "", "", "")
+	assert.Nil(t, apiErr)
+	assert.NotNil(t, releases)
+	assert.Empty(t, releases.Results)
+}
+
+func TestLegacyReleaseServiceFallback(t *testing.T) {
+	t.Setenv(siloReleaseServiceHostEnvVar, "")
+	t.Setenv(releaseServiceHostEnvVar, "https://updates.example.com/")
+
+	assert.Equal(t, "https://updates.example.com/releases", getReleaseServiceURL())
 }

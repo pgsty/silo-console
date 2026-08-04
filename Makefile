@@ -3,8 +3,8 @@ GOPATH := $(shell go env GOPATH)
 # Sets the build version based on the output of the following command, if we are building for a tag, that's the build else it uses the current git branch as the build
 BUILD_VERSION:=$(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null)
 BUILD_TIME:=$(shell date 2>/dev/null)
-TAG ?= "ghcr.io/georgmangold/console:$(BUILD_VERSION)-dev"
-#TAG ?= "ghcr.io/georgmangold/console:dev"
+TAG ?= "ghcr.io/pgsty/silo-console:$(BUILD_VERSION)-dev"
+#TAG ?= "ghcr.io/pgsty/silo-console:dev"
 MINIO_VERSION ?= "quay.io/minio/minio:latest"
 #MINIO_VERSION ?= "quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z"
 
@@ -15,7 +15,7 @@ default: console
 
 .PHONY: console
 console:
-	@echo "Building Console binary to './console'"
+	@echo "Building SILO Console binary to './console'"
 	@(GO111MODULE=on CGO_ENABLED=0 go build -trimpath --tags=kqueue --ldflags "-s -w" -o console ./cmd/console)
 
 getdeps:

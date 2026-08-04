@@ -92,5 +92,5 @@ func TestRegisterAdminArnsHandlers(t *testing.T) {
 	value := api.SystemArnListHandler.Handle(ArnListParamsStruct, &modelsPrincipal)
 	str := fmt.Sprintf("%#v", value)
 	fmt.Println("value: ", str)
-	assert.Equal(strings.Contains(str, "_statusCode:500"), true)
+	assert.Equal(strings.Contains(str, "_statusCode:403"), true)
 }
