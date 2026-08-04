@@ -20,10 +20,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"testing"
+	"time"
 
 	"github.com/go-openapi/swag"
 	"github.com/minio/console/models"
+	mc "github.com/minio/mc/cmd"
 	"github.com/minio/mc/pkg/probe"
 	"github.com/minio/minio-go/v7/pkg/notification"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +47,12 @@ var (
 )
 
 // Define a mock struct of mc S3Client interface implementation
-type s3ClientMock struct{}
+type s3ClientMock struct {
+	listFunc          func(context.Context, mc.ListOptions) <-chan *mc.ClientContent
+	removeFunc        func(context.Context, bool, bool, bool, bool, <-chan *mc.ClientContent) <-chan mc.RemoveResult
+	getFunc           func(context.Context, mc.GetOptions) (io.ReadCloser, *probe.Error)
+	shareDownloadFunc func(context.Context, string, time.Duration) (string, *probe.Error)
+}
 
 // implements mc.S3Client.AddNotificationConfigMock()
 func (c s3ClientMock) addNotificationConfig(ctx context.Context, arn string, events []string, prefix, suffix string, ignoreExisting bool) *probe.Error {

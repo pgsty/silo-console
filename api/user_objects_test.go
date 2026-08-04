@@ -53,13 +53,6 @@ var (
 	minioStatObjectMock         func(ctx context.Context, bucketName, prefix string, opts minio.GetObjectOptions) (objectInfo minio.ObjectInfo, err error)
 )
 
-var (
-	mcListMock          func(ctx context.Context, opts mc.ListOptions) <-chan *mc.ClientContent
-	mcRemoveMock        func(ctx context.Context, isIncomplete, isRemoveBucket, isBypass, forceDelete bool, contentCh <-chan *mc.ClientContent) <-chan mc.RemoveResult
-	mcGetMock           func(ctx context.Context, opts mc.GetOptions) (io.ReadCloser, *probe.Error)
-	mcShareDownloadMock func(ctx context.Context, versionID string, expires time.Duration) (string, *probe.Error)
-)
-
 // mock functions for minioClientMock
 func (ac minioClientMock) listObjects(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo {
 	return minioListObjectsMock(ctx, bucket, opts)
@@ -99,19 +92,19 @@ func (ac minioClientMock) statObject(ctx context.Context, bucketName, prefix str
 
 // mock functions for s3ClientMock
 func (c s3ClientMock) list(ctx context.Context, opts mc.ListOptions) <-chan *mc.ClientContent {
-	return mcListMock(ctx, opts)
+	return c.listFunc(ctx, opts)
 }
 
 func (c s3ClientMock) remove(ctx context.Context, isIncomplete, isRemoveBucket, isBypass, forceDelete bool, contentCh <-chan *mc.ClientContent) <-chan mc.RemoveResult {
-	return mcRemoveMock(ctx, isIncomplete, isRemoveBucket, isBypass, forceDelete, contentCh)
+	return c.removeFunc(ctx, isIncomplete, isRemoveBucket, isBypass, forceDelete, contentCh)
 }
 
 func (c s3ClientMock) get(ctx context.Context, opts mc.GetOptions) (io.ReadCloser, *probe.Error) {
-	return mcGetMock(ctx, opts)
+	return c.getFunc(ctx, opts)
 }
 
 func (c s3ClientMock) shareDownload(ctx context.Context, versionID string, expires time.Duration) (string, *probe.Error) {
-	return mcShareDownloadMock(ctx, versionID, expires)
+	return c.shareDownloadFunc(ctx, versionID, expires)
 }
 
 func Test_listObjects(t *testing.T) {
@@ -705,7 +698,6 @@ func Test_listObjects(t *testing.T) {
 		},
 	}
 
-	t.Parallel()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.test, func(_ *testing.T) {
@@ -747,7 +739,6 @@ func Test_listObjects(t *testing.T) {
 func Test_deleteObjects(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	s3Client1 := s3ClientMock{}
 	type args struct {
 		bucket     string
 		path       string
@@ -888,12 +879,13 @@ func Test_deleteObjects(t *testing.T) {
 		},
 	}
 
-	t.Parallel()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.test, func(_ *testing.T) {
-			mcListMock = tt.args.listFunc
-			mcRemoveMock = tt.args.removeFunc
+			s3Client1 := s3ClientMock{
+				listFunc:   tt.args.listFunc,
+				removeFunc: tt.args.removeFunc,
+			}
 			err := deleteObjects(ctx, s3Client1, tt.args.bucket, tt.args.path, tt.args.versionID, tt.args.recursive, false, tt.args.nonCurrent, false)
 			switch {
 			case err == nil && tt.wantError != nil:
@@ -913,7 +905,6 @@ func Test_shareObject(t *testing.T) {
 	tAssert := assert.New(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	client := s3ClientMock{}
 	type args struct {
 		r         *http.Request
 		versionID string
@@ -1095,7 +1086,7 @@ func Test_shareObject(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.test, func(_ *testing.T) {
-			mcShareDownloadMock = tt.args.shareFunc
+			client := s3ClientMock{shareDownloadFunc: tt.args.shareFunc}
 			if tt.setEnvVars != nil {
 				tt.setEnvVars()
 			}

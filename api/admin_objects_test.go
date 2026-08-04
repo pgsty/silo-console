@@ -28,8 +28,6 @@ import (
 
 func TestWSRewindObjects(t *testing.T) {
 	assert := assert.New(t)
-	client := s3ClientMock{}
-
 	tests := []struct {
 		name         string
 		testOptions  objectsListOpts
@@ -101,7 +99,7 @@ func TestWSRewindObjects(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			mcListMock = func(_ context.Context, _ mc.ListOptions) <-chan *mc.ClientContent {
+			client := s3ClientMock{listFunc: func(_ context.Context, _ mc.ListOptions) <-chan *mc.ClientContent {
 				ch := make(chan *mc.ClientContent)
 				go func() {
 					defer close(ch)
@@ -110,7 +108,7 @@ func TestWSRewindObjects(t *testing.T) {
 					}
 				}()
 				return ch
-			}
+			}}
 
 			rewindList := startRewindListing(ctx, client, &tt.testOptions)
 

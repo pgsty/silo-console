@@ -114,7 +114,7 @@ func (h *Target) Init() error {
 	}
 
 	h.status = 1
-	go h.startHTTPLogger()
+	h.startHTTPLogger()
 	return nil
 }
 
