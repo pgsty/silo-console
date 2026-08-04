@@ -4,10 +4,25 @@ Systemd script for Console.
 
 ## Installation
 
-- Systemd script is configured to run the binary from `/usr/local/bin/`.
-- Systemd script is configured to run the binary as `console-user`, make sure you create this user prior using service script.
-- Download the binary. Find the relevant links for the binary in the [README](https://github.com/georgmangold/console#binary-releases) or latest [Release Page](https://github.com/georgmangold/console/releases/latest/)..
-- DEB and RPM Packages will install the systemd service file to `/etc/systemd/system/minio-console.service`.
+- Systemd script is configured to run `/usr/local/bin/silo-console`.
+- Systemd script is configured to run the binary as `console-user`. DEB/RPM/APK
+  packages create this system user automatically (`preinstall.sh`); for manual
+  installations, create it yourself before using the service script.
+- Release binaries and packages are available from the
+  [release page](https://github.com/pgsty/silo-console/releases). Source builds
+  remain available through the [README](https://github.com/pgsty/silo-console#quick-start).
+- DEB and RPM packages currently retain the compatibility service name
+  `/etc/systemd/system/minio-console.service`; renaming it requires a package
+  migration. Manual installations below use `console.service`.
+- Packages also install a configuration template at `/etc/default/console`
+  (from `console.env`, marked as config/noreplace so upgrades keep your edits).
+
+When building from source, install the local development binary under the
+release name expected by the service:
+
+```sh
+sudo install -m 0755 ./console /usr/local/bin/silo-console
+```
 
 ## Create the Environment configuration file
 
@@ -24,7 +39,7 @@ CONSOLE_PBKDF_PASSPHRASE=CHANGEME
 # required to encrypt JWT payload
 CONSOLE_PBKDF_SALT=CHANGEME
 
-# MinIO Endpoint
+# SILO or MinIO-compatible endpoint (compatibility variable retained)
 CONSOLE_MINIO_SERVER=http://minio.endpoint:9000
 
 EOT
@@ -35,7 +50,7 @@ EOT
 Download `console.service` in  `/etc/systemd/system/`
 
 ```
-( cd /etc/systemd/system/; curl -O https://raw.githubusercontent.com/georgmangold/console/main/systemd/console.service )
+( cd /etc/systemd/system/; curl -O https://raw.githubusercontent.com/pgsty/silo-console/main/systemd/console.service )
 ```
 
 Enable startup on boot

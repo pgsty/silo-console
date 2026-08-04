@@ -4,17 +4,17 @@ ARG TARGETPLATFORM
 ARG TAG
 ARG SOURCE
 
-LABEL name="Console" \
-      maintainer="Georg Mangold" \
+LABEL name="SILO Console" \
+      maintainer="Pigsty" \
       version="${TAG}" \
       release="${TAG}" \
-      summary="A graphical user interface for MinIO®" \
-      description="See Github for more information https://github.com/georgmangold/console" \
-      org.opencontainers.image.source="https://github.com/georgmangold/console" \
-      org.opencontainers.image.description="A graphical user interface for MinIO®" \
+      summary="The SILO object storage console" \
+      description="See Github for more information https://github.com/pgsty/silo-console" \
+      org.opencontainers.image.source="https://github.com/pgsty/silo-console" \
+      org.opencontainers.image.description="The SILO object storage console" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later"
 
-COPY $TARGETPLATFORM/console /console
+COPY $TARGETPLATFORM/silo-console /console
 
 EXPOSE 9090
 

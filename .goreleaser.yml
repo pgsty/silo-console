@@ -1,17 +1,19 @@
 # Make sure to check the documentation at http://goreleaser.com
 version: 2
-project_name: console
+project_name: silo-console
 
 release:
   name_template: "Release version {{.Tag}}"
   github:
-    owner: georgmangold
-    name: console
+    owner: pgsty
+    name: silo-console
+  draft: true
+  prerelease: false
 
 before:
   hooks:
-    # you may remove this if you don't use vgo
-    - go mod tidy
+    - go mod download
+    - go mod verify
 
 builds:
   - goos:
@@ -42,31 +44,64 @@ archives:
   - name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
     formats: ["binary"]
 
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
 snapshot:
   version_template: SNAPSHOT@{{.ShortCommit}}
 
 changelog:
   sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "Merge pull request"
+      - "Merge branch"
 
 nfpms:
-  - vendor: "Georg Mangold"
-    homepage: https://github.com/georgmangold/console
-    maintainer: "Georg Mangold"
-    description: Console UI for MinIO Server
-    license: GNU Affero General Public License v3.0
+  - vendor: PGSTY
+    homepage: https://silo.pgsty.com
+    maintainer: "Ruohang Feng (@Vonng) <rh@vonng.com>"
+    description: SILO object storage console, community-maintained MinIO Console fork.
+    license: AGPL-3.0-or-later
+    section: utils
+    priority: optional
     bindir: /usr/local/bin
     formats:
       - deb
       - rpm
+      - apk
     contents:
-      # Basic file that applies to all packagers
+      # DEB/RPM packages retain the compatibility unit name, see systemd/README.md
       - src: systemd/console.service
         dst: /etc/systemd/system/minio-console.service
+        file_info:
+          mode: 0644
+          owner: root
+          group: root
+      - src: systemd/console.env
+        dst: /etc/default/console
+        type: config|noreplace
+        file_info:
+          mode: 0600
+          owner: root
+          group: root
+    scripts:
+      preinstall: systemd/preinstall.sh
+    rpm:
+      group: Applications/File
+      compression: gzip:9
+    deb:
+      compression: gzip
+      fields:
+        License: AGPL-3.0-or-later
 
 dockers_v2:
   - dockerfile: Dockerfile.goreleaser
     images:
-      - "ghcr.io/georgmangold/console"
+      - "ghcr.io/pgsty/silo-console"
     platforms:
       - linux/amd64
       - linux/arm64
@@ -76,11 +111,11 @@ dockers_v2:
     build_args:
       TAG: "{{ .Tag }}"
     labels:
-      "org.opencontainers.image.authors": "Georg Mangold"
-      "org.opencontainers.image.vendor": "Georg Mangold"
+      "org.opencontainers.image.authors": "Pigsty"
+      "org.opencontainers.image.vendor": "Pigsty"
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.description": "A graphical user interface for MinIO®"
+      "org.opencontainers.image.description": "The SILO object storage console"
       "org.opencontainers.image.created": "{{.Date}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Tag}}"
@@ -90,11 +125,11 @@ dockers_v2:
       "org.opencontainers.image.licenses": "AGPL-3.0-or-later"
       "org.opencontainers.image.base.name": "scratch"
     annotations:
-      "org.opencontainers.image.authors": "Georg Mangold"
-      "org.opencontainers.image.vendor": "Georg Mangold"
+      "org.opencontainers.image.authors": "Pigsty"
+      "org.opencontainers.image.vendor": "Pigsty"
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.description": "A graphical user interface for MinIO®"
+      "org.opencontainers.image.description": "The SILO object storage console"
       "org.opencontainers.image.created": "{{.Date}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Tag}}"

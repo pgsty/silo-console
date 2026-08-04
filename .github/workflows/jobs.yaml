@@ -1047,7 +1047,7 @@ jobs:
           echo "The idea is to build console image from cached binary";
           cd $GITHUB_WORKSPACE;
 
-          TAG="ghcr.io/georgmangold/console:dev"
+          TAG="ghcr.io/pgsty/silo-console:dev"
           echo "Create Console image: $TAG";
           docker build -q --no-cache -t $TAG . -f Dockerfile.release
 
