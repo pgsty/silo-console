@@ -2,12 +2,14 @@
 
 ## Supported Versions
 
-We always provide security updates for the [latest release](https://github.com/georgmangold/console/releases/latest).
-Whenever there is a security update you just need to upgrade to the latest version.
+Security fixes are provided on a best-effort basis for the
+[latest release](https://github.com/pgsty/silo-console/releases/latest). No
+fixed support window or remediation schedule is guaranteed. Pin versions,
+review release notes, and test upgrades before production use.
 
 ## Reporting a Vulnerability
 
-Please use Githubs [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) feature to report security bugs in [console](https://github.com/georgmangold/console) directly and privately to the maintainers.
+Please use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) feature to report security bugs in [SILO Console](https://github.com/pgsty/silo-console) directly and privately to the maintainers.
 
 
 Please, provide a detailed explanation of the issue. In particular, outline the type of the security

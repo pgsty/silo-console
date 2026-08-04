@@ -1,210 +1,172 @@
-# Console
+<p align="center">
+  <img src="web-app/public/silo-word.svg" alt="SILO" height="88">
+</p>
 
-![Workflow](https://github.com/georgmangold/console/actions/workflows/jobs.yaml/badge.svg) ![license](https://img.shields.io/badge/license-AGPL%20V3-blue) ![binarydownloads](https://img.shields.io/github/downloads/georgmangold/console/total?label=GitHub%20Release%20Downloads) ![ghcr](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fgeorgmangold%2Fconsole%2Fconsole&query=downloadCount&logo=refinedgithub&label=ghcr.io%20Container%20Pulls&color=9E95B7)
+<h1 align="center">SILO Console</h1>
 
-Console is a graphical admin management browser user interface for [MinIO® Server](https://github.com/minio/minio)
+<p align="center">
+  <strong>Web administration console for SILO object storage</strong><br>
+  Keep the interface. Own the objects.
+</p>
+<p align="center">
+  <a href="https://silo.pgsty.com/">Website</a> ·
+  <a href="https://silo.pgsty.com/docs/">Documentation</a> ·
+  <a href="https://github.com/pgsty/silo-console">Source</a> ·
+  <a href="https://github.com/pgsty/silo-console/issues">Issues</a> ·
+  <a href="SECURITY.md">Security</a>
+</p>
 
-> [!NOTE]
-> Console is a fork of the old [MinIO Console](https://github.com/minio/object-browser) for my own personal educational purposes, and therefore it incorporates MinIO® source code. You may also want to look for other maintained [forks](https://github.com/minio/object-browser/forks).
+<p align="center">
+  <a href="https://github.com/pgsty/silo-console/actions/workflows/jobs.yaml"><img alt="Build status" src="https://github.com/pgsty/silo-console/actions/workflows/jobs.yaml/badge.svg"></a>
+  <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/pgsty/silo-console?logo=go"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPLv3-blue"></a>
+</p>
 
 > [!IMPORTANT]
->  **MINIO** is a registered trademark of the MinIO Corporation. Consequently, this project is not affiliated with or endorsed by the MinIO Corporation.
+> SILO Console is an independent, community-maintained continuation of the
+> former MinIO Console codebase, published by [Pigsty](https://pigsty.io/) for
+> [SILO](https://silo.pgsty.com/). It is not affiliated with, endorsed by, or
+> sponsored by MinIO, Inc. The MinIO name is used only to identify the upstream
+> project and compatibility lineage.
 
-| Login                                    | Metrics                                             | Object Browser                         |
-|------------------------------------------|-----------------------------------------------------|----------------------------------------|
-| ![Login](images/1_login.png)             | ![Metrics](images/2_metrics.png)                    | ![Object Browser](images/3_bucket.png) |
-| ![Performance](images/4_performance.png) | ![CommandInterface](images/5_command_interface.png) |                                        |
-| **Performance/ Speedtest**               | **<kbd>Ctrl</kbd>/<kbd>Strg</kbd> + <kbd>k</kbd>**  |                                        |
+## Overview
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
+SILO Console is the browser-based administration interface for
+[SILO](https://github.com/pgsty/minio). It combines a React and TypeScript web
+application with a Go backend that connects to a SILO or compatible object
+storage server.
 
-- [Console](#console)
-  - [Install](#install)
-    - [Binary Releases](#binary-releases)
-    - [Docker](#docker)
-    - [Build from source](#build-from-source)
-  - [Setup](#setup)
-    - [1. Create a user `console` using `mc`](#1-create-a-user-console-using-mc)
-    - [2. Create a policy for `console` with admin access to all resources (for testing)](#2-create-a-policy-for-console-with-admin-access-to-all-resources-for-testing)
-    - [3. Set the policy for the new `console` user](#3-set-the-policy-for-the-new-console-user)
-  - [Start Console service:](#start-console-service)
-- [Documentation](#documentation)
-- [Contribute to Console Project](#contribute-to-console-project)
-- [License](#license)
+The Console provides:
 
-<!-- markdown-toc end -->
-## Install
+- dashboards, health information, logs, diagnostics, and speed tests;
+- bucket, object, lifecycle, replication, notification, and tier management;
+- users, groups, service accounts, policies, identity providers, and KMS setup;
+- server configuration and day-to-day administrative workflows.
 
-### Binary Releases ![binarydownloads](https://img.shields.io/github/downloads/georgmangold/console/total)
-|   OS    |  ARCH   |                                                Binary                                                       |
-|:-------:|:-------:|:-----------------------------------------------------------------------------------------------------------:|
-|  Linux  |  amd64  |     [linux-amd64](https://github.com/georgmangold/console/releases/latest/download/console-linux-amd64)     |
-|  Linux  |  arm64  |     [linux-arm64](https://github.com/georgmangold/console/releases/latest/download/console-linux-arm64)     |
-|  Linux  |   arm   |       [linux-arm](https://github.com/georgmangold/console/releases/latest/download/console-linux-arm)       |
-|  Apple  |  amd64  |    [darwin-amd64](https://github.com/georgmangold/console/releases/latest/download/console-darwin-amd64)    |
-|  Apple  |  arm64  |    [darwin-amd64](https://github.com/georgmangold/console/releases/latest/download/console-darwin-arm64)    |
-| Windows |  amd64  | [windows-amd64](https://github.com/georgmangold/console/releases/latest/download/console-windows-amd64.exe) |
-
-For Checksums, DEB and RPM Packages visit latest [Release Page](https://github.com/georgmangold/console/releases/latest/).
-
-### Docker
-Pull the latest release via: [Github Packages](https://github.com/georgmangold/console/pkgs/container/console) ![ghcr](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fgeorgmangold%2Fconsole%2Fconsole&query=downloadCount&logo=refinedgithub&label=ghcr.io%20Container%20Pulls&color=9E95B7)
-```
-docker pull ghcr.io/georgmangold/console
-```
-Run it with and replace `YOUR_MINIO_SERVER_URL` with your own MinIO Server URL
-```
-docker run -p 127.0.0.1:9090:9090 -e CONSOLE_MINIO_SERVER=https://YOUR_MINIO_SERVER_URL ghcr.io/georgmangold/console
-```
-> [!NOTE]
-> If you have changed the region on your MinIO Server from the default `us-east-1` you need to set the Environment Variable `CONSOLE_MINIO_REGION=` as well.
-
-### Build from source
-> [!NOTE]
-> You will need a working Go environment. Therefore, please follow [How to install Go](https://golang.org/doc/install).
-> Minimum version required is ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/georgmangold/console)
-
-```
-go install github.com/georgmangold/console/cmd/console@latest
-```
-Refer to [DEVELOPMENT.md](DEVELOPMENT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for more Information on how to build this project.
-
-## Setup
-
-All `console` needs is a MinIO user with admin privileges and URL pointing to your MinIO deployment.
+![SILO Console login](images/silo-console-home.webp)
 
 > [!NOTE]
-> We don't recommend using MinIO's Root Admin Credentials
+> SILO Console is not a generic S3 browser. Its administrative features require
+> the MinIO-compatible administration APIs implemented by SILO in addition to
+> the S3 API.
 
-### 1. Create a user `console` using `mc`
+## Status and Compatibility
+
+The public project and release name is `silo-console`. Compatibility-sensitive
+names are retained where changing them would break existing integrations:
+
+| Surface | Current contract |
+| :-- | :-- |
+| Repository | [`pgsty/silo-console`](https://github.com/pgsty/silo-console) |
+| Release binary | `silo-console` |
+| Development build | `./console` |
+| Go module | `github.com/minio/console` |
+| Server endpoint | `CONSOLE_MINIO_SERVER` |
+| Server region | `CONSOLE_MINIO_REGION` |
+| Container image | `ghcr.io/pgsty/silo-console` |
+
+The retained Go module, import paths, environment variables, API fields, and
+protocol identifiers are compatibility interfaces, not product branding. Any
+future rename of those interfaces will require aliases and a migration period.
+
+Release binaries and packages are published on the
+[release page](https://github.com/pgsty/silo-console/releases). Official
+multi-architecture container images are published as
+`ghcr.io/pgsty/silo-console`. Automatic updates remain disabled until signed
+release artifacts and a tested rollback path are available; upgrade explicitly
+through a pinned binary, package, or container version.
+
+![SILO Console metrics dashboard](images/silo-console-metrics.webp)
+
+
+
+## Quick Start
+
+Install the Go version declared in [`go.mod`](go.mod), then build the standalone
+Console server:
 
 ```bash
-mc admin user add myminio/
-Enter Access Key: console
-Enter Secret Key: xxxxxxxx
+git clone https://github.com/pgsty/silo-console.git
+cd silo-console
+make console
 ```
 
-### 2. Create a policy for `console` with admin access to all resources (for testing)
+Point it at a running SILO server and start the Console:
 
-```sh
-cat > admin.json << EOF
-{
-	"Version": "2012-10-17",
-	"Statement": [{
-			"Action": [
-				"admin:*"
-			],
-			"Effect": "Allow",
-			"Sid": ""
-		},
-		{
-			"Action": [
-                "s3:*"
-			],
-			"Effect": "Allow",
-			"Resource": [
-				"arn:aws:s3:::*"
-			],
-			"Sid": ""
-		}
-	]
-}
-EOF
-```
-
-```sh
-mc admin policy create myminio/ consoleAdmin admin.json
-```
-
-### 3. Set the policy for the new `console` user
-
-```sh
-mc admin policy attach myminio consoleAdmin --user=console
-```
-
-> [!NOTE]
-> Additionally, you can create policies to limit the privileges for other `console` users, for example, if you
-> want the user to only have access to dashboard, buckets, notifications and watch page, the policy should look like
-> this:
-> ```json
-> {
->   "Version": "2012-10-17",
->   "Statement": [
->     {
->       "Action": [
-> 	"admin:ServerInfo"
->       ],
->       "Effect": "Allow",
->       "Sid": ""
->     },
->     {
->       "Action": [
-> 	"s3:ListenBucketNotification",
-> 	"s3:PutBucketNotification",
-> 	"s3:GetBucketNotification",
-> 	"s3:ListMultipartUploadParts",
-> 	"s3:ListBucketMultipartUploads",
-> 	"s3:ListBucket",
-> 	"s3:HeadBucket",
-> 	"s3:GetObject",
-> 	"s3:GetBucketLocation",
-> 	"s3:AbortMultipartUpload",
-> 	"s3:CreateBucket",
-> 	"s3:PutObject",
-> 	"s3:DeleteObject",
-> 	"s3:DeleteBucket",
-> 	"s3:PutBucketPolicy",
-> 	"s3:DeleteBucketPolicy",
-> 	"s3:GetBucketPolicy"
->       ],
->       "Effect": "Allow",
->       "Resource": [
-> 	"arn:aws:s3:::*"
->       ],
->       "Sid": ""
->     }
->   ]
-> }
-> ```
-
-## Start Console service:
-
-Before running console service, following environment settings must be supplied
-
-```sh
-# MinIO Endpoint
-export CONSOLE_MINIO_SERVER=http://localhost:9000
-```
-
-Now start the console service.
-
-```
+```bash
+export CONSOLE_MINIO_SERVER=http://127.0.0.1:9000
 ./console server
-2021-01-19 02:36:08.893735 I | 2021/01/19 02:36:08 server.go:129: Serving console at http://localhost:9090
 ```
 
-By default `console` runs on port `9090` this can be changed with `--port` of your choice.
+Open <http://127.0.0.1:9090> and sign in with a user from the configured server.
+For production, use TLS, configure stable random values for
+`CONSOLE_PBKDF_PASSPHRASE` and `CONSOLE_PBKDF_SALT`, and grant users only the
+permissions they need. Do not reuse the server root credentials for routine
+administration.
 
-> [!NOTE]
-> If you have changed the region on your MinIO Server from the default `us-east-1` you need to set the Environment Variable `CONSOLE_MINIO_REGION=` as well.
+If the server uses a region other than `us-east-1`, set the compatibility
+variable as well:
 
-## Documentation
+```bash
+export CONSOLE_MINIO_REGION=your-region
+```
 
-See [documentation](docs/README.md) and [FAQ](docs/README.md#faq) for more information.
+See the [environment variable reference](docs/Environment.md),
+[systemd setup](systemd/README.md), and [FAQ](docs/README.md#faq) for additional
+configuration.
 
-## Contribute to console Project
+### Frontend Development
 
-Please follow console [Contributor's Guide](./CONTRIBUTING.md)
+The repository includes the generated frontend bundle used by the Go server.
+When changing the web application, rebuild it with:
 
+```bash
+make assets
+```
 
-## License
+The required Node.js version is recorded in [`.nvmrc`](.nvmrc). See
+[`DEVELOPMENT.md`](DEVELOPMENT.md) for the frontend development server and
+embedded-server compatibility workflow.
 
-Console is licensed under the [GNU AGPLv3](LICENSE).
+## Maintenance Scope
 
-## Star History
-<picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=georgmangold/console&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=georgmangold/console&type=date&legend=top-left" />
-   <img alt="Console Star History Chart" src="https://api.star-history.com/svg?repos=georgmangold/console&type=date&legend=top-left" />
- </picture>
+SILO Console follows the conservative maintenance model of the SILO server. The
+active line focuses on:
+
+- compatibility with the maintained SILO server;
+- applicable security and dependency updates;
+- focused fixes for reproducible defects;
+- release engineering, tests, documentation, and operational continuity.
+
+Maintenance is best effort. No response time, remediation schedule, support
+window, commercial support, or SLA is guaranteed. Pin versions, review changes,
+keep a rollback path, and test upgrades before production use.
+
+## Security and Contributing
+
+Report security issues privately as described in [`SECURITY.md`](SECURITY.md).
+For ordinary defects and feature work, open an
+[issue](https://github.com/pgsty/silo-console/issues) or follow
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Useful contributions include security and
+dependency updates, compatibility fixes, tests, release automation,
+documentation, and accessibility improvements.
+
+## License, Attribution, and Trademarks
+
+SILO Console is free software distributed under the
+[GNU Affero General Public License v3.0 or later](LICENSE). See [`NOTICE`](NOTICE)
+and [`CREDITS`](CREDITS) for notices and third-party license information.
+
+This repository contains code derived from the former MinIO Console and carried
+forward through the [`Alevsk/console`](https://github.com/Alevsk/console) and
+[`georgmangold/console`](https://github.com/georgmangold/console) community
+maintenance lines. Copyright in inherited code remains with MinIO, Inc. and the
+respective contributors; SILO-specific modifications remain copyright their
+respective authors. Existing copyright, license, and attribution notices must
+be kept intact.
+
+MinIO® is a registered trademark of MinIO, Inc. SILO and SILO Console are
+independent community projects and are not affiliated with, endorsed by, or
+sponsored by MinIO, Inc. Amazon S3 is a trademark of Amazon.com, Inc. or its
+affiliates; references to S3 describe protocol compatibility only. All other
+trademarks are the property of their respective owners.

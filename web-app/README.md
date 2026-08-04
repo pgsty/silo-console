@@ -6,7 +6,7 @@ This Folder contains the Web Frontend for Console using React/TypeScript.
 graph TD;
     A(User Browser) -- HTTPS/HTTP --> B["Console<br>Frontend Application<br>(React/TypeScript)"];
     B -- REST API Calls HTTPS/HTTP --> D["Console<br>Backend Server<br>(Go)"];
-    D -- "HTTPS/HTTP<br>Admin Operations" --> E["MinIO Server<br>Object Storage"];
+    D -- "HTTPS/HTTP<br>Admin Operations" --> E["SILO / MinIO-compatible Server<br>Object Storage"];
     E@{ shape: cyl}
 ```
 
@@ -27,7 +27,7 @@ Runs the app in the development mode. Needs Console local running in Dev Mode on
 ```bash
 CONSOLE_ACCESS_KEY=<your-access-key>
 CONSOLE_SECRET_KEY=<your-secret-key>
-CONSOLE_MINIO_SERVER=<minio-server-endpoint>
+CONSOLE_MINIO_SERVER=<compatible-server-endpoint>
 CONSOLE_DEV_MODE=on
 ./console server
 ```

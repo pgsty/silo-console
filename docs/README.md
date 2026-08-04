@@ -14,14 +14,19 @@ More documentation to read
     - [CONTRIBUTING](../CONTRIBUTING.md)
 
 ### Share Option
-With the enenvironment variable `CONSOLE_SHARE_MINIO_URL=on` can change the default from Console URL to MinIO Server URL in case Console endpoint is not exposed. There is a toggle in GUI to change between the two.
+The compatibility environment variable `CONSOLE_SHARE_MINIO_URL=on` changes
+the default shared-object URL from the Console URL to the configured SILO or
+MinIO-compatible server URL when the Console endpoint is not exposed. The UI
+also provides a toggle between the two.
 
 ## FAQ
 
 ### How do I log in?
-Console uses the same users as minio, it just passes the login you enter to the minio server.
+Console uses the same users as the configured SILO or MinIO-compatible server;
+it passes the credentials you enter to that server.
 
-Its the users you will see with the mc command below, the same user you would login to the now object browser only and you can always use your set minio admin.
+These are the users shown by the `mc` command below, including an administrator
+configured on the object-storage server.
 ``` bash
 mc admin user ls
 ```
@@ -35,16 +40,16 @@ mc admin accesskey ls
 ErrorWithContext:The authorization header is malformed; the region is wrong; expecting 'us-east-1'.
 %!(EXTRA *errors.errorString=invalid login)
 ```
-Set the console region variable `CONSOLE_MINIO_REGION` to the same as you have set on your minio server
+Set `CONSOLE_MINIO_REGION` to the same region configured on the object-storage server:
 ``` bash
-docker run -p 9090:9090 -e CONSOLE_MINIO_SERVER=http://127.0.0.1:9000 -e CONSOLE_MINIO_REGION=your.region.here ghcr.io/georgmangold/console
+docker run -p 9090:9090 -e CONSOLE_MINIO_SERVER=http://127.0.0.1:9000 -e CONSOLE_MINIO_REGION=your.region.here ghcr.io/pgsty/silo-console
 ```
 ``` bash
 export CONSOLE_MINIO_REGION=eu-central-1
 export CONSOLE_MINIO_SERVER=http://localhost:9000
 ./console server
 ```
-If you have changed your region on the minio config, you can also get it with
+You can query the configured region with:
 ``` bash
 mc admin config get ALIAS region
 ```
@@ -53,11 +58,14 @@ mc admin config get ALIAS region
 Yes, see docs [OIDC](OIDC.md).
 
 ### Docker Volume Mount?
-There is no persistent data for the Console, everything is done with environment variables. The only one needed is the URL to the Minio server, i.e. `CONSOLE_MINIO_SERVER`.
+Console stores no persistent data of its own; it is configured with environment
+variables. The only required value is the SILO or MinIO-compatible server URL,
+using the retained compatibility variable `CONSOLE_MINIO_SERVER`.
 
 ### Can I use this Console as S3 Browser for other S3 Provider?
-No, this Console only works with minio .
+No. This Console requires the MinIO-compatible administration APIs implemented
+by SILO/MinIO; generic S3 API compatibility alone is not enough.
 ```
-minio-console-1  | ErrorWithContext:The s3 command you requested is not implemented.                                 
-minio-console-1  | %!(EXTRA *errors.errorString=invalid login)
+silo-console-1  | ErrorWithContext:The s3 command you requested is not implemented.
+silo-console-1  | %!(EXTRA *errors.errorString=invalid login)
 ```

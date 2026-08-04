@@ -66,7 +66,7 @@ request. After a Pull Request gets peer reviewed and approved, it will be merged
 
 ### How does ``console`` manages dependencies?
 
-``MinIO`` uses `go mod` to manage its dependencies.
+SILO Console uses `go mod` to manage its dependencies.
 
 - Run `go get foo/bar` in the source folder to add the dependency to `go.mod` file.
 

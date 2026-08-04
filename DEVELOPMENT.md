@@ -1,7 +1,8 @@
 # Developing Console
 
-Console requires the [MinIO® Server](https://github.com/minio/minio). For development purposes, you also need
-to run both the Console web app and the Console server.
+SILO Console requires a SILO or
+[MinIO-compatible server](https://github.com/minio/minio). For development,
+run both the Console web app and the Console server.
 > [!IMPORTANT]
 > **MINIO** is a registered trademark of the MinIO Corporation. Consequently, this project is not affiliated with or endorsed by the MinIO Corporation.
 ## Console Architecture Overview
@@ -9,7 +10,7 @@ to run both the Console web app and the Console server.
 graph TD;
     A(User Browser) -- HTTPS/HTTP --> B["Console<br>Frontend Application<br>(React/TypeScript)"];
     B -- REST API Calls --> D["Console<br>Backend Server<br>(Go)"];
-    D -- "HTTPS/HTTP<br>Admin Operations" --> E["MinIO Server<br>Object Storage"];
+    D -- "HTTPS/HTTP<br>Admin Operations" --> E["SILO / MinIO-compatible Server<br>Object Storage"];
     E@{ shape: cyl}
 ```
 
@@ -29,7 +30,7 @@ To start the server run:
 ```
 CONSOLE_ACCESS_KEY=<your-access-key>
 CONSOLE_SECRET_KEY=<your-secret-key>
-CONSOLE_MINIO_SERVER=<minio-server-endpoint>
+CONSOLE_MINIO_SERVER=<compatible-server-endpoint>
 CONSOLE_DEV_MODE=on
 ./console server
 ```
@@ -38,10 +39,11 @@ CONSOLE_DEV_MODE=on
 
 Refer to `/web-app` [instructions](/web-app/README.md) to run the web app locally.
 
-# Building with MinIO
+# Compatibility testing inside MinIO
 
-To test console in its shipping format, you need to build it from the MinIO repository, the following step will guide
-you to do that.
+To test Console embedded in an upstream-compatible MinIO binary, build it from
+the MinIO repository as described below. This is a compatibility workflow, not
+the SILO release workflow.
 
 ### 0. Building with UI Changes
 
@@ -54,7 +56,7 @@ In the console folder run
 make assets
 ```
 
-This will regenerate all the static assets that will be served by MinIO.
+This regenerates the static assets served by the compatible object-storage binary.
 
 ### 1. Clone the `MinIO` repository
 
@@ -90,7 +92,8 @@ make build
 
 # Testing with a Container
 
-If you want to test console in a container, you can perform all the steps from `Building with MinIO`, but change `Step 3`
+If you want to test Console in a container, follow the steps from
+`Compatibility testing inside MinIO`, but change `Step 3`
 to the following:
 
 ```shell

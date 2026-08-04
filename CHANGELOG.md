@@ -1,5 +1,35 @@
 # Changelog
 
+## Release v2.0.0
+
+Distribution Changes:
+
+- Rebranded the project and user interface as SILO Console
+- Moved the public source and release project to `pgsty/silo-console`
+- Renamed release binaries, packages, checksums, and container images to `silo-console`
+- Published container images as `ghcr.io/pgsty/silo-console`
+
+Compatibility:
+
+- Retained the `github.com/minio/console` Go module and existing `CONSOLE_*` environment variables
+- Retained `minio-console.service`, `console-user`, and `/etc/default/console` for package upgrades
+- Disabled automatic self-update while preserving explicit release and package upgrades
+- Added `SILO_RELEASE_SERVICE_HOST` with `RELEASE_SERVICE_HOST` as a compatibility fallback
+
+Additional Changes:
+
+- Added SILO branding across login, navigation, help, metadata, and responsive layouts
+- Routed product documentation and blog content to `silo.pgsty.com`
+- Expanded the in-product license, source, attribution, and trademark disclosures
+- Displayed the connected server and Console versions without issuing protected admin requests for unauthorized users
+- Deferred the optional SILO Blog feed request until the Blog tab is opened
+- Fixed narrow-screen dashboard and help-menu layouts
+- Rebuilt and deterministically precompressed the embedded frontend with the current Vite production pipeline
+- Corrected precompressed asset negotiation for HTTP methods and `Accept-Encoding` quality values
+- Updated Go to 1.26.5 and remediated applicable runtime and build-tool dependency advisories, including the React Router 7 migration
+- Removed ineffective lazy imports so the production build preserves the intended route-level code splitting
+- Added APK packaging and hardened the tag-driven release workflow with reproducible asset verification
+
 ## Release v1.9.1
 
 Bug Fix:
@@ -110,9 +140,9 @@ Bug Fix:
 
 Deprecations:
 
-- Deprecated support tools User Interface in favor of mc admin commands. Please refer to the [MinIO Client documentation page](https://docs.min.io/community/minio-object-store/reference/minio-mc.html) for more information.
-- Deprecated Site replication User Interface in favor of mc admin commands. Please refer to the [MinIO Site Replication page](https://docs.min.io/community/minio-object-store/reference/minio-mc-admin/mc-admin-replicate.html) for more information.
-- Deprecated Lifecycle & Tiers User Interface in favor of mc admin commands. Please refer to the [MinIO Tiers page](https://docs.min.io/community/minio-object-store/reference/minio-mc/mc-ilm-tier.html) for more information.
+- Deprecated support tools User Interface in favor of mc admin commands. Please refer to the [SILO Client documentation page](https://silo.pgsty.com/reference/minio-mc/) for more information.
+- Deprecated Site replication User Interface in favor of mc admin commands. Please refer to the [SILO Site Replication page](https://silo.pgsty.com/reference/minio-mc-admin/mc-admin-replicate/) for more information.
+- Deprecated Lifecycle & Tiers User Interface in favor of mc admin commands. Please refer to the [SILO Tiers page](https://silo.pgsty.com/reference/minio-mc/mc-ilm-tier/) for more information.
 
 Bug Fix:
 

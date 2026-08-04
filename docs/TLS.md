@@ -30,9 +30,10 @@ Following tree structure is expected for supporting multiple domains:
 
 ```
 
-## Connect Console to a Minio using TLS and a self-signed certificate
+## Connect Console to a compatible server using TLS and a self-signed certificate
 
-Copy the MinIO `ca.crt` under `~/.console/certs/CAs`, then:
+Copy the SILO/MinIO-compatible server's `ca.crt` under
+`~/.console/certs/CAs`, then:
 
 ```sh
 export CONSOLE_MINIO_SERVER=https://localhost:9000
