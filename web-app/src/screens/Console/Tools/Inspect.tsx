@@ -332,7 +332,7 @@ const Inspect = () => {
                     >
                       You can learn more at the{" "}
                       <a
-                        href="https://github.com/minio/minio/tree/master/docs/debugging"
+                        href="https://silo.pgsty.com/operations/troubleshooting/"
                         target="_blank"
                         rel="noopener"
                       >

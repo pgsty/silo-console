@@ -34,7 +34,11 @@ const TierButtonBase = styled.button(({ theme }) => ({
     backgroundColor: get(theme, "buttons.regular.hover.background", "#ebebeb"),
   },
   "& .imageContainer": {
-    width: 80,
+    flex: "0 0 80px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: 0,
     "& .min-icon": {
       maxWidth: 46,
       maxHeight: 46,

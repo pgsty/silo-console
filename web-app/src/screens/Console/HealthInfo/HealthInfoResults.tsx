@@ -294,7 +294,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                   </Accordion>
                 </Accordion>
                 <Accordion
-                  title={"MinIO Health Info"}
+                  title={"SILO Health Info"}
                   id={"minio-health"}
                   expanded={minioHealhExpanded}
                   onTitleClick={() =>

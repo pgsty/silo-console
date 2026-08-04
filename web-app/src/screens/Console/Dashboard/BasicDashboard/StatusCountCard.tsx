@@ -20,91 +20,71 @@ import get from "lodash/get";
 import { Box, breakPoints, CircleIcon } from "mds";
 
 const StatusCountBase = styled.div(({ theme }) => ({
-  fontFamily: "Inter,sans-serif",
-  maxWidth: "321px",
   display: "flex",
-  marginLeft: "auto",
-  marginRight: "auto",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  height: "100%",
+  width: "100%",
   cursor: "default",
-  color: get(theme, "signalColors.main", "#07193E"),
-  "& .mainBox": {
-    flex: 1,
+  "& .cardHeader": {
     display: "flex",
-    padding: "0 8px 0 8px",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
+  },
+  "& .statRow": {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: 48,
+    [`@media (max-width: ${breakPoints.lg}px)`]: {
+      gap: 32,
+    },
+  },
+  "& .statGroup": {
+    display: "flex",
+    flexDirection: "column",
+    gap: 7,
+  },
+  "& .stat-value": {
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
     [`@media (max-width: ${breakPoints.sm}px)`]: {
-      padding: "0 10px 0 10px",
+      fontSize: 28,
     },
-    "& .indicatorIcon": {
-      width: "20px",
-      height: "20px",
-      marginTop: "8px",
-      maxWidth: "26px",
-      "& .min-icon": {
-        width: "16px",
-        height: "16px",
-      },
+  },
+  "& .statMeta": {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 12,
+    color: get(theme, "mutedText", "#71717A"),
+    "& .min-icon": {
+      width: 8,
+      height: 8,
+      flexShrink: 0,
     },
-    "& .indicatorContainer": {
-      flex: 1,
-      display: "flex",
-      flexFlow: "column",
-      "& .indicatorLabel": {
-        fontSize: "16px",
-        fontWeight: 600,
-      },
-      "& .counterIndicator": {
-        display: "flex",
-        alignItems: "center",
-        gap: "5px",
-        justifyContent: "space-between",
-        paddingBottom: 0,
-        fontSize: "55px",
-        [`@media (max-width: ${breakPoints.sm}px)`]: {
-          paddingBottom: 10,
-          fontSize: "35px",
-        },
-        [`@media (max-width: ${breakPoints.lg}px)`]: {
-          fontSize: "45px",
-        },
-        [`@media (max-width: ${breakPoints.xl}px)`]: {
-          fontSize: "50px",
-        },
-        flexFlow: "row",
-        fontWeight: 600,
-
-        "& .stat-text": {
-          color: get(theme, "mutedText", "#87888D"),
-          fontSize: "12px",
-          marginTop: "8px",
-        },
-        "& .stat-value": {
-          textAlign: "center",
-          height: "50px",
-        },
-        "& .min-icon": {
-          marginRight: "8px",
-          marginTop: "8px",
-          height: "10px",
-          width: "10px",
-        },
-      },
-      "& .onlineCounter": {
-        display: "flex",
-        alignItems: "center",
-        marginTop: "5px",
-        "& .min-icon": {
-          fill: get(theme, "signalColors.good", "#4CCB92"),
-        },
-      },
-      "& .offlineCount": {
-        display: "flex",
-        alignItems: "center",
-        marginTop: "8px",
-        "& .min-icon": {
-          fill: get(theme, "signalColors.danger", "#C51B3F"),
-        },
-      },
-    },
+  },
+  "& .online .min-icon": {
+    fill: get(theme, "signalColors.good", "#10B981"),
+  },
+  "& .offline .min-icon": {
+    fill: get(theme, "signalColors.danger", "#BE123C"),
   },
 }));
 
@@ -125,29 +105,25 @@ const StatusCountCard = ({
 }) => {
   return (
     <StatusCountBase>
-      <Box className={"mainBox"}>
-        <Box className={"indicatorContainer"}>
-          <Box className={"indicatorLabel"}>{label}</Box>
-
-          <Box className={"counterIndicator"}>
-            <Box>
-              <Box className="stat-value">{onlineCount}</Box>
-              <Box className={"onlineCounter"}>
-                <CircleIcon />
-                <div className="stat-text">{okStatusText}</div>
-              </Box>
-            </Box>
-
-            <Box>
-              <Box className="stat-value">{offlineCount}</Box>
-              <Box className={"offlineCount"}>
-                <CircleIcon />{" "}
-                <div className="stat-text">{notOkStatusText}</div>
-              </Box>
-            </Box>
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>{label}</Box>
+        {icon}
+      </Box>
+      <Box className={"statRow"}>
+        <Box className={"statGroup"}>
+          <Box className={"stat-value"}>{onlineCount}</Box>
+          <Box className={"statMeta online"}>
+            <CircleIcon />
+            {okStatusText}
           </Box>
         </Box>
-        <Box className={"indicatorIcon"}>{icon}</Box>
+        <Box className={"statGroup"}>
+          <Box className={"stat-value"}>{offlineCount}</Box>
+          <Box className={"statMeta offline"}>
+            <CircleIcon />
+            {notOkStatusText}
+          </Box>
+        </Box>
       </Box>
     </StatusCountBase>
   );

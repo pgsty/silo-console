@@ -76,7 +76,7 @@ const AddKeyForm = () => {
           <KMSHelpBox
             helpText={"Encryption Key"}
             contents={[
-              "Create a new cryptographic key in the Key Management Service server connected to MINIO.",
+              "Create a new cryptographic key in the Key Management Service server connected to SILO.",
             ]}
           />
         }

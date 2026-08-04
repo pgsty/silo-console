@@ -264,7 +264,7 @@ const AddTierConfiguration = () => {
         break;
       case "minio":
         setEndpoint("");
-        setTitleSelection("MinIO");
+        setTitleSelection("SILO");
     }
   }, [type]);
 

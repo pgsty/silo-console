@@ -18,17 +18,17 @@ import { LockIcon, LoginIcon } from "mds";
 
 export const ldapHelpBoxContents = [
   {
-    text: "MinIO supports using an Active Directory or LDAP (AD/LDAP) service for external management of user identities. Configuring an external IDentity Provider (IDP) enables Single-Sign On (SSO) workflows, where applications authenticate against the external IDP before accessing MinIO.",
+    text: "SILO supports using an Active Directory or LDAP (AD/LDAP) service for external management of user identities. Configuring an external IDentity Provider (IDP) enables Single-Sign On (SSO) workflows, where applications authenticate against the external IDP before accessing SILO.",
     icon: <LoginIcon />,
     iconDescription: "Create Configurations",
   },
   {
-    text: "MinIO queries the configured Active Directory / LDAP server to verify the credentials specified by the application and optionally return a list of groups in which the user has membership. MinIO supports two modes (Lookup-Bind Mode and Username-Bind Mode) for performing these queries",
+    text: "SILO queries the configured Active Directory / LDAP server to verify the credentials specified by the application and optionally return a list of groups in which the user has membership. SILO supports two modes (Lookup-Bind Mode and Username-Bind Mode) for performing these queries",
     icon: null,
     iconDescription: "",
   },
   {
-    text: "MinIO recommends using Lookup-Bind mode as the preferred method for verifying AD/LDAP credentials. Username-Bind mode is a legacy method retained for backwards compatibility only.",
+    text: "SILO recommends using Lookup-Bind mode as the preferred method for verifying AD/LDAP credentials. Username-Bind mode is a legacy method retained for backwards compatibility only.",
     icon: null,
     iconDescription: "",
   },
@@ -36,12 +36,12 @@ export const ldapHelpBoxContents = [
 
 export const openIDHelpBoxContents = [
   {
-    text: "MinIO supports using an OpenID Connect (OIDC) compatible IDentity Provider (IDP) such as Okta, KeyCloak, Dex, Google, or Facebook for external management of user identities.",
+    text: "SILO supports using an OpenID Connect (OIDC) compatible IDentity Provider (IDP) such as Okta, KeyCloak, Dex, Google, or Facebook for external management of user identities.",
     icon: <LockIcon />,
     iconDescription: "Create Configurations",
   },
   {
-    text: "Configuring an external IDP enables Single-Sign On workflows, where applications authenticate against the external IDP before accessing MinIO.",
+    text: "Configuring an external IDP enables Single-Sign On workflows, where applications authenticate against the external IDP before accessing SILO.",
     icon: null,
     iconDescription: "",
   },
@@ -85,7 +85,7 @@ export const openIDFormFields = {
   claim_name: {
     required: false,
     label: "Claim Name",
-    tooltip: "Claim from which MinIO will read the policy or role to use",
+    tooltip: "Claim from which SILO will read the policy or role to use",
     placeholder: "Enter Claim Name",
     type: "text",
     hasError: (s: string, editMode: boolean) => "",

@@ -199,7 +199,7 @@ const AccessRule = () => {
             <Fragment>
               Setting an{" "}
               <a
-                href="https://docs.min.io/community/minio-object-store/reference/minio-mc/mc-anonymous-set.html"
+                href="https://silo.pgsty.com/reference/minio-mc/mc-anonymous-set/"
                 target="blank"
               >
                 Anonymous

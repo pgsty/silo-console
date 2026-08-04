@@ -295,18 +295,18 @@ const Account = () => {
               iconComponent={<AccountIcon />}
               help={
                 <Fragment>
-                  MinIO access keys are child identities of an authenticated
-                  MinIO user, including externally managed identities. Each
-                  access key inherits its privileges based on the policies
-                  attached to it’s parent user or those groups in which the
-                  parent user has membership. Access Keys also support an
-                  optional inline policy which further restricts access to a
-                  subset of actions and resources available to the parent user.
+                  SILO access keys are child identities of an authenticated SILO
+                  user, including externally managed identities. Each access key
+                  inherits its privileges based on the policies attached to it’s
+                  parent user or those groups in which the parent user has
+                  membership. Access Keys also support an optional inline policy
+                  which further restricts access to a subset of actions and
+                  resources available to the parent user.
                   <br />
                   <br />
                   You can learn more at the{" "}
                   <a
-                    href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/minio-user-management.html#access-keys"
+                    href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/#access-keys"
                     target="_blank"
                     rel="noopener"
                   >

@@ -18,6 +18,7 @@ import React, { useState } from "react";
 import * as cicons from "mds";
 import * as micons from "mds";
 import { Box, Grid, Loader, RadioGroup } from "mds";
+import { SiloBrand } from "../../../common/SiloBrand";
 
 const IconsScreen = () => {
   const [color, setColor] = useState<string>("default");
@@ -67,9 +68,14 @@ const IconsScreen = () => {
         }}
       >
         <Grid item xs={3}>
-          <cicons.ThemedLogo />
+          <SiloBrand style={{ width: 180, height: 64 }} />
           <br />
-          ThemedLogo
+          SILO wordmark
+        </Grid>
+        <Grid item xs={3}>
+          <SiloBrand variant="emblem" style={{ width: 64, height: 64 }} />
+          <br />
+          SILO emblem
         </Grid>
       </Grid>
       <h1>Loaders</h1>
@@ -697,18 +703,6 @@ const IconsScreen = () => {
         </Grid>
 
         <Grid item xs={3} sm={2} md={1}>
-          <cicons.MinIOTierIcon />
-          <br />
-          MinIOTierIcon
-        </Grid>
-
-        <Grid item xs={3} sm={2} md={1}>
-          <cicons.MinIOTierIconXs />
-          <br />
-          MinIOTierIconXs
-        </Grid>
-
-        <Grid item xs={3} sm={2} md={1}>
           <cicons.MirroringIcon />
           <br />
           MirroringIcon
@@ -1081,9 +1075,13 @@ const IconsScreen = () => {
         </Grid>
 
         <Grid item xs={3} sm={2} md={1}>
-          <cicons.VersionIcon />
+          <SiloBrand
+            variant="emblem"
+            alt="SILO emblem"
+            style={{ width: 24, height: 24, objectFit: "contain" }}
+          />
           <br />
-          VersionIcon
+          SILO Emblem
         </Grid>
 
         <Grid item xs={3} sm={2} md={1}>

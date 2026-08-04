@@ -19,9 +19,9 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import api from "../../common/api";
 import { baseUrl } from "../../history";
-import { Box, Button, LoginWrapper, WarnIcon } from "mds";
-import { getLogoApplicationVariant, getLogoVar } from "../../config";
+import { Box, Button, WarnIcon } from "mds";
 import get from "lodash/get";
+import LoginLayout from "./LoginLayout";
 
 const CallBackContainer = styled.div(({ theme }) => ({
   "& .errorDescription": {
@@ -106,59 +106,29 @@ const LoginCallback = () => {
   }, [loading, navigate]);
   return error !== "" || errorDescription !== "" ? (
     <Fragment>
-      <LoginWrapper
-        logoProps={{
-          applicationName: getLogoApplicationVariant(),
-          subVariant: getLogoVar(),
-        }}
-        form={
-          <CallBackContainer>
-            <div className={"errorTitle"}>
-              <span className={"messageIcon"}>
-                <WarnIcon />
-              </span>
-              <span className={"errorLabel"}>Error from IDP</span>
-            </div>
-            <div className={"simpleError"}>{error}</div>
-            <Box className={"errorDescription"}>{errorDescription}</Box>
-            <Button
-              id={"back-to-login"}
-              onClick={() => {
-                window.location.href = `${baseUrl}login`;
-              }}
-              type="submit"
-              variant="callAction"
-              fullWidth
-            >
-              Back to Login
-            </Button>
-          </CallBackContainer>
-        }
-        promoHeader={
-          <span
-            style={{
-              fontSize: "clamp(6px, 6vw, 115px)",
-              lineHeight: 1,
-              display: "inline-block",
-              width: "100%",
+      <LoginLayout>
+        <CallBackContainer>
+          <div className={"errorTitle"}>
+            <span className={"messageIcon"}>
+              <WarnIcon />
+            </span>
+            <span className={"errorLabel"}>Error from IDP</span>
+          </div>
+          <div className={"simpleError"}>{error}</div>
+          <Box className={"errorDescription"}>{errorDescription}</Box>
+          <Button
+            id={"back-to-login"}
+            onClick={() => {
+              window.location.href = `${baseUrl}login`;
             }}
+            type="submit"
+            variant="callAction"
+            fullWidth
           >
-            Welcome to<br></br>
-            <span style={{ fontSize: "clamp(6px, 8vw, 200px)" }}>CONSOLE</span>
-          </span>
-        }
-        promoInfo={
-          <span style={{ fontSize: 14, lineHeight: 1 }}>
-            This is just a fork of the MinIO Console for my own personal
-            educational purposes, and therefore it incorporates MinIO® source
-            code. You may also want to look for other maintained forks.
-            <br></br>
-            It is important to note that <strong>MINIO</strong> is a registered
-            trademark of the MinIO Corporation. Consequently, this project is
-            not affiliated with or endorsed by the MinIO Corporation.
-          </span>
-        }
-      />
+            Back to Login
+          </Button>
+        </CallBackContainer>
+      </LoginLayout>
     </Fragment>
   ) : null;
 };

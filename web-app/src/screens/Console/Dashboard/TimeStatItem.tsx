@@ -21,31 +21,42 @@ import { Box, Loader, SuccessIcon } from "mds";
 
 const TimeStatBase = styled.div(({ theme }) => ({
   display: "grid",
+  gridTemplateColumns: "16px minmax(0, 1fr) auto 14px",
   alignItems: "center",
-  gap: 8,
-  height: 33,
-  paddingLeft: 15,
-  gridTemplateColumns: "20px 1.5fr .5fr 20px",
-  background: get(theme, "boxBackground", "#FBFAFA"), // #EBF9EE
-  "& .min-icon": {
-    height: "12px",
-    width: "12px",
-    fill: get(theme, "signalColors.good", "#4CCB92"),
+  gap: 10,
+  minHeight: 40,
+  padding: "8px 14px",
+  borderRadius: 8,
+  background: get(theme, "boxBackground", "#FAFAFA"),
+  "& > .min-icon": {
+    height: 14,
+    width: 14,
+    color: get(theme, "secondaryText", "#52525B"),
+    fill: get(theme, "secondaryText", "#52525B"),
   },
   "& .ok-icon": {
-    height: "8px",
-    width: "8px",
-    fill: get(theme, "signalColors.good", "#4CCB92"),
-    color: get(theme, "signalColors.good", "#4CCB92"),
+    height: 8,
+    width: 8,
+    fill: get(theme, "signalColors.good", "#10B981"),
+    color: get(theme, "signalColors.good", "#10B981"),
   },
   "& .timeStatLabel": {
-    fontSize: "12px",
-    color: get(theme, "signalColors.good", "#4CCB92"),
-    fontWeight: 600,
+    fontSize: 13,
+    fontWeight: 500,
+    lineHeight: 1.35,
+    color: get(theme, "secondaryText", "#52525B"),
   },
   "& .timeStatValue": {
-    fontSize: "12px",
-    color: get(theme, "signalColors.good", "#4CCB92"),
+    fontSize: 13,
+    fontWeight: 600,
+    justifySelf: "end",
+    whiteSpace: "nowrap",
+    fontVariantNumeric: "tabular-nums",
+    color: get(theme, "fontColor", "#18181B"),
+    "&.is-na": {
+      fontWeight: 500,
+      color: get(theme, "mutedText", "#71717A"),
+    },
   },
 }));
 
@@ -62,9 +73,11 @@ const TimeStatItem = ({
 }) => {
   return (
     <TimeStatBase className="dashboard-time-stat-item">
-      {loading ? <Loader style={{ width: 10, height: 10 }} /> : icon}
+      {loading ? <Loader style={{ width: 12, height: 12 }} /> : icon}
       <Box className={"timeStatLabel"}>{label}</Box>
-      <Box className={"timeStatValue"}>{value}</Box>
+      <Box className={`timeStatValue ${value === "n/a" ? "is-na" : ""}`}>
+        {value}
+      </Box>
       {value !== "n/a" ? <SuccessIcon className="ok-icon" /> : null}
     </TimeStatBase>
   );

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import React, { Fragment, useState } from "react";
 import get from "lodash/get";
+import { DateTime } from "luxon";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -42,9 +43,10 @@ import { usageClarifyingContent } from "screens/Console/Dashboard/BasicDashboard
 
 const BucketItemMain = styled.div(({ theme }) => ({
   border: `${get(theme, "borderColor", "#eaeaea")} 1px solid`,
-  borderRadius: 3,
+  borderRadius: 12,
   padding: 15,
   cursor: "pointer",
+  transition: "background-color 0.15s ease, border-color 0.15s ease",
   "&.disabled": {
     backgroundColor: get(theme, "signalColors.danger", "red"),
   },
@@ -191,7 +193,9 @@ const BucketListItem = ({
         <span id={`created-${bucket.name}`}>
           <strong>Created:</strong>{" "}
           {bucket.creation_date
-            ? new Date(bucket.creation_date).toString()
+            ? DateTime.fromISO(bucket.creation_date).toFormat(
+                "ccc, LLL dd yyyy HH:mm (ZZZZ)",
+              )
             : "n/a"}
         </span>
         <span id={`access-${bucket.name}`}>

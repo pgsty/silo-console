@@ -69,26 +69,26 @@ const TierTypeSelector = () => {
               title={"Tier Types"}
               help={
                 <Fragment>
-                  MinIO supports creating object transition lifecycle management
-                  rules, where MinIO can automatically move an object to a
-                  remote storage “tier”.
+                  SILO supports creating object transition lifecycle management
+                  rules, where SILO can automatically move an object to a remote
+                  storage “tier”.
                   <br />
                   <br />
-                  MinIO supports the following Tier types:
+                  SILO supports the following Tier types:
                   <br />
                   <ul>
                     <li>
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/transition-objects-to-s3.html"
+                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/"
                         target="_blank"
                         rel="noopener"
                       >
-                        MinIO or other S3-compatible storage
+                        SILO or other S3-compatible storage
                       </a>
                     </li>
                     <li>
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/transition-objects-to-s3.html"
+                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/"
                         target="_blank"
                         rel="noopener"
                       >
@@ -97,7 +97,7 @@ const TierTypeSelector = () => {
                     </li>
                     <li>
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/transition-objects-to-gcs.html"
+                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-gcs/"
                         target="_blank"
                         rel="noopener"
                       >
@@ -106,7 +106,7 @@ const TierTypeSelector = () => {
                     </li>
                     <li>
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/transition-objects-to-azure.html"
+                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-azure/"
                         target="_blank"
                         rel="noopener"
                       >

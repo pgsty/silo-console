@@ -137,7 +137,7 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
                   tooltip={
                     configureBucketAllowed
                       ? "Configure Bucket"
-                      : "You do not have the required permissions to configure this bucket. Please contact your MinIO administrator to request " +
+                      : "You do not have the required permissions to configure this bucket. Please contact your SILO administrator to request " +
                         IAM_ROLES.BUCKET_ADMIN +
                         " permisions."
                   }

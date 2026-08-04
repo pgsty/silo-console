@@ -45,7 +45,7 @@ const DistributedOnly = ({ iconComponent, entity }: IDistributedOnly) => {
               <span>
                 Please deploy a server in{" "}
                 <a
-                  href="https://docs.min.io/community/minio-object-store/operations/deployments/baremetal-deploy-minio-on-redhat-linux.html#create-the-minio-environment-file"
+                  href="https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#create-the-minio-environment-file"
                   target="_blank"
                   rel="noopener"
                 >

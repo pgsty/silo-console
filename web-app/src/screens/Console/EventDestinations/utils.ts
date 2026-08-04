@@ -532,8 +532,7 @@ export const notificationEndpointsFields: any = {
       name: "endpoint",
       required: true,
       label: "Endpoint",
-      tooltip:
-        "Webhook server endpoint e.g. http://localhost:8080/minio/events",
+      tooltip: "Webhook server endpoint e.g. http://localhost:8080/silo/events",
       type: "url",
       placeholder: "Enter Endpoint",
     },

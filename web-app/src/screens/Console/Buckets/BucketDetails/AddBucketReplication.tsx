@@ -195,19 +195,19 @@ const AddBucketReplication = () => {
                     while the configured remote deployment acts as the “target”.
                   </Box>
                   <Box sx={{ paddingTop: "10px" }}>
-                    For each write operation to this "source" bucket, MinIO
+                    For each write operation to this "source" bucket, SILO
                     checks all configured replication rules and applies the
                     matching rule with highest configured priority.
                   </Box>
                   <Box sx={{ paddingTop: "10px" }}>
-                    MinIO supports automatically replicating existing objects in
+                    SILO supports automatically replicating existing objects in
                     a bucket; this setting is enabled by default. Please note
                     that objects created before replication was configured or
                     while replication is disabled are not synchronized to the
                     target deployment in case this setting is not enabled.
                   </Box>
                   <Box sx={{ paddingTop: "10px" }}>
-                    MinIO supports replicating delete operations, where MinIO
+                    SILO supports replicating delete operations, where SILO
                     synchronizes deleting specific object versions and new
                     delete markers. Delete operation replication uses the same
                     replication process as all other replication operations.
@@ -245,7 +245,7 @@ const AddBucketReplication = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setTargetURL(e.target.value);
               }}
-              placeholder="play.min.io"
+              placeholder="s3.example.com"
               label="Target URL"
               value={targetURL}
             />

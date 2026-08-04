@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import React from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import get from "lodash/get";
 import { Box, breakPoints, CircleIcon } from "mds";
 import { niceDays } from "../../../../common/utils";
@@ -46,9 +46,10 @@ const ServerStatItemMain = styled.div(({ theme }) => ({
     },
     "& .stat-value": {
       fontSize: "18px",
-      color: get(theme, "signalColors.main", "#07193E"),
+      color: get(theme, "fontColor", "#18181B"),
       display: "flex",
-      fontWeight: 500,
+      fontWeight: 600,
+      fontVariantNumeric: "tabular-nums",
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
@@ -154,6 +155,7 @@ const ServerStatItem = ({
 };
 
 const ServerInfoItem = ({ server }: ICardProps) => {
+  const theme = useTheme();
   const networkKeys = Object.keys(get(server, "network", {}));
   const networkTotal = networkKeys.length;
   const totalDrives = server.drives ? server.drives.length : 0;
@@ -238,13 +240,13 @@ const ServerInfoItem = ({ server }: ICardProps) => {
           value={
             <Box
               sx={{
-                background: "rgb(235, 236, 237)",
-                color: "#000000",
-                paddingLeft: "10px",
-                paddingRight: "10px",
-                borderRadius: "2px",
+                background: get(theme, "boxBackground", "#FAFAFA"),
+                border: `1px solid ${get(theme, "borderColor", "#E4E4E7")}`,
+                color: get(theme, "secondaryText", "#52525B"),
+                padding: "3px 10px",
+                borderRadius: "6px",
                 fontSize: "12px",
-                marginTop: "5px",
+                fontWeight: 400,
 
                 "& .label": {
                   fontWeight: 600,

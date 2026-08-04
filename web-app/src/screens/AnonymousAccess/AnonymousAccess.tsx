@@ -15,15 +15,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, Suspense } from "react";
-import { ApplicationLogo, Button } from "mds";
+import { Button } from "mds";
 import { Route, Routes } from "react-router-dom";
 import { IAM_PAGES } from "../../common/SecureComponent/permissions";
 import { resetSession } from "../Console/consoleSlice";
 import { useAppDispatch } from "../../store";
 import { resetSystem } from "../../systemSlice";
-import { getLogoApplicationVariant, getLogoVar } from "../../config";
 import LoadingComponent from "../../common/LoadingComponent";
 import ObjectManagerButton from "../Console/Common/ObjectManager/ObjectManagerButton";
+import { SiloBrand } from "../../common/SiloBrand";
 
 const ObjectBrowser = React.lazy(
   () => import("../Console/ObjectBrowser/ObjectBrowser"),
@@ -50,11 +50,7 @@ const AnonymousAccess = () => {
         }}
       >
         <div style={{ width: 200, flexShrink: 1 }}>
-          <ApplicationLogo
-            applicationName={getLogoApplicationVariant()}
-            subVariant={getLogoVar()}
-            inverse={true}
-          />
+          <SiloBrand style={{ display: "block", width: "100%", height: 70 }} />
         </div>
         <div style={{ flexGrow: 1 }}></div>
         <div style={{ flexShrink: 1, display: "flex", flexDirection: "row" }}>

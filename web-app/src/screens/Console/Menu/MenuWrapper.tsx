@@ -28,10 +28,10 @@ import { AppState, useAppDispatch } from "../../../store";
 import { validRoutes } from "../valid-routes";
 import { menuOpen } from "../../../systemSlice";
 import { selFeatures } from "../consoleSlice";
-import { getLogoApplicationVariant, getLogoVar } from "../../../config";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import UserMenu from "./UserMenu";
+import { SILO_EMBLEM_URL, SILO_WORDMARK_URL } from "../../../common/SiloBrand";
 
 const MenuWrapper = () => {
   const dispatch = useAppDispatch();
@@ -51,8 +51,80 @@ const MenuWrapper = () => {
       displayGroupTitles
       options={allowedMenuItems}
       applicationLogo={{
-        applicationName: getLogoApplicationVariant(),
-        subVariant: getLogoVar(),
+        // MDS requires one of its built-in logo enums. These SVGs are hidden
+        // below and replaced with the SILO assets until MDS exposes a slot.
+        applicationName: "console",
+        subVariant: "AGPL",
+      }}
+      sx={{
+        // The mds drawer animates `all` for its collapse effect, which also
+        // animates height: 100vh on window resize — the bottom items chase
+        // the new height for 300ms and leave a blank strip. Animate only the
+        // collapse width so height tracks the viewport instantly.
+        transitionProperty: "width, min-width, max-width",
+        "& .menuHeaderContainer": {
+          position: "relative",
+        },
+        "& .menuLogoContainer > svg": {
+          display: "block",
+          visibility: "hidden",
+          width: "100%",
+          height: 48,
+        },
+        "& .menuHeaderContainer::before": {
+          content: '""',
+          display: "block",
+          position: "absolute",
+          zIndex: 2,
+          top: 21,
+          left: 46,
+          width: 46,
+          height: 46,
+          backgroundImage: `url(${SILO_EMBLEM_URL})`,
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "contain",
+          pointerEvents: "none",
+          transition:
+            "left 0.3s ease, top 0.3s ease, width 0.3s ease, height 0.3s ease",
+        },
+        "& .menuHeaderContainer::after": {
+          content: '""',
+          display: "block",
+          position: "absolute",
+          zIndex: 1,
+          top: 27,
+          left: 106,
+          width: 98,
+          height: 34,
+          opacity: 1,
+          transform: "translateX(0)",
+          backgroundImage: `url(${SILO_WORDMARK_URL})`,
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "contain",
+          pointerEvents: "none",
+          transition: "opacity 0.16s ease 0.3s, transform 0.16s ease 0.3s",
+        },
+        "& .collapsedMenuHeader .collapsedIcon > svg": {
+          display: "none",
+        },
+        "& .collapsedMenuHeader .collapsedIcon": {
+          width: 36,
+          height: 36,
+          visibility: "hidden",
+        },
+        "&.collapsed .menuHeaderContainer::before": {
+          top: 29,
+          left: 22,
+          width: 36,
+          height: 36,
+        },
+        "&.collapsed .menuHeaderContainer::after": {
+          opacity: 0,
+          transform: "translateX(-10px)",
+          transition: "opacity 0.08s ease, transform 0.12s ease",
+        },
       }}
       callPathAction={(path) => {
         navigate(path);
@@ -74,9 +146,9 @@ const MenuWrapper = () => {
         >
           <MenuDivider />
           <MenuItem
-            name={"MinIO Documentation"}
+            name={"Documentation"}
             icon={<DocumentationIcon />}
-            path={"https://docs.min.io/community/minio-object-store/index.html"}
+            path={"https://silo.pgsty.com/docs/"}
             visibleTooltip={!sidebarOpen}
             id="menu-documentation"
           />

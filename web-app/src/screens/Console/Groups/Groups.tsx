@@ -333,12 +333,12 @@ const Groups = () => {
                           A group can have one attached IAM policy, where all
                           users with membership in that group inherit that
                           policy. Groups support more simplified management of
-                          user permissions on the MinIO Tenant.
+                          user permissions on the SILO Tenant.
                           <br />
                           <br />
                           You can learn more at the{" "}
                           <a
-                            href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/minio-group-management.html"
+                            href="https://silo.pgsty.com/administration/identity-access-management/minio-group-management/"
                             target="_blank"
                             rel="noopener"
                           >
@@ -362,7 +362,7 @@ const Groups = () => {
                           A group can have one attached IAM policy, where all
                           users with membership in that group inherit that
                           policy. Groups support more simplified management of
-                          user permissions on the MinIO Tenant.
+                          user permissions on the SILO Tenant.
                           <SecureComponent
                             resource={CONSOLE_UI_RESOURCE}
                             scopes={createGroupPermissions}

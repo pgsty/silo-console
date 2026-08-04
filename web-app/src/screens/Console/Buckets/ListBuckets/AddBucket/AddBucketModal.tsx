@@ -255,7 +255,7 @@ const AddBucketModal = () => {
                       <br />
                       Please deploy a server in{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/operations/concepts/architecture.html#distributed-minio-deployments"
+                        href="https://silo.pgsty.com/operations/concepts/architecture/#distributed-minio-deployments"
                         target="_blank"
                         rel="noopener"
                       >
@@ -325,9 +325,9 @@ const AddBucketModal = () => {
                           be disabled <br />
                         </strong>
                       )}
-                      MinIO supports keeping multiple{" "}
+                      SILO supports keeping multiple{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/object-versioning.html#bucket-versioning"
+                        href="https://silo.pgsty.com/administration/object-management/object-versioning/#bucket-versioning"
                         target="blank"
                       >
                         versions
@@ -336,14 +336,14 @@ const AddBucketModal = () => {
                       <br />
                       Versioning is required to enable{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html"
+                        href="https://silo.pgsty.com/administration/object-management/object-retention/"
                         target="blank"
                       >
                         Object Locking
                       </a>{" "}
                       and{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#object-retention-modes"
+                        href="https://silo.pgsty.com/administration/object-management/object-retention/#object-retention-modes"
                         target="blank"
                       >
                         Retention
@@ -366,12 +366,12 @@ const AddBucketModal = () => {
                       helpTip={
                         <Fragment>
                           You can choose to{" "}
-                          <a href="https://docs.min.io/community/minio-object-store/administration/object-management/object-versioning.html#exclude-folders-from-versioning">
+                          <a href="https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning">
                             exclude folders and prefixes
                           </a>{" "}
                           from versioning if Object Locking is not enabled.
                           <br />
-                          MinIO requires versioning to support replication.
+                          SILO requires versioning to support replication.
                           <br />
                           Objects in excluded prefixes do not replicate to any
                           peer site or remote site.
@@ -435,7 +435,7 @@ const AddBucketModal = () => {
                       )}
                       You can only enable{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/administration/object-management.html#object-retention"
+                        href="https://silo.pgsty.com/administration/object-management/#object-retention"
                         target="blank"
                       >
                         Object Locking
@@ -443,7 +443,7 @@ const AddBucketModal = () => {
                       when first creating a bucket.
                       <br />
                       <br />
-                      <a href="https://docs.min.io/community/minio-object-store/administration/object-management/object-versioning.html#exclude-folders-from-versioning">
+                      <a href="https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning">
                         Exclude folders and prefixes
                       </a>{" "}
                       options will not be available if this option is enabled.
@@ -465,12 +465,12 @@ const AddBucketModal = () => {
                     <Fragment>
                       Setting a{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/reference/deprecated/mc-quota-set.html"
+                        href="https://silo.pgsty.com/reference/deprecated/mc-quota-set/"
                         target="blank"
                       >
                         quota
                       </a>{" "}
-                      assigns a hard limit to a bucket beyond which MinIO does
+                      assigns a hard limit to a bucket beyond which SILO does
                       not allow writes.
                     </Fragment>
                   }
@@ -520,9 +520,9 @@ const AddBucketModal = () => {
                     label={"Retention"}
                     helpTip={
                       <Fragment>
-                        MinIO supports setting both{" "}
+                        SILO supports setting both{" "}
                         <a
-                          href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#configure-bucket-default-object-retention"
+                          href="https://silo.pgsty.com/administration/object-management/object-retention/#configure-bucket-default-object-retention"
                           target="blank"
                         >
                           bucket-default
@@ -559,17 +559,17 @@ const AddBucketModal = () => {
                         <Fragment>
                           {" "}
                           <a
-                            href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#compliance-mode"
+                            href="https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode"
                             target="blank"
                           >
                             Compliance
                           </a>{" "}
                           lock protects Objects from write operations by all
-                          users, including the MinIO root user.
+                          users, including the SILO root user.
                           <br />
                           <br />
                           <a
-                            href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#governance-mode"
+                            href="https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode"
                             target="blank"
                           >
                             Governance

@@ -1465,8 +1465,10 @@ export interface ApiConfig<SecurityDataType = unknown> {
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-  extends Response {
+export interface HttpResponse<
+  D extends unknown,
+  E extends unknown = unknown,
+> extends Response {
   data: D;
   error: E;
 }
@@ -3859,7 +3861,7 @@ export class Api<
      *
      * @tags Configuration
      * @name ExportConfig
-     * @summary Export the current config from MinIO server
+     * @summary Export the current config from SILO server
      * @request GET:/configs/export
      * @secure
      */
@@ -3877,7 +3879,7 @@ export class Api<
      *
      * @tags Configuration
      * @name ImportCreate
-     * @summary Uploads a file to import MinIO server config.
+     * @summary Uploads a file to import SILO server config.
      * @request POST:/configs/import
      * @secure
      */

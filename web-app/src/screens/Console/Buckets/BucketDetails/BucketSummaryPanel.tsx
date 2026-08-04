@@ -485,16 +485,16 @@ const BucketSummary = () => {
                     isLoading={loadingEncryption}
                     helpTip={
                       <Fragment>
-                        MinIO supports enabling automatic{" "}
+                        SILO supports enabling automatic{" "}
                         <a
-                          href="https://docs.min.io/community/minio-object-store/administration/server-side-encryption/server-side-encryption-sse-kms.html"
+                          href="https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-kms/"
                           target="blank"
                         >
                           SSE-KMS
                         </a>{" "}
                         and{" "}
                         <a
-                          href="https://docs.min.io/community/minio-object-store/administration/server-side-encryption/server-side-encryption-sse-s3.html"
+                          href="https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-s3/"
                           target="blank"
                         >
                           SSE-S3
@@ -570,12 +570,12 @@ const BucketSummary = () => {
                     <Fragment>
                       Setting a{" "}
                       <a
-                        href="https://docs.min.io/community/minio-object-store/reference/deprecated/mc-quota-set.html"
+                        href="https://silo.pgsty.com/reference/deprecated/mc-quota-set/"
                         target="blank"
                       >
                         quota
                       </a>{" "}
-                      assigns a hard limit to a bucket beyond which MinIO does
+                      assigns a hard limit to a bucket beyond which SILO does
                       not allow writes.
                     </Fragment>
                   }
@@ -673,10 +673,10 @@ const BucketSummary = () => {
                     isLoading={loadingRetention}
                     helpTip={
                       <Fragment>
-                        MinIO{" "}
+                        SILO{" "}
                         <a
                           target="blank"
-                          href="https://docs.min.io/community/minio-object-store/administration/object-management.html#object-retention"
+                          href="https://silo.pgsty.com/administration/object-management/#object-retention"
                         >
                           Object Locking
                         </a>{" "}

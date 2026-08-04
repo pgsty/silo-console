@@ -9,6 +9,8 @@ import {
   MultipleBucketsIcon,
   ObjectBrowserIcon,
 } from "mds";
+import get from "lodash/get";
+import { useTheme } from "styled-components";
 import { AppState, useAppDispatch } from "../../../store";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
@@ -18,6 +20,7 @@ import { setAddBucketOpen } from "../Buckets/ListBuckets/AddBucket/addBucketsSli
 const UserMenu = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
   const { pathname = "" } = useLocation();
 
   const sidebarOpen = useSelector(
@@ -74,34 +77,48 @@ const UserMenu = () => {
           border: "0px",
           padding: "0px",
           ".accordionTitle": {
+            position: "relative",
             padding: "unset",
             backgroundColor: "unset !important",
-            width: sidebarOpen ? "250px" : "80px",
-            menuItemButton: {
-              width: "29px",
+            width: sidebarOpen ? "100%" : "80px",
+            "& .menuItemButton": {
+              width: sidebarOpen ? "100%" : undefined,
             },
             "svg.min-icon:nth-child(2)": {
-              marginRight: "25px",
-              backgroundColor: "rgb(28, 36, 54)",
-              color: "rgb(202, 218, 232)",
+              backgroundColor: get(
+                theme,
+                "menu.vertical.iconBGColor",
+                "#14243C",
+              ),
+              color: get(theme, "menu.vertical.textColor", "#A9B6C9"),
               width: "15px",
               height: "15px",
               minWidth: "15px",
               minHeight: "15px",
-              borderRadius: "2px",
-              position: sidebarOpen ? "unset" : "relative",
+              borderRadius: "4px",
+              transition: "transform 0.15s ease",
+              pointerEvents: "none",
+              marginRight: sidebarOpen ? 0 : "25px",
+              position: sidebarOpen ? "absolute" : "relative",
+              right: sidebarOpen ? "22px" : "unset",
               left: sidebarOpen ? "unset" : "-50%",
-              top: sidebarOpen ? "unset" : "7px",
+              top: sidebarOpen ? "50%" : "7px",
               transform: sidebarOpen
-                ? "unset"
+                ? "translateY(-50%)"
                 : "translateX(50%) translateY(20%)",
             },
             "span:nth-child(1) > button:nth-child(1)": {
-              width: "80px",
+              width: sidebarOpen ? undefined : "80px",
             },
           },
           ".accordionContent": {
-            borderTop: expanded ? "1px solid rgb(50, 60, 78)" : "0px",
+            borderTop: expanded
+              ? `1px solid ${get(
+                  theme,
+                  "menu.vertical.sectionDividerColor",
+                  "#1C2C44",
+                )}`
+              : "0px",
           },
         }}
       >

@@ -65,8 +65,9 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
       sx={{
         display: "flex",
         flexFlow: "row",
-        padding: 12,
+        padding: 16,
         gap: 24,
+        borderRadius: 10,
         alignItems: "center",
         [`@media (max-width: ${breakPoints.xs}px)`]: {
           flexFlow: "column",
@@ -78,9 +79,10 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
         },
         "& .info-value": {
           fontSize: 18,
-          color: get(theme, "signalColors.main", "#07193E"),
+          color: get(theme, "fontColor", "#18181B"),
           display: "flex",
-          fontWeight: 500,
+          fontWeight: 600,
+          fontVariantNumeric: "tabular-nums",
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",

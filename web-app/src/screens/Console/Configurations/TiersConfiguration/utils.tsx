@@ -19,11 +19,10 @@ import {
   AzureTierIconXs,
   GoogleTierIcon,
   GoogleTierIconXs,
-  MinIOTierIcon,
-  MinIOTierIconXs,
   S3TierIcon,
   S3TierIconXs,
 } from "mds";
+import { SiloBrand } from "../../../../common/SiloBrand";
 
 export const minioServiceName = "minio";
 export const gcsServiceName = "gcs";
@@ -33,9 +32,19 @@ export const azureServiceName = "azure";
 export const tierTypes = [
   {
     serviceName: minioServiceName,
-    targetTitle: "MinIO",
-    logo: <MinIOTierIcon />,
-    logoXs: <MinIOTierIconXs />,
+    targetTitle: "SILO",
+    logo: (
+      <SiloBrand
+        variant="emblem"
+        style={{ display: "block", width: 26, height: 26 }}
+      />
+    ),
+    logoXs: (
+      <SiloBrand
+        variant="emblem"
+        style={{ display: "block", width: 18, height: 18 }}
+      />
+    ),
   },
   {
     serviceName: gcsServiceName,

@@ -107,7 +107,7 @@ const ConfigurationOptions = () => {
         <Grid item xs={12} id={"settings-container"}>
           <ScreenTitle
             icon={<SettingsIcon />}
-            title={"MinIO Configuration:"}
+            title={"SILO Configuration:"}
             actions={
               <Box
                 sx={{
@@ -162,13 +162,13 @@ const ConfigurationOptions = () => {
             iconComponent={<SettingsIcon />}
             help={
               <Fragment>
-                MinIO supports a variety of configurations ranging from
+                SILO supports a variety of configurations ranging from
                 encryption, compression, region, notifications, etc.
                 <br />
                 <br />
                 You can learn more at the{" "}
                 <a
-                  href="https://docs.min.io/community/minio-object-store/reference/minio-server/settings.html#minio-server-configuration-settings"
+                  href="https://silo.pgsty.com/reference/minio-server/settings/#minio-server-configuration-settings"
                   target="_blank"
                   rel="noopener"
                 >

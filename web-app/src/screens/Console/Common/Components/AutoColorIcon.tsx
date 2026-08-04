@@ -15,9 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from "react";
-import { Grid, ThemedLogo } from "mds";
-import { useSelector } from "react-redux";
-import { AppState } from "../../../../store";
+import { Grid } from "mds";
+import { SiloBrand } from "../../../../common/SiloBrand";
 
 interface IAutoColorIcon {
   marginRight: number;
@@ -25,27 +24,18 @@ interface IAutoColorIcon {
 }
 
 const AutoColorIcon = ({ marginRight, marginTop }: IAutoColorIcon) => {
-  let tinycolor = require("tinycolor2");
-
-  const colorVariants = useSelector(
-    (state: AppState) => state.system.overrideStyles,
-  );
-
-  const isDark =
-    tinycolor(colorVariants?.backgroundColor || "#fff").getBrightness() <= 128;
-
   return (
-    <Grid
-      sx={{
-        "& svg": {
+    <Grid>
+      <SiloBrand
+        style={{
+          display: "block",
           width: 105,
+          height: 37,
+          objectFit: "contain",
           marginRight,
           marginTop,
-          fill: isDark ? "#fff" : "#081C42",
-        },
-      }}
-    >
-      <ThemedLogo />
+        }}
+      />
     </Grid>
   );
 };

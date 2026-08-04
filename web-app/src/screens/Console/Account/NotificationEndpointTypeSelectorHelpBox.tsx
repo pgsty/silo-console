@@ -24,9 +24,9 @@ const NotificationEndpointTypeSelectorHelpBox = () => {
       title={"What are Event Destinations?"}
       help={
         <Box sx={{ paddingTop: "20px" }}>
-          MinIO bucket notifications allow administrators to send notifications
+          SILO bucket notifications allow administrators to send notifications
           to supported external services on certain object or bucket events.
-          MinIO supports bucket and object-level S3 events similar to the Amazon
+          SILO supports bucket and object-level S3 events similar to the Amazon
           S3 Event Notifications.
         </Box>
       }

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, useEffect, useState } from "react";
-import { Box, BucketsIcon, HelpBox } from "mds";
+import { Box } from "mds";
 import { AppState, useAppDispatch } from "../../../../store";
 import { Bucket } from "../../../../api/consoleApi";
 import { api } from "../../../../api";
@@ -91,6 +91,18 @@ const ListBuckets = () => {
 
   return (
     <Fragment>
+      {!loadingBuckets && records.length === 0 && sidebarOpen && (
+        <Box
+          sx={{
+            padding: "12px 25px 14px 25px",
+            fontSize: 13,
+            lineHeight: 1.5,
+            color: get(theme, "menu.vertical.sectionLabelColor", "#8093AC"),
+          }}
+        >
+          No buckets yet.
+        </Box>
+      )}
       {!loadingBuckets && records.length !== 0 && (
         <Fragment>
           <Box
@@ -142,19 +154,17 @@ const ListBuckets = () => {
               sidebarOpen && (
                 <Box
                   sx={{
-                    "& .helpbox-container": {
-                      backgroundColor: "transparent",
-                      color: get(theme, "menu.vertical.textColor", "#FFF"),
-                      border: 0,
-                      fontSize: 14,
-                    },
+                    padding: "12px 25px 14px 25px",
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: get(
+                      theme,
+                      "menu.vertical.sectionLabelColor",
+                      "#8093AC",
+                    ),
                   }}
                 >
-                  <HelpBox
-                    iconComponent={<BucketsIcon />}
-                    title={"No buckets match the filtering condition"}
-                    help={""}
-                  />
+                  No buckets match this filter.
                 </Box>
               )}
           </Box>

@@ -218,7 +218,7 @@ const AddServiceAccount = () => {
                         <Fragment>
                           <a
                             target="blank"
-                            href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/policy-based-access-control.html#policy-document-structure"
+                            href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
                           >
                             Guide to access policy structure
                           </a>

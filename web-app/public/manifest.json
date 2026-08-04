@@ -1,5 +1,6 @@
 {
-  "name": "Console",
+  "name": "SILO Console",
+  "short_name": "SILO",
   "icons": [
     {
       "src": "favicon.ico",

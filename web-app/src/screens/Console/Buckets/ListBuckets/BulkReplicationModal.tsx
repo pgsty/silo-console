@@ -345,7 +345,7 @@ const AddBulkReplicationModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setTargetURL(e.target.value);
                     }}
-                    placeholder="play.min.io:9000"
+                    placeholder="s3.example.com:9000"
                     label="Target URL"
                     value={targetURL}
                   />

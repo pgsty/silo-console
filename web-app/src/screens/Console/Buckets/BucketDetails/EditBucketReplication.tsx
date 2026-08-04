@@ -169,23 +169,23 @@ const EditBucketReplication = () => {
                 help={
                   <Fragment>
                     <Box sx={{ paddingTop: "10px" }}>
-                      For each write operation to the bucket, MinIO checks all
+                      For each write operation to the bucket, SILO checks all
                       configured replication rules for the bucket and applies
                       the matching rule with highest configured priority.
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      MinIO supports enabling replication of existing objects in
+                      SILO supports enabling replication of existing objects in
                       a bucket.
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      MinIO does not enable existing object replication by
+                      SILO does not enable existing object replication by
                       default. Objects created before replication was configured
                       or while replication is disabled are not synchronized to
                       the target deployment unless replication of existing
                       objects is enabled.
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      MinIO supports replicating delete operations, where MinIO
+                      SILO supports replicating delete operations, where SILO
                       synchronizes deleting specific object versions and new
                       delete markers. Delete operation replication uses the same
                       replication process as all other replication operations.

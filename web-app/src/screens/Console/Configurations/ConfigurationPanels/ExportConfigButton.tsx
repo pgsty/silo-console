@@ -30,7 +30,7 @@ const ExportConfigButton = () => {
       //base64 encoded information so decode before downloading.
       performDownload(
         new Blob([window.atob(res.value)]),
-        `minio-server-config-${DateTime.now().toFormat(
+        `silo-server-config-${DateTime.now().toFormat(
           "LL-dd-yyyy-HH-mm-ss",
         )}.conf`,
       );

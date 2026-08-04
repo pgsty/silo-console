@@ -206,7 +206,7 @@ const SiteReplication = () => {
                 iconComponent={<ClustersIcon />}
                 help={
                   <Fragment>
-                    This feature allows multiple independent MinIO sites (or
+                    This feature allows multiple independent SILO sites (or
                     clusters) that are using the same external IDentity Provider
                     (IDP) to be configured as replicas.
                     <br />
@@ -225,7 +225,7 @@ const SiteReplication = () => {
                     <br />
                     You can learn more at the{" "}
                     <a
-                      href="https://docs.min.io/community/minio-object-store/operations/replication/multi-site-replication.html"
+                      href="https://silo.pgsty.com/operations/replication/multi-site-replication/"
                       target="_blank"
                       rel="noopener"
                     >
@@ -244,7 +244,7 @@ const SiteReplication = () => {
             iconComponent={<ClustersIcon />}
             help={
               <Fragment>
-                This feature allows multiple independent MinIO sites (or
+                This feature allows multiple independent SILO sites (or
                 clusters) that are using the same external IDentity Provider
                 (IDP) to be configured as replicas. In this situation the set of
                 replica sites are referred to as peer sites or just sites.
@@ -270,7 +270,7 @@ const SiteReplication = () => {
                 <br />
                 You can learn more at the{" "}
                 <a
-                  href="https://github.com/minio/minio/tree/master/docs/site-replication"
+                  href="https://silo.pgsty.com/operations/replication/multi-site-replication/#minio-site-replication-overview"
                   target="_blank"
                   rel="noopener"
                 >

@@ -38,6 +38,7 @@ const MoreLink = ({
       }}
       href={link}
       target={"_blank"}
+      rel="noopener noreferrer"
     >
       <Box
         sx={{

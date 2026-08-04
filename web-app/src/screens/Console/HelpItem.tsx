@@ -14,68 +14,50 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment } from "react";
+import React from "react";
+import get from "lodash/get";
+import styled from "styled-components";
 import { DocItem } from "./HelpMenu.types";
 import MoreLink from "../../common/MoreLink";
 
 interface IHelpItemProps {
   item: DocItem;
-  displayImage?: boolean;
 }
 
-const HelpItem = ({ item, displayImage = true }: IHelpItemProps) => {
+const HelpItemContainer = styled.div({
+  padding: "4px 16px 10px",
+});
+
+const HelpTitle = styled.a(({ theme }) => ({
+  display: "inline-block",
+  maxWidth: "100%",
+  color: get(theme, "linkColor", "#2781B0"),
+  font: "normal normal bold 16px/28px Inter",
+  textDecoration: "none",
+  whiteSpace: "pre-wrap",
+  "&:hover": {
+    textDecoration: "underline",
+  },
+}));
+
+const HelpDescription = styled.div({
+  width: "100%",
+  whiteSpace: "pre-line",
+  lineHeight: "1.5em",
+  height: "3em",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+});
+
+const HelpItem = ({ item }: IHelpItemProps) => {
   return (
-    <Fragment>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
-        {displayImage && (
-          <div style={{ paddingLeft: 16 }}>
-            <a href={item.url} target={"_blank"}>
-              <img
-                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                alt={item.title}
-                style={{
-                  width: 208,
-                  height: 116,
-                  backgroundImage: `url(${item.img})`,
-                  backgroundPosition: "center center",
-                  backgroundSize: "auto",
-                  backgroundRepeat: "no-repeat",
-                }}
-              />
-            </a>
-          </div>
-        )}
-        <div style={{ flexGrow: 1, flexBasis: "auto", paddingLeft: 16 }}>
-          <div
-            style={{
-              width: "100%",
-              font: "normal normal bold 16px/28px Inter",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {item.title}
-          </div>
-          <div
-            style={{
-              width: "100%",
-              whiteSpace: "pre-line",
-              lineHeight: "1.5em",
-              height: "3em",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {item.body}
-          </div>
-          <MoreLink text={"Learn more"} link={item.url} color={"#3874A6"} />
-        </div>
-      </div>
-    </Fragment>
+    <HelpItemContainer>
+      <HelpTitle href={item.url} target="_blank" rel="noopener noreferrer">
+        {item.title}
+      </HelpTitle>
+      <HelpDescription>{item.body}</HelpDescription>
+      <MoreLink text={"Learn more"} link={item.url} color={"#3874A6"} />
+    </HelpItemContainer>
   );
 };
 

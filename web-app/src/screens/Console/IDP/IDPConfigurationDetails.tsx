@@ -471,7 +471,7 @@ const IDPConfigurationDetails = ({
                   <Tooltip
                     tooltip={
                       envOverride
-                        ? "Configuration cannot be edited in this module as OpenID environment variables are set for this MinIO instance."
+                        ? "Configuration cannot be edited in this module as OpenID environment variables are set for this SILO instance."
                         : ""
                     }
                   >
@@ -489,7 +489,7 @@ const IDPConfigurationDetails = ({
                 <Tooltip
                   tooltip={
                     envOverride
-                      ? "Configuration cannot be disabled / enabled in this module as OpenID environment variables are set for this MinIO instance."
+                      ? "Configuration cannot be disabled / enabled in this module as OpenID environment variables are set for this SILO instance."
                       : ""
                   }
                 >

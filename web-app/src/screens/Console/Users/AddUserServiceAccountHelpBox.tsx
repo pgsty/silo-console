@@ -106,7 +106,7 @@ const AddUserServiceAccountHelpBox = () => {
           </Box>
           <Box sx={{ paddingTop: "10px" }}>
             Access Keys support programmatic access by applications. You cannot
-            use a Access Key to log into the MinIO Console.
+            use a Access Key to log into the SILO Console.
           </Box>
         </Box>
         <Box sx={{ paddingBottom: "20px" }}>

@@ -16,9 +16,15 @@
 
 import React, { Fragment } from "react";
 import { GlobalStyles, ThemeHandler } from "mds";
+import { ThemeProvider } from "styled-components";
+import merge from "lodash/merge";
 import "react-virtualized/styles.css";
 
 import { generateOverrideTheme } from "./utils/stylesUtils";
+import {
+  siloDarkThemeOverrides,
+  siloLightThemeOverrides,
+} from "./common/siloTheme";
 import "./index.css";
 import { useSelector } from "react-redux";
 import { AppState } from "./store";
@@ -39,11 +45,24 @@ const StyleHandler = ({ children }: IStyleHandler) => {
     thm = generateOverrideTheme(colorVariants);
   }
 
+  // Deep-merge the SILO look over whichever base theme mds resolved.
+  // Server-provided override styles keep full precedence when present.
+  const applySiloTheme = (outerTheme: object) =>
+    merge(
+      {},
+      outerTheme,
+      darkMode ? siloDarkThemeOverrides : siloLightThemeOverrides,
+    );
+
   return (
     <Fragment>
       <GlobalStyles />
       <ThemeHandler darkMode={darkMode} customTheme={thm}>
-        {children}
+        {colorVariants ? (
+          children
+        ) : (
+          <ThemeProvider theme={applySiloTheme}>{children}</ThemeProvider>
+        )}
       </ThemeHandler>
     </Fragment>
   );

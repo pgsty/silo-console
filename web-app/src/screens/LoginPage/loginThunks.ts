@@ -22,7 +22,7 @@ import {
   userLogged,
 } from "../../systemSlice";
 import { setNavigateTo } from "./loginSlice";
-import { getTargetPath } from "./Login";
+import { getTargetPath } from "./login.utils";
 import { api } from "api";
 import { ApiError, LoginRequest } from "api/consoleApi";
 import { errorToHandler } from "api/errors";

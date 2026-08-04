@@ -16,6 +16,18 @@
 
 import { RedirectRule } from "api/consoleApi";
 
+export const getTargetPath = () => {
+  let targetPath = "/browser";
+  const redirectPath = localStorage.getItem("redirect-path");
+
+  if (redirectPath) {
+    targetPath = redirectPath;
+    localStorage.setItem("redirect-path", "");
+  }
+
+  return targetPath;
+};
+
 export const redirectRules = (a: RedirectRule, b: RedirectRule) => {
   if (a.displayName && b.displayName) {
     if (a.displayName > b.displayName) {

@@ -249,15 +249,15 @@ const ListPolicies = () => {
               iconComponent={<IAMPoliciesIcon />}
               help={
                 <Fragment>
-                  MinIO uses Policy-Based Access Control (PBAC) to define the
+                  SILO uses Policy-Based Access Control (PBAC) to define the
                   authorized actions and resources to which an authenticated
                   user has access. Each policy describes one or more actions and
                   conditions that outline the permissions of a user or group of
                   users.
                   <br />
                   <br />
-                  MinIO PBAC is built for compatibility with AWS IAM policy
-                  syntax, structure, and behavior. The MinIO documentation makes
+                  SILO PBAC is built for compatibility with AWS IAM policy
+                  syntax, structure, and behavior. The SILO documentation makes
                   a best-effort to cover IAM-specific behavior and
                   functionality. Consider deferring to the IAM documentation for
                   more complete documentation on AWS IAM-specific topics.
@@ -265,7 +265,7 @@ const ListPolicies = () => {
                   <br />
                   You can learn more at the{" "}
                   <a
-                    href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/policy-based-access-control.html"
+                    href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/"
                     target="_blank"
                     rel="noopener"
                   >

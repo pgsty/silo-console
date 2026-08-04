@@ -112,7 +112,7 @@ const EditSiteEndPoint = ({
           <InputBox
             id="edit-rep-peer-endpoint"
             name="edit-rep-peer-endpoint"
-            placeholder={"https://dr.minio-storage:9000"}
+            placeholder={"https://dr.example.com:9000"}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setEditEndPointName(event.target.value);
             }}

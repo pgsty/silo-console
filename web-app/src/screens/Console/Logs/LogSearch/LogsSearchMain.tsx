@@ -236,7 +236,7 @@ const LogsSearchMain = () => {
           <MissingIntegration
             entity={"Audit Logs"}
             iconComponent={<SearchIcon />}
-            documentationLink="https://docs.min.io/community/minio-object-store/operations/monitoring/minio-logging.html"
+            documentationLink="https://silo.pgsty.com/operations/monitoring/minio-logging/"
           />
         ) : (
           <Fragment>

@@ -310,7 +310,7 @@ const IDPLDAPConfigurationDetails = () => {
                           <Tooltip
                             tooltip={
                               envOverride
-                                ? "Configuration cannot be edited in this module as LDAP environment variables are set for this MinIO instance."
+                                ? "Configuration cannot be edited in this module as LDAP environment variables are set for this SILO instance."
                                 : ""
                             }
                           >
@@ -328,7 +328,7 @@ const IDPLDAPConfigurationDetails = () => {
                             <Tooltip
                               tooltip={
                                 envOverride
-                                  ? "Configuration cannot be disabled / enabled in this module as LDAP environment variables are set for this MinIO instance."
+                                  ? "Configuration cannot be disabled / enabled in this module as LDAP environment variables are set for this SILO instance."
                                   : ""
                               }
                             >
@@ -376,7 +376,7 @@ const IDPLDAPConfigurationDetails = () => {
                                 }
                                 contents={ldapHelpBoxContents}
                                 docLink={
-                                  "https://docs.min.io/community/minio-object-store/operations/external-iam.html#active-directory-ldap"
+                                  "https://silo.pgsty.com/operations/external-iam/#active-directory-ldap"
                                 }
                                 docText={"Learn more about LDAP Configurations"}
                               />

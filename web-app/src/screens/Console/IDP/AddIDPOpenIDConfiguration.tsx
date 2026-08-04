@@ -30,7 +30,7 @@ const AddIDPOpenIDConfiguration = () => {
           helpText={"Learn more about OpenID Connect Configurations"}
           contents={openIDHelpBoxContents}
           docLink={
-            "https://docs.min.io/community/minio-object-store/operations/external-iam.html#openid-connect-oidc"
+            "https://silo.pgsty.com/operations/external-iam/#openid-connect-oidc"
           }
           docText={"Learn more about OpenID Connect Configurations"}
         />

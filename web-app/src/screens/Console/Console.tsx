@@ -147,7 +147,6 @@ const KMSRoutes = React.lazy(() => import("./KMS/KMSRoutes"));
 const Console = () => {
   const dispatch = useAppDispatch();
   const { pathname = "" } = useLocation();
-  const open = useSelector((state: AppState) => state.system.sidebarOpen);
   const session = useSelector(selSession);
   const features = useSelector(selFeatures);
   const distributedSetup = useSelector(selDistSet);
@@ -196,21 +195,25 @@ const Console = () => {
       });
   };
 
-  // Layout effect to be executed after last re-render for resizing only
+  // Collapse the vertical menu before the first narrow-screen paint and when
+  // the viewport later crosses into tablet/mobile widths. The menu remains
+  // user-expandable until the next resize event.
   useLayoutEffect(() => {
-    // Debounce to not execute constantly
-    const debounceSize = debounce(() => {
-      if (open && window.innerWidth <= 1024) {
+    const collapseMenuForNarrowViewport = () => {
+      if (window.innerWidth <= 1024) {
         dispatch(menuOpen(false));
       }
-    }, 300);
+    };
+    const debounceSize = debounce(collapseMenuForNarrowViewport, 300);
 
-    // Added event listener for window resize
+    collapseMenuForNarrowViewport();
     window.addEventListener("resize", debounceSize);
 
-    // We remove the listener on component unmount
-    return () => window.removeEventListener("resize", debounceSize);
-  });
+    return () => {
+      window.removeEventListener("resize", debounceSize);
+      debounceSize.cancel();
+    };
+  }, [dispatch]);
 
   const consoleAdminRoutes: IRouteRule[] = [
     {

@@ -151,14 +151,14 @@ const AccessDetails = () => {
               Understand which{" "}
               <a
                 target="blank"
-                href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/policy-based-access-control.html"
+                href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/"
               >
                 Policies
               </a>{" "}
               and{" "}
               <a
                 target="blank"
-                href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/minio-user-management.html"
+                href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/"
               >
                 Users
               </a>{" "}

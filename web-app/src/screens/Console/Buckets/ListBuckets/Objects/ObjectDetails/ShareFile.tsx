@@ -258,7 +258,7 @@ const ShareFile = ({
                 sx={{
                   marginTop: 20,
                 }}
-                tooltip="Toggle Share URL between Console and MinIO Server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable"
+                tooltip="Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable"
                 id="switch_toggle_url"
                 label="Toogle Share URL"
                 onChange={(e) => {

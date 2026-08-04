@@ -20,15 +20,51 @@ import styled from "styled-components";
 import { Box, breakPoints, Tooltip } from "mds";
 
 const CounterCardMain = styled.div(({ theme }) => ({
-  fontFamily: "Inter,sans-serif",
-  color: get(theme, "signalColors.main", "#07193E"),
-  maxWidth: "300px",
   display: "flex",
-  marginLeft: "auto",
-  marginRight: "auto",
-  cursor: "default",
-  position: "relative",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  height: "100%",
   width: "100%",
+  cursor: "default",
+  "& .cardHeader": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
+  },
+  "& .cardBottom": {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 8,
+    minWidth: 0,
+  },
+  "& .cardValue": {
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    [`@media (max-width: ${breakPoints.sm}px)`]: {
+      fontSize: 28,
+    },
+  },
 }));
 
 const CounterCard = ({
@@ -44,90 +80,15 @@ const CounterCard = ({
 }) => {
   return (
     <CounterCardMain>
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          width: "100%",
-          padding: "0 8px 0 8px",
-          position: "absolute",
-          [`@media (max-width: ${breakPoints.md}px)`]: {
-            padding: "0 10px 0 10px",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexFlow: "column",
-            marginTop: "8px",
-            zIndex: 10,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              fontSize: "16px",
-              fontWeight: 600,
-            }}
-          >
-            {label}
-          </Box>
-
-          <Tooltip tooltip={counterValue} placement="bottom">
-            <Box
-              sx={{
-                fontWeight: 600,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: 187,
-                flexFlow: "row",
-                fontSize: counterValue.toString().length >= 5 ? 50 : 55,
-                [`@media (max-width: ${breakPoints.sm}px)`]: {
-                  flexFlow: "column",
-                  maxWidth: 200,
-                  fontSize: counterValue.toString().length >= 5 ? 20 : 35,
-                },
-                [`@media (max-width: ${breakPoints.md}px)`]: {
-                  fontSize: counterValue.toString().length >= 5 ? 28 : 35,
-                },
-                [`@media (max-width: ${breakPoints.lg}px)`]: {
-                  fontSize: counterValue.toString().length >= 5 ? 28 : 36,
-                },
-                [`@media (max-width: ${breakPoints.xl}px)`]: {
-                  fontSize: counterValue.toString().length >= 5 ? 45 : 50,
-                },
-              }}
-            >
-              {counterValue}
-            </Box>
-          </Tooltip>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexFlow: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            marginTop: "8px",
-            maxWidth: "26px",
-            "& .min-icon": {
-              width: "16px",
-              height: "16px",
-            },
-          }}
-        >
-          {icon}
-
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            {actions}
-          </Box>
-        </Box>
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>{label}</Box>
+        {icon}
+      </Box>
+      <Box className={"cardBottom"}>
+        <Tooltip tooltip={counterValue} placement="bottom">
+          <Box className={"cardValue"}>{counterValue}</Box>
+        </Tooltip>
+        {actions ? <Box className={"cardActions"}>{actions}</Box> : null}
       </Box>
     </CounterCardMain>
   );

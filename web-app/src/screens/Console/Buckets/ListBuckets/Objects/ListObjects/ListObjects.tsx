@@ -117,6 +117,8 @@ import UploadFilesButton from "../../UploadFilesButton";
 import DetailsListPanel from "./DetailsListPanel";
 import ObjectDetailPanel from "./ObjectDetailPanel";
 import VersionsNavigator from "../ObjectDetails/VersionsNavigator";
+import ShareFile from "../ObjectDetails/ShareFile";
+import PreviewFileModal from "../Preview/PreviewFileModal";
 import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
 import TooltipWrapper from "../../../../Common/TooltipWrapper/TooltipWrapper";
 import ListObjectsTable from "./ListObjectsTable";
@@ -127,13 +129,7 @@ import { sanitizeFilePath } from "./utils";
 const DeleteMultipleObjects = withSuspense(
   React.lazy(() => import("./DeleteMultipleObjects")),
 );
-const ShareFile = withSuspense(
-  React.lazy(() => import("../ObjectDetails/ShareFile")),
-);
 const RewindEnable = withSuspense(React.lazy(() => import("./RewindEnable")));
-const PreviewFileModal = withSuspense(
-  React.lazy(() => import("../Preview/PreviewFileModal")),
-);
 
 const baseDnDStyle = {
   borderWidth: 2,

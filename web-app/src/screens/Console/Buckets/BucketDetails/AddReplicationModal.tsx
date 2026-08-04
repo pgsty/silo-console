@@ -200,7 +200,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setTargetURL(e.target.value);
             }}
-            placeholder="play.min.io"
+            placeholder="s3.example.com"
             label="Target URL"
             value={targetURL}
           />

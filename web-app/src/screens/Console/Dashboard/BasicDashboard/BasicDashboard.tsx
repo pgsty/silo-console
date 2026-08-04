@@ -49,11 +49,12 @@ const BoxItem = ({ children }: { children: any }) => {
     <Box
       withBorders
       sx={{
-        padding: 15,
+        padding: "16px 20px",
+        borderRadius: 12,
         height: "136px",
         maxWidth: "100%",
         [`@media (max-width: ${breakPoints.sm}px)`]: {
-          padding: 5,
+          padding: 10,
           maxWidth: "initial",
         },
       }}
@@ -157,13 +158,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                 actions={
                   <Link
                     to={IAM_PAGES.BUCKETS}
-                    style={{
-                      zIndex: 11,
-                      textDecoration: "none",
-                      top: "40px",
-                      position: "relative",
-                      marginRight: "75px",
-                    }}
+                    style={{ textDecoration: "none" }}
                   >
                     <TooltipWrapper tooltip={"Browse"}>
                       <Button
@@ -173,10 +168,9 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                         icon={<ArrowRightIcon />}
                         variant={"regular"}
                         style={{
-                          padding: 5,
                           height: 30,
-                          fontSize: 14,
-                          marginTop: 20,
+                          fontSize: 13,
+                          padding: "0 12px",
                         }}
                       />
                     </TooltipWrapper>
@@ -219,9 +213,18 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                 gridRowStart: "1",
                 gridRowEnd: "3",
                 gridColumnStart: "3",
-                padding: 15,
-                display: "grid",
-                justifyContent: "stretch",
+                padding: "16px 20px",
+                borderRadius: 12,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: 14,
+                [`@media (max-width: ${breakPoints.sm}px)`]: {
+                  gridRowStart: "auto",
+                  gridRowEnd: "auto",
+                  gridColumnStart: "1",
+                  gridColumnEnd: "2",
+                },
               }}
             >
               <ReportedUsage
@@ -341,12 +344,12 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                   </Box>
                   <Box
                     sx={{
-                      paddingTop: 20,
+                      paddingTop: 12,
                       fontSize: 14,
                     }}
                   >
                     <a
-                      href="https://docs.min.io/community/minio-object-store/operations/monitoring/collect-minio-metrics-using-prometheus.html"
+                      href="https://silo.pgsty.com/operations/monitoring/collect-minio-metrics-using-prometheus/"
                       target="_blank"
                       rel="noopener"
                     >

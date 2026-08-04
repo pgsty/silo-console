@@ -314,10 +314,10 @@ const BucketReplicationPanel = () => {
         <HelpTip
           content={
             <Fragment>
-              MinIO{" "}
+              SILO{" "}
               <a
                 target="blank"
-                href="https://docs.min.io/community/minio-object-store/administration/bucket-replication.html"
+                href="https://silo.pgsty.com/administration/bucket-replication/"
               >
                 server-side bucket replication
               </a>{" "}
@@ -386,13 +386,13 @@ const BucketReplicationPanel = () => {
             iconComponent={<BucketsIcon />}
             help={
               <Fragment>
-                MinIO supports server-side and client-side replication of
-                objects between source and destination buckets.
+                SILO supports server-side and client-side replication of objects
+                between source and destination buckets.
                 <br />
                 <br />
                 You can learn more at the{" "}
                 <a
-                  href="https://docs.min.io/community/minio-object-store/administration/bucket-replication.html"
+                  href="https://silo.pgsty.com/administration/bucket-replication/"
                   target="_blank"
                   rel="noopener"
                 >

@@ -24,7 +24,6 @@ import {
   JSONIcon,
   StorageIcon,
   UploadStatIcon,
-  VersionIcon,
   Grid,
   Box,
 } from "mds";
@@ -35,6 +34,7 @@ import { cleanMetrics } from "./utils";
 import CodeMirrorWrapper from "../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
 import SpeedTestUnit from "./SpeedTestUnit";
 import styled from "styled-components";
+import { SiloBrand } from "../../../common/SiloBrand";
 
 const STResultsContainer = styled.div(({ theme }) => ({
   "& .actionButtons": {
@@ -129,7 +129,7 @@ const STResultsContainer = styled.div(({ theme }) => ({
     },
   },
   "& .versionIcon": {
-    color: get(theme, `screenTitle.iconColor`, "#07193E"),
+    display: "inline-flex",
     marginRight: 20,
   },
   "& .editorContainer": {
@@ -401,9 +401,14 @@ const STResults = ({ results, start }: ISTResults) => {
                     className={"detailedVersion"}
                   >
                     <span className={"versionIcon"}>
-                      <VersionIcon />
+                      <SiloBrand
+                        variant="emblem"
+                        alt=""
+                        aria-hidden="true"
+                        style={{ width: 28, height: 28, objectFit: "contain" }}
+                      />
                     </span>{" "}
-                    MinIO VERSION&nbsp;<strong>{finalRes.version}</strong>
+                    SILO VERSION&nbsp;<strong>{finalRes.version}</strong>
                   </Grid>
                   <Grid item xs={12} className={"tableOverflow"}>
                     <table

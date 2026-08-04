@@ -180,10 +180,10 @@ const BucketEventsPanel = () => {
         <HelpTip
           content={
             <Fragment>
-              MinIO{" "}
+              SILO{" "}
               <a
                 target="blank"
-                href="https://docs.min.io/community/minio-object-store/administration/monitoring.html"
+                href="https://silo.pgsty.com/administration/monitoring/"
               >
                 bucket notifications
               </a>{" "}
@@ -235,15 +235,15 @@ const BucketEventsPanel = () => {
               iconComponent={<LambdaIcon />}
               help={
                 <Fragment>
-                  MinIO bucket notifications allow administrators to send
+                  SILO bucket notifications allow administrators to send
                   notifications to supported external services on certain object
-                  or bucket events. MinIO supports bucket and object-level S3
+                  or bucket events. SILO supports bucket and object-level S3
                   events similar to the Amazon S3 Event Notifications.
                   <br />
                   <br />
                   You can learn more at the{" "}
                   <a
-                    href="https://docs.min.io/community/minio-object-store/administration/monitoring/bucket-notifications.html"
+                    href="https://silo.pgsty.com/administration/monitoring/bucket-notifications/"
                     target="_blank"
                     rel="noopener"
                   >

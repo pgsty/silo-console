@@ -16,7 +16,7 @@
 
 import React, { Fragment, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, Loader, LoginWrapper, RefreshIcon } from "mds";
+import { Box, Button, Loader, RefreshIcon } from "mds";
 import { loginStrategyType } from "./login.types";
 import MainError from "../Console/Common/MainError/MainError";
 import { AppState, useAppDispatch } from "../../store";
@@ -24,22 +24,10 @@ import { useSelector } from "react-redux";
 import { getFetchConfigurationAsync } from "./loginThunks";
 import { resetForm } from "./loginSlice";
 import StrategyForm from "./StrategyForm";
-import { getLogoApplicationVariant, getLogoVar } from "../../config";
 import { RedirectRule } from "api/consoleApi";
 import { redirectRules } from "./login.utils";
 import { setHelpName } from "../../systemSlice";
-
-export const getTargetPath = () => {
-  let targetPath = "/browser";
-  if (
-    localStorage.getItem("redirect-path") &&
-    localStorage.getItem("redirect-path") !== ""
-  ) {
-    targetPath = `${localStorage.getItem("redirect-path")}`;
-    localStorage.setItem("redirect-path", "");
-  }
-  return targetPath;
-};
+import LoginLayout from "./LoginLayout";
 
 const Login = () => {
   const dispatch = useAppDispatch();
@@ -128,7 +116,7 @@ const Login = () => {
       );
   }
 
-  let docsURL = "https://docs.min.io/community/minio-object-store/index.html";
+  const docsURL = "https://silo.pgsty.com/docs/";
 
   useEffect(() => {
     dispatch(setHelpName("login"));
@@ -138,13 +126,8 @@ const Login = () => {
   return (
     <Fragment>
       <MainError />
-      <LoginWrapper
-        logoProps={{
-          applicationName: getLogoApplicationVariant(),
-          subVariant: getLogoVar(),
-        }}
-        form={loginComponent}
-        formFooter={
+      <LoginLayout
+        footer={
           <Box
             sx={{
               "& .separator": {
@@ -153,12 +136,16 @@ const Login = () => {
               },
             }}
           >
+            <a href="https://silo.pgsty.com" target="_blank" rel="noopener">
+              SILO
+            </a>
+            <span className={"separator"}>|</span>
             <a href={docsURL} target="_blank" rel="noopener">
-              MinIO Documentation
+              Documentation
             </a>
             <span className={"separator"}>|</span>
             <a
-              href="https://github.com/georgmangold/console"
+              href="https://github.com/pgsty/silo-console"
               target="_blank"
               rel="noopener"
             >
@@ -166,7 +153,7 @@ const Login = () => {
             </a>
             <span className={"separator"}>|</span>
             <a
-              href="https://github.com/georgmangold/console/releases"
+              href="https://silo.pgsty.com/download/"
               target="_blank"
               rel="noopener"
             >
@@ -174,31 +161,9 @@ const Login = () => {
             </a>
           </Box>
         }
-        promoHeader={
-          <span
-            style={{
-              fontSize: "clamp(6px, 6vw, 115px)",
-              lineHeight: 1,
-              display: "inline-block",
-              width: "100%",
-            }}
-          >
-            Welcome to<br></br>
-            <span style={{ fontSize: "clamp(6px, 8vw, 200px)" }}>CONSOLE</span>
-          </span>
-        }
-        promoInfo={
-          <span style={{ fontSize: 14, lineHeight: 1 }}>
-            This is just a fork of the MinIO Console for my own personal
-            educational purposes, and therefore it incorporates MinIO® source
-            code. You may also want to look for other maintained forks.
-            <br></br>
-            It is important to note that <strong>MINIO</strong> is a registered
-            trademark of the MinIO Corporation. Consequently, this project is
-            not affiliated with or endorsed by the MinIO Corporation.
-          </span>
-        }
-      />
+      >
+        {loginComponent}
+      </LoginLayout>
     </Fragment>
   );
 };

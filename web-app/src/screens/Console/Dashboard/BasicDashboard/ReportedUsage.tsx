@@ -16,43 +16,36 @@
 
 import React, { Fragment } from "react";
 import get from "lodash/get";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { Box, HelpTip } from "mds";
 import { Cell, Pie, PieChart } from "recharts";
 
 const ReportedUsageMain = styled.div(({ theme }) => ({
-  maxHeight: "110px",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  fontSize: "19px",
-
-  padding: "10px",
+  gap: 16,
+  "& .usage-label": {
+    fontSize: 13,
+    fontWeight: 500,
+    letterSpacing: "0.02em",
+    color: get(theme, "mutedText", "#71717A"),
+  },
   "& .unit-value": {
-    fontSize: "50px",
-    color: get(theme, "signalColors.main", "#07193E"),
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
   },
   "& .unit-type": {
-    fontSize: "18px",
-    color: get(theme, "mutedText", "#87888d"),
-    marginTop: "20px",
-    marginLeft: "5px",
-  },
-
-  "& .usage-label": {
-    display: "flex",
-    alignItems: "center",
-    fontSize: "16px",
-    fontWeight: 600,
-    marginRight: "20px",
-    marginTop: "-10px",
-    "& .min-icon": {
-      marginLeft: "10px",
-      height: 16,
-      width: 16,
-    },
+    fontSize: 14,
+    fontWeight: 500,
+    marginLeft: 6,
+    color: get(theme, "mutedText", "#71717A"),
   },
 }));
+
 export const usageClarifyingContent = (
   <Fragment>
     <div>
@@ -64,7 +57,7 @@ export const usageClarifyingContent = (
       Running{" "}
       <a
         target="_blank"
-        href="https://docs.min.io/community/minio-object-store/reference/minio-mc/mc-du.html"
+        href="https://silo.pgsty.com/reference/minio-mc/mc-du/"
       >
         mc du
       </a>{" "}
@@ -88,67 +81,57 @@ const ReportedUsage = ({
   total: number | string;
   unit: string;
 }) => {
+  const theme = useTheme();
+
   const plotValues = [
-    { value: total, color: "#D6D6D6", label: "Free Space" },
+    {
+      value: total,
+      color: get(theme, "borderColor", "#E4E4E7"),
+      label: "Free Space",
+    },
     {
       value: usageValue,
-      color: "#073052",
+      color: get(theme, "signalColors.main", "#1D588C"),
       label: "Used Space",
     },
   ];
 
   return (
     <ReportedUsageMain>
-      <Box>
-        <div className="usage-label">
-          <span>Reported Usage</span>
-        </div>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+        }}
+      >
+        <div className="usage-label">Reported Usage</div>
 
         <HelpTip content={usageClarifyingContent} placement="left">
-          <label
-            className={"unit-value"}
-            style={{
-              fontWeight: 600,
-            }}
-          >
-            {total}
-          </label>
-          <label className={"unit-type"}>{unit}</label>
+          <Box sx={{ display: "flex", alignItems: "baseline" }}>
+            <label className={"unit-value"}>{total}</label>
+            <label className={"unit-type"}>{unit}</label>
+          </Box>
         </HelpTip>
       </Box>
 
-      <Box>
-        <Box sx={{ flex: 1 }}>
-          <div
-            style={{
-              position: "relative",
-              width: 105,
-              height: 105,
-              top: "-8px",
-            }}
-          >
-            <div>
-              <PieChart width={105} height={105}>
-                <Pie
-                  data={plotValues}
-                  cx={"50%"}
-                  cy={"50%"}
-                  dataKey="value"
-                  outerRadius={45}
-                  innerRadius={35}
-                  startAngle={-70}
-                  endAngle={360}
-                  animationDuration={1}
-                >
-                  {plotValues.map((entry, index) => (
-                    <Cell key={`cellCapacity-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </div>
-          </div>
-        </Box>
-      </Box>
+      <PieChart width={96} height={96}>
+        <Pie
+          data={plotValues}
+          cx={"50%"}
+          cy={"50%"}
+          dataKey="value"
+          outerRadius={44}
+          innerRadius={35}
+          startAngle={-70}
+          endAngle={360}
+          animationDuration={1}
+        >
+          {plotValues.map((entry, index) => (
+            <Cell key={`cellCapacity-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+      </PieChart>
     </ReportedUsageMain>
   );
 };

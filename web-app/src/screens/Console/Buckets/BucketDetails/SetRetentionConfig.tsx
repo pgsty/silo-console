@@ -141,17 +141,17 @@ const SetRetentionConfig = ({
                 <Fragment>
                   {" "}
                   <a
-                    href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#compliance-mode"
+                    href="https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode"
                     target="blank"
                   >
                     Compliance
                   </a>{" "}
                   lock protects Objects from write operations by all users,
-                  including the MinIO root user.
+                  including the SILO root user.
                   <br />
                   <br />
                   <a
-                    href="https://docs.min.io/community/minio-object-store/administration/object-management/object-retention.html#governance-mode"
+                    href="https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode"
                     target="blank"
                   >
                     Governance

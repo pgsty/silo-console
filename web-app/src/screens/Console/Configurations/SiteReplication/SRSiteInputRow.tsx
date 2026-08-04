@@ -65,7 +65,7 @@ const SRSiteInputRow = ({
         <InputBox
           id={`add-rep-peer-site-ep-${index}`}
           name={`add-rep-peer-site-ep-${index}`}
-          placeholder={`https://dr.minio-storage:900${index}`}
+          placeholder={`https://dr.example.com:900${index}`}
           label=""
           readOnly={disabledFields.includes("endpoint")}
           error={fieldErrors["endpoint"]}

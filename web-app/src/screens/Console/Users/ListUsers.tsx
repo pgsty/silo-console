@@ -58,8 +58,8 @@ import { useAppDispatch } from "../../../store";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
+import DeleteUser from "./DeleteUser";
 
-const DeleteUser = withSuspense(React.lazy(() => import("./DeleteUser")));
 const AddToGroup = withSuspense(React.lazy(() => import("./BulkAddToGroup")));
 
 const ListUsers = () => {
@@ -358,11 +358,11 @@ const ListUsers = () => {
                     iconComponent={<UsersIcon />}
                     help={
                       <Fragment>
-                        A MinIO user consists of a unique access key (username)
+                        A SILO user consists of a unique access key (username)
                         and corresponding secret key (password). Clients must
                         authenticate their identity by specifying both a valid
                         access key (username) and the corresponding secret key
-                        (password) of an existing MinIO user.
+                        (password) of an existing SILO user.
                         <br />
                         Groups provide a simplified method for managing shared
                         permissions among users with common access patterns and
@@ -372,7 +372,7 @@ const ListUsers = () => {
                         Users inherit access permissions to data and resources
                         through the groups they belong to.
                         <br />
-                        MinIO uses Policy-Based Access Control (PBAC) to define
+                        SILO uses Policy-Based Access Control (PBAC) to define
                         the authorized actions and resources to which an
                         authenticated user has access. Each policy describes one
                         or more actions and conditions that outline the
@@ -380,14 +380,14 @@ const ListUsers = () => {
                         <br />
                         <br />
                         Each user can access only those resources and operations
-                        which are explicitly granted by the built-in role. MinIO
+                        which are explicitly granted by the built-in role. SILO
                         denies access to any other resource or action by
                         default.
                         <br />
                         <br />
                         You can learn more at the{" "}
                         <a
-                          href="https://docs.min.io/community/minio-object-store/administration/identity-access-management/minio-user-management.html"
+                          href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/"
                           target="_blank"
                           rel="noopener"
                         >
@@ -407,12 +407,11 @@ const ListUsers = () => {
                       iconComponent={<UsersIcon />}
                       help={
                         <Fragment>
-                          A MinIO user consists of a unique access key
-                          (username) and corresponding secret key (password).
-                          Clients must authenticate their identity by specifying
-                          both a valid access key (username) and the
-                          corresponding secret key (password) of an existing
-                          MinIO user.
+                          A SILO user consists of a unique access key (username)
+                          and corresponding secret key (password). Clients must
+                          authenticate their identity by specifying both a valid
+                          access key (username) and the corresponding secret key
+                          (password) of an existing SILO user.
                           <br />
                           Groups provide a simplified method for managing shared
                           permissions among users with common access patterns
@@ -422,16 +421,16 @@ const ListUsers = () => {
                           Users inherit access permissions to data and resources
                           through the groups they belong to.
                           <br />
-                          MinIO uses Policy-Based Access Control (PBAC) to
-                          define the authorized actions and resources to which
-                          an authenticated user has access. Each policy
-                          describes one or more actions and conditions that
-                          outline the permissions of a user or group of users.
+                          SILO uses Policy-Based Access Control (PBAC) to define
+                          the authorized actions and resources to which an
+                          authenticated user has access. Each policy describes
+                          one or more actions and conditions that outline the
+                          permissions of a user or group of users.
                           <br />
                           <br />
                           Each user can access only those resources and
                           operations which are explicitly granted by the
-                          built-in role. MinIO denies access to any other
+                          built-in role. SILO denies access to any other
                           resource or action by default.
                           <SecureComponent
                             scopes={[

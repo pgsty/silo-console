@@ -15,9 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, useEffect, useState } from "react";
-import { DrivesIcon, Loader, SectionTitle, VersionIcon, Grid } from "mds";
+import { DrivesIcon, Loader, SectionTitle, Grid } from "mds";
 import { api } from "api";
 import { ServerProperties } from "api/consoleApi";
+import { SiloBrand } from "../../../../common/SiloBrand";
 
 interface ITestWrapper {
   title: any;
@@ -114,12 +115,18 @@ const TestWrapper = ({ title, children }: ITestWrapper) => {
                 >
                   <span
                     style={{
-                      marginRight: 20,
+                      display: "inline-flex",
+                      marginRight: 12,
                     }}
                   >
-                    <VersionIcon />
+                    <SiloBrand
+                      variant="emblem"
+                      alt=""
+                      aria-hidden="true"
+                      style={{ width: 32, height: 32, objectFit: "contain" }}
+                    />
                   </span>{" "}
-                  MinIO VERSION&nbsp;<strong>{version}</strong>
+                  SILO VERSION&nbsp;<strong>{version}</strong>
                 </Grid>
               </Fragment>
             ) : (
