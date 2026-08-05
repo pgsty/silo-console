@@ -18,6 +18,7 @@ import { snackBarMessage, SRInfoStateType } from "./types";
 import { ErrorResponseHandler, IEmbeddedCustomStyles } from "./common/types";
 import { AppState } from "./store";
 import { isDarkModeOn } from "./utils/stylesUtils";
+import { getStoredLanguage, Lang } from "./i18n/lang";
 import { addBucketAsync } from "./screens/Console/Buckets/ListBuckets/AddBucket/addBucketThunks";
 
 // determine whether we have the sidebar state stored on localstorage
@@ -46,6 +47,7 @@ interface SystemState {
   helpTabName: string;
   locationPath: string;
   darkMode: boolean;
+  language: Lang;
   filterBucketList: string;
   loadBucketsListing: boolean;
 }
@@ -79,6 +81,7 @@ const initialState: SystemState = {
   helpTabName: "docs",
   locationPath: "",
   darkMode: isDarkModeOn(),
+  language: getStoredLanguage(),
   filterBucketList: "",
   loadBucketsListing: true,
 };
@@ -179,6 +182,9 @@ const systemSlice = createSlice({
     setDarkMode: (state, action: PayloadAction<boolean>) => {
       state.darkMode = action.payload;
     },
+    setLanguage: (state, action: PayloadAction<Lang>) => {
+      state.language = action.payload;
+    },
     resetSystem: () => {
       return initialState;
     },
@@ -217,6 +223,7 @@ export const {
   setHelpTabName,
   setLocationPath,
   setDarkMode,
+  setLanguage,
   setFilterBucket,
   setBucketLoadListing,
 } = systemSlice.actions;

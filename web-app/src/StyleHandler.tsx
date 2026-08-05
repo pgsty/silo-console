@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { GlobalStyles, ThemeHandler } from "mds";
 import { ThemeProvider } from "styled-components";
 import merge from "lodash/merge";
@@ -38,6 +38,13 @@ const StyleHandler = ({ children }: IStyleHandler) => {
     (state: AppState) => state.system.overrideStyles,
   );
   const darkMode = useSelector((state: AppState) => state.system.darkMode);
+  const language = useSelector((state: AppState) => state.system.language);
+
+  // Keep <html lang> in sync for accessibility and the zh CSS overrides in
+  // index.css; this wraps both the login page and the console.
+  useEffect(() => {
+    document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+  }, [language]);
 
   let thm = undefined;
 

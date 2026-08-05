@@ -263,3 +263,33 @@ input.removeArrows[type="number"],
 .removeArrows input[type="number"] {
   -moz-appearance: textfield;
 }
+
+/* CJK typography: the wide uppercase tracking used on login chrome scatters
+   Chinese glyphs. Scoped by the <html lang> that StyleHandler keeps in sync. */
+html[lang="zh-CN"] #root .eyebrow,
+html[lang="zh-CN"] #root .consoleTag,
+html[lang="zh-CN"] #root .footer a {
+  letter-spacing: 0.08em;
+}
+html[lang="zh-CN"] #root .consoleTag {
+  padding-left: 0.08em;
+}
+
+/* Vendor-string overrides for zh: mds hardcodes a few labels ("Sign Out" in
+   the menu, "Actions:" in the object ActionsList). Their text nodes cannot be
+   reached via props, so swap them with CSS scoped to the zh locale. */
+html[lang="zh-CN"] #sign-out .labelContainer {
+  font-size: 0;
+}
+html[lang="zh-CN"] #sign-out .labelContainer::after {
+  content: "登出";
+  font-size: 14px;
+}
+html[lang="zh-CN"] #root ul.objectActions > li:first-of-type {
+  font-size: 0;
+}
+html[lang="zh-CN"] #root ul.objectActions > li:first-of-type::after {
+  content: "可用操作：";
+  font-size: 14px;
+  font-weight: bold;
+}

@@ -19,6 +19,7 @@ import { AppState } from "../../store";
 import {
   setDarkMode,
   setErrorSnackMessage,
+  setLanguage,
   userLogged,
 } from "../../systemSlice";
 import { setNavigateTo } from "./loginSlice";
@@ -27,6 +28,7 @@ import { api } from "api";
 import { ApiError, LoginRequest } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import { isDarkModeOn } from "../../utils/stylesUtils";
+import { getStoredLanguage } from "../../i18n/lang";
 
 export const doLoginAsync = createAsyncThunk(
   "login/doLoginAsync",
@@ -59,6 +61,7 @@ export const doLoginAsync = createAsyncThunk(
         localStorage.setItem("userLoggedIn", accessKey);
         dispatch(setNavigateTo(getTargetPath()));
         dispatch(setDarkMode(!!darkModeEnabled));
+        dispatch(setLanguage(getStoredLanguage()));
       })
       .catch(async (res) => {
         const err = (await res.json()) as ApiError;

@@ -16,8 +16,10 @@
 
 import React, { Fragment } from "react";
 import { PageHeader } from "mds";
+import { useT } from "i18n";
 import ObjectManagerButton from "../ObjectManager/ObjectManagerButton";
 import DarkModeActivator from "../DarkModeActivator/DarkModeActivator";
+import LanguageActivator from "../LanguageActivator/LanguageActivator";
 
 interface IPageHeaderWrapper {
   label: React.ReactNode;
@@ -30,12 +32,17 @@ const PageHeaderWrapper = ({
   actions,
   middleComponent,
 }: IPageHeaderWrapper) => {
+  const t = useT();
+
   return (
     <PageHeader
-      label={label}
+      // Plain-string page titles translate centrally here; composed nodes
+      // (breadcrumbs etc.) are handled by their own components.
+      label={typeof label === "string" ? t(label) : label}
       actions={
         <Fragment>
           {actions}
+          <LanguageActivator />
           <DarkModeActivator />
           <ObjectManagerButton />
         </Fragment>

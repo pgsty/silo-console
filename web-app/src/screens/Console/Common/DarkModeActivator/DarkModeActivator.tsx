@@ -20,9 +20,11 @@ import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../store";
 import { setDarkMode } from "../../../../systemSlice";
 import { storeDarkMode } from "../../../../utils/stylesUtils";
+import { useT } from "i18n";
 
 const DarkModeActivator = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const darkMode = useSelector((state: AppState) => state.system.darkMode);
 
@@ -36,7 +38,9 @@ const DarkModeActivator = () => {
   return (
     <Button
       id={"dark-mode-activator"}
-      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        darkMode ? t("Switch to light mode") : t("Switch to dark mode")
+      }
       icon={darkMode ? <LightModeIcon /> : <DarkModeIcon />}
       onClick={darkModeActivator}
     />
