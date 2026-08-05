@@ -668,7 +668,7 @@ var widgets = []Metric{
 		Targets: []Target{
 			{
 				Expr:         `sum by (server,api) (increase(minio_s3_requests_total{$__query}[$__rate_interval]))`,
-				LegendFormat: "{{server,api}}",
+				LegendFormat: "{{server}}, {{api}}",
 			},
 		},
 	},
@@ -685,7 +685,7 @@ var widgets = []Metric{
 		Targets: []Target{
 			{
 				Expr:         `sum by (server,api) (increase(minio_s3_requests_errors_total{$__query}[$__rate_interval]))`,
-				LegendFormat: "{{server,api}}",
+				LegendFormat: "{{server}}, {{api}}",
 			},
 		},
 	},

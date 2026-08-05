@@ -18,3 +18,8 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+#download-widget-main-menu,
+#upload-files-main-menu {
+  min-width: 180px;
+}

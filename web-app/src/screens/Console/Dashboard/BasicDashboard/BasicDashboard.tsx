@@ -32,7 +32,11 @@ import {
   TotalObjectsIcon,
   UptimeIcon,
 } from "mds";
-import { calculateBytes, representationNumber } from "../../../../common/utils";
+import {
+  calculateBytes,
+  niceDays,
+  representationNumber,
+} from "../../../../common/utils";
 import StatusCountCard from "./StatusCountCard";
 import groupBy from "lodash/groupBy";
 import ServersList from "./ServersList";
@@ -42,7 +46,11 @@ import { Link } from "react-router-dom";
 import { IAM_PAGES } from "../../../../common/SecureComponent/permissions";
 import TimeStatItem from "../TimeStatItem";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
-import { AdminInfoResponse, ServerDrives } from "api/consoleApi";
+import {
+  AdminInfoResponse,
+  ServerDrives,
+  ServerProperties,
+} from "api/consoleApi";
 
 const BoxItem = ({ children }: { children: any }) => {
   return (
@@ -94,13 +102,30 @@ const prettyUsage = (usage: string | undefined) => {
   return calculateBytes(usage);
 };
 
+const getClusterUptime = (servers: ServerProperties[]) => {
+  const onlineUptimes = servers
+    .filter(
+      (server) =>
+        server.state === "online" &&
+        typeof server.uptime === "number" &&
+        server.uptime >= 0,
+    )
+    .map((server) => server.uptime as number);
+
+  if (!onlineUptimes.length) {
+    return "n/a";
+  }
+
+  return niceDays(Math.min(...onlineUptimes).toString()).trim() || "0 seconds";
+};
+
 const BasicDashboard = ({ usage }: IDashboardProps) => {
   const usageValue = usage && usage.usage ? usage.usage.toString() : "0";
   const usageToRepresent = prettyUsage(usageValue);
-
-  const { lastScan = "n/a", lastHeal = "n/a", upTime = "n/a" } = {};
-
   const serverList = getServersList(usage);
+  const lastScan = "n/a";
+  const lastHeal = "n/a";
+  const upTime = getClusterUptime(serverList);
 
   let allDrivesArray: ServerDrives[] = [];
 

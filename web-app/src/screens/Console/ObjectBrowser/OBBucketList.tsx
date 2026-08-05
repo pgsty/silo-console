@@ -19,6 +19,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ActionLink,
+  breakPoints,
   BucketsIcon,
   Button,
   DataTable,
@@ -195,6 +196,43 @@ const OBListBuckets = () => {
                 records={filteredRecords}
                 entityName={"Buckets"}
                 idField={"name"}
+                sx={{
+                  [`@media (max-width: ${breakPoints.sm}px)`]: {
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                    scrollbarWidth: "thin",
+                    "#root &&": {
+                      overflowX: "auto",
+                    },
+                    "& .ReactVirtualized__Table": {
+                      minWidth: 470,
+                    },
+                    "& .ReactVirtualized__Table__headerColumn, & .ReactVirtualized__Table__rowColumn":
+                      {
+                        flexShrink: "0 !important",
+                      },
+                    "& .ReactVirtualized__Table__headerColumn:nth-child(1), & .ReactVirtualized__Table__rowColumn:nth-child(1)":
+                      {
+                        flexBasis: "180px !important",
+                        width: "180px !important",
+                      },
+                    "& .ReactVirtualized__Table__headerColumn:nth-child(2), & .ReactVirtualized__Table__rowColumn:nth-child(2)":
+                      {
+                        flexBasis: "75px !important",
+                        width: "75px !important",
+                      },
+                    "& .ReactVirtualized__Table__headerColumn:nth-child(3), & .ReactVirtualized__Table__rowColumn:nth-child(3)":
+                      {
+                        flexBasis: "85px !important",
+                        width: "85px !important",
+                      },
+                    "& .ReactVirtualized__Table__headerColumn:nth-child(4), & .ReactVirtualized__Table__rowColumn:nth-child(4)":
+                      {
+                        flexBasis: "70px !important",
+                        width: "70px !important",
+                      },
+                  },
+                }}
                 columns={[
                   {
                     label: "Name",

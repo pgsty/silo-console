@@ -17,6 +17,7 @@
 import React, { Fragment, useState } from "react";
 import {
   Box,
+  breakPoints,
   Button,
   Grid,
   HelpBox,
@@ -337,6 +338,27 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
         horizontal
         options={tabsOptions}
         currentTabOrPath={curTab}
+        sx={{
+          [`@media (max-width: ${breakPoints.sm}px)`]: {
+            minWidth: 0,
+            "& > .optionsContainer": {
+              minWidth: 0,
+            },
+            "& > .optionsContainer > .optionsList": {
+              minWidth: 0,
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollbarWidth: "thin",
+            },
+            "& .optionsList > button": {
+              flex: "0 0 auto",
+            },
+            "& > .tabsPanels": {
+              boxSizing: "border-box",
+              minWidth: 0,
+            },
+          },
+        }}
         onTabClick={(newValue) => {
           setCurTab(newValue);
         }}

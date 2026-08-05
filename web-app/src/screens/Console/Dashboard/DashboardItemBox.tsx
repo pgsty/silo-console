@@ -22,12 +22,12 @@ const DashboardItemBox = ({ children }: { children: any }) => {
     <Box
       withBorders
       sx={{
-        borderRadius: "3px",
-        padding: 15,
+        borderRadius: 12,
+        padding: "16px 20px",
         height: 136,
         maxWidth: "100%",
         [`@media (max-width: ${breakPoints.sm}px)`]: {
-          padding: 5,
+          padding: 10,
           height: "auto",
         },
         [`@media (max-width: ${breakPoints.md}px)`]: {

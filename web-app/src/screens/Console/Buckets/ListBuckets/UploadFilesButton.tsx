@@ -113,7 +113,7 @@ const UploadFilesButton = ({
       >
         <Button
           id={"upload-main"}
-          aria-controls={`upload-main-menu`}
+          aria-controls={`upload-files-main-menu`}
           aria-haspopup="true"
           aria-expanded={openUploadMenu ? "true" : undefined}
           onClick={handleClick}
@@ -125,7 +125,7 @@ const UploadFilesButton = ({
         />
       </TooltipWrapper>
       <DropdownSelector
-        id={"upload-main-menu"}
+        id={"upload-files-main-menu"}
         options={[
           {
             label: "Upload File",

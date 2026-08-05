@@ -119,10 +119,17 @@ const DownloadWidgetDataButton = ({
             backgroundColor: "transparent",
             border: 0,
             padding: 0,
+            width: 32,
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 4,
             cursor: "pointer",
             "& svg": {
               color: "#D0D0D0",
-              height: 16,
+              width: 18,
+              height: 18,
             },
             "&:hover": {
               "& svg": {
