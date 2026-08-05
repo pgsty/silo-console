@@ -155,7 +155,7 @@ const LinearGraphWidget = ({
               if (key === "name") {
                 continue;
               }
-              let val = parseInt(dp[key]);
+              let val = parseFloat(dp[key]);
 
               if (isNaN(val)) {
                 val = 0;

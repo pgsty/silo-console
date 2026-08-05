@@ -96,12 +96,13 @@ const SingleRepWidget = ({
   let repNumber = "";
 
   if (result) {
-    const resultRep = parseInt(result.innerLabel || "0");
-
-    if (!isNaN(resultRep)) {
-      repNumber = representationNumber(resultRep);
+    if (result.innerLabel === "" || result.innerLabel == null) {
+      // empty query result is "no data" (broken scrape / pre-scan usage),
+      // never a fabricated zero
+      repNumber = "—";
     } else {
-      repNumber = "0";
+      const resultRep = parseInt(result.innerLabel);
+      repNumber = !isNaN(resultRep) ? representationNumber(resultRep) : "—";
     }
   }
 

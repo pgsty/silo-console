@@ -43,6 +43,13 @@ const roundNumber = (value: string) => {
   return parseInt(value).toString(10);
 };
 
+// rate() results are routinely fractional (e.g. 0.25 CPU-seconds/second);
+// truncating them to integers flattens the whole graph to zero
+const rateNumber = (value: string) => {
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? "0" : parsed.toFixed(2);
+};
+
 export const panelsConfiguration: IDashboardPanel[] = [
   {
     id: 1,
@@ -186,7 +193,7 @@ export const panelsConfiguration: IDashboardPanel[] = [
     ],
     type: widgetType.linearGraph,
 
-    yAxisFormatter: roundNumber,
+    yAxisFormatter: rateNumber,
     xAxisFormatter: getTimeFromTimestamp,
   },
   {
@@ -693,6 +700,16 @@ export const widgetDetailsToPanel = (
           chartBars = [];
         }
 
+        // a fully empty result is "no data", not seven measured zero bins;
+        // zero-filling below only applies to ranges missing from a partial
+        // (zero-skipped) histogram
+        if (chartBars.length === 0) {
+          return {
+            ...panelItem,
+            data: [],
+          };
+        }
+
         const sortFunction = (value1: any[], value2: any[]) =>
           value1[0] - value2[0];
 
@@ -700,7 +717,7 @@ export const widgetDetailsToPanel = (
         if (panelItem.customStructure) {
           values = panelItem.customStructure.map((structureItem) => {
             const metricTake = chartBars.find((element: any) => {
-              return element.metric.range === structureItem.originTag;
+              return (element.metric || {}).range === structureItem.originTag;
             });
 
             const elements = get(metricTake, "values", []);
@@ -763,9 +780,10 @@ export const widgetDetailsToPanel = (
           valuesForBackground.push({ value: parseInt(eachVal[1]) });
         });
 
-        const innerLabel = panelItem.labelDisplayFunction
-          ? panelItem.labelDisplayFunction(valueDisplay[1])
-          : valueDisplay[1];
+        const innerLabel =
+          valueDisplay[1] !== "" && panelItem.labelDisplayFunction
+            ? panelItem.labelDisplayFunction(valueDisplay[1])
+            : valueDisplay[1];
 
         return {
           ...panelItem,

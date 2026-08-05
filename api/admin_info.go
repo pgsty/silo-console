@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -166,17 +165,24 @@ type GridPos struct {
 	Y int32
 }
 
-type WidgetLabel struct {
-	Name string
-}
-
-var labels = []WidgetLabel{
-	{Name: "instance"},
-	{Name: "drive"},
-	{Name: "server"},
-	{Name: "api"},
-}
-
+// All widget queries target SILO/MinIO Metrics V3 (`/minio/metrics/v3`) names.
+// See docs/metrics-v3.md for the full V2 -> V3 mapping and aggregation rules.
+//
+// Two server-side V3 semantics shape these expressions:
+//
+//  1. Cluster-scoped groups (`minio_cluster_*`) carry no `server` label and are
+//     exported identically by every node, so scraping N nodes yields N duplicate
+//     series. They must be deduplicated with `max()` (never summed).
+//  2. Metrics with value <= 0 are skipped at export time, so a legitimate zero
+//     (e.g. no offline drives) is indistinguishable from a missing series. Stat
+//     widgets that can legitimately read zero append an
+//     `or (max(<companion>{...}) * 0)` guard so that a live cluster renders an
+//     explicit 0 while a dead scrape stays empty. The companion must share the
+//     value's lifecycle: cluster-health counts and traffic totals guard on
+//     nodes_online_count; usage counts guard on the usage group's own
+//     since_last_update_seconds (the whole group is absent until the first
+//     scanner cycle, and pre-scan buckets must read as no-data, not 0);
+//     capacity free/used baseline on the always-present capacity total.
 var widgets = []Metric{
 	{
 		ID:            1,
@@ -198,8 +204,8 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `time() - max(minio_node_process_starttime_seconds{$__query})`,
-				LegendFormat: "{{instance}}",
+				Expr:         `min(minio_system_process_uptime_seconds{$__query})`,
+				LegendFormat: "",
 				Step:         60,
 			},
 		},
@@ -224,8 +230,8 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (instance) (minio_s3_traffic_received_bytes{$__query})`,
-				LegendFormat: "{{instance}}",
+				Expr:         `sum(minio_api_requests_traffic_received_bytes{$__query}) or (max(minio_cluster_health_nodes_online_count{$__query}) * 0)`,
+				LegendFormat: "",
 				Step:         60,
 			},
 		},
@@ -250,44 +256,21 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `topk(1, sum(minio_cluster_capacity_usable_total_bytes{$__query}) by (instance))`,
+				Expr:         `max(minio_cluster_health_capacity_usable_total_bytes{$__query})`,
 				LegendFormat: "Total Usable",
 				Step:         300,
 			},
 			{
-				Expr:         `topk(1, sum(minio_cluster_capacity_usable_free_bytes{$__query}) by (instance))`,
+				// zero free bytes (full cluster) is zero-skipped by the server;
+				// baseline on the always-present total so full reads as 0, not empty
+				Expr:         `max(minio_cluster_health_capacity_usable_free_bytes{$__query}) or (max(minio_cluster_health_capacity_usable_total_bytes{$__query}) * 0)`,
 				LegendFormat: "Usable Free",
 				Step:         300,
 			},
 			{
-				Expr:         `topk(1, sum(minio_cluster_capacity_usable_total_bytes{$__query}) by (instance)) - topk(1, sum(minio_cluster_capacity_usable_free_bytes{$__query}) by (instance))`,
+				// when free is absent (full cluster), used equals total
+				Expr:         `max(minio_cluster_health_capacity_usable_total_bytes{$__query}) - max(minio_cluster_health_capacity_usable_free_bytes{$__query}) or max(minio_cluster_health_capacity_usable_total_bytes{$__query})`,
 				LegendFormat: "Used Space",
-				Step:         300,
-			},
-		},
-	},
-	{
-		ID:            51,
-		Title:         "Current Usable Total Bytes",
-		Type:          "gauge",
-		MaxDataPoints: 100,
-		GridPos: GridPos{
-			H: 6,
-			W: 3,
-			X: 6,
-			Y: 0,
-		},
-		Options: MetricOptions{
-			ReduceOptions: ReduceOptions{
-				Calcs: []string{
-					"lastNotNull",
-				},
-			},
-		},
-		Targets: []Target{
-			{
-				Expr:         `topk(1, sum(minio_cluster_capacity_usable_total_bytes{$__query}) by (instance))`,
-				LegendFormat: "",
 				Step:         300,
 			},
 		},
@@ -304,7 +287,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_usage_total_bytes{$__query}`,
+				Expr:         `max(minio_cluster_usage_objects_total_bytes{$__query})`,
 				LegendFormat: "Used Capacity",
 				InitialTime:  -180,
 				Step:         10,
@@ -330,35 +313,9 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_objects_size_distribution{$__query}`,
+				Expr:         `max by (range) (minio_cluster_usage_objects_size_distribution{$__query})`,
 				LegendFormat: "{{range}}",
 				Step:         300,
-			},
-		},
-	},
-	{
-		ID:            61,
-		Title:         "Total Open FDs",
-		Type:          "stat",
-		MaxDataPoints: 100,
-		GridPos: GridPos{
-			H: 3,
-			W: 3,
-			X: 21,
-			Y: 0,
-		},
-		Options: MetricOptions{
-			ReduceOptions: ReduceOptions{
-				Calcs: []string{
-					"last",
-				},
-			},
-		},
-		Targets: []Target{
-			{
-				Expr:         `sum(minio_node_file_descriptor_open_total{$__query})`,
-				LegendFormat: "",
-				Step:         60,
 			},
 		},
 	},
@@ -382,33 +339,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (instance) (minio_s3_traffic_sent_bytes{$__query})`,
-				LegendFormat: "",
-				Step:         60,
-			},
-		},
-	},
-	{
-		ID:            62,
-		Title:         "Total Goroutines",
-		Type:          "stat",
-		MaxDataPoints: 100,
-		GridPos: GridPos{
-			H: 3,
-			W: 3,
-			X: 21,
-			Y: 3,
-		},
-		Options: MetricOptions{
-			ReduceOptions: ReduceOptions{
-				Calcs: []string{
-					"last",
-				},
-			},
-		},
-		Targets: []Target{
-			{
-				Expr:         `sum without (server,instance) (minio_node_go_routine_total{$__query})`,
+				Expr:         `sum(minio_api_requests_traffic_sent_bytes{$__query}) or (max(minio_cluster_health_nodes_online_count{$__query}) * 0)`,
 				LegendFormat: "",
 				Step:         60,
 			},
@@ -434,7 +365,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_nodes_online_total{$__query}`,
+				Expr:         `max(minio_cluster_health_nodes_online_count{$__query})`,
 				LegendFormat: "",
 				Step:         60,
 			},
@@ -460,8 +391,10 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_drive_online_total{$__query}`,
-				LegendFormat: "Total online drives in MinIO Cluster",
+				// all drives can be offline while a node still serves metrics;
+				// the zero sample is skipped, so guard to render an explicit 0
+				Expr:         `max(minio_cluster_health_drives_online_count{$__query}) or (max(minio_cluster_health_nodes_online_count{$__query}) * 0)`,
+				LegendFormat: "",
 				Step:         60,
 			},
 		},
@@ -486,7 +419,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_bucket_total{$__query}`,
+				Expr:         `max(minio_cluster_usage_objects_buckets_count{$__query}) or (max(minio_cluster_usage_objects_since_last_update_seconds{$__query}) * 0)`,
 				LegendFormat: "",
 				Step:         100,
 			},
@@ -504,7 +437,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (server) (rate(minio_s3_traffic_received_bytes{$__query}[$__rate_interval]))`,
+				Expr:         `sum by (server) (rate(minio_api_requests_traffic_received_bytes{$__query}[$__rate_interval]))`,
 				LegendFormat: "Data Received [{{server}}]",
 			},
 		},
@@ -521,7 +454,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (server) (rate(minio_s3_traffic_sent_bytes{$__query}[$__rate_interval]))`,
+				Expr:         `sum by (server) (rate(minio_api_requests_traffic_sent_bytes{$__query}[$__rate_interval]))`,
 				LegendFormat: "Data Sent [{{server}}]",
 			},
 		},
@@ -546,7 +479,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_nodes_offline_total{$__query}`,
+				Expr:         `max(minio_cluster_health_nodes_offline_count{$__query}) or (max(minio_cluster_health_nodes_online_count{$__query}) * 0)`,
 				LegendFormat: "",
 				Step:         60,
 			},
@@ -572,7 +505,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_drive_offline_total{$__query}`,
+				Expr:         `max(minio_cluster_health_drives_offline_count{$__query}) or (max(minio_cluster_health_nodes_online_count{$__query}) * 0)`,
 				LegendFormat: "",
 				Step:         60,
 			},
@@ -598,14 +531,19 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_cluster_usage_object_total{$__query}`,
+				Expr:         `max(minio_cluster_usage_objects_count{$__query}) or (max(minio_cluster_usage_objects_since_last_update_seconds{$__query}) * 0)`,
 				LegendFormat: "",
 			},
 		},
 	},
 	{
+		// Replaces the V2-only "Time Since Last Heal Activity" widget: V3 has no
+		// minio_heal_* namespace. `overall_health` is 1 when healthy and skipped
+		// entirely when unhealthy (zero-value skip), so the always-positive
+		// `overall_write_quorum` acts as the 0-baseline: 1 = healthy,
+		// 0 = unhealthy, empty = metrics unavailable.
 		ID:            80,
-		Title:         "Time Since Last Heal Activity",
+		Title:         "Erasure Health",
 		Type:          "stat",
 		MaxDataPoints: 100,
 		GridPos: GridPos{
@@ -623,15 +561,18 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_heal_time_last_activity_nano_seconds{$__query}`,
-				LegendFormat: "{{server}}",
+				Expr:         `min(minio_cluster_erasure_set_overall_health{$__query}) or (max(minio_cluster_erasure_set_overall_write_quorum{$__query}) * 0)`,
+				LegendFormat: "",
 				Step:         60,
 			},
 		},
 	},
 	{
+		// Replaces the V2-only "Time Since Last Scan Activity" widget: reports
+		// the age (seconds) of the usage data behind the Usage/Objects/Buckets
+		// cards. Empty until the first scanner cycle completes.
 		ID:            81,
-		Title:         "Time Since Last Scan Activity",
+		Title:         "Usage Data Age",
 		Type:          "stat",
 		MaxDataPoints: 100,
 		GridPos: GridPos{
@@ -649,8 +590,8 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_usage_last_activity_nano_seconds{$__query}`,
-				LegendFormat: "{{server}}",
+				Expr:         `max(minio_cluster_usage_objects_since_last_update_seconds{$__query})`,
+				LegendFormat: "",
 				Step:         60,
 			},
 		},
@@ -667,8 +608,8 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (server,api) (increase(minio_s3_requests_total{$__query}[$__rate_interval]))`,
-				LegendFormat: "{{server}}, {{api}}",
+				Expr:         `sum by (server,name) (increase(minio_api_requests_total{$__query}[$__rate_interval]))`,
+				LegendFormat: "{{server}}, {{name}}",
 			},
 		},
 	},
@@ -684,12 +625,14 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `sum by (server,api) (increase(minio_s3_requests_errors_total{$__query}[$__rate_interval]))`,
-				LegendFormat: "{{server}}, {{api}}",
+				Expr:         `sum by (server,name) (increase(minio_api_requests_errors_total{$__query}[$__rate_interval]))`,
+				LegendFormat: "{{server}}, {{name}}",
 			},
 		},
 	},
 	{
+		// Internode metrics are only exported by distributed deployments; a
+		// single-node cluster legitimately renders this panel empty.
 		ID:    17,
 		Title: "Internode Data Transfer",
 		Type:  "graph",
@@ -701,14 +644,14 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `rate(minio_inter_node_traffic_sent_bytes{$__query}[$__rate_interval])`,
+				Expr:         `rate(minio_system_network_internode_recv_bytes_total{$__query}[$__rate_interval])`,
 				LegendFormat: "Internode Bytes Received [{{server}}]",
 				Step:         4,
 			},
 
 			{
-				Expr:         `rate(minio_inter_node_traffic_sent_bytes{$__query}[$__rate_interval])`,
-				LegendFormat: "Internode Bytes Received [{{server}}]",
+				Expr:         `rate(minio_system_network_internode_sent_bytes_total{$__query}[$__rate_interval])`,
+				LegendFormat: "Internode Bytes Sent [{{server}}]",
 			},
 		},
 	},
@@ -724,7 +667,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `rate(minio_node_process_cpu_total_seconds{$__query}[$__rate_interval])`,
+				Expr:         `rate(minio_system_process_cpu_total_seconds{$__query}[$__rate_interval])`,
 				LegendFormat: "CPU Usage Rate [{{server}}]",
 			},
 		},
@@ -741,7 +684,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_node_process_resident_memory_bytes{$__query}`,
+				Expr:         `minio_system_process_resident_memory_bytes{$__query}`,
 				LegendFormat: "Memory Used [{{server}}]",
 			},
 		},
@@ -758,7 +701,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_node_drive_used_bytes{$__query}`,
+				Expr:         `minio_system_drive_used_bytes{$__query}`,
 				LegendFormat: "Used Capacity [{{server}}:{{drive}}]",
 			},
 		},
@@ -775,7 +718,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_node_drive_free_inodes{$__query}`,
+				Expr:         `minio_system_drive_free_inodes{$__query}`,
 				LegendFormat: "Free Inodes [{{server}}:{{drive}}]",
 			},
 		},
@@ -792,14 +735,14 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `rate(minio_node_syscall_read_total{$__query}[$__rate_interval])`,
+				Expr:         `rate(minio_system_process_syscall_read_total{$__query}[$__rate_interval])`,
 				LegendFormat: "Read Syscalls [{{server}}]",
 				Step:         60,
 			},
 
 			{
-				Expr:         `rate(minio_node_syscall_read_total{$__query}[$__rate_interval])`,
-				LegendFormat: "Read Syscalls [{{server}}]",
+				Expr:         `rate(minio_system_process_syscall_write_total{$__query}[$__rate_interval])`,
+				LegendFormat: "Write Syscalls [{{server}}]",
 			},
 		},
 	},
@@ -815,7 +758,7 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `minio_node_file_descriptor_open_total{$__query}`,
+				Expr:         `minio_system_process_file_descriptor_open_total{$__query}`,
 				LegendFormat: "Open FDs [{{server}}]",
 			},
 		},
@@ -832,12 +775,12 @@ var widgets = []Metric{
 		},
 		Targets: []Target{
 			{
-				Expr:         `rate(minio_node_io_rchar_bytes{$__query}[$__rate_interval])`,
+				Expr:         `rate(minio_system_process_io_rchar_bytes{$__query}[$__rate_interval])`,
 				LegendFormat: "Node RChar [{{server}}]",
 			},
 
 			{
-				Expr:         `rate(minio_node_io_wchar_bytes{$__query}[$__rate_interval])`,
+				Expr:         `rate(minio_system_process_io_wchar_bytes{$__query}[$__rate_interval])`,
 				LegendFormat: "Node WChar [{{server}}]",
 			},
 		},
@@ -862,16 +805,6 @@ type PromRespData struct {
 type PromResp struct {
 	Status string       `json:"status"`
 	Data   PromRespData `json:"data"`
-}
-
-type LabelResponse struct {
-	Status string   `json:"status"`
-	Data   []string `json:"data"`
-}
-
-type LabelResults struct {
-	Label    string
-	Response LabelResponse
 }
 
 // getAdminInfoResponse returns the response containing total buckets, objects and usage.
@@ -1052,39 +985,6 @@ func getWidgetDetails(ctx context.Context, prometheusURL string, selector string
 	clientIP := utils.ClientIPFromContext(ctx)
 	httpClnt := GetConsoleHTTPClient(clientIP)
 
-	labelResultsCh := make(chan LabelResults)
-
-	for _, lbl := range labels {
-		go func(lbl WidgetLabel) {
-			endpoint := fmt.Sprintf("%s/api/v1/label/%s/values", prometheusURL, lbl.Name)
-
-			var response LabelResponse
-			if unmarshalPrometheus(ctx, httpClnt, endpoint, &response) {
-				return
-			}
-
-			labelResultsCh <- LabelResults{Label: lbl.Name, Response: response}
-		}(lbl)
-	}
-
-	labelMap := make(map[string][]string)
-
-	// wait for as many goroutines that come back in less than 1 second
-LabelsWaitLoop:
-	for {
-		select {
-		case <-time.After(1 * time.Second):
-			break LabelsWaitLoop
-		case res := <-labelResultsCh:
-			labelMap[res.Label] = res.Response.Data
-			if len(labelMap) >= len(labels) {
-				break LabelsWaitLoop
-			}
-		}
-	}
-
-	// launch a goroutines per widget
-
 	for _, m := range widgets {
 		if m.ID != widgetID {
 			continue
@@ -1132,16 +1032,6 @@ LabelsWaitLoop:
 
 				// replace the `$__rate_interval` global for step with unit (s for seconds)
 				queryExpr := strings.ReplaceAll(target.Expr, "$__rate_interval", fmt.Sprintf("%ds", 240))
-				if strings.Contains(queryExpr, "$") {
-					re := regexp.MustCompile(`\$([a-z]+)`)
-
-					for _, match := range re.FindAllStringSubmatch(queryExpr, -1) {
-						if val, ok := labelMap[match[1]]; ok {
-							queryExpr = strings.ReplaceAll(queryExpr, "$"+match[1], fmt.Sprintf("(%s)", strings.Join(val, "|")))
-						}
-					}
-				}
-
 				queryExpr = strings.ReplaceAll(queryExpr, "$__query", selector)
 				endpoint := fmt.Sprintf("%s/api/v1/%s?query=%s%s", prometheusURL, apiType, url.QueryEscape(queryExpr), extraParamters)
 

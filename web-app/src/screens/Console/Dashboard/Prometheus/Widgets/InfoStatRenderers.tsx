@@ -100,7 +100,8 @@ export const UsageAgeRenderer = ({
   let value = t("Unknown");
   let status: TimeStatStatus = "muted";
   if (!Number.isNaN(seconds)) {
-    value = niceDays(`${Math.max(0, Math.floor(seconds))}`);
+    // clamp sub-second ages up to one second: niceDays renders 0 as blank
+    value = niceDays(`${Math.max(1, Math.floor(seconds))}`);
     if (seconds < 3600) {
       status = "ok";
     } else if (seconds < 86400) {
