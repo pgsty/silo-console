@@ -44,9 +44,11 @@ import PolicySelectors from "../Policies/PolicySelectors";
 import UserSelector from "./UserSelector";
 import PasswordSelector from "./PasswordSelector";
 import GroupsSelectors from "./GroupsSelectors";
+import { useT } from "i18n";
 
 const AddUser = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const selectedPolicies = useSelector(
     (state: AppState) => state.createUser.selectedPolicies,
   );
@@ -70,7 +72,7 @@ const AddUser = () => {
     if (secretKeylength < 8) {
       dispatch(
         setErrorSnackMessage({
-          errorMessage: "Passwords must be at least 8 characters long",
+          errorMessage: t("Passwords must be at least 8 characters long"),
           detailedError: "",
         }),
       );
@@ -97,7 +99,7 @@ const AddUser = () => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"Users"}
+              label={t("Users")}
               onClick={() => navigate(IAM_PAGES.USERS)}
             />
           }
@@ -105,7 +107,7 @@ const AddUser = () => {
         />
         <PageLayout>
           <FormLayout
-            title={"Create User"}
+            title={t("Create User")}
             icon={<CreateUserIcon />}
             helpBox={<AddUserHelpBox />}
           >
@@ -139,7 +141,7 @@ const AddUser = () => {
                   onClick={(e) => {
                     dispatch(resetFormAsync());
                   }}
-                  label={"Clear"}
+                  label={t("Clear")}
                 />
 
                 <Button
@@ -148,7 +150,7 @@ const AddUser = () => {
                   variant="callAction"
                   color="primary"
                   disabled={addLoading || !sendEnabled}
-                  label={"Save"}
+                  label={t("Save")}
                 />
               </Grid>
             </form>

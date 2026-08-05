@@ -22,6 +22,7 @@ import { useAppDispatch } from "../../../store";
 import { api } from "api";
 import { ApiError, HttpResponse } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { interpolate, useT } from "i18n";
 
 interface IDeletePolicyProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -35,6 +36,7 @@ const DeletePolicy = ({
   selectedPolicy,
 }: IDeletePolicyProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeDeleteModalAndRefresh(false);
 
   const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
@@ -60,8 +62,8 @@ const DeletePolicy = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Policy`}
-      confirmText={"Delete"}
+      title={t("Delete Policy")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={loadingDelete}
@@ -69,8 +71,14 @@ const DeletePolicy = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete policy <br />
-          <b>{selectedPolicy}</b>?
+          {interpolate(t("Are you sure you want to delete policy {name}?"), {
+            name: (
+              <Fragment>
+                <br />
+                <b>{selectedPolicy}</b>
+              </Fragment>
+            ),
+          })}
         </Fragment>
       }
     />

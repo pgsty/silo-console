@@ -22,9 +22,11 @@ import { DateTime } from "luxon";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useDispatch } from "react-redux";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import { useT } from "i18n";
 
 const ExportConfigButton = () => {
   const dispatch = useDispatch();
+  const t = useT();
   const [isReqLoading, invokeApi] = useApi(
     (res: any) => {
       //base64 encoded information so decode before downloading.
@@ -41,14 +43,18 @@ const ExportConfigButton = () => {
   );
 
   return (
-    <TooltipWrapper tooltip="Warning! The resulting file will contain server configuration information in plain text">
+    <TooltipWrapper
+      tooltip={t(
+        "Warning! The resulting file will contain server configuration information in plain text",
+      )}
+    >
       <Button
         id={"export-config"}
         onClick={() => {
           invokeApi("GET", `api/v1/configs/export`);
         }}
         icon={<UploadIcon />}
-        label={"Export"}
+        label={t("Export")}
         variant={"regular"}
         disabled={isReqLoading}
       />

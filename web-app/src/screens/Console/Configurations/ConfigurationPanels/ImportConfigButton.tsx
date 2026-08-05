@@ -25,10 +25,12 @@ import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppState } from "../../../../store";
+import { useT } from "i18n";
 
 const ImportConfigButton = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const t = useT();
 
   const needsRestart = useSelector(
     (state: AppState) => state.system.serverNeedsRestart,
@@ -86,7 +88,11 @@ const ImportConfigButton = () => {
         style={{ display: "none" }}
         ref={fileUpload}
       />
-      <TooltipWrapper tooltip="The file must be valid and  should have valid config values">
+      <TooltipWrapper
+        tooltip={t(
+          "The file must be valid and  should have valid config values",
+        )}
+      >
         <Button
           id={"import-config"}
           onClick={() => {
@@ -95,7 +101,7 @@ const ImportConfigButton = () => {
             }
           }}
           icon={<DownloadIcon />}
-          label={"Import"}
+          label={t("Import")}
           variant={"regular"}
           disabled={isReqLoading}
         />

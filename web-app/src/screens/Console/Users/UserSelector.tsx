@@ -19,15 +19,17 @@ import { setUserName } from "./AddUsersSlice";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../store";
 import { InputBox } from "mds";
+import { useT } from "i18n";
 
 const UserSelector = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const userName = useSelector((state: AppState) => state.createUser.userName);
   return (
     <InputBox
       id="accesskey-input"
       name="accesskey-input"
-      label="User Name"
+      label={t("User Name")}
       value={userName}
       autoFocus={true}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

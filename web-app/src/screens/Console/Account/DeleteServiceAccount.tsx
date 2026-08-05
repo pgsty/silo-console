@@ -22,6 +22,7 @@ import { useAppDispatch } from "../../../store";
 import { api } from "api";
 import { ApiError, HttpResponse } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteServiceAccountProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -35,6 +36,7 @@ const DeleteServiceAccount = ({
   selectedServiceAccount,
 }: IDeleteServiceAccountProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeDeleteModalAndRefresh(false);
 
   const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
@@ -60,8 +62,8 @@ const DeleteServiceAccount = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Access Key`}
-      confirmText={"Delete"}
+      title={t("Delete Access Key")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={loadingDelete}
@@ -69,17 +71,22 @@ const DeleteServiceAccount = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete Access Key{" "}
-          <b
-            style={{
-              maxWidth: "200px",
-              whiteSpace: "normal",
-              wordWrap: "break-word",
-            }}
-          >
-            {selectedServiceAccount}
-          </b>
-          ?
+          {interpolate(
+            t("Are you sure you want to delete Access Key {name}?"),
+            {
+              name: (
+                <b
+                  style={{
+                    maxWidth: "200px",
+                    whiteSpace: "normal",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  {selectedServiceAccount}
+                </b>
+              ),
+            },
+          )}
         </Fragment>
       }
     />

@@ -22,6 +22,7 @@ import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
 import { ConfirmDeleteIcon, ProgressBar } from "mds";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 
 interface IResetConfiguration {
   configurationName: string;
@@ -35,6 +36,7 @@ const ResetConfigurationModal = ({
   resetOpen,
 }: IResetConfiguration) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [resetLoading, setResetLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -58,8 +60,8 @@ const ResetConfigurationModal = ({
 
   return (
     <ConfirmDialog
-      title={`Restore Defaults`}
-      confirmText={"Yes, Reset Configuration"}
+      title={t("Restore Defaults")}
+      confirmText={t("Yes, Reset Configuration")}
       isOpen={resetOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={resetLoading}
@@ -71,8 +73,9 @@ const ResetConfigurationModal = ({
         <Fragment>
           {resetLoading && <ProgressBar />}
           <Fragment>
-            Are you sure you want to restore these configurations to default
-            values?
+            {t(
+              "Are you sure you want to restore these configurations to default values?",
+            )}
             <br />
             <b
               style={{
@@ -81,7 +84,9 @@ const ResetConfigurationModal = ({
                 wordWrap: "break-word",
               }}
             >
-              Please note that this may cause your system to not be accessible
+              {t(
+                "Please note that this may cause your system to not be accessible",
+              )}
             </b>
           </Fragment>
         </Fragment>

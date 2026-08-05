@@ -23,6 +23,7 @@ import { api } from "api";
 import { errorToHandler } from "api/errors";
 import UsersSelectors from "./UsersSelectors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 type UserPickerModalProps = {
   title?: string;
@@ -43,6 +44,7 @@ const AddGroupMember = ({
   onClose,
 }: UserPickerModalProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [selectedUsers, setSelectedUsers] = useState(preSelectedUsers);
 
   function addMembersToGroup() {
@@ -68,7 +70,7 @@ const AddGroupMember = ({
       titleIcon={<AddMembersToGroupIcon />}
     >
       <FormLayout withBorders={false} containerPadding={false}>
-        <ReadBox label={`Selected Group`} sx={{ width: "100%" }}>
+        <ReadBox label={t("Selected Group")} sx={{ width: "100%" }}>
           {selectedGroup}
         </ReadBox>
         <UsersSelectors
@@ -85,7 +87,7 @@ const AddGroupMember = ({
           onClick={() => {
             setSelectedUsers(preSelectedUsers);
           }}
-          label={"Reset"}
+          label={t("Reset")}
         />
 
         <Button
@@ -95,7 +97,7 @@ const AddGroupMember = ({
           onClick={() => {
             addMembersToGroup();
           }}
-          label={"Save"}
+          label={t("Save")}
         />
       </Grid>
     </ModalWrapper>

@@ -17,6 +17,7 @@
 import React from "react";
 import ConfirmDialog from "../Common/ModalWrapper/ConfirmDialog";
 import { ConfirmModalIcon } from "mds";
+import { interpolate, useT } from "i18n";
 
 const ConfirmDeleteDestinationModal = ({
   onConfirm,
@@ -29,10 +30,11 @@ const ConfirmDeleteDestinationModal = ({
   serviceName: string;
   status: string;
 }) => {
+  const t = useT();
   return (
     <ConfirmDialog
-      title={`Delete Endpoint`}
-      confirmText={"Delete"}
+      title={t("Delete Endpoint")}
+      confirmText={t("Delete")}
       isOpen={true}
       titleIcon={<ConfirmModalIcon />}
       isLoading={false}
@@ -40,9 +42,12 @@ const ConfirmDeleteDestinationModal = ({
       onClose={onClose}
       confirmationContent={
         <React.Fragment>
-          Are you sure you want to delete the event destination ?
+          {t("Are you sure you want to delete the event destination ?")}
           <br />
-          <b>{serviceName}</b> which is <b>{status}</b>
+          {interpolate(t("{service} which is {status}"), {
+            service: <b>{serviceName}</b>,
+            status: <b>{t(status)}</b>,
+          })}
         </React.Fragment>
       }
     />

@@ -61,6 +61,7 @@ import SetUserPolicies from "./SetUserPolicies";
 import UserServiceAccountsPanel from "./UserServiceAccountsPanel";
 import ChangeUserPasswordModal from "../Account/ChangeUserPasswordModal";
 import DeleteUser from "./DeleteUser";
+import { useT } from "i18n";
 
 interface IGroupItem {
   group: string;
@@ -70,6 +71,7 @@ const UserDetails = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
   const navigate = useNavigate();
+  const t = useT();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [addGroupOpen, setAddGroupOpen] = useState<boolean>(false);
@@ -245,7 +247,7 @@ const UserDetails = () => {
         label={
           <Fragment>
             <BackLink
-              label={"Users"}
+              label={t("Users")}
               onClick={() => navigate(IAM_PAGES.USERS)}
             />
           </Fragment>
@@ -267,7 +269,7 @@ const UserDetails = () => {
                       marginRight: ".5rem",
                     }}
                   >
-                    User Status:
+                    {t("User Status:")}
                   </span>
                   <span
                     style={{
@@ -276,7 +278,7 @@ const UserDetails = () => {
                       marginRight: ".5rem",
                     }}
                   >
-                    {enabled ? "Enabled" : "Disabled"}
+                    {enabled ? t("Enabled") : t("Disabled")}
                   </span>
                   <TooltipWrapper
                     tooltip={
@@ -305,7 +307,7 @@ const UserDetails = () => {
                     }
                   >
                     <Switch
-                      indicatorLabels={["Enabled", "Disabled"]}
+                      indicatorLabels={[t("Enabled"), t("Disabled")]}
                       checked={enabled}
                       value={"group_enabled"}
                       id="group-status"
@@ -322,8 +324,8 @@ const UserDetails = () => {
                     tooltip={
                       hasPermission(CONSOLE_UI_RESOURCE, deleteUserPermissions)
                         ? userLoggedIn === userName
-                          ? "You cannot delete the currently logged in User"
-                          : "Delete User"
+                          ? t("You cannot delete the currently logged in User")
+                          : t("Delete User")
                         : permissionTooltipHelper(
                             deleteUserPermissions,
                             "delete user",
@@ -344,7 +346,7 @@ const UserDetails = () => {
                     />
                   </TooltipWrapper>
 
-                  <TooltipWrapper tooltip={"Change Password"}>
+                  <TooltipWrapper tooltip={t("Change Password")}>
                     <Button
                       id={"change-user-password"}
                       onClick={changeUserPassword}
@@ -367,7 +369,7 @@ const UserDetails = () => {
                 {
                   tabConfig: {
                     id: "groups",
-                    label: "Groups",
+                    label: t("Groups"),
                     disabled: !canAssignGroup,
                   },
                   content: (
@@ -384,7 +386,7 @@ const UserDetails = () => {
                             <TooltipWrapper
                               tooltip={
                                 canAssignGroup
-                                  ? "Assign groups"
+                                  ? t("Assign groups")
                                   : permissionTooltipHelper(
                                       assignGroupPermissions,
                                       "add users to groups",
@@ -393,7 +395,7 @@ const UserDetails = () => {
                             >
                               <Button
                                 id={"add-groups"}
-                                label={"Add to Groups"}
+                                label={t("Add to Groups")}
                                 onClick={() => {
                                   setAddGroupOpen(true);
                                 }}
@@ -404,7 +406,7 @@ const UserDetails = () => {
                             </TooltipWrapper>
                           }
                         >
-                          Groups
+                          {t("Groups")}
                         </SectionTitle>
                       </Box>
                       <Grid
@@ -416,10 +418,11 @@ const UserDetails = () => {
                       >
                         <DataTable
                           itemActions={groupTableActions}
-                          columns={[{ label: "Name", elementKey: "group" }]}
+                          columns={[{ label: t("Name"), elementKey: "group" }]}
                           isLoading={loading}
                           records={currentGroups}
-                          entityName="Groups"
+                          entityName={t("Groups")}
+                          customEmptyMessage={t("There are no Groups yet.")}
                           idField="group"
                         />
                       </Grid>
@@ -429,7 +432,7 @@ const UserDetails = () => {
                 {
                   tabConfig: {
                     id: "service_accounts",
-                    label: "Service Accounts",
+                    label: t("Service Accounts"),
                     disabled: !hasPermission(
                       CONSOLE_UI_RESOURCE,
                       editServiceAccountPermissions,
@@ -445,7 +448,7 @@ const UserDetails = () => {
                 {
                   tabConfig: {
                     id: "policies",
-                    label: "Policies",
+                    label: t("Policies"),
                     disabled: !canAssignPolicy,
                   },
                   content: (
@@ -462,7 +465,7 @@ const UserDetails = () => {
                             <TooltipWrapper
                               tooltip={
                                 canAssignPolicy
-                                  ? "Assign Policies"
+                                  ? t("Assign Policies")
                                   : permissionTooltipHelper(
                                       assignIAMPolicyPermissions,
                                       "assign policies",
@@ -471,7 +474,7 @@ const UserDetails = () => {
                             >
                               <Button
                                 id={"assign-policies"}
-                                label={"Assign Policies"}
+                                label={t("Assign Policies")}
                                 onClick={() => {
                                   setPolicyOpen(true);
                                 }}
@@ -482,7 +485,7 @@ const UserDetails = () => {
                             </TooltipWrapper>
                           }
                         >
-                          Policies
+                          {t("Policies")}
                         </SectionTitle>
                       </Box>
                       <Box>
@@ -499,10 +502,11 @@ const UserDetails = () => {
                               },
                             },
                           ]}
-                          columns={[{ label: "Name", elementKey: "policy" }]}
+                          columns={[{ label: t("Name"), elementKey: "policy" }]}
                           isLoading={loading}
                           records={currentPolicies}
-                          entityName="Policies"
+                          entityName={t("Policies")}
+                          customEmptyMessage={t("There are no Policies yet.")}
                           idField="policy"
                         />
                       </Box>

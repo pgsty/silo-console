@@ -25,6 +25,7 @@ import {
   setServerNeedsRestart,
 } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteWebhookEndpoint {
   modalOpen: boolean;
@@ -38,6 +39,7 @@ const DeleteWebhookEndpoint = ({
   onClose,
   selectedARN,
 }: IDeleteWebhookEndpoint) => {
+  const t = useT();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
@@ -65,17 +67,15 @@ const DeleteWebhookEndpoint = ({
 
   const defaultWH = !selectedARN.includes(":");
 
-  let message = "Are you sure you want to delete the Configured Endpoint";
-
   // Main webhook, we just reset
-  if (defaultWH) {
-    message = "Are you sure you want to reset the Default";
-  }
+  const message = defaultWH
+    ? t("Are you sure you want to reset the Default {name}?")
+    : t("Are you sure you want to delete the Configured Endpoint {name}?");
 
   return (
     <ConfirmDialog
-      title={defaultWH ? `Reset Default Webhook` : `Delete Webhook`}
-      confirmText={defaultWH ? "Reset" : "Delete"}
+      title={defaultWH ? t("Reset Default Webhook") : t("Delete Webhook")}
+      confirmText={defaultWH ? t("Reset") : t("Delete")}
       isOpen={modalOpen}
       isLoading={deleteLoading}
       onConfirm={onConfirmDelete}
@@ -83,8 +83,7 @@ const DeleteWebhookEndpoint = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          {`${message} `}
-          <strong>{selectedARN}</strong>?
+          {interpolate(message, { name: <strong>{selectedARN}</strong> })}
         </Fragment>
       }
     />

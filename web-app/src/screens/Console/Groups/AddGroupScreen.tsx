@@ -37,10 +37,12 @@ import AddGroupHelpBox from "./AddGroupHelpBox";
 import UsersSelectors from "./UsersSelectors";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
+import { useT } from "i18n";
 
 const AddGroupScreen = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
   const [groupName, setGroupName] = useState<string>("");
   const [saving, isSaving] = useState<boolean>(false);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -94,7 +96,7 @@ const AddGroupScreen = () => {
       <PageHeaderWrapper
         label={
           <BackLink
-            label={"Groups"}
+            label={t("Groups")}
             onClick={() => navigate(IAM_PAGES.GROUPS)}
           />
         }
@@ -102,7 +104,7 @@ const AddGroupScreen = () => {
       />
       <PageLayout>
         <FormLayout
-          title={"Create Group"}
+          title={t("Create Group")}
           icon={<CreateGroupIcon />}
           helpBox={<AddGroupHelpBox />}
         >
@@ -110,7 +112,7 @@ const AddGroupScreen = () => {
             <InputBox
               id="group-name"
               name="group-name"
-              label="Group Name"
+              label={t("Group Name")}
               autoFocus={true}
               value={groupName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +130,7 @@ const AddGroupScreen = () => {
                 type="button"
                 variant="regular"
                 onClick={resetForm}
-                label={"Clear"}
+                label={t("Clear")}
               />
 
               <Button
@@ -136,7 +138,7 @@ const AddGroupScreen = () => {
                 type="submit"
                 variant="callAction"
                 disabled={saving || !validGroup}
-                label={"Save"}
+                label={t("Save")}
               />
             </Grid>
             {saving && (

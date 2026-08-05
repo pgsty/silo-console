@@ -19,9 +19,11 @@ import { InputBox } from "mds";
 import { setSecretKey } from "./AddUsersSlice";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../store";
+import { useT } from "i18n";
 
 const PasswordSelector = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const secretKey = useSelector(
     (state: AppState) => state.createUser.secretKey,
   );
@@ -31,7 +33,7 @@ const PasswordSelector = () => {
       id="standard-multiline-static"
       name="standard-multiline-static"
       type="password"
-      label="Password"
+      label={t("Password")}
       value={secretKey}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(setSecretKey(e.target.value));

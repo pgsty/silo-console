@@ -22,6 +22,7 @@ import ConfirmDialog from "../Common/ModalWrapper/ConfirmDialog";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { ApiError, HttpResponse } from "api/consoleApi";
+import { useT } from "i18n";
 
 interface IDeleteGroup {
   selectedGroups: string[];
@@ -35,6 +36,7 @@ const DeleteGroup = ({
   closeDeleteModalAndRefresh,
 }: IDeleteGroup) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeDeleteModalAndRefresh(false);
   const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
 
@@ -66,8 +68,8 @@ const DeleteGroup = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Group${selectedGroups.length > 1 ? "s" : ""}`}
-      confirmText={"Delete"}
+      title={selectedGroups.length > 1 ? t("Delete Groups") : t("Delete Group")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={loadingDelete}
@@ -75,9 +77,11 @@ const DeleteGroup = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete the following{" "}
-          {selectedGroups.length === 1 ? "" : selectedGroups.length} group
-          {selectedGroups.length > 1 ? "s?" : "?"}
+          {selectedGroups.length > 1
+            ? t(
+                "Are you sure you want to delete the following {count} groups?",
+              ).replace("{count}", `${selectedGroups.length}`)
+            : t("Are you sure you want to delete the following group?")}
           {renderGroups}
         </Fragment>
       }

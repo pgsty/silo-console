@@ -19,6 +19,7 @@ import { DisabledIcon, EnabledIcon, Box, Grid, HelpTip } from "mds";
 import SearchBox from "../Common/SearchBox";
 import { STATUS_COLORS } from "../Dashboard/BasicDashboard/Utils";
 import { IAMStatement } from "./types";
+import { interpolate, useT } from "i18n";
 
 const rowGridStyle = {
   display: "grid",
@@ -48,6 +49,7 @@ const PolicyView = ({
   policyStatements: IAMStatement[];
 }) => {
   const [filter, setFilter] = useState<string>("");
+  const t = useT();
 
   return (
     <Grid container>
@@ -56,21 +58,25 @@ const PolicyView = ({
           <HelpTip
             content={
               <Fragment>
-                Define which actions are permitted on a specified resource.
-                Learn more about{" "}
-                <a
-                  target="blank"
-                  href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html"
-                >
-                  IAM conditional statements
-                </a>
-                .
+                {t(
+                  "Define which actions are permitted on a specified resource.",
+                )}{" "}
+                {interpolate(t("Learn more about {link}."), {
+                  link: (
+                    <a
+                      target="blank"
+                      href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html"
+                    >
+                      {t("IAM conditional statements")}
+                    </a>
+                  ),
+                })}
               </Fragment>
             }
             placement="right"
           >
             <Grid item xs={12} sm={6} sx={{ fontWeight: "bold" }}>
-              Statements
+              {t("Statements")}
             </Grid>
           </HelpTip>
           <Grid
@@ -80,7 +86,7 @@ const PolicyView = ({
             sx={{ display: "flex", justifyContent: "flex-end" }}
           >
             <SearchBox
-              placeholder={"Search"}
+              placeholder={t("Search")}
               onChange={setFilter}
               value={filter}
               sx={{
@@ -90,7 +96,9 @@ const PolicyView = ({
           </Grid>
         </Grid>
       </Grid>
-      {!policyStatements && <Fragment>Policy has no statements</Fragment>}
+      {!policyStatements && (
+        <Fragment>{t("Policy has no statements")}</Fragment>
+      )}
       {policyStatements && (
         <Grid
           item
@@ -131,7 +139,7 @@ const PolicyView = ({
                 }}
               >
                 <Box sx={rowGridStyle}>
-                  <Box className="label">Effect:</Box>
+                  <Box className="label">{t("Effect:")}</Box>
                   <Box
                     sx={{
                       display: "flex",
@@ -151,7 +159,7 @@ const PolicyView = ({
                 </Box>
                 <Grid container sx={{ gap: 15 }}>
                   <Grid item xs={12} sm={6} sx={rowGridStyle}>
-                    <Box className="label">Actions:</Box>
+                    <Box className="label">{t("Actions:")}</Box>
                     <Box>
                       {stmt.Action &&
                         stmt.Action.map((act, actIndex) => (
@@ -162,7 +170,7 @@ const PolicyView = ({
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={6} sx={rowGridStyle}>
-                    <Box className="label">Resources:</Box>
+                    <Box className="label">{t("Resources:")}</Box>
                     <Box>
                       {stmt.Resource &&
                         stmt.Resource.map((res, resIndex) => (

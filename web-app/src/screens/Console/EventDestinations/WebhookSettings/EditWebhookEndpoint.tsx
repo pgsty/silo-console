@@ -42,6 +42,7 @@ import { IConfigurationSys } from "../../Configurations/types";
 import { overrideFields } from "../../Configurations/utils";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IEndpointModal {
   open: boolean;
@@ -56,6 +57,7 @@ const EditEndpointModal = ({
   endpointInfo,
   onCloseEndpoint,
 }: IEndpointModal) => {
+  const t = useT();
   const [name, setName] = useState<string>("");
   const [endpoint, setEndpoint] = useState<string>("");
   const [authToken, setAuthToken] = useState<string>("");
@@ -150,7 +152,7 @@ const EditEndpointModal = ({
         setSaving(false);
         dispatch(setServerNeedsRestart(res.data.restart || false));
         if (!res.data.restart) {
-          dispatch(setSnackBarMessage("Configuration saved successfully"));
+          dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
 
         onCloseEndpoint();
@@ -180,22 +182,26 @@ const EditEndpointModal = ({
 
   const overrideValues = overrideFields(hasOverride);
 
-  let title = "Edit Webhook";
+  let title = t("Edit Webhook");
   let icon = <WebhookIcon />;
 
   switch (type) {
     case "logger_webhook":
-      title = `Edit ${defaultWH ? " the Default " : ""}Logger Webhook`;
+      title = defaultWH
+        ? t("Edit the Default Logger Webhook")
+        : t("Edit Logger Webhook");
       icon = <ConsoleIcon />;
       break;
     case "audit_webhook":
-      title = `Edit ${defaultWH ? " the Default " : ""}Audit Webhook`;
+      title = defaultWH
+        ? t("Edit the Default Audit Webhook")
+        : t("Edit Audit Webhook");
       icon = <PendingItemsIcon />;
       break;
   }
 
   if (hasOverride.length > 0) {
-    title = "View env variable Webhook";
+    title = t("View env variable Webhook");
   }
 
   return (
@@ -210,7 +216,7 @@ const EditEndpointModal = ({
           {hasOverride.length > 0 ? (
             <Fragment>
               <ReadBox
-                label={"Enabled"}
+                label={t("Enabled")}
                 sx={{ width: "100%" }}
                 actionButton={
                   <Grid
@@ -224,9 +230,12 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? `This value is set from the ${
-                              overrideValues.enable?.overrideEnv || "N/A"
-                            } environment variable`
+                          ? t(
+                              "This value is set from the {env} environment variable",
+                            ).replace(
+                              "{env}",
+                              overrideValues.enable?.overrideEnv || "N/A",
+                            )
                           : ""
                       }
                       placement={"left"}
@@ -239,7 +248,7 @@ const EditEndpointModal = ({
                 {overrideValues.enable?.value || "-"}
               </ReadBox>
               <ReadBox
-                label={"Endpoint"}
+                label={t("Endpoint")}
                 sx={{ width: "100%" }}
                 actionButton={
                   <Grid
@@ -253,9 +262,12 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? `This value is set from the ${
-                              overrideValues.endpoint?.overrideEnv || "N/A"
-                            } environment variable`
+                          ? t(
+                              "This value is set from the {env} environment variable",
+                            ).replace(
+                              "{env}",
+                              overrideValues.endpoint?.overrideEnv || "N/A",
+                            )
                           : ""
                       }
                       placement={"left"}
@@ -268,7 +280,7 @@ const EditEndpointModal = ({
                 {overrideValues.endpoint?.value || "-"}
               </ReadBox>
               <ReadBox
-                label={"Auth Token"}
+                label={t("Auth Token")}
                 sx={{ width: "100%" }}
                 actionButton={
                   <Grid
@@ -282,9 +294,12 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? `This value is set from the ${
-                              overrideValues.auth_token?.overrideEnv || "N/A"
-                            } environment variable`
+                          ? t(
+                              "This value is set from the {env} environment variable",
+                            ).replace(
+                              "{env}",
+                              overrideValues.auth_token?.overrideEnv || "N/A",
+                            )
                           : ""
                       }
                       placement={"left"}
@@ -306,7 +321,7 @@ const EditEndpointModal = ({
                 }}
                 id={"endpoint_enabled"}
                 name={"endpoint_enabled"}
-                label={"Enabled"}
+                label={t("Enabled")}
                 value={"switch_on"}
                 checked={endpointState === "on"}
               />
@@ -319,10 +334,10 @@ const EditEndpointModal = ({
                 }}
                 error={
                   invalidInputs.includes("endpoint")
-                    ? "Invalid Endpoint set"
+                    ? t("Invalid Endpoint set")
                     : ""
                 }
-                label="Endpoint"
+                label={t("Endpoint")}
                 value={endpoint}
                 pattern={
                   "^(https?):\\/\\/([a-zA-Z0-9\\-.]+)(:[0-9]+)?(\\/[a-zA-Z0-9_\\-.\\/]*)?$"
@@ -335,7 +350,7 @@ const EditEndpointModal = ({
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setAuthToken(event.target.value);
                 }}
-                label="Auth Token"
+                label={t("Auth Token")}
                 value={authToken}
               />
               {saving && (
@@ -356,7 +371,7 @@ const EditEndpointModal = ({
                   variant="regular"
                   disabled={saving}
                   onClick={onCloseEndpoint}
-                  label={"Cancel"}
+                  label={t("Cancel")}
                 />
                 <Button
                   id={"save-lifecycle"}
@@ -364,7 +379,7 @@ const EditEndpointModal = ({
                   variant="callAction"
                   color="primary"
                   disabled={saving || invalidInputs.length !== 0}
-                  label={"Update"}
+                  label={t("Update")}
                   onClick={updateWebhook}
                 />
               </Grid>

@@ -46,6 +46,7 @@ import {
   HttpResponse,
   SiteReplicationStatusResponse,
 } from "api/consoleApi";
+import { useT } from "i18n";
 
 export type StatsResponseType = {
   maxBuckets?: number;
@@ -70,6 +71,7 @@ const SREntityStatus = ({
   entityTextPlural: string;
   icon?: React.ReactNode;
 }) => {
+  const t = useT();
   const statEntityLen = Object.keys(entityStatObj || {})?.length;
   return (
     <Box
@@ -85,9 +87,9 @@ const SREntityStatus = ({
         icon={icon}
         onlineCount={maxValue}
         offlineCount={statEntityLen}
-        okStatusText={"Synced"}
-        notOkStatusText={"Failed"}
-        label={entityTextPlural}
+        okStatusText={t("Synced")}
+        notOkStatusText={t("Failed")}
+        label={t(entityTextPlural)}
       />
     </Box>
   );
@@ -95,6 +97,7 @@ const SREntityStatus = ({
 
 const SiteReplicationStatus = () => {
   const navigate = useNavigate();
+  const t = useT();
 
   const [stats, setStats] = useState<StatsResponseType>({});
   const [loading, setLoading] = useState<boolean>(false);
@@ -145,7 +148,7 @@ const SiteReplicationStatus = () => {
       <PageHeaderWrapper
         label={
           <BackLink
-            label={"Site Replication"}
+            label={t("Site Replication")}
             onClick={() => navigate(IAM_PAGES.SITE_REPLICATION)}
           />
         }
@@ -156,13 +159,13 @@ const SiteReplicationStatus = () => {
         <SectionTitle
           actions={
             <Fragment>
-              <TooltipWrapper tooltip={"Refresh"}>
+              <TooltipWrapper tooltip={t("Refresh")}>
                 <Button
                   id={"refresh"}
                   onClick={() => {
                     getStats();
                   }}
-                  label={"Refresh"}
+                  label={t("Refresh")}
                   icon={<RefreshIcon />}
                   variant={"regular"}
                   collapseOnSmall={false}
@@ -172,7 +175,7 @@ const SiteReplicationStatus = () => {
           }
           separator
         >
-          Replication status from all Sites
+          {t("Replication status from all Sites")}
         </SectionTitle>
 
         {!loading ? (

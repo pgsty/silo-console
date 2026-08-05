@@ -28,6 +28,7 @@ import { setSelectedPolicies } from "../Users/AddUsersSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import PolicySelectors from "./PolicySelectors";
 import api from "../../../common/api";
+import { useT } from "i18n";
 
 interface ISetPolicyProps {
   closeModalAndRefresh: () => void;
@@ -43,6 +44,7 @@ const SetPolicy = ({
   open,
 }: ISetPolicyProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   //Local States
   const [loading, setLoading] = useState<boolean>(false);
   const [actualPolicy, setActualPolicy] = useState<string[]>([]);
@@ -126,24 +128,28 @@ const SetPolicy = ({
         closeModalAndRefresh();
       }}
       modalOpen={open}
-      title="Set Policies"
+      title={t("Set Policies")}
     >
       <FormLayout withBorders={false} containerPadding={false}>
         {(selectedGroups?.length === 1 || selectedUser != null) && (
           <Fragment>
             <ReadBox
-              label={`Selected ${selectedGroups !== null ? "Group" : "User"}`}
+              label={
+                selectedGroups !== null
+                  ? t("Selected Group")
+                  : t("Selected User")
+              }
               sx={{ width: "100%" }}
             >
               {selectedGroups !== null ? selectedGroups[0] : userName}
             </ReadBox>
-            <ReadBox label={"Current Policy"} sx={{ width: "100%" }}>
+            <ReadBox label={t("Current Policy")} sx={{ width: "100%" }}>
               {actualPolicy.join(", ")}
             </ReadBox>
           </Fragment>
         )}
         {selectedGroups && selectedGroups?.length > 1 && (
-          <ReadBox label={"Selected Groups"} sx={{ width: "100%" }}>
+          <ReadBox label={t("Selected Groups")} sx={{ width: "100%" }}>
             {selectedGroups.join(", ")}
           </ReadBox>
         )}
@@ -157,7 +163,7 @@ const SetPolicy = ({
           type="button"
           variant="regular"
           onClick={resetSelection}
-          label={"Reset"}
+          label={t("Reset")}
         />
         <Button
           id={"save"}
@@ -166,7 +172,7 @@ const SetPolicy = ({
           color="primary"
           disabled={loading}
           onClick={setPolicyAction}
-          label={"Save"}
+          label={t("Save")}
         />
       </Grid>
       {loading && (

@@ -26,12 +26,14 @@ import {
   ReadBox,
   Switch,
 } from "mds";
+import { useT } from "i18n";
 
 interface IConfMySqlProps {
   onChange: (newValue: IElementValue[]) => void;
 }
 
 const ConfMySql = ({ onChange }: IConfMySqlProps) => {
+  const t = useT();
   //Local States
   const [useDsnString, setUseDsnString] = useState<boolean>(false);
   const [dsnString, setDsnString] = useState<string>("");
@@ -129,7 +131,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
   return (
     <FormLayout withBorders={false} containerPadding={false}>
       <Switch
-        label={"Enter DNS String"}
+        label={t("Enter DNS String")}
         checked={useDsnString}
         id="checkedB"
         name="checkedB"
@@ -142,7 +144,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
             <InputBox
               id="dsn-string"
               name="dsn_string"
-              label="DSN String"
+              label={t("DSN String")}
               value={dsnString}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setDsnString(e.target.value);
@@ -166,7 +168,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 id="host"
                 name="host"
                 label=""
-                placeholder="Enter Host"
+                placeholder={t("Enter Host")}
                 value={host}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setHostname(e.target.value);
@@ -176,7 +178,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 id="db-name"
                 name="db-name"
                 label=""
-                placeholder="Enter DB Name"
+                placeholder={t("Enter DB Name")}
                 value={dbName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setDbName(e.target.value);
@@ -186,7 +188,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 id="port"
                 name="port"
                 label=""
-                placeholder="Enter Port"
+                placeholder={t("Enter Port")}
                 value={port}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPort(e.target.value);
@@ -196,7 +198,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 id="user"
                 name="user"
                 label=""
-                placeholder="Enter User"
+                placeholder={t("Enter User")}
                 value={user}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setUser(e.target.value);
@@ -206,7 +208,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 id="password"
                 name="password"
                 label=""
-                placeholder="Enter Password"
+                placeholder={t("Enter Password")}
                 type="password"
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,7 +218,7 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
             </Box>
           </Box>
           <Grid item xs={12} sx={{ margin: "12px 0" }}>
-            <ReadBox label={"Connection String"} multiLine>
+            <ReadBox label={t("Connection String")} multiLine>
               {dsnString}
             </ReadBox>
           </Grid>
@@ -225,10 +227,12 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
       <InputBox
         id="table"
         name="table"
-        label="Table"
-        placeholder="Enter Table Name"
+        label={t("Table")}
+        placeholder={t("Enter Table Name")}
         value={table}
-        tooltip="DB table name to store/update events, table is auto-created"
+        tooltip={t(
+          "DB table name to store/update events, table is auto-created",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setTable(e.target.value);
         }}
@@ -237,11 +241,13 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
         currentValue={format}
         id="format"
         name="format"
-        label="Format"
+        label={t("Format")}
         onChange={(e) => {
           setFormat(e.target.value);
         }}
-        tooltip="'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'"
+        tooltip={t(
+          "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'",
+        )}
         selectorOptions={[
           { label: "Namespace", value: "namespace" },
           { label: "Access", value: "access" },
@@ -250,10 +256,12 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
       <InputBox
         id="queue-dir"
         name="queue_dir"
-        label="Queue Dir"
-        placeholder="Enter Queue Dir"
+        label={t("Queue Dir")}
+        placeholder={t("Enter Queue Dir")}
         value={queueDir}
-        tooltip="Staging directory for undelivered messages e.g. '/home/events'"
+        tooltip={t(
+          "Staging directory for undelivered messages e.g. '/home/events'",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setQueueDir(e.target.value);
         }}
@@ -261,11 +269,13 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
       <InputBox
         id="queue-limit"
         name="queue_limit"
-        label="Queue Limit"
-        placeholder="Enter Queue Limit"
+        label={t("Queue Limit")}
+        placeholder={t("Enter Queue Limit")}
         type="number"
         value={queueLimit}
-        tooltip="Maximum limit for undelivered messages, defaults to '10000'"
+        tooltip={t(
+          "Maximum limit for undelivered messages, defaults to '10000'",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setQueueLimit(e.target.value);
         }}
@@ -273,8 +283,8 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
       <CommentBox
         id="comment"
         name="comment"
-        label="Comment"
-        placeholder="Enter custom notes if any"
+        label={t("Comment")}
+        placeholder={t("Enter custom notes if any")}
         value={comment}
         onChange={(e) => {
           setComment(e.target.value);

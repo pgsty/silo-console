@@ -45,7 +45,8 @@ import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import HelpMenu from "../HelpMenu";
-import { ACCOUNT_TABLE_COLUMNS } from "./AccountUtils";
+import { accountTableColumns } from "./AccountUtils";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 import { useAppDispatch } from "store";
 import { ServiceAccounts } from "api/consoleApi";
 import {
@@ -68,6 +69,8 @@ const DeleteServiceAccount = withSuspense(
 const Account = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const features = useSelector(selFeatures);
 
@@ -107,7 +110,7 @@ const Account = () => {
         .catch((res) => {
           dispatch(
             setErrorSnackMessage(
-              errorToHandler(res?.error || "Error retrieving access keys"),
+              errorToHandler(res?.error || t("Error retrieving access keys")),
             ),
           );
           setLoading(false);
@@ -131,7 +134,7 @@ const Account = () => {
   const closeDeleteMultipleModalAndRefresh = (refresh: boolean) => {
     setDeleteMultipleOpen(false);
     if (refresh) {
-      dispatch(setSnackBarMessage(`Access keys deleted successfully.`));
+      dispatch(setSnackBarMessage(t("Access keys deleted successfully.")));
       setSelectedSAs([]);
       setLoading(true);
     }
@@ -213,13 +216,13 @@ const Account = () => {
         open={changePasswordModalOpen}
         closeModal={() => setChangePasswordModalOpen(false)}
       />
-      <PageHeaderWrapper label="Access Keys" actions={<HelpMenu />} />
+      <PageHeaderWrapper label={t("Access Keys")} actions={<HelpMenu />} />
 
       <PageLayout>
         <Grid container>
           <Grid item xs={12} sx={{ ...actionsTray.actionsTray }}>
             <SearchBox
-              placeholder={"Search Access Keys"}
+              placeholder={t("Search Access Keys")}
               onChange={setFilter}
               sx={{ marginRight: "auto", maxWidth: 380 }}
               value={filter}
@@ -231,13 +234,13 @@ const Account = () => {
                 gap: 5,
               }}
             >
-              <TooltipWrapper tooltip={"Delete Selected"}>
+              <TooltipWrapper tooltip={t("Delete Selected")}>
                 <Button
                   id={"delete-selected-accounts"}
                   onClick={() => {
                     setDeleteMultipleOpen(true);
                   }}
-                  label={"Delete Selected"}
+                  label={t("Delete Selected")}
                   icon={<DeleteIcon />}
                   disabled={selectedSAs.length === 0}
                   variant={"secondary"}
@@ -252,7 +255,7 @@ const Account = () => {
                 <Button
                   id={"change-password"}
                   onClick={() => setChangePasswordModalOpen(true)}
-                  label={`Change Password`}
+                  label={t("Change Password")}
                   icon={<PasswordKeyIcon />}
                   variant={"regular"}
                   disabled={userIDP}
@@ -269,7 +272,7 @@ const Account = () => {
                   onClick={() => {
                     navigate(`${IAM_PAGES.ACCOUNT_ADD}`);
                   }}
-                  label={`Create access key`}
+                  label={t("Create access key")}
                   icon={<AddIcon />}
                   variant={"callAction"}
                 />
@@ -280,9 +283,17 @@ const Account = () => {
           <Grid item xs={12}>
             <DataTable
               itemActions={tableActions}
-              entityName={"Access Keys"}
-              columns={ACCOUNT_TABLE_COLUMNS}
+              entityName={t("Access Keys")}
+              customEmptyMessage={t("There are no Access Keys yet.")}
+              columns={accountTableColumns(t)}
               onSelect={(e) => selectSAs(e, setSelectedSAs, selectedSAs)}
+              onSelectAll={() =>
+                setSelectedSAs(
+                  selectedSAs.length === filteredRecords.length
+                    ? []
+                    : filteredRecords.map((r) => `${r.accessKey}`),
+                )
+              }
               selectedItems={selectedSAs}
               isLoading={loading}
               records={filteredRecords}
@@ -291,28 +302,28 @@ const Account = () => {
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 15 }}>
             <HelpBox
-              title={"Learn more about ACCESS KEYS"}
+              title={t("Learn more about ACCESS KEYS")}
               iconComponent={<AccountIcon />}
               help={
                 <Fragment>
-                  SILO access keys are child identities of an authenticated SILO
-                  user, including externally managed identities. Each access key
-                  inherits its privileges based on the policies attached to it’s
-                  parent user or those groups in which the parent user has
-                  membership. Access Keys also support an optional inline policy
-                  which further restricts access to a subset of actions and
-                  resources available to the parent user.
+                  {t(
+                    "SILO access keys are child identities of an authenticated SILO user, including externally managed identities. Each access key inherits its privileges based on the policies attached to it’s parent user or those groups in which the parent user has membership. Access Keys also support an optional inline policy which further restricts access to a subset of actions and resources available to the parent user.",
+                  )}
                   <br />
                   <br />
-                  You can learn more at the{" "}
-                  <a
-                    href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/#access-keys"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    documentation
-                  </a>
-                  .
+                  {interpolate(t("You can learn more at the {link}."), {
+                    link: (
+                      <a
+                        href={localize(
+                          "https://silo.pgsty.com/administration/identity-access-management/minio-user-management/#access-keys",
+                        )}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {t("documentation")}
+                      </a>
+                    ),
+                  })}
                 </Fragment>
               }
             />

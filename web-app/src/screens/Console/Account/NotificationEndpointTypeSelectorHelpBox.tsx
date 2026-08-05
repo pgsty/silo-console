@@ -16,18 +16,19 @@
 import React from "react";
 
 import { HelpBox, LambdaNotificationsIcon, Box } from "mds";
+import { useT } from "i18n";
 
 const NotificationEndpointTypeSelectorHelpBox = () => {
+  const t = useT();
   return (
     <HelpBox
       iconComponent={<LambdaNotificationsIcon />}
-      title={"What are Event Destinations?"}
+      title={t("What are Event Destinations?")}
       help={
         <Box sx={{ paddingTop: "20px" }}>
-          SILO bucket notifications allow administrators to send notifications
-          to supported external services on certain object or bucket events.
-          SILO supports bucket and object-level S3 events similar to the Amazon
-          S3 Event Notifications.
+          {t(
+            "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.",
+          )}
         </Box>
       }
     />

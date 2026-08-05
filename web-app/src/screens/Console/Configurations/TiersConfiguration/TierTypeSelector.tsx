@@ -33,9 +33,12 @@ import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper"
 import HelpMenu from "../../HelpMenu";
 import { setHelpName } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { useLocalizedLink, useT } from "i18n";
 
 const TierTypeSelector = () => {
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const typeSelect = (selectName: string) => {
     navigate(`${IAM_PAGES.TIERS_ADD}/${selectName}`);
@@ -51,7 +54,7 @@ const TierTypeSelector = () => {
         label={
           <Fragment>
             <BackLink
-              label="Tier Types"
+              label={t("Tier Types")}
               onClick={() => navigate(IAM_PAGES.TIERS)}
             />
           </Fragment>
@@ -61,34 +64,38 @@ const TierTypeSelector = () => {
 
       <PageLayout>
         <FormLayout
-          title={"Select Tier Type"}
+          title={t("Select Tier Type")}
           icon={<TiersIcon />}
           helpBox={
             <HelpBox
               iconComponent={<TiersIcon />}
-              title={"Tier Types"}
+              title={t("Tier Types")}
               help={
                 <Fragment>
-                  SILO supports creating object transition lifecycle management
-                  rules, where SILO can automatically move an object to a remote
-                  storage “tier”.
+                  {t(
+                    "SILO supports creating object transition lifecycle management rules, where SILO can automatically move an object to a remote storage “tier”.",
+                  )}
                   <br />
                   <br />
-                  SILO supports the following Tier types:
+                  {t("SILO supports the following Tier types:")}
                   <br />
                   <ul>
                     <li>
                       <a
-                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/"
+                        href={localize(
+                          "https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/",
+                        )}
                         target="_blank"
                         rel="noopener"
                       >
-                        SILO or other S3-compatible storage
+                        {t("SILO or other S3-compatible storage")}
                       </a>
                     </li>
                     <li>
                       <a
-                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/"
+                        href={localize(
+                          "https://silo.pgsty.com/administration/object-management/transition-objects-to-s3/",
+                        )}
                         target="_blank"
                         rel="noopener"
                       >
@@ -97,7 +104,9 @@ const TierTypeSelector = () => {
                     </li>
                     <li>
                       <a
-                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-gcs/"
+                        href={localize(
+                          "https://silo.pgsty.com/administration/object-management/transition-objects-to-gcs/",
+                        )}
                         target="_blank"
                         rel="noopener"
                       >
@@ -106,7 +115,9 @@ const TierTypeSelector = () => {
                     </li>
                     <li>
                       <a
-                        href="https://silo.pgsty.com/administration/object-management/transition-objects-to-azure/"
+                        href={localize(
+                          "https://silo.pgsty.com/administration/object-management/transition-objects-to-azure/",
+                        )}
                         target="_blank"
                         rel="noopener"
                       >

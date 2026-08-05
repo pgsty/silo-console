@@ -22,6 +22,7 @@ import {
   HelpIconFilled,
   UsersIcon,
 } from "mds";
+import { useT } from "i18n";
 
 const FeatureItem = ({
   icon,
@@ -50,6 +51,7 @@ const FeatureItem = ({
   );
 };
 const AddUserHelpBox = () => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -78,18 +80,17 @@ const AddUserHelpBox = () => {
         }}
       >
         <HelpIconFilled />
-        <div>Learn more about the Users feature</div>
+        <div>{t("Learn more about the Users feature")}</div>
       </Box>
       <Box sx={{ fontSize: "14px", marginBottom: "15px" }}>
-        A SILO user consists of a unique access key (username) and corresponding
-        secret key (password). Clients must authenticate their identity by
-        specifying both a valid access key (username) and the corresponding
-        secret key (password) of an existing SILO user.
+        {t(
+          "A SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.",
+        )}
         <br />
         <br />
-        Each user can have one or more assigned policies that explicitly list
-        the actions and resources to which that user has access. Users can also
-        inherit policies from the groups in which they have membership.
+        {t(
+          "Each user can have one or more assigned policies that explicitly list the actions and resources to which that user has access. Users can also inherit policies from the groups in which they have membership.",
+        )}
         <br />
       </Box>
 
@@ -99,11 +100,11 @@ const AddUserHelpBox = () => {
           flexFlow: "column",
         }}
       >
-        <FeatureItem icon={<UsersIcon />} description={`Create Users`} />
-        <FeatureItem icon={<GroupsIcon />} description={`Manage Groups`} />
+        <FeatureItem icon={<UsersIcon />} description={t("Create Users")} />
+        <FeatureItem icon={<GroupsIcon />} description={t("Manage Groups")} />
         <FeatureItem
           icon={<ChangeAccessPolicyIcon />}
-          description={`Assign Policies`}
+          description={t("Assign Policies")}
         />
       </Box>
     </Box>

@@ -64,6 +64,7 @@ import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../../HelpMenu";
 import DeleteTierConfirmModal from "./DeleteTierConfirmModal";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const UpdateTierCredentialsModal = withSuspense(
   React.lazy(() => import("./UpdateTierCredentialsModal")),
@@ -72,6 +73,8 @@ const UpdateTierCredentialsModal = withSuspense(
 const ListTiersConfiguration = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const distributedSetup = useSelector(selDistSet);
   const [records, setRecords] = useState<Tier[]>([]);
@@ -173,7 +176,7 @@ const ListTiersConfiguration = () => {
           }}
         >
           <TierOnlineIcon style={{ fill: "#4CCB92", width: 14, height: 14 }} />
-          ONLINE
+          {t("ONLINE")}
         </Grid>
       );
     }
@@ -189,7 +192,7 @@ const ListTiersConfiguration = () => {
         }}
       >
         <TierOfflineIcon style={{ fill: "#C83B51", width: 14, height: 14 }} />
-        OFFLINE
+        {t("OFFLINE")}
       </Grid>
     );
   };
@@ -305,7 +308,7 @@ const ListTiersConfiguration = () => {
           <Fragment>
             <Grid item xs={12} sx={actionsTray.actionsTray}>
               <SearchBox
-                placeholder="Filter"
+                placeholder={t("Filter")}
                 onChange={setFilter}
                 value={filter}
                 sx={{
@@ -324,7 +327,7 @@ const ListTiersConfiguration = () => {
                 <Button
                   id={"refresh-list"}
                   icon={<RefreshIcon />}
-                  label={`Refresh List`}
+                  label={t("Refresh List")}
                   onClick={() => {
                     setIsLoading(true);
                   }}
@@ -333,9 +336,9 @@ const ListTiersConfiguration = () => {
                   tooltip={
                     hasSetTier
                       ? ""
-                      : "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you " +
-                        IAM_SCOPES.ADMIN_SET_TIER +
-                        " permission in order to create a Tier."
+                      : t(
+                          "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you {permission} permission in order to create a Tier.",
+                        ).replace("{permission}", IAM_SCOPES.ADMIN_SET_TIER)
                   }
                 >
                   <SecureComponent
@@ -346,7 +349,7 @@ const ListTiersConfiguration = () => {
                     <Button
                       id={"add-tier"}
                       icon={<AddIcon />}
-                      label={`Create Tier`}
+                      label={t("Create Tier")}
                       onClick={addTier}
                       variant="callAction"
                     />
@@ -389,61 +392,61 @@ const ListTiersConfiguration = () => {
                           ]}
                           columns={[
                             {
-                              label: "Tier Name",
+                              label: t("Tier Name"),
                               elementKey: "type",
                               renderFunction: renderTierName,
                               renderFullObject: true,
                             },
                             {
-                              label: "Status",
+                              label: t("Status"),
                               elementKey: "status",
                               renderFunction: renderTierStatus,
                               width: 50,
                             },
                             {
-                              label: "Type",
+                              label: t("Type"),
                               elementKey: "type",
                               renderFunction: renderTierType,
                               width: 50,
                             },
                             {
-                              label: "Endpoint",
+                              label: t("Endpoint"),
                               elementKey: "type",
                               renderFunction: renderTierEndpoint,
                               renderFullObject: true,
                             },
                             {
-                              label: "Bucket",
+                              label: t("Bucket"),
                               elementKey: "type",
                               renderFunction: renderTierBucket,
                               renderFullObject: true,
                             },
                             {
-                              label: "Prefix",
+                              label: t("Prefix"),
                               elementKey: "type",
                               renderFunction: renderTierPrefix,
                               renderFullObject: true,
                             },
                             {
-                              label: "Region",
+                              label: t("Region"),
                               elementKey: "type",
                               renderFunction: renderTierRegion,
                               renderFullObject: true,
                             },
                             {
-                              label: "Usage",
+                              label: t("Usage"),
                               elementKey: "type",
                               renderFunction: renderTierUsage,
                               renderFullObject: true,
                             },
                             {
-                              label: "Objects",
+                              label: t("Objects"),
                               elementKey: "type",
                               renderFunction: renderTierObjects,
                               renderFullObject: true,
                             },
                             {
-                              label: "Versions",
+                              label: t("Versions"),
                               elementKey: "type",
                               renderFunction: renderTierVersions,
                               renderFullObject: true,
@@ -451,7 +454,8 @@ const ListTiersConfiguration = () => {
                           ]}
                           isLoading={isLoading}
                           records={filteredRecords}
-                          entityName="Tiers"
+                          entityName={t("Tiers")}
+                          customEmptyMessage={t("There are no Tiers yet.")}
                           idField="service_name"
                           customPaperHeight={"400px"}
                         />
@@ -465,27 +469,31 @@ const ListTiersConfiguration = () => {
                       }}
                     >
                       <HelpBox
-                        title={"Learn more about TIERS"}
+                        title={t("Learn more about TIERS")}
                         iconComponent={<TiersIcon />}
                         help={
                           <Fragment>
-                            Tiers are used by the SILO Object Lifecycle
-                            Management which allows creating rules for time or
-                            date based automatic transition or expiry of
-                            objects. For object transition, SILO automatically
-                            moves the object to a configured remote storage
-                            tier.
+                            {t(
+                              "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.",
+                            )}
                             <br />
                             <br />
-                            You can learn more at the{" "}
-                            <a
-                              href="https://silo.pgsty.com/administration/object-management/object-lifecycle-management/"
-                              target="_blank"
-                              rel="noopener"
-                            >
-                              documentation
-                            </a>
-                            .
+                            {interpolate(
+                              t("You can learn more at the {link}."),
+                              {
+                                link: (
+                                  <a
+                                    href={localize(
+                                      "https://silo.pgsty.com/administration/object-management/object-lifecycle-management/",
+                                    )}
+                                    target="_blank"
+                                    rel="noopener"
+                                  >
+                                    {t("documentation")}
+                                  </a>
+                                ),
+                              },
+                            )}
                           </Fragment>
                         }
                       />
@@ -494,28 +502,28 @@ const ListTiersConfiguration = () => {
                 )}
                 {records.length === 0 && (
                   <HelpBox
-                    title={"Tiers"}
+                    title={t("Tiers")}
                     iconComponent={<TiersIcon />}
                     help={
                       <Fragment>
-                        Tiers are used by the SILO Object Lifecycle Management
-                        which allows creating rules for time or date based
-                        automatic transition or expiry of objects. For object
-                        transition, SILO automatically moves the object to a
-                        configured remote storage tier.
+                        {t(
+                          "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.",
+                        )}
                         <br />
                         <br />
                         {hasSetTier ? (
                           <div>
-                            To get started,{" "}
-                            <ActionLink
-                              isLoading={false}
-                              label={""}
-                              onClick={addTier}
-                            >
-                              Create Tier
-                            </ActionLink>
-                            .
+                            {interpolate(t("To get started, {link}."), {
+                              link: (
+                                <ActionLink
+                                  isLoading={false}
+                                  label={""}
+                                  onClick={addTier}
+                                >
+                                  {t("Create Tier")}
+                                </ActionLink>
+                              ),
+                            })}
                           </div>
                         ) : (
                           ""

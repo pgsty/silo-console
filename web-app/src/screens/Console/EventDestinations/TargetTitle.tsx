@@ -18,6 +18,7 @@ import React from "react";
 import get from "lodash/get";
 import styled from "styled-components";
 import { Box } from "mds";
+import { useT } from "i18n";
 
 interface ITargetTitle {
   logoSrc: string;
@@ -62,6 +63,7 @@ const TargetBase = styled.div(({ theme }) => ({
 }));
 
 const TargetTitle = ({ logoSrc, title }: ITargetTitle) => {
+  const t = useT();
   return (
     <TargetBase>
       <Box className={"imageContainer"}>
@@ -69,7 +71,7 @@ const TargetTitle = ({ logoSrc, title }: ITargetTitle) => {
       </Box>
 
       <Box className={"titleBox"}>
-        <b>{title} Event Destination</b>
+        <b>{t("{target} Event Destination").replace("{target}", title)}</b>
       </Box>
     </TargetBase>
   );

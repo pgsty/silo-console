@@ -57,6 +57,7 @@ import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import SearchBox from "../Common/SearchBox";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const DeleteGroup = withSuspense(React.lazy(() => import("./DeleteGroup")));
 const SetPolicy = withSuspense(
@@ -66,6 +67,8 @@ const SetPolicy = withSuspense(
 const Groups = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [loading, isLoading] = useState<boolean>(false);
@@ -197,7 +200,7 @@ const Groups = () => {
           }}
         />
       )}
-      <PageHeaderWrapper label={"Groups"} actions={<HelpMenu />} />
+      <PageHeaderWrapper label={t("Groups")} actions={<HelpMenu />} />
 
       <PageLayout>
         <Grid container>
@@ -208,7 +211,7 @@ const Groups = () => {
               errorProps={{ disabled: true }}
             >
               <SearchBox
-                placeholder={"Search Groups"}
+                placeholder={t("Search Groups")}
                 onChange={setFilter}
                 value={filter}
                 sx={{ maxWidth: 380 }}
@@ -228,9 +231,11 @@ const Groups = () => {
                 <TooltipWrapper
                   tooltip={
                     checkedGroups.length < 1
-                      ? "Please select Groups on which you want to apply Policies"
+                      ? t(
+                          "Please select Groups on which you want to apply Policies",
+                        )
                       : applyPolicy
-                        ? "Select Policy"
+                        ? t("Select Policy")
                         : permissionTooltipHelper(
                             applyPolicyPermissions,
                             "apply policies to Groups",
@@ -242,7 +247,7 @@ const Groups = () => {
                     onClick={() => {
                       setPolicyOpen(true);
                     }}
-                    label={"Assign Policy"}
+                    label={t("Assign Policy")}
                     icon={<IAMPoliciesIcon />}
                     disabled={checkedGroups.length < 1 || !applyPolicy}
                     variant={"regular"}
@@ -258,9 +263,9 @@ const Groups = () => {
                 <TooltipWrapper
                   tooltip={
                     checkedGroups.length === 0
-                      ? "Select Groups to delete"
+                      ? t("Select Groups to delete")
                       : getGroup
-                        ? "Delete Selected"
+                        ? t("Delete Selected")
                         : permissionTooltipHelper(
                             getGroupPermissions,
                             "delete Groups",
@@ -272,7 +277,7 @@ const Groups = () => {
                     onClick={() => {
                       setDeleteOpen(true);
                     }}
-                    label={"Delete Selected"}
+                    label={t("Delete Selected")}
                     icon={<DeleteIcon />}
                     variant="secondary"
                     disabled={checkedGroups.length === 0 || !getGroup}
@@ -285,10 +290,10 @@ const Groups = () => {
                 matchAll
                 errorProps={{ disabled: true }}
               >
-                <TooltipWrapper tooltip={"Create Group"}>
+                <TooltipWrapper tooltip={t("Create Group")}>
                   <Button
                     id={"create-group"}
-                    label={"Create Group"}
+                    label={t("Create Group")}
                     variant="callAction"
                     icon={<AddIcon />}
                     onClick={() => {
@@ -312,39 +317,54 @@ const Groups = () => {
                     >
                       <DataTable
                         itemActions={tableActions}
-                        columns={[{ label: "Name" }]}
+                        columns={[{ label: t("Name") }]}
                         isLoading={loading}
                         selectedItems={checkedGroups}
                         onSelect={
                           deleteGroup || getGroup ? selectionChanged : undefined
                         }
+                        onSelectAll={
+                          deleteGroup || getGroup
+                            ? () =>
+                                setCheckedGroups(
+                                  checkedGroups.length ===
+                                    filteredRecords.length
+                                    ? []
+                                    : [...filteredRecords],
+                                )
+                            : undefined
+                        }
                         records={filteredRecords}
-                        entityName="Groups"
+                        entityName={t("Groups")}
+                        customEmptyMessage={t("There are no Groups yet.")}
                         idField=""
                       />
                     </SecureComponent>
                   </Grid>
                   <Grid item xs={12}>
                     <HelpBox
-                      title={"Groups"}
+                      title={t("Groups")}
                       iconComponent={<GroupsIcon />}
                       help={
                         <Fragment>
-                          A group can have one attached IAM policy, where all
-                          users with membership in that group inherit that
-                          policy. Groups support more simplified management of
-                          user permissions on the SILO Tenant.
+                          {t(
+                            "A group can have one attached IAM policy, where all users with membership in that group inherit that policy. Groups support more simplified management of user permissions on the SILO Tenant.",
+                          )}
                           <br />
                           <br />
-                          You can learn more at the{" "}
-                          <a
-                            href="https://silo.pgsty.com/administration/identity-access-management/minio-group-management/"
-                            target="_blank"
-                            rel="noopener"
-                          >
-                            documentation
-                          </a>
-                          .
+                          {interpolate(t("You can learn more at the {link}."), {
+                            link: (
+                              <a
+                                href={localize(
+                                  "https://silo.pgsty.com/administration/identity-access-management/minio-group-management/",
+                                )}
+                                target="_blank"
+                                rel="noopener"
+                              >
+                                {t("documentation")}
+                              </a>
+                            ),
+                          })}
                         </Fragment>
                       }
                     />
@@ -355,14 +375,13 @@ const Groups = () => {
                 <Grid container>
                   <Grid item xs={8}>
                     <HelpBox
-                      title={"Groups"}
+                      title={t("Groups")}
                       iconComponent={<UsersIcon />}
                       help={
                         <Fragment>
-                          A group can have one attached IAM policy, where all
-                          users with membership in that group inherit that
-                          policy. Groups support more simplified management of
-                          user permissions on the SILO Tenant.
+                          {t(
+                            "A group can have one attached IAM policy, where all users with membership in that group inherit that policy. Groups support more simplified management of user permissions on the SILO Tenant.",
+                          )}
                           <SecureComponent
                             resource={CONSOLE_UI_RESOURCE}
                             scopes={createGroupPermissions}
@@ -370,15 +389,17 @@ const Groups = () => {
                           >
                             <br />
                             <br />
-                            To get started,{" "}
-                            <ActionLink
-                              onClick={() => {
-                                navigate(`${IAM_PAGES.GROUPS_ADD}`);
-                              }}
-                            >
-                              Create a Group
-                            </ActionLink>
-                            .
+                            {interpolate(t("To get started, {link}."), {
+                              link: (
+                                <ActionLink
+                                  onClick={() => {
+                                    navigate(`${IAM_PAGES.GROUPS_ADD}`);
+                                  }}
+                                >
+                                  {t("Create a Group")}
+                                </ActionLink>
+                              ),
+                            })}
                           </SecureComponent>
                         </Fragment>
                       }

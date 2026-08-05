@@ -59,12 +59,15 @@ import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import DeleteUser from "./DeleteUser";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const AddToGroup = withSuspense(React.lazy(() => import("./BulkAddToGroup")));
 
 const ListUsers = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [records, setRecords] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -189,13 +192,13 @@ const ListUsers = () => {
           }}
         />
       )}
-      <PageHeaderWrapper label={"Users"} actions={<HelpMenu />} />
+      <PageHeaderWrapper label={t("Users")} actions={<HelpMenu />} />
 
       <PageLayout>
         <Grid container>
           <Grid item xs={12} sx={actionsTray.actionsTray}>
             <SearchBox
-              placeholder={"Search Users"}
+              placeholder={t("Search Users")}
               onChange={setFilter}
               value={filter}
               sx={{
@@ -213,8 +216,8 @@ const ListUsers = () => {
                 tooltip={
                   hasPermission("console", [IAM_SCOPES.ADMIN_DELETE_USER])
                     ? checkedUsers.length === 0
-                      ? "Select Users to delete"
-                      : "Delete Selected"
+                      ? t("Select Users to delete")
+                      : t("Delete Selected")
                     : permissionTooltipHelper(
                         [IAM_SCOPES.ADMIN_DELETE_USER],
                         "delete users",
@@ -226,7 +229,7 @@ const ListUsers = () => {
                   onClick={() => {
                     setDeleteOpen(true);
                   }}
-                  label={"Delete Selected"}
+                  label={t("Delete Selected")}
                   icon={<DeleteIcon />}
                   disabled={checkedUsers.length === 0}
                   variant={"secondary"}
@@ -243,8 +246,8 @@ const ListUsers = () => {
                 tooltip={
                   hasPermission("console", [IAM_SCOPES.ADMIN_ADD_USER_TO_GROUP])
                     ? checkedUsers.length === 0
-                      ? "Select Users to group"
-                      : "Add to Group"
+                      ? t("Select Users to group")
+                      : t("Add to Group")
                     : permissionTooltipHelper(
                         [IAM_SCOPES.ADMIN_ADD_USER_TO_GROUP],
                         "add users to groups",
@@ -253,7 +256,7 @@ const ListUsers = () => {
               >
                 <Button
                   id={"add-to-group"}
-                  label={"Add to Group"}
+                  label={t("Add to Group")}
                   icon={<GroupsIcon />}
                   disabled={checkedUsers.length <= 0}
                   onClick={() => {
@@ -287,7 +290,7 @@ const ListUsers = () => {
                     ],
                     true,
                   )
-                    ? "Create User"
+                    ? t("Create User")
                     : permissionTooltipHelper(
                         [
                           IAM_SCOPES.ADMIN_CREATE_USER,
@@ -301,7 +304,7 @@ const ListUsers = () => {
               >
                 <Button
                   id={"create-user"}
-                  label={"Create User"}
+                  label={t("Create User")}
                   icon={<AddIcon />}
                   onClick={() => {
                     navigate(`${IAM_PAGES.USER_ADD}`);
@@ -338,62 +341,75 @@ const ListUsers = () => {
                       <DataTable
                         itemActions={tableActions}
                         columns={[
-                          { label: "Access Key", elementKey: "accessKey" },
+                          { label: t("Access Key"), elementKey: "accessKey" },
                         ]}
                         onSelect={
                           addUserToGroup || deleteUser
                             ? selectionChanged
                             : undefined
                         }
+                        onSelectAll={
+                          addUserToGroup || deleteUser
+                            ? () =>
+                                setCheckedUsers(
+                                  checkedUsers.length === filteredRecords.length
+                                    ? []
+                                    : filteredRecords.map(
+                                        (r) => `${r.accessKey}`,
+                                      ),
+                                )
+                            : undefined
+                        }
                         selectedItems={checkedUsers}
                         isLoading={loading}
                         records={filteredRecords}
-                        entityName="Users"
+                        entityName={t("Users")}
+                        customEmptyMessage={t("There are no Users yet.")}
                         idField="accessKey"
                       />
                     </SecureComponent>
                   </Grid>
                   <HelpBox
-                    title={"Users"}
+                    title={t("Users")}
                     iconComponent={<UsersIcon />}
                     help={
                       <Fragment>
-                        A SILO user consists of a unique access key (username)
-                        and corresponding secret key (password). Clients must
-                        authenticate their identity by specifying both a valid
-                        access key (username) and the corresponding secret key
-                        (password) of an existing SILO user.
+                        {t(
+                          "A SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.",
+                        )}
                         <br />
-                        Groups provide a simplified method for managing shared
-                        permissions among users with common access patterns and
-                        workloads.
+                        {t(
+                          "Groups provide a simplified method for managing shared permissions among users with common access patterns and workloads.",
+                        )}
                         <br />
                         <br />
-                        Users inherit access permissions to data and resources
-                        through the groups they belong to.
+                        {t(
+                          "Users inherit access permissions to data and resources through the groups they belong to.",
+                        )}
                         <br />
-                        SILO uses Policy-Based Access Control (PBAC) to define
-                        the authorized actions and resources to which an
-                        authenticated user has access. Each policy describes one
-                        or more actions and conditions that outline the
-                        permissions of a user or group of users.
-                        <br />
-                        <br />
-                        Each user can access only those resources and operations
-                        which are explicitly granted by the built-in role. SILO
-                        denies access to any other resource or action by
-                        default.
+                        {t(
+                          "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.",
+                        )}
                         <br />
                         <br />
-                        You can learn more at the{" "}
-                        <a
-                          href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          documentation
-                        </a>
-                        .
+                        {t(
+                          "Each user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.",
+                        )}
+                        <br />
+                        <br />
+                        {interpolate(t("You can learn more at the {link}."), {
+                          link: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/identity-access-management/minio-user-management/",
+                              )}
+                              target="_blank"
+                              rel="noopener"
+                            >
+                              {t("documentation")}
+                            </a>
+                          ),
+                        })}
                       </Fragment>
                     }
                   />
@@ -403,35 +419,31 @@ const ListUsers = () => {
                 <Grid container>
                   <Grid item xs={8}>
                     <HelpBox
-                      title={"Users"}
+                      title={t("Users")}
                       iconComponent={<UsersIcon />}
                       help={
                         <Fragment>
-                          A SILO user consists of a unique access key (username)
-                          and corresponding secret key (password). Clients must
-                          authenticate their identity by specifying both a valid
-                          access key (username) and the corresponding secret key
-                          (password) of an existing SILO user.
+                          {t(
+                            "A SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.",
+                          )}
                           <br />
-                          Groups provide a simplified method for managing shared
-                          permissions among users with common access patterns
-                          and workloads.
+                          {t(
+                            "Groups provide a simplified method for managing shared permissions among users with common access patterns and workloads.",
+                          )}
                           <br />
                           <br />
-                          Users inherit access permissions to data and resources
-                          through the groups they belong to.
+                          {t(
+                            "Users inherit access permissions to data and resources through the groups they belong to.",
+                          )}
                           <br />
-                          SILO uses Policy-Based Access Control (PBAC) to define
-                          the authorized actions and resources to which an
-                          authenticated user has access. Each policy describes
-                          one or more actions and conditions that outline the
-                          permissions of a user or group of users.
+                          {t(
+                            "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.",
+                          )}
                           <br />
                           <br />
-                          Each user can access only those resources and
-                          operations which are explicitly granted by the
-                          built-in role. SILO denies access to any other
-                          resource or action by default.
+                          {t(
+                            "Each user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.",
+                          )}
                           <SecureComponent
                             scopes={[
                               IAM_SCOPES.ADMIN_CREATE_USER,
@@ -443,15 +455,17 @@ const ListUsers = () => {
                           >
                             <br />
                             <br />
-                            To get started,{" "}
-                            <ActionLink
-                              onClick={() => {
-                                navigate(`${IAM_PAGES.USER_ADD}`);
-                              }}
-                            >
-                              Create a User
-                            </ActionLink>
-                            .
+                            {interpolate(t("To get started, {link}."), {
+                              link: (
+                                <ActionLink
+                                  onClick={() => {
+                                    navigate(`${IAM_PAGES.USER_ADD}`);
+                                  }}
+                                >
+                                  {t("Create a User")}
+                                </ActionLink>
+                              ),
+                            })}
                           </SecureComponent>
                         </Fragment>
                       }

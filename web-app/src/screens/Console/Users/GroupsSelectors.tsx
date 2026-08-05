@@ -25,6 +25,7 @@ import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import api from "../../../common/api";
 import SearchBox from "../Common/SearchBox";
+import { useT } from "i18n";
 
 interface IGroupsProps {
   selectedGroups: string[];
@@ -36,6 +37,7 @@ const GroupsSelectors = ({
   setSelectedGroups,
 }: IGroupsProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   // Local State
   const [records, setRecords] = useState<any[]>([]);
   const [loading, isLoading] = useState<boolean>(false);
@@ -102,19 +104,20 @@ const GroupsSelectors = ({
         <Fragment>
           <Grid item xs={12} className={"inputItem"}>
             <SearchBox
-              placeholder="Start typing to search for Groups"
+              placeholder={t("Start typing to search for Groups")}
               onChange={setFilter}
               value={filter}
-              label={"Assign Groups"}
+              label={t("Assign Groups")}
             />
           </Grid>
           <DataTable
-            columns={[{ label: "Group" }]}
+            columns={[{ label: t("Group") }]}
             onSelect={selectionChanged}
             selectedItems={selGroups}
             isLoading={loading}
             records={filteredRecords}
-            entityName="Groups"
+            entityName={t("Groups")}
+            customEmptyMessage={t("There are no Groups yet.")}
             idField=""
             customPaperHeight={"200px"}
           />
@@ -126,7 +129,7 @@ const GroupsSelectors = ({
             padding: "10px 0",
           }}
         >
-          No Groups Available
+          {t("No Groups Available")}
         </Box>
       )}
     </Grid>

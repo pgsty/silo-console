@@ -28,6 +28,7 @@ import AddEndpointModal from "./AddEndpointModal";
 import DeleteWebhookEndpoint from "./DeleteWebhookEndpoint";
 import EditWebhookEndpoint from "./EditWebhookEndpoint";
 import { Configuration } from "api/consoleApi";
+import { useT } from "i18n";
 
 interface WebhookSettingsProps {
   WebhookSettingslist: Configuration[];
@@ -40,6 +41,7 @@ const WebhookSettings = ({
   WebhookSettingslist,
   type,
 }: WebhookSettingsProps) => {
+  const t = useT();
   const [newEndpointOpen, setNewEndpointOpen] = useState<boolean>(false);
   const [deleteWebhookOpen, setDeleteWebhookOpen] = useState<boolean>(false);
   const [editWebhookOpen, setEditWebhookOpen] = useState<boolean>(false);
@@ -83,7 +85,7 @@ const WebhookSettings = ({
           }}
         >
           <ConsoleIcon style={{ fill: "#052F51", width: "14px" }} />
-          {overrideEnabled ? "Enabled" : "Disabled"}
+          {overrideEnabled ? t("Enabled") : t("Disabled")}
         </Grid>
       );
     }
@@ -102,7 +104,7 @@ const WebhookSettings = ({
           }}
         >
           <TierOnlineIcon style={{ fill: "#4CCB92", width: 14, height: 14 }} />
-          Enabled
+          {t("Enabled")}
         </Grid>
       );
     }
@@ -119,7 +121,7 @@ const WebhookSettings = ({
         }}
       >
         <TierOfflineIcon style={{ fill: "#C83B51", width: 14, height: 14 }} />
-        Disabled
+        {t("Disabled")}
       </Grid>
     );
   };
@@ -208,23 +210,23 @@ const WebhookSettings = ({
             setNewEndpointOpen(true);
           }}
         >
-          New Endpoint
+          {t("New Endpoint")}
         </Button>
       </Grid>
       <Grid item xs={12} sx={{ padding: "0 10px 10px" }}>
         <Fragment>
-          <h3>Currently Configured Endpoints</h3>
+          <h3>{t("Currently Configured Endpoints")}</h3>
           <DataTable
             columns={[
               {
-                label: "Status",
+                label: t("Status"),
                 elementKey: "key_values",
                 renderFunction: renderWebhookStatus,
                 width: 50,
               },
-              { label: "Name", elementKey: "name" },
+              { label: t("Name"), elementKey: "name" },
               {
-                label: "Endpoint",
+                label: t("Endpoint"),
                 elementKey: "key_values",
                 renderFunction: renderEndpoint,
               },
@@ -233,7 +235,8 @@ const WebhookSettings = ({
             idField="name"
             isLoading={false}
             records={WebhookSettingslist}
-            entityName="endpoints"
+            entityName={t("endpoints")}
+            customEmptyMessage={t("There are no endpoints yet.")}
             customPaperHeight={"calc(100vh - 750px)"}
           />
         </Fragment>

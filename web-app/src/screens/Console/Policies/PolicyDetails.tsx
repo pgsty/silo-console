@@ -72,6 +72,7 @@ import { Policy } from "../../../api/consoleApi";
 import { api } from "../../../api";
 import HelpMenu from "../HelpMenu";
 import SearchBox from "../Common/SearchBox";
+import { useLocalizedLink, useT } from "i18n";
 
 const DeletePolicy = withSuspense(React.lazy(() => import("./DeletePolicy")));
 
@@ -79,6 +80,8 @@ const PolicyDetails = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const features = useSelector(selFeatures);
 
@@ -157,18 +160,17 @@ const PolicyDetails = () => {
         })
         .then((_) => {
           setAddLoading(false);
-          dispatch(setSnackBarMessage("Policy successfully updated"));
+          dispatch(setSnackBarMessage(t("Policy successfully updated")));
           refreshPolicyDetails();
         })
         .catch((err) => {
           setAddLoading(false);
           dispatch(
             setErrorSnackMessage({
-              errorMessage: "There was an error updating the Policy ",
-              detailedError:
-                "There was an error updating the Policy: " +
-                (err.error.detailedMessage || "") +
-                ". Please check Policy syntax.",
+              errorMessage: t("There was an error updating the Policy "),
+              detailedError: t(
+                "There was an error updating the Policy: {details}. Please check Policy syntax.",
+              ).replace("{details}", err.error.detailedMessage || ""),
             }),
           );
         });
@@ -337,7 +339,7 @@ const PolicyDetails = () => {
         label={
           <Fragment>
             <BackLink
-              label={"Policy"}
+              label={t("Policy")}
               onClick={() => navigate(IAM_PAGES.POLICIES)}
             />
           </Fragment>
@@ -348,7 +350,7 @@ const PolicyDetails = () => {
         <ScreenTitle
           icon={<IAMPoliciesIcon width={40} />}
           title={policyName}
-          subTitle={<Fragment>IAM Policy</Fragment>}
+          subTitle={<Fragment>{t("IAM Policy")}</Fragment>}
           actions={
             <Fragment>
               <SecureComponent
@@ -368,7 +370,7 @@ const PolicyDetails = () => {
                 >
                   <Button
                     id={"delete-policy"}
-                    label={"Delete Policy"}
+                    label={t("Delete Policy")}
                     variant="secondary"
                     icon={<TrashIcon />}
                     onClick={deletePolicy}
@@ -377,10 +379,10 @@ const PolicyDetails = () => {
                 </TooltipWrapper>
               </SecureComponent>
 
-              <TooltipWrapper tooltip={"Refresh"}>
+              <TooltipWrapper tooltip={t("Refresh")}>
                 <Button
                   id={"refresh-policy"}
-                  label={"Refresh"}
+                  label={t("Refresh")}
                   variant="regular"
                   icon={<RefreshIcon />}
                   onClick={() => {
@@ -397,7 +399,7 @@ const PolicyDetails = () => {
             options={[
               {
                 tabConfig: {
-                  label: "Summary",
+                  label: t("Summary"),
                   disabled: !displayPolicy,
                   id: "summary",
                 },
@@ -409,7 +411,7 @@ const PolicyDetails = () => {
                       }
                     >
                       <SectionTitle separator sx={{ marginBottom: 15 }}>
-                        Policy Summary
+                        {t("Policy Summary")}
                       </SectionTitle>
                       <Box withBorders>
                         <PolicyView policyStatements={policyStatements} />
@@ -420,7 +422,7 @@ const PolicyDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Users",
+                  label: t("Users"),
                   disabled: !displayUsers || ldapIsEnabled,
                   id: "users",
                 },
@@ -432,7 +434,7 @@ const PolicyDetails = () => {
                       }
                     >
                       <SectionTitle separator sx={{ marginBottom: 15 }}>
-                        Users
+                        {t("Users")}
                       </SectionTitle>
                       <Grid container>
                         {userList.length > 0 && (
@@ -446,7 +448,7 @@ const PolicyDetails = () => {
                           >
                             <SearchBox
                               value={filterUsers}
-                              placeholder={"Search Users"}
+                              placeholder={t("Search Users")}
                               id="search-resource"
                               onChange={(val) => {
                                 setFilterUsers(val);
@@ -456,10 +458,13 @@ const PolicyDetails = () => {
                         )}
                         <DataTable
                           itemActions={userTableActions}
-                          columns={[{ label: "Name", elementKey: "name" }]}
+                          columns={[{ label: t("Name"), elementKey: "name" }]}
                           isLoading={loadingUsers}
                           records={filteredUsers}
-                          entityName="Users with this Policy associated"
+                          entityName={t("Users with this Policy associated")}
+                          customEmptyMessage={t(
+                            "There are no Users with this Policy associated yet.",
+                          )}
                           idField="name"
                           customPaperHeight={"500px"}
                         />
@@ -470,7 +475,7 @@ const PolicyDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Groups",
+                  label: t("Groups"),
                   disabled: !displayGroups || ldapIsEnabled,
                   id: "groups",
                 },
@@ -482,7 +487,7 @@ const PolicyDetails = () => {
                       }
                     >
                       <SectionTitle separator sx={{ marginBottom: 15 }}>
-                        Groups
+                        {t("Groups")}
                       </SectionTitle>
                       <Grid container>
                         {groupList.length > 0 && (
@@ -496,7 +501,7 @@ const PolicyDetails = () => {
                           >
                             <SearchBox
                               value={filterUsers}
-                              placeholder={"Search Groups"}
+                              placeholder={t("Search Groups")}
                               id="search-resource"
                               onChange={(val) => {
                                 setFilterGroups(val);
@@ -506,10 +511,13 @@ const PolicyDetails = () => {
                         )}
                         <DataTable
                           itemActions={groupTableActions}
-                          columns={[{ label: "Name", elementKey: "name" }]}
+                          columns={[{ label: t("Name"), elementKey: "name" }]}
                           isLoading={loadingGroups}
                           records={filteredGroups}
-                          entityName="Groups with this Policy associated"
+                          entityName={t("Groups with this Policy associated")}
+                          customEmptyMessage={t(
+                            "There are no Groups with this Policy associated yet.",
+                          )}
                           idField="name"
                           customPaperHeight={"500px"}
                         />
@@ -520,7 +528,7 @@ const PolicyDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Raw Policy",
+                  label: t("Raw Policy"),
                   disabled: !displayPolicy,
                   id: "raw-policy",
                 },
@@ -536,15 +544,17 @@ const PolicyDetails = () => {
                           <Fragment>
                             <a
                               target="blank"
-                              href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                              href={localize(
+                                "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                              )}
                             >
-                              Guide to access policy structure
+                              {t("Guide to access policy structure")}
                             </a>
                           </Fragment>
                         }
                         placement="right"
                       >
-                        <SectionTitle>Raw Policy</SectionTitle>
+                        <SectionTitle>{t("Raw Policy")}</SectionTitle>
                       </HelpTip>
                       <form
                         noValidate
@@ -567,9 +577,11 @@ const PolicyDetails = () => {
                                 <Fragment>
                                   <a
                                     target="blank"
-                                    href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                                    href={localize(
+                                      "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                                    )}
                                   >
-                                    Guide to access policy structure
+                                    {t("Guide to access policy structure")}
                                   </a>
                                 </Fragment>
                               }
@@ -594,7 +606,7 @@ const PolicyDetails = () => {
                                   resetForm();
                                 }}
                               >
-                                Clear
+                                {t("Clear")}
                               </Button>
                             )}
                             <SecureComponent
@@ -620,7 +632,7 @@ const PolicyDetails = () => {
                                   disabled={
                                     addLoading || !validSave || !canEditPolicy
                                   }
-                                  label={"Save"}
+                                  label={t("Save")}
                                 />
                               </TooltipWrapper>
                             </SecureComponent>

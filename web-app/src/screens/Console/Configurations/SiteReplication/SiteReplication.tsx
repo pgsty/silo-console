@@ -45,6 +45,7 @@ import ReplicationSites from "./ReplicationSites";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../../HelpMenu";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 export type ReplicationSite = {
   deploymentID: string;
@@ -56,6 +57,8 @@ export type ReplicationSite = {
 const SiteReplication = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [sites, setSites] = useState([]);
 
@@ -91,7 +94,7 @@ const SiteReplication = () => {
   const [isRemoving, invokeSiteRemoveApi] = useApi(
     (res: any) => {
       setIsDeleteAll(false);
-      dispatch(setSnackBarMessage(`Successfully deleted.`));
+      dispatch(setSnackBarMessage(t("Successfully deleted.")));
       getSites();
     },
     (err: ErrorResponseHandler) => {
@@ -136,10 +139,10 @@ const SiteReplication = () => {
             >
               {hasSites ? (
                 <Fragment>
-                  <TooltipWrapper tooltip={"Delete All"}>
+                  <TooltipWrapper tooltip={t("Delete All")}>
                     <Button
                       id={"delete-all"}
-                      label={"Delete All"}
+                      label={t("Delete All")}
                       variant="secondary"
                       disabled={isRemoving}
                       icon={<TrashIcon />}
@@ -148,10 +151,10 @@ const SiteReplication = () => {
                       }}
                     />
                   </TooltipWrapper>
-                  <TooltipWrapper tooltip={"Replication Status"}>
+                  <TooltipWrapper tooltip={t("Replication Status")}>
                     <Button
                       id={"replication-status"}
-                      label={"Replication Status"}
+                      label={t("Replication Status")}
                       variant="regular"
                       icon={<RecoverIcon />}
                       onClick={(e) => {
@@ -162,10 +165,10 @@ const SiteReplication = () => {
                   </TooltipWrapper>
                 </Fragment>
               ) : null}
-              <TooltipWrapper tooltip={"Add Replication Sites"}>
+              <TooltipWrapper tooltip={t("Add Replication Sites")}>
                 <Button
                   id={"add-replication-site"}
-                  label={"Add Sites"}
+                  label={t("Add Sites")}
                   variant="callAction"
                   disabled={isRemoving}
                   icon={<AddIcon />}
@@ -177,7 +180,7 @@ const SiteReplication = () => {
             </Box>
           }
         >
-          {hasSites ? "List of Replicated Sites" : ""}
+          {hasSites ? t("List of Replicated Sites") : ""}
         </SectionTitle>
         {hasSites ? (
           <ReplicationSites
@@ -202,36 +205,42 @@ const SiteReplication = () => {
           <Grid container>
             <Grid item xs={8}>
               <HelpBox
-                title={"Site Replication"}
+                title={t("Site Replication")}
                 iconComponent={<ClustersIcon />}
                 help={
                   <Fragment>
-                    This feature allows multiple independent SILO sites (or
-                    clusters) that are using the same external IDentity Provider
-                    (IDP) to be configured as replicas.
+                    {t(
+                      "This feature allows multiple independent SILO sites (or clusters) that are using the same external IDentity Provider (IDP) to be configured as replicas.",
+                    )}
                     <br />
                     <br />
-                    To get started,{" "}
-                    <ActionLink
-                      isLoading={false}
-                      label={""}
-                      onClick={() => {
-                        navigate(IAM_PAGES.SITE_REPLICATION_ADD);
-                      }}
-                    >
-                      Add a Replication Site
-                    </ActionLink>
-                    .
+                    {interpolate(t("To get started, {link}."), {
+                      link: (
+                        <ActionLink
+                          isLoading={false}
+                          label={""}
+                          onClick={() => {
+                            navigate(IAM_PAGES.SITE_REPLICATION_ADD);
+                          }}
+                        >
+                          {t("Add a Replication Site")}
+                        </ActionLink>
+                      ),
+                    })}
                     <br />
-                    You can learn more at the{" "}
-                    <a
-                      href="https://silo.pgsty.com/operations/replication/multi-site-replication/"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      documentation
-                    </a>
-                    .
+                    {interpolate(t("You can learn more at the {link}."), {
+                      link: (
+                        <a
+                          href={localize(
+                            "https://silo.pgsty.com/operations/replication/multi-site-replication/",
+                          )}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          {t("documentation")}
+                        </a>
+                      ),
+                    })}
                   </Fragment>
                 }
               />
@@ -240,43 +249,46 @@ const SiteReplication = () => {
         ) : null}
         {hasSites && !isSiteInfoLoading ? (
           <HelpBox
-            title={"Site Replication"}
+            title={t("Site Replication")}
             iconComponent={<ClustersIcon />}
             help={
               <Fragment>
-                This feature allows multiple independent SILO sites (or
-                clusters) that are using the same external IDentity Provider
-                (IDP) to be configured as replicas. In this situation the set of
-                replica sites are referred to as peer sites or just sites.
+                {t(
+                  "This feature allows multiple independent SILO sites (or clusters) that are using the same external IDentity Provider (IDP) to be configured as replicas. In this situation the set of replica sites are referred to as peer sites or just sites.",
+                )}
                 <br />
                 <br />
-                Initially, only one of the sites added for replication may have
-                data. After site-replication is successfully configured, this
-                data is replicated to the other (initially empty) sites.
-                Subsequently, objects may be written to any of the sites, and
-                they will be replicated to all other sites.
+                {t(
+                  "Initially, only one of the sites added for replication may have data. After site-replication is successfully configured, this data is replicated to the other (initially empty) sites. Subsequently, objects may be written to any of the sites, and they will be replicated to all other sites.",
+                )}
                 <br />
                 <br />
-                All sites must have the same deployment credentials (i.e.
-                MINIO_ROOT_USER, MINIO_ROOT_PASSWORD).
+                {t(
+                  "All sites must have the same deployment credentials (i.e. MINIO_ROOT_USER, MINIO_ROOT_PASSWORD).",
+                )}
                 <br />
                 <br />
-                All sites must be using the same external IDP(s) if any.
+                {t("All sites must be using the same external IDP(s) if any.")}
                 <br />
                 <br />
-                For SSE-S3 or SSE-KMS encryption via KMS, all sites must have
-                access to a central KMS deployment server.
+                {t(
+                  "For SSE-S3 or SSE-KMS encryption via KMS, all sites must have access to a central KMS deployment server.",
+                )}
                 <br />
                 <br />
-                You can learn more at the{" "}
-                <a
-                  href="https://silo.pgsty.com/operations/replication/multi-site-replication/#minio-site-replication-overview"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  documentation
-                </a>
-                .
+                {interpolate(t("You can learn more at the {link}."), {
+                  link: (
+                    <a
+                      href={localize(
+                        "https://silo.pgsty.com/operations/replication/multi-site-replication/#minio-site-replication-overview",
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {t("documentation")}
+                    </a>
+                  ),
+                })}
               </Fragment>
             }
           />
@@ -284,8 +296,8 @@ const SiteReplication = () => {
 
         {deleteAll ? (
           <ConfirmDialog
-            title={`Delete All`}
-            confirmText={"Delete"}
+            title={t("Delete All")}
+            confirmText={t("Delete")}
             isOpen={true}
             titleIcon={<ConfirmDeleteIcon />}
             isLoading={false}
@@ -298,7 +310,9 @@ const SiteReplication = () => {
             }}
             confirmationContent={
               <Fragment>
-                Are you sure you want to remove all the replication sites?.
+                {t(
+                  "Are you sure you want to remove all the replication sites?.",
+                )}
               </Fragment>
             }
           />

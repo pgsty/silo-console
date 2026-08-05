@@ -18,6 +18,7 @@ import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
 import { Box, CircleIcon } from "mds";
+import { interpolate, useT } from "i18n";
 
 const LookupTableBase = styled.div(({ theme }) => ({
   marginTop: 15,
@@ -75,6 +76,7 @@ const LookupStatusTable = ({
   entityName: string;
   entityType: string;
 }) => {
+  const t = useT();
   //Assumes 1st row should be a header row.
   const [header = [], ...rows] = matrixData;
 
@@ -93,7 +95,8 @@ const LookupStatusTable = ({
           let indicator = null;
 
           if (cIdx === 0) {
-            indicator = v;
+            // First column carries the feature name; the rest are site columns.
+            indicator = t(v);
           } else if (v === "") {
             indicator = "";
           }
@@ -127,7 +130,13 @@ const LookupStatusTable = ({
   return (
     <LookupTableBase>
       <Box sx={{ marginTop: 15, marginBottom: 15 }}>
-        Replication status for {entityType}: <strong>{entityName}</strong>.
+        {interpolate(
+          t("Replication status for {type}: {name}.").replace(
+            "{type}",
+            t(entityType),
+          ),
+          { name: <strong>{entityName}</strong> },
+        )}
       </Box>
       <table>
         <thead>

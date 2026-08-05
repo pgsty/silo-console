@@ -63,6 +63,7 @@ import SearchBox from "../Common/SearchBox";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import HelpMenu from "../HelpMenu";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
+import { useT } from "i18n";
 
 const formatPolicy = (policy: string = ""): string[] => {
   if (policy.length <= 0) return [];
@@ -73,6 +74,7 @@ const GroupsDetails = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
 
   const [groupDetails, setGroupDetails] = useState<Group>({});
   const [policyOpen, setPolicyOpen] = useState<boolean>(false);
@@ -107,7 +109,8 @@ const GroupsDetails = () => {
 
   const groupPolicies = formatPolicy(policy);
   const isGroupEnabled = groupEnabled === "enabled";
-  const memberActionText = members.length > 0 ? "Edit Members" : "Add Members";
+  const memberActionText =
+    members.length > 0 ? t("Edit Members") : t("Add Members");
 
   const getGroupDetails = hasPermission(
     CONSOLE_UI_RESOURCE,
@@ -177,7 +180,7 @@ const GroupsDetails = () => {
             }}
           >
             <SearchBox
-              placeholder={"Search members"}
+              placeholder={t("Search members")}
               onChange={(searchText) => {
                 setMemberFilter(searchText);
               }}
@@ -216,7 +219,7 @@ const GroupsDetails = () => {
           </Box>
         }
       >
-        Members
+        {t("Members")}
       </SectionTitle>
       <Grid item xs={12}>
         <SecureComponent
@@ -246,11 +249,12 @@ const GroupsDetails = () => {
                   isDisabled: !viewUser,
                 },
               ]}
-              columns={[{ label: "Access Key" }]}
+              columns={[{ label: t("Access Key") }]}
               selectedItems={[]}
               isLoading={false}
               records={filteredMembers}
-              entityName="Users"
+              entityName={t("Users")}
+              customEmptyMessage={t("There are no Users yet.")}
             />
           </TooltipWrapper>
         </SecureComponent>
@@ -272,7 +276,7 @@ const GroupsDetails = () => {
             <TooltipWrapper
               tooltip={
                 canSetPolicies
-                  ? "Set Policies"
+                  ? t("Set Policies")
                   : permissionTooltipHelper(
                       setGroupPoliciesPermissions,
                       "assign Policies",
@@ -281,7 +285,7 @@ const GroupsDetails = () => {
             >
               <Button
                 id={"set-policies"}
-                label={`Set Policies`}
+                label={t("Set Policies")}
                 variant="callAction"
                 icon={<IAMPoliciesIcon />}
                 onClick={() => {
@@ -292,7 +296,7 @@ const GroupsDetails = () => {
             </TooltipWrapper>
           }
         >
-          Policies
+          {t("Policies")}
         </SectionTitle>
       </Box>
       <Grid item xs={12}>
@@ -318,10 +322,11 @@ const GroupsDetails = () => {
                 isDisabled: !canViewPolicy,
               },
             ]}
-            columns={[{ label: "Policy" }]}
+            columns={[{ label: t("Policy") }]}
             isLoading={false}
             records={groupPolicies}
-            entityName="Policies"
+            entityName={t("Policies")}
+            customEmptyMessage={t("There are no Policies yet.")}
           />
         </TooltipWrapper>
       </Grid>
@@ -374,7 +379,7 @@ const GroupsDetails = () => {
         label={
           <Fragment>
             <BackLink
-              label={"Groups"}
+              label={t("Groups")}
               onClick={() => navigate(IAM_PAGES.GROUPS)}
             />
           </Fragment>
@@ -401,9 +406,9 @@ const GroupsDetails = () => {
                   gap: 15,
                 }}
               >
-                <span>Group Status:</span>
+                <span>{t("Group Status:")}</span>
                 <span id="group-status-label" style={{ fontWeight: "bold" }}>
-                  {isGroupEnabled ? "Enabled" : "Disabled"}
+                  {isGroupEnabled ? t("Enabled") : t("Disabled")}
                 </span>
                 <TooltipWrapper
                   tooltip={
@@ -426,7 +431,7 @@ const GroupsDetails = () => {
                     matchAll
                   >
                     <Switch
-                      indicatorLabels={["Enabled", "Disabled"]}
+                      indicatorLabels={[t("Enabled"), t("Disabled")]}
                       checked={isGroupEnabled}
                       value={"group_enabled"}
                       id="group-status"
@@ -439,7 +444,7 @@ const GroupsDetails = () => {
                   </SecureComponent>
                 </TooltipWrapper>
 
-                <TooltipWrapper tooltip={"Delete Group"}>
+                <TooltipWrapper tooltip={t("Delete Group")}>
                   <Button
                     id={"delete-user-group"}
                     variant="secondary"
@@ -459,11 +464,11 @@ const GroupsDetails = () => {
           <Tabs
             options={[
               {
-                tabConfig: { id: "members", label: "Members" },
+                tabConfig: { id: "members", label: t("Members") },
                 content: groupsTabContent,
               },
               {
-                tabConfig: { id: "policies", label: "Policies" },
+                tabConfig: { id: "policies", label: t("Policies") },
                 content: policiesTabContent,
               },
             ]}

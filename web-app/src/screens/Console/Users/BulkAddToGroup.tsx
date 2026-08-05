@@ -31,6 +31,7 @@ import GroupsSelectors from "./GroupsSelectors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
+import { useT } from "i18n";
 
 interface IAddToGroup {
   open: boolean;
@@ -44,6 +45,7 @@ const BulkAddToGroup = ({
   closeModalAndRefresh,
 }: IAddToGroup) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   //Local States
   const [saving, isSaving] = useState<boolean>(false);
   const [accepted, setAccepted] = useState<boolean>(false);
@@ -70,7 +72,7 @@ const BulkAddToGroup = ({
         isSaving(false);
         dispatch(
           setModalErrorSnackMessage({
-            errorMessage: "You need to select at least one group to assign",
+            errorMessage: t("You need to select at least one group to assign"),
             detailedError: "",
           }),
         );
@@ -104,8 +106,8 @@ const BulkAddToGroup = ({
       }}
       title={
         accepted
-          ? "The selected users were added to the following groups."
-          : "Add Users to Group"
+          ? t("The selected users were added to the following groups.")
+          : t("Add Users to Group")
       }
       titleIcon={<AddMembersToGroupIcon />}
     >
@@ -116,10 +118,10 @@ const BulkAddToGroup = ({
             containerPadding={false}
             sx={{ margin: "30px 0" }}
           >
-            <ReadBox label={"Groups"} sx={{ width: "100%" }}>
+            <ReadBox label={t("Groups")} sx={{ width: "100%" }}>
               {selectedGroups.join(", ")}
             </ReadBox>
-            <ReadBox label={"Users"} sx={{ width: "100%" }}>
+            <ReadBox label={t("Users")} sx={{ width: "100%" }}>
               {" "}
               {checkedUsers.join(", ")}{" "}
             </ReadBox>
@@ -128,7 +130,7 @@ const BulkAddToGroup = ({
       ) : (
         <form noValidate autoComplete="off" onSubmit={setSaving}>
           <FormLayout withBorders={false} containerPadding={false}>
-            <ReadBox label={"Selected Users"} sx={{ width: "100%" }}>
+            <ReadBox label={t("Selected Users")} sx={{ width: "100%" }}>
               {checkedUsers.join(", ")}
             </ReadBox>
             <GroupsSelectors
@@ -143,14 +145,14 @@ const BulkAddToGroup = ({
               variant="regular"
               color="primary"
               onClick={resetForm}
-              label={"Clear"}
+              label={t("Clear")}
             />
             <Button
               id={"save-add-group"}
               type="submit"
               variant="callAction"
               disabled={saving || selectedGroups.length < 1}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
           {saving && (

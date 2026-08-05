@@ -40,7 +40,8 @@ import { useAppDispatch } from "../../../store";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import { ServiceAccounts } from "../../../api/consoleApi";
 import { usersSort } from "../../../utils/sortFunctions";
-import { ACCOUNT_TABLE_COLUMNS } from "../Account/AccountUtils";
+import { accountTableColumns } from "../Account/AccountUtils";
+import { useT } from "i18n";
 
 interface IUserServiceAccountsProps {
   user: string;
@@ -53,6 +54,7 @@ const UserServiceAccountsPanel = ({
 }: IUserServiceAccountsProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [records, setRecords] = useState<ServiceAccounts>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -105,7 +107,7 @@ const UserServiceAccountsPanel = ({
   const closeDeleteMultipleModalAndRefresh = (refresh: boolean) => {
     setDeleteMultipleOpen(false);
     if (refresh) {
-      dispatch(setSnackBarMessage(`Access Keys deleted successfully.`));
+      dispatch(setSnackBarMessage(t("Access Keys deleted successfully.")));
       setSelectedSAs([]);
       setLoading(true);
     }
@@ -188,7 +190,7 @@ const UserServiceAccountsPanel = ({
           closeModal={() => {
             closeCredentialsModal();
           }}
-          entity="Access Key"
+          entity={t("Access Key")}
         />
       )}
       {editOpen && (
@@ -204,13 +206,13 @@ const UserServiceAccountsPanel = ({
         sx={{ marginBottom: 15 }}
         actions={
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-            <TooltipWrapper tooltip={"Delete Selected"}>
+            <TooltipWrapper tooltip={t("Delete Selected")}>
               <Button
                 id={"delete-selected"}
                 onClick={() => {
                   setDeleteMultipleOpen(true);
                 }}
-                label={"Delete Selected"}
+                label={t("Delete Selected")}
                 icon={<DeleteIcon />}
                 disabled={selectedSAs.length === 0}
                 variant={"secondary"}
@@ -227,10 +229,10 @@ const UserServiceAccountsPanel = ({
               matchAll
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={"Create Access Key"}>
+              <TooltipWrapper tooltip={t("Create Access Key")}>
                 <Button
                   id={"create-service-account"}
-                  label={"Create Access Key"}
+                  label={t("Create Access Key")}
                   variant="callAction"
                   icon={<AddIcon />}
                   onClick={() => {
@@ -245,14 +247,22 @@ const UserServiceAccountsPanel = ({
           </Box>
         }
       >
-        Access Keys
+        {t("Access Keys")}
       </SectionTitle>
 
       <DataTable
         itemActions={tableActions}
-        entityName={"Access Keys"}
-        columns={ACCOUNT_TABLE_COLUMNS}
+        entityName={t("Access Keys")}
+        customEmptyMessage={t("There are no Access Keys yet.")}
+        columns={accountTableColumns(t)}
         onSelect={(e) => selectSAs(e, setSelectedSAs, selectedSAs)}
+        onSelectAll={() =>
+          setSelectedSAs(
+            selectedSAs.length === records.length
+              ? []
+              : records.map((r) => `${r.accessKey}`),
+          )
+        }
         selectedItems={selectedSAs}
         isLoading={loading}
         records={records}

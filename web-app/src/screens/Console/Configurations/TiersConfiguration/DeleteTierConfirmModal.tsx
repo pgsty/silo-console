@@ -20,6 +20,7 @@ import { api } from "api";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ConfirmDialog from "screens/Console/Common/ModalWrapper/ConfirmDialog";
+import { interpolate, useT } from "i18n";
 
 interface ITierDeleteModal {
   open: boolean;
@@ -33,6 +34,7 @@ const DeleteTierConfirmModal = ({
   tierName,
 }: ITierDeleteModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const deleteTier = () => {
     if (tierName !== "") {
@@ -54,7 +56,7 @@ const DeleteTierConfirmModal = ({
         });
     } else {
       setErrorSnackMessage({
-        errorMessage: "There was an error deleting the tier",
+        errorMessage: t("There was an error deleting the tier"),
         detailedError: "",
       });
     }
@@ -62,8 +64,8 @@ const DeleteTierConfirmModal = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Tier`}
-      confirmText={"Delete"}
+      title={t("Delete Tier")}
+      confirmText={t("Delete")}
       isOpen={open}
       titleIcon={<ConfirmModalIcon />}
       isLoading={false}
@@ -71,12 +73,16 @@ const DeleteTierConfirmModal = ({
       onClose={() => closeModalAndRefresh(false)}
       confirmationContent={
         <React.Fragment>
-          Are you sure you want to delete the tier <strong>{tierName}</strong>?
+          {interpolate(t("Are you sure you want to delete the tier {name}?"), {
+            name: <strong>{tierName}</strong>,
+          })}
           <br />
           <br />
-          <strong> Please note</strong>
-          <br /> Only empty tiers can be deleted. If the tier has had objects
-          transitioned into it, it cannot be removed.
+          <strong> {t("Please note")}</strong>
+          <br />{" "}
+          {t(
+            "Only empty tiers can be deleted. If the tier has had objects transitioned into it, it cannot be removed.",
+          )}
         </React.Fragment>
       }
     />

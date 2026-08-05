@@ -31,6 +31,7 @@ import { useAppDispatch } from "../../../store";
 import api from "../../../common/api";
 import GroupsSelectors from "./GroupsSelectors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface IChangeUserGroupsContentProps {
   closeModalAndRefresh: () => void;
@@ -44,6 +45,7 @@ const ChangeUserGroups = ({
   open,
 }: IChangeUserGroupsContentProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [accessKey, setAccessKey] = useState<string>("");
   const [secretKey, setSecretKey] = useState<string>("");
@@ -138,7 +140,7 @@ const ChangeUserGroups = ({
         closeModalAndRefresh();
       }}
       modalOpen={open}
-      title={"Set Groups"}
+      title={t("Set Groups")}
       titleIcon={<AddMembersToGroupIcon />}
     >
       <Fragment>
@@ -163,7 +165,7 @@ const ChangeUserGroups = ({
               type="button"
               variant="regular"
               onClick={resetForm}
-              label={"Clear"}
+              label={t("Clear")}
             />
 
             <Button
@@ -171,7 +173,7 @@ const ChangeUserGroups = ({
               type="submit"
               variant="callAction"
               disabled={addLoading || !sendEnabled}
-              label={"Save"}
+              label={t("Save")}
             />
           </Box>
           {addLoading && (

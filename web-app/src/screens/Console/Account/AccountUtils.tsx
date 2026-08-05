@@ -17,10 +17,12 @@
 import React from "react";
 import { DateTime } from "luxon";
 
-export const ACCOUNT_TABLE_COLUMNS = [
-  { label: "Access Key", elementKey: "accessKey" },
+// Built per render so the labels follow the active language; callers pass the
+// t() they already hold.
+export const accountTableColumns = (t: (text: string) => string) => [
+  { label: t("Access Key"), elementKey: "accessKey" },
   {
-    label: "Expiry",
+    label: t("Expiry"),
     elementKey: "expiration",
     renderFunction: (expTime: string) => {
       if (expTime !== "1970-01-01T00:00:00Z") {
@@ -30,21 +32,21 @@ export const ACCOUNT_TABLE_COLUMNS = [
 
         return <span title={fmtDate}>{fmtDate}</span>;
       } else {
-        return <span>no-expiry</span>;
+        return <span>{t("no-expiry")}</span>;
       }
     },
   },
   {
-    label: "Status",
+    label: t("Status"),
     elementKey: "accountStatus",
     renderFunction: (status: string) => {
       if (status === "off") {
-        return "Disabled";
+        return t("Disabled");
       } else {
-        return "Enabled";
+        return t("Enabled");
       }
     },
   },
-  { label: "Name", elementKey: "name" },
-  { label: "Description", elementKey: "description" },
+  { label: t("Name"), elementKey: "name" },
+  { label: t("Description"), elementKey: "description" },
 ];

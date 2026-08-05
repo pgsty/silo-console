@@ -37,6 +37,7 @@ import {
 import { useAppDispatch } from "../../../../store";
 
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
+import { useT } from "i18n";
 
 interface IEndpointModal {
   open: boolean;
@@ -45,6 +46,7 @@ interface IEndpointModal {
 }
 
 const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
+  const t = useT();
   const [name, setName] = useState<string>("");
   const [endpoint, setEndpoint] = useState<string>("");
   const [authToken, setAuthToken] = useState<string>("");
@@ -104,7 +106,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
         setSaving(false);
         dispatch(setServerNeedsRestart(res.data.restart || false));
         if (!res.data.restart) {
-          dispatch(setSnackBarMessage("Configuration saved successfully"));
+          dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
 
         onCloseEndpoint();
@@ -131,16 +133,16 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
     }
   };
 
-  let title = "Add new Webhook";
+  let title = t("Add new Webhook");
   let icon = <WebhookIcon />;
 
   switch (type) {
     case "logger_webhook":
-      title = "New Logger Webhook";
+      title = t("New Logger Webhook");
       icon = <ConsoleIcon />;
       break;
     case "audit_webhook":
-      title = "New Audit Webhook";
+      title = t("New Audit Webhook");
       icon = <PendingItemsIcon />;
       break;
   }
@@ -164,10 +166,10 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
             }}
             error={
               invalidInputs.includes("name") && !initialInputs.includes("name")
-                ? "Invalid Name"
+                ? t("Invalid Name")
                 : ""
             }
-            label="Name"
+            label={t("Name")}
             value={name}
             pattern={"^(?=.*[a-zA-Z0-9]).{1,}$"}
             required
@@ -183,10 +185,10 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
             error={
               invalidInputs.includes("endpoint") &&
               !initialInputs.includes("endpoint")
-                ? "Invalid Endpoint set"
+                ? t("Invalid Endpoint set")
                 : ""
             }
-            label="Endpoint"
+            label={t("Endpoint")}
             value={endpoint}
             pattern={
               "^(https?):\\/\\/([a-zA-Z0-9\\-.]+)(:[0-9]+)?(\\/[a-zA-Z0-9_\\-.\\/]*)?$"
@@ -200,7 +202,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
               initializeInput("auth-token");
               setAuthToken(event.target.value);
             }}
-            label="Auth Token"
+            label={t("Auth Token")}
             value={authToken}
           />
         </FormLayout>
@@ -222,7 +224,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
             variant="regular"
             disabled={saving}
             onClick={onCloseEndpoint}
-            label={"Cancel"}
+            label={t("Cancel")}
             sx={{
               marginRight: 10,
             }}
@@ -233,7 +235,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
             variant="callAction"
             color="primary"
             disabled={saving || invalidInputs.length !== 0}
-            label={"Save"}
+            label={t("Save")}
             onClick={saveWebhook}
           />
         </Grid>

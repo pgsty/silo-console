@@ -46,6 +46,7 @@ import { useAppDispatch } from "../../../../store";
 import { api } from "../../../../api";
 import { IElement } from "../types";
 import { errorToHandler } from "../../../../api/errors";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const getRoutePath = (path: string) => {
   return `${IAM_PAGES.SETTINGS}/${path}`;
@@ -59,6 +60,8 @@ const ConfigurationOptions = () => {
   const { pathname = "" } = useLocation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [configSubSysList, setConfigSubSysList] = useState<string[]>([]);
   const fetchConfigSubSysList = useCallback(async () => {
@@ -107,7 +110,7 @@ const ConfigurationOptions = () => {
         <Grid item xs={12} id={"settings-container"}>
           <ScreenTitle
             icon={<SettingsIcon />}
-            title={"SILO Configuration:"}
+            title={t("SILO Configuration:")}
             actions={
               <Box
                 sx={{
@@ -132,7 +135,7 @@ const ConfigurationOptions = () => {
               return {
                 tabConfig: {
                   id: `settings-tab-${configuration_label}`,
-                  label: configuration_label,
+                  label: t(configuration_label),
                   value: configuration_id,
                   icon: icon,
                   to: getRoutePath(configuration_id),
@@ -158,23 +161,28 @@ const ConfigurationOptions = () => {
         </Grid>
         <Grid item xs={12} sx={{ paddingTop: "15px" }}>
           <HelpBox
-            title={"Learn more about Configurations"}
+            title={t("Learn more about Configurations")}
             iconComponent={<SettingsIcon />}
             help={
               <Fragment>
-                SILO supports a variety of configurations ranging from
-                encryption, compression, region, notifications, etc.
+                {t(
+                  "SILO supports a variety of configurations ranging from encryption, compression, region, notifications, etc.",
+                )}
                 <br />
                 <br />
-                You can learn more at the{" "}
-                <a
-                  href="https://silo.pgsty.com/reference/minio-server/settings/#minio-server-configuration-settings"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  documentation
-                </a>
-                .
+                {interpolate(t("You can learn more at the {link}."), {
+                  link: (
+                    <a
+                      href={localize(
+                        "https://silo.pgsty.com/reference/minio-server/settings/#minio-server-configuration-settings",
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {t("documentation")}
+                    </a>
+                  ),
+                })}
               </Fragment>
             }
           />

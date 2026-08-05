@@ -45,11 +45,14 @@ import AddUserServiceAccountHelpBox from "./AddUserServiceAccountHelpBox";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import PanelTitle from "../Common/PanelTitle/PanelTitle";
+import { useLocalizedLink, useT } from "i18n";
 
 const AddServiceAccount = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [addSending, setAddSending] = useState<boolean>(false);
   const [accessKey, setAccessKey] = useState<string>(getRandomString(20));
@@ -157,7 +160,7 @@ const AddServiceAccount = () => {
           closeModal={() => {
             closeCredentialsModal();
           }}
-          entity="Access Key"
+          entity={t("Access Key")}
         />
       )}
       <Grid item xs={12}>
@@ -167,7 +170,7 @@ const AddServiceAccount = () => {
               onClick={() =>
                 navigate(`${IAM_PAGES.USERS}/${encodeURIComponent(userName)}`)
               }
-              label={"User Details - " + userName}
+              label={t("User Details - {user}").replace("{user}", userName)}
             />
           }
           actions={<HelpMenu />}
@@ -176,7 +179,10 @@ const AddServiceAccount = () => {
           <FormLayout
             helpBox={<AddUserServiceAccountHelpBox />}
             icon={<ServiceAccountCredentialsIcon />}
-            title={`Create Access Key for ${userName}`}
+            title={t("Create Access Key for {user}").replace(
+              "{user}",
+              userName,
+            )}
           >
             <form
               noValidate
@@ -188,11 +194,11 @@ const AddServiceAccount = () => {
             >
               <InputBox
                 value={accessKey}
-                label={"Access Key"}
+                label={t("Access Key")}
                 id={"accessKey"}
                 name={"accessKey"}
                 autoComplete="section-service-account username"
-                placeholder={"Enter Access Key"}
+                placeholder={t("Enter Access Key")}
                 onChange={(e) => {
                   setAccessKey(e.target.value);
                 }}
@@ -200,12 +206,12 @@ const AddServiceAccount = () => {
               />
               <InputBox
                 value={secretKey}
-                label={"Secret Key"}
+                label={t("Secret Key")}
                 id={"secretKey"}
                 name={"secretKey"}
                 type={"password"}
                 autoComplete="section-service-account new-password"
-                placeholder={"Enter Secret Key"}
+                placeholder={t("Enter Secret Key")}
                 onChange={(e) => {
                   setSecretKey(e.target.value);
                 }}
@@ -220,10 +226,10 @@ const AddServiceAccount = () => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setIsRestrictedByPolicy(event.target.checked);
                 }}
-                label={"Restrict beyond user policy"}
-                description={
-                  "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies."
-                }
+                label={t("Restrict beyond user policy")}
+                description={t(
+                  "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies.",
+                )}
               />
               {isRestrictedByPolicy && (
                 <Grid item xs={12}>
@@ -233,17 +239,20 @@ const AddServiceAccount = () => {
                         <Fragment>
                           <a
                             target="blank"
-                            href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                            href={localize(
+                              "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                            )}
                           >
-                            Guide to access policy structure
+                            {t("Guide to access policy structure")}
                           </a>
                         </Fragment>
                       }
                       placement="right"
                     >
                       <PanelTitle>
-                        Current User Policy - edit the JSON to remove
-                        permissions for this Access Key
+                        {t(
+                          "Current User Policy - edit the JSON to remove permissions for this Access Key",
+                        )}
                       </PanelTitle>
                     </HelpTip>
                   </Box>
@@ -258,9 +267,11 @@ const AddServiceAccount = () => {
                         <Fragment>
                           <a
                             target="blank"
-                            href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                            href={localize(
+                              "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                            )}
                           >
-                            Guide to access policy structure
+                            {t("Guide to access policy structure")}
                           </a>
                         </Fragment>
                       }
@@ -284,7 +295,7 @@ const AddServiceAccount = () => {
                     setExpiry(e);
                   }}
                   id="expiryTime"
-                  label={"Expiry"}
+                  label={t("Expiry")}
                   timeFormat={"24h"}
                   secondsSelector={false}
                 />
@@ -292,33 +303,33 @@ const AddServiceAccount = () => {
 
               <InputBox
                 value={name}
-                label={"Name"}
+                label={t("Name")}
                 id={"name"}
                 name={"name"}
                 type={"text"}
-                placeholder={"Enter a name"}
+                placeholder={t("Enter a name")}
                 onChange={(e) => {
                   setName(e.target.value);
                 }}
               />
               <InputBox
                 value={description}
-                label={"Description"}
+                label={t("Description")}
                 id={"description"}
                 name={"description"}
                 type={"text"}
-                placeholder={"Enter a description"}
+                placeholder={t("Enter a description")}
                 onChange={(e) => {
                   setDescription(e.target.value);
                 }}
               />
               <InputBox
                 value={comments}
-                label={"Comments"}
+                label={t("Comments")}
                 id={"comment"}
                 name={"comment"}
                 type={"text"}
-                placeholder={"Enter a comment"}
+                placeholder={t("Enter a comment")}
                 onChange={(e) => {
                   setComments(e.target.value);
                 }}
@@ -329,7 +340,7 @@ const AddServiceAccount = () => {
                   type="button"
                   variant="regular"
                   onClick={resetForm}
-                  label={"Clear"}
+                  label={t("Clear")}
                 />
 
                 <Button
@@ -337,7 +348,7 @@ const AddServiceAccount = () => {
                   type="submit"
                   variant="callAction"
                   color="primary"
-                  label={"Create"}
+                  label={t("Create")}
                 />
               </Grid>
             </form>

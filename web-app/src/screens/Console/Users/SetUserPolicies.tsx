@@ -33,6 +33,7 @@ import { setSelectedPolicies } from "./AddUsersSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import api from "../../../common/api";
 import PolicySelectors from "../Policies/PolicySelectors";
+import { useT } from "i18n";
 
 interface ISetUserPoliciesProps {
   closeModalAndRefresh: () => void;
@@ -48,6 +49,7 @@ const SetUserPolicies = ({
   open,
 }: ISetUserPoliciesProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   //Local States
   const [loading, setLoading] = useState<boolean>(false);
   const [actualPolicy, setActualPolicy] = useState<string[]>([]);
@@ -100,7 +102,7 @@ const SetUserPolicies = ({
         closeModalAndRefresh();
       }}
       modalOpen={open}
-      title="Set Policies"
+      title={t("Set Policies")}
       titleIcon={<IAMPoliciesIcon />}
     >
       <FormLayout withBorders={false} containerPadding={false}>
@@ -113,7 +115,7 @@ const SetUserPolicies = ({
           variant="regular"
           color="primary"
           onClick={resetSelection}
-          label={"Reset"}
+          label={t("Reset")}
         />
         <Button
           id={"save-user-policy"}
@@ -122,7 +124,7 @@ const SetUserPolicies = ({
           color="primary"
           disabled={loading}
           onClick={SetUserPoliciesAction}
-          label={"Save"}
+          label={t("Save")}
         />
       </Box>
       {loading && (

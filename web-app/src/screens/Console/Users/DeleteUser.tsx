@@ -24,6 +24,7 @@ import { useAppDispatch } from "../../../store";
 import { api } from "api";
 import { UserServiceAccountItem } from "../../../api/consoleApi";
 import { errorToHandler } from "../../../api/errors";
+import { useT } from "i18n";
 
 interface IDeleteUserProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -38,6 +39,7 @@ const DeleteUser = ({
 }: IDeleteUserProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const onClose = () => closeDeleteModalAndRefresh(false);
 
@@ -93,8 +95,10 @@ const DeleteUser = ({
       if (user === userLoggedIn) {
         dispatch(
           setErrorSnackMessage({
-            errorMessage: "Cannot delete currently logged in user",
-            detailedError: `Cannot delete currently logged in user ${userLoggedIn}`,
+            errorMessage: t("Cannot delete currently logged in user"),
+            detailedError: t(
+              "Cannot delete currently logged in user {user}",
+            ).replace("{user}", userLoggedIn),
           }),
         );
         closeDeleteModalAndRefresh(true);
@@ -111,16 +115,16 @@ const DeleteUser = ({
   };
 
   const noSAtext =
-    "Are you sure you want to delete the following " +
-    selectedUsers.length +
-    " " +
-    "user" +
-    (selectedUsers.length > 1 ? "s?" : "?");
+    selectedUsers.length > 1
+      ? t(
+          "Are you sure you want to delete the following {count} users?",
+        ).replace("{count}", `${selectedUsers.length}`)
+      : t("Are you sure you want to delete the following user?");
 
   return (
     <ConfirmDialog
-      title={`Delete User${selectedUsers.length > 1 ? "s" : ""}`}
-      confirmText={"Delete"}
+      title={selectedUsers.length > 1 ? t("Delete Users") : t("Delete User")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -137,29 +141,32 @@ const DeleteUser = ({
                   variant={"warning"}
                   message={
                     <Fragment>
-                      Click on a user to view the full listing of associated
-                      Access Keys. All Access Keys associated with a user will
-                      be deleted along with the user.
+                      {t(
+                        "Click on a user to view the full listing of associated Access Keys. All Access Keys associated with a user will be deleted along with the user.",
+                      )}
                       <br />
                       <br />
-                      <strong>Are you sure you want to continue?</strong>
+                      <strong>{t("Are you sure you want to continue?")}</strong>
                     </Fragment>
                   }
-                  title="Warning: One or more users selected has associated Access Keys."
+                  title={t(
+                    "Warning: One or more users selected has associated Access Keys.",
+                  )}
                   sx={{ margin: "15px 0" }}
                 />
                 <DataTable
                   itemActions={tableActions}
                   columns={[
-                    { label: "Username", elementKey: "userName" },
+                    { label: t("Username"), elementKey: "userName" },
                     {
-                      label: "# Associated Access Keys",
+                      label: t("# Associated Access Keys"),
                       elementKey: "numSAs",
                     },
                   ]}
                   isLoading={loadingSA}
                   records={userSAList}
-                  entityName="User Access Keys"
+                  entityName={t("User Access Keys")}
+                  customEmptyMessage={t("There are no User Access Keys yet.")}
                   idField="userName"
                   customPaperHeight="250"
                 />

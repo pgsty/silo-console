@@ -49,6 +49,7 @@ import { setDestinationLoading } from "./destinationsSlice";
 import SearchBox from "../Common/SearchBox";
 import ConfirmDeleteDestinationModal from "./ConfirmDeleteDestinationModal";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const StatusDisplay = styled.div(({ theme }) => ({
   display: "flex",
@@ -66,6 +67,8 @@ const StatusDisplay = styled.div(({ theme }) => ({
 const ListEventDestinations = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
   // Reducer States
   const isLoading = useSelector((state: AppState) => state.destination.loading);
 
@@ -150,7 +153,7 @@ const ListEventDestinations = () => {
     return (
       <StatusDisplay>
         <CircleIcon className={status === "Offline" ? "offline" : ""} />
-        {status}
+        {status ? t(status) : status}
       </StatusDisplay>
     );
   };
@@ -160,7 +163,7 @@ const ListEventDestinations = () => {
       <PageLayout>
         <Grid item xs={12} sx={actionsTray.actionsTray}>
           <SearchBox
-            placeholder="Search target"
+            placeholder={t("Search target")}
             onChange={setFilter}
             value={filter}
             sx={{ maxWidth: 380 }}
@@ -173,10 +176,10 @@ const ListEventDestinations = () => {
               gap: 5,
             }}
           >
-            <TooltipWrapper tooltip={"Refresh List"}>
+            <TooltipWrapper tooltip={t("Refresh List")}>
               <Button
                 id={"reload-event-destinations"}
-                label={"Refresh"}
+                label={t("Refresh")}
                 variant="regular"
                 icon={<RefreshIcon />}
                 onClick={() => {
@@ -184,10 +187,10 @@ const ListEventDestinations = () => {
                 }}
               />
             </TooltipWrapper>
-            <TooltipWrapper tooltip={"Add Event Destination"}>
+            <TooltipWrapper tooltip={t("Add Event Destination")}>
               <Button
                 id={"add-notification-target"}
-                label={"Add Event Destination"}
+                label={t("Add Event Destination")}
                 variant="callAction"
                 icon={<AddIcon />}
                 onClick={() => {
@@ -207,42 +210,47 @@ const ListEventDestinations = () => {
                     itemActions={tableActions}
                     columns={[
                       {
-                        label: "Status",
+                        label: t("Status"),
                         elementKey: "status",
                         renderFunction: statusDisplay,
                         width: 150,
                       },
-                      { label: "Service", elementKey: "service_name" },
+                      { label: t("Service"), elementKey: "service_name" },
                     ]}
                     isLoading={isLoading}
                     records={filteredRecords}
-                    entityName="Event Destinations"
+                    entityName={t("Event Destinations")}
+                    customEmptyMessage={t(
+                      "There are no Event Destinations yet.",
+                    )}
                     idField="service_name"
                     customPaperHeight={"400px"}
                   />
                 </Box>
                 <Grid item xs={12} sx={{ marginTop: 15 }}>
                   <HelpBox
-                    title={"Event Destinations"}
+                    title={t("Event Destinations")}
                     iconComponent={<LambdaIcon />}
                     help={
                       <Fragment>
-                        SILO bucket notifications allow administrators to send
-                        notifications to supported external services on certain
-                        object or bucket events. SILO supports bucket and
-                        object-level S3 events similar to the Amazon S3 Event
-                        Notifications.
+                        {t(
+                          "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.",
+                        )}
                         <br />
                         <br />
-                        You can learn more at the{" "}
-                        <a
-                          href="https://silo.pgsty.com/administration/monitoring/bucket-notifications/#minio-bucket-notifications"
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          documentation
-                        </a>
-                        .
+                        {interpolate(t("You can learn more at the {link}."), {
+                          link: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/monitoring/bucket-notifications/#minio-bucket-notifications",
+                              )}
+                              target="_blank"
+                              rel="noopener"
+                            >
+                              {t("documentation")}
+                            </a>
+                          ),
+                        })}
                       </Fragment>
                     }
                   />
@@ -260,26 +268,26 @@ const ListEventDestinations = () => {
               >
                 <Grid item xs={8}>
                   <HelpBox
-                    title={"Event Destinations"}
+                    title={t("Event Destinations")}
                     iconComponent={<LambdaIcon />}
                     help={
                       <Fragment>
-                        SILO bucket notifications allow administrators to send
-                        notifications to supported external services on certain
-                        object or bucket events. SILO supports bucket and
-                        object-level S3 events similar to the Amazon S3 Event
-                        Notifications.
+                        {t(
+                          "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.",
+                        )}
                         <br />
                         <br />
-                        To get started,{" "}
-                        <ActionLink
-                          onClick={() => {
-                            navigate(IAM_PAGES.EVENT_DESTINATIONS_ADD);
-                          }}
-                        >
-                          Add an Event Destination
-                        </ActionLink>
-                        .
+                        {interpolate(t("To get started, {link}."), {
+                          link: (
+                            <ActionLink
+                              onClick={() => {
+                                navigate(IAM_PAGES.EVENT_DESTINATIONS_ADD);
+                              }}
+                            >
+                              {t("Add an Event Destination")}
+                            </ActionLink>
+                          ),
+                        })}
                       </Fragment>
                     }
                   />

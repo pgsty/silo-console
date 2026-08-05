@@ -27,6 +27,7 @@ import DestinationButton from "./DestinationButton";
 import HelpMenu from "../HelpMenu";
 import { useAppDispatch } from "../../../store";
 import { setHelpName } from "../../../systemSlice";
+import { useT } from "i18n";
 
 const withLogos = destinationList.filter((elService) => elService.logo !== "");
 const database = withLogos.filter(
@@ -42,6 +43,7 @@ const functions = withLogos.filter(
 const EventTypeSelector = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const t = useT();
   useEffect(() => {
     dispatch(setHelpName("notification_type_selector"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,7 +54,7 @@ const EventTypeSelector = () => {
         label={
           <Fragment>
             <BackLink
-              label={"Event Destinations"}
+              label={t("Event Destinations")}
               onClick={() => navigate(IAM_PAGES.EVENT_DESTINATIONS)}
             />
           </Fragment>
@@ -63,7 +65,7 @@ const EventTypeSelector = () => {
         <FormLayout helpBox={<NotificationEndpointTypeSelectorHelpBox />}>
           <Box>
             <Box sx={{ fontSize: 16, fontWeight: 600, paddingBottom: 15 }}>
-              Queue
+              {t("Queue")}
             </Box>
             <Box sx={{ ...typesSelection.iconContainer }}>
               {queue.map((item) => {
@@ -78,7 +80,7 @@ const EventTypeSelector = () => {
               })}
             </Box>
             <Box sx={{ fontSize: 16, fontWeight: 600, paddingBottom: 15 }}>
-              Database
+              {t("Database")}
             </Box>
             <Box sx={{ ...typesSelection.iconContainer }}>
               {database.map((item) => {
@@ -93,7 +95,7 @@ const EventTypeSelector = () => {
               })}
             </Box>
             <Box sx={{ fontSize: 16, fontWeight: 600, paddingBottom: 15 }}>
-              Functions
+              {t("Functions")}
             </Box>
             <Box sx={{ ...typesSelection.iconContainer }}>
               {functions.map((item) => {

@@ -29,6 +29,7 @@ import get from "lodash/get";
 import { ReplicationSite } from "./SiteReplication";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
 import EditSiteEndPoint from "./EditSiteEndPoint";
+import { interpolate, useT } from "i18n";
 
 const EndpointRender = styled.div(({ theme }) => ({
   display: "flex",
@@ -56,19 +57,20 @@ const ReplicationSites = ({
   onDeleteSite: (isAll: boolean, sites: string[]) => void;
   onRefresh: () => void;
 }) => {
+  const t = useT();
   const [deleteSiteKey, setIsDeleteSiteKey] = useState<string>("");
   const [editSite, setEditSite] = useState<any>(null);
 
   const replicationColumns: IColumns[] = [
-    { label: "Site Name", elementKey: "name" },
+    { label: t("Site Name"), elementKey: "name" },
     {
-      label: "Endpoint",
+      label: t("Endpoint"),
       elementKey: "endpoint",
       renderFullObject: true,
       renderFunction: (siteInfo) => (
         <EndpointRender>
           {siteInfo.isCurrent ? (
-            <Tooltip tooltip={"This site/cluster"} placement="top">
+            <Tooltip tooltip={t("This site/cluster")} placement="top">
               <Box className={"currentIndicator"}>
                 <CircleIcon />
               </Box>
@@ -86,12 +88,12 @@ const ReplicationSites = ({
     {
       type: "edit",
       onClick: (valueToSend) => setEditSite(valueToSend),
-      tooltip: "Edit Endpoint",
+      tooltip: t("Edit Endpoint"),
     },
     {
       type: "delete",
       onClick: (valueToSend) => setIsDeleteSiteKey(valueToSend.name),
-      tooltip: "Delete Site",
+      tooltip: t("Delete Site"),
     },
   ];
 
@@ -108,8 +110,8 @@ const ReplicationSites = ({
 
       {deleteSiteKey !== "" && (
         <ConfirmDialog
-          title={`Delete Replication Site`}
-          confirmText={"Delete"}
+          title={t("Delete Replication Site")}
+          confirmText={t("Delete")}
           isOpen={deleteSiteKey !== ""}
           titleIcon={<ConfirmDeleteIcon />}
           isLoading={false}
@@ -121,8 +123,12 @@ const ReplicationSites = ({
           }}
           confirmationContent={
             <Fragment>
-              Are you sure you want to remove the replication site:{" "}
-              <strong>{deleteSiteKey}</strong>?
+              {interpolate(
+                t(
+                  "Are you sure you want to remove the replication site: {name}?",
+                ),
+                { name: <strong>{deleteSiteKey}</strong> },
+              )}
             </Fragment>
           }
         />

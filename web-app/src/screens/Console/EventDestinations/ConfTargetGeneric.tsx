@@ -27,6 +27,7 @@ import {
 } from "mds";
 import { IElementValue, IOverrideEnv, KVField } from "../Configurations/types";
 import CSVMultiSelector from "../Common/FormComponents/CSVMultiSelector/CSVMultiSelector";
+import { useT } from "i18n";
 
 interface IConfGenericProps {
   onChange: (newValue: IElementValue[]) => void;
@@ -57,9 +58,17 @@ const ConfTargetGeneric = ({
   defaultVals,
   overrideEnv,
 }: IConfGenericProps) => {
+  const t = useT();
   const [valueHolder, setValueHolder] = useState<IElementValue[]>([]);
   const fieldsElements = !fields ? [] : fields;
   const defValList = !defaultVals ? [] : defaultVals;
+
+  // The descriptor arrays stay plain module constants, so their English
+  // label/tooltip/placeholder literals double as dictionary keys and are
+  // translated here, at the single point where every field is rendered.
+  // Descriptors omit tooltip and placeholder freely, hence the guard.
+  const tr = <T extends string | undefined>(text: T): T =>
+    text ? (t(text) as T) : text;
 
   // Effect to create all the values to hold
   useEffect(() => {
@@ -98,7 +107,7 @@ const ConfTargetGeneric = ({
       if (override) {
         return (
           <ReadBox
-            label={field.label}
+            label={tr(field.label)}
             actionButton={
               <Grid
                 item
@@ -109,7 +118,9 @@ const ConfTargetGeneric = ({
                 }}
               >
                 <Tooltip
-                  tooltip={`This value is set from the ${override.overrideEnv} environment variable`}
+                  tooltip={t(
+                    "This value is set from the {env} environment variable",
+                  ).replace("{env}", override.overrideEnv)}
                   placement={"left"}
                 >
                   <ConsoleIcon style={{ width: 20 }} />
@@ -136,9 +147,9 @@ const ConfTargetGeneric = ({
             }}
             id={field.name}
             name={field.name}
-            label={field.label}
+            label={tr(field.label)}
             value={"switch_on"}
-            tooltip={field.tooltip}
+            tooltip={tr(field.tooltip)}
             checked={value === "on"}
           />
         );
@@ -146,7 +157,7 @@ const ConfTargetGeneric = ({
         return (
           <CSVMultiSelector
             elements={holderItem ? holderItem.value : ""}
-            label={field.label}
+            label={tr(field.label)}
             name={field.name}
             onChange={(value: string | string[]) => {
               let valCh = "";
@@ -159,8 +170,8 @@ const ConfTargetGeneric = ({
 
               setValueElement(field.name, valCh, item);
             }}
-            tooltip={field.tooltip}
-            commonPlaceholder={field.placeholder}
+            tooltip={tr(field.tooltip)}
+            commonPlaceholder={tr(field.placeholder)}
             withBorder={true}
           />
         );
@@ -169,11 +180,11 @@ const ConfTargetGeneric = ({
           <CommentBox
             id={field.name}
             name={field.name}
-            label={field.label}
-            tooltip={field.tooltip}
+            label={tr(field.label)}
+            tooltip={tr(field.tooltip)}
             value={holderItem ? holderItem.value : ""}
             onChange={(e) => setValueElement(field.name, e.target.value, item)}
-            placeholder={field.placeholder}
+            placeholder={tr(field.placeholder)}
           />
         );
       default:
@@ -181,13 +192,13 @@ const ConfTargetGeneric = ({
           <InputBox
             id={field.name}
             name={field.name}
-            label={field.label}
-            tooltip={field.tooltip}
+            label={tr(field.label)}
+            tooltip={tr(field.tooltip)}
             value={holderItem ? holderItem.value : ""}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setValueElement(field.name, e.target.value, item)
             }
-            placeholder={field.placeholder}
+            placeholder={tr(field.placeholder)}
           />
         );
     }

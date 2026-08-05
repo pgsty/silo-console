@@ -16,6 +16,7 @@
 import React from "react";
 
 import { Box, HelpIconFilled, IAMPoliciesIcon } from "mds";
+import { useT } from "i18n";
 
 const FeatureItem = ({
   icon,
@@ -45,6 +46,7 @@ const FeatureItem = ({
 };
 
 const AddPolicyHelpBox = () => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -73,29 +75,29 @@ const AddPolicyHelpBox = () => {
         }}
       >
         <HelpIconFilled />
-        <div>Learn more about Policies</div>
+        <div>{t("Learn more about Policies")}</div>
       </Box>
       <Box sx={{ fontSize: "14px", marginBottom: "15px" }}>
         <Box sx={{ paddingBottom: "20px" }}>
           <FeatureItem
             icon={<IAMPoliciesIcon />}
-            description={`Create Policies`}
+            description={t("Create Policies")}
           />
           <Box sx={{ paddingTop: "20px" }}>
-            SILO uses Policy-Based Access Control (PBAC) to define the
-            authorized actions and resources to which an authenticated user has
-            access. Each policy describes one or more actions and conditions
-            that outline the permissions of a user or group of users.{" "}
+            {t(
+              "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.",
+            )}
           </Box>
         </Box>
         <Box sx={{ paddingBottom: "20px" }}>
-          SILO PBAC is built for compatibility with AWS IAM policy syntax,
-          structure, and behavior.
+          {t(
+            "SILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior.",
+          )}
         </Box>
         <Box sx={{ paddingBottom: "20px" }}>
-          Each user can access only those resources and operations which are
-          explicitly granted by the built-in role. SILO denies access to any
-          other resource or action by default.
+          {t(
+            "Each user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.",
+          )}
         </Box>
       </Box>
     </Box>

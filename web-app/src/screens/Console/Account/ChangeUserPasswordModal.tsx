@@ -34,6 +34,7 @@ import { api } from "api";
 import { ApiError, ChangeUserPasswordRequest } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
+import { interpolate, useT } from "i18n";
 
 interface IChangeUserPasswordProps {
   open: boolean;
@@ -47,6 +48,7 @@ const ChangeUserPassword = ({
   closeModal,
 }: IChangeUserPasswordProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [newPassword, setNewPassword] = useState<string>("");
   const [reNewPassword, setReNewPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -62,7 +64,7 @@ const ChangeUserPassword = ({
     if (newPassword.length < 8) {
       dispatch(
         setModalErrorSnackMessage({
-          errorMessage: "Passwords must be at least 8 characters long",
+          errorMessage: t("Passwords must be at least 8 characters long"),
           detailedError: "",
         }),
       );
@@ -83,7 +85,10 @@ const ChangeUserPassword = ({
         setReNewPassword("");
         dispatch(
           setSnackBarMessage(
-            `Successfully updated the password for the user ${userName}.`,
+            t("Successfully updated the password for the user {user}.").replace(
+              "{user}",
+              userName,
+            ),
           ),
         );
         closeModal();
@@ -99,7 +104,7 @@ const ChangeUserPassword = ({
 
   return open ? (
     <ModalWrapper
-      title="Change User Password"
+      title={t("Change User Password")}
       modalOpen={open}
       onClose={() => {
         setNewPassword("");
@@ -117,7 +122,9 @@ const ChangeUserPassword = ({
       >
         <FormLayout withBorders={false} containerPadding={false}>
           <Box sx={{ margin: "10px 0 20px" }}>
-            Change password for: <strong>{userName}</strong>
+            {interpolate(t("Change password for: {user}"), {
+              user: <strong>{userName}</strong>,
+            })}
           </Box>
           <InputBox
             id="new-password"
@@ -125,7 +132,7 @@ const ChangeUserPassword = ({
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setNewPassword(event.target.value);
             }}
-            label="New Password"
+            label={t("New Password")}
             type="password"
             value={newPassword}
           />
@@ -135,7 +142,7 @@ const ChangeUserPassword = ({
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setReNewPassword(event.target.value);
             }}
-            label="Type New Password Again"
+            label={t("Type New Password Again")}
             type="password"
             value={reNewPassword}
           />
@@ -149,7 +156,7 @@ const ChangeUserPassword = ({
                 loading ||
                 !(reNewPassword.length > 0 && newPassword === reNewPassword)
               }
-              label={"Save"}
+              label={t("Save")}
             />
           </Box>
           {loading && (

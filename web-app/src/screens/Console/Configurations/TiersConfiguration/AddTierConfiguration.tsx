@@ -45,11 +45,13 @@ import { useAppDispatch } from "../../../../store";
 import RegionSelectWrapper from "./RegionSelectWrapper";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../../HelpMenu";
+import { useT } from "i18n";
 
 const AddTierConfiguration = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
 
   //Local States
   const [saving, setSaving] = useState<boolean>(false);
@@ -89,10 +91,12 @@ const AddTierConfiguration = () => {
     }
 
     setNameInputError(
-      "Please verify that string is uppercase only and contains valid characters (numbers, dashes & underscores).",
+      t(
+        "Please verify that string is uppercase only and contains valid characters (numbers, dashes & underscores).",
+      ),
     );
     return false;
-  }, [name]);
+  }, [name, t]);
 
   //Effects
 
@@ -292,7 +296,7 @@ const AddTierConfiguration = () => {
         label={
           <Fragment>
             <BackLink
-              label={"Add Tier"}
+              label={t("Add Tier")}
               onClick={() => navigate(IAM_PAGES.TIERS_ADD)}
             />
           </Fragment>
@@ -312,7 +316,10 @@ const AddTierConfiguration = () => {
           <form noValidate onSubmit={submitForm}>
             {type !== "" && targetElement ? (
               <SectionTitle icon={targetElement.logo} sx={{ marginBottom: 20 }}>
-                {titleSelection ? titleSelection : ""} - Add Tier Configuration
+                {t("{provider} - Add Tier Configuration").replace(
+                  "{provider}",
+                  titleSelection ? titleSelection : "",
+                )}
               </SectionTitle>
             ) : null}
             <Grid
@@ -335,8 +342,8 @@ const AddTierConfiguration = () => {
                   <InputBox
                     id="name"
                     name="name"
-                    label="Name"
-                    placeholder="Enter Name (Eg. REMOTE-TIER)"
+                    label={t("Name")}
+                    placeholder={t("Enter Name (Eg. REMOTE-TIER)")}
                     value={name}
                     onChange={updateTierName}
                     error={nameInputError}
@@ -345,8 +352,8 @@ const AddTierConfiguration = () => {
                   <InputBox
                     id="endpoint"
                     name="endpoint"
-                    label="Endpoint"
-                    placeholder="Enter Endpoint"
+                    label={t("Endpoint")}
+                    placeholder={t("Enter Endpoint")}
                     value={endpoint}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setEndpoint(e.target.value);
@@ -358,8 +365,8 @@ const AddTierConfiguration = () => {
                       <InputBox
                         id="accessKey"
                         name="accessKey"
-                        label="Access Key"
-                        placeholder="Enter Access Key"
+                        label={t("Access Key")}
+                        placeholder={t("Enter Access Key")}
                         value={accessKey}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setAccessKey(e.target.value);
@@ -369,8 +376,8 @@ const AddTierConfiguration = () => {
                       <InputBox
                         id="secretKey"
                         name="secretKey"
-                        label="Secret Key"
-                        placeholder="Enter Secret Key"
+                        label={t("Secret Key")}
+                        placeholder={t("Enter Secret Key")}
                         value={secretKey}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setSecretKey(e.target.value);
@@ -383,7 +390,7 @@ const AddTierConfiguration = () => {
                     <FileSelector
                       accept=".json"
                       id="creds"
-                      label="Credentials"
+                      label={t("Credentials")}
                       name="creds"
                       returnEncodedData
                       onChange={(_, fileName, encodedValue) => {
@@ -401,8 +408,8 @@ const AddTierConfiguration = () => {
                       <InputBox
                         id="accountName"
                         name="accountName"
-                        label="Account Name"
-                        placeholder="Enter Account Name"
+                        label={t("Account Name")}
+                        placeholder={t("Enter Account Name")}
                         value={accountName}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setAccountName(e.target.value);
@@ -412,8 +419,8 @@ const AddTierConfiguration = () => {
                       <InputBox
                         id="accountKey"
                         name="accountKey"
-                        label="Account Key"
-                        placeholder="Enter Account Key"
+                        label={t("Account Key")}
+                        placeholder={t("Enter Account Key")}
                         value={accountKey}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           setAccountKey(e.target.value);
@@ -425,8 +432,8 @@ const AddTierConfiguration = () => {
                   <InputBox
                     id="bucket"
                     name="bucket"
-                    label="Bucket"
-                    placeholder="Enter Bucket"
+                    label={t("Bucket")}
+                    placeholder={t("Enter Bucket")}
                     value={bucket}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setBucket(e.target.value);
@@ -436,8 +443,8 @@ const AddTierConfiguration = () => {
                   <InputBox
                     id="prefix"
                     name="prefix"
-                    label="Prefix"
-                    placeholder="Enter Prefix"
+                    label={t("Prefix")}
+                    placeholder={t("Enter Prefix")}
                     value={prefix}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setPrefix(e.target.value);
@@ -448,7 +455,7 @@ const AddTierConfiguration = () => {
                       setRegion(value);
                     }}
                     required={type !== "minio"}
-                    label={"Region"}
+                    label={t("Region")}
                     id="region"
                     type={type as "azure" | "s3" | "minio" | "gcs"}
                   />
@@ -456,8 +463,8 @@ const AddTierConfiguration = () => {
                     <InputBox
                       id="storageClass"
                       name="storageClass"
-                      label="Storage Class"
-                      placeholder="Enter Storage Class"
+                      label={t("Storage Class")}
+                      placeholder={t("Enter Storage Class")}
                       value={storageClass}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setStorageClass(e.target.value);
@@ -473,7 +480,7 @@ const AddTierConfiguration = () => {
                 type="submit"
                 variant="callAction"
                 disabled={saving || !isFormValid}
-                label={"Save Tier Configuration"}
+                label={t("Save Tier Configuration")}
               />
             </Grid>
           </form>

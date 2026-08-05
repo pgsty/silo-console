@@ -50,12 +50,15 @@ import withSuspense from "../Common/Components/withSuspense";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const DeletePolicy = withSuspense(React.lazy(() => import("./DeletePolicy")));
 
 const ListPolicies = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [records, setRecords] = useState<Policy[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -176,14 +179,14 @@ const ListPolicies = () => {
           closeDeleteModalAndRefresh={closeDeleteModalAndRefresh}
         />
       )}
-      <PageHeaderWrapper label="IAM Policies" actions={<HelpMenu />} />
+      <PageHeaderWrapper label={t("IAM Policies")} actions={<HelpMenu />} />
 
       <PageLayout>
         <Grid container>
           <Grid item xs={12} sx={actionsTray.actionsTray}>
             <SearchBox
               onChange={setFilterPolicies}
-              placeholder="Search Policies"
+              placeholder={t("Search Policies")}
               value={filterPolicies}
               sx={{ maxWidth: 380 }}
             />
@@ -205,7 +208,7 @@ const ListPolicies = () => {
               >
                 <Button
                   id={"create-policy"}
-                  label={"Create Policy"}
+                  label={t("Create Policy")}
                   variant="callAction"
                   icon={<AddIcon />}
                   onClick={() => {
@@ -234,10 +237,11 @@ const ListPolicies = () => {
               >
                 <DataTable
                   itemActions={tableActions}
-                  columns={[{ label: "Name", elementKey: "name" }]}
+                  columns={[{ label: t("Name"), elementKey: "name" }]}
                   isLoading={loading}
                   records={filteredRecords}
-                  entityName="Policies"
+                  entityName={t("Policies")}
+                  customEmptyMessage={t("There are no Policies yet.")}
                   idField="name"
                 />
               </TooltipWrapper>
@@ -245,33 +249,33 @@ const ListPolicies = () => {
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 15 }}>
             <HelpBox
-              title={"Learn more about IAM POLICIES"}
+              title={t("Learn more about IAM POLICIES")}
               iconComponent={<IAMPoliciesIcon />}
               help={
                 <Fragment>
-                  SILO uses Policy-Based Access Control (PBAC) to define the
-                  authorized actions and resources to which an authenticated
-                  user has access. Each policy describes one or more actions and
-                  conditions that outline the permissions of a user or group of
-                  users.
+                  {t(
+                    "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.",
+                  )}
                   <br />
                   <br />
-                  SILO PBAC is built for compatibility with AWS IAM policy
-                  syntax, structure, and behavior. The SILO documentation makes
-                  a best-effort to cover IAM-specific behavior and
-                  functionality. Consider deferring to the IAM documentation for
-                  more complete documentation on AWS IAM-specific topics.
+                  {t(
+                    "SILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.",
+                  )}
                   <br />
                   <br />
-                  You can learn more at the{" "}
-                  <a
-                    href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    documentation
-                  </a>
-                  .
+                  {interpolate(t("You can learn more at the {link}."), {
+                    link: (
+                      <a
+                        href={localize(
+                          "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/",
+                        )}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {t("documentation")}
+                      </a>
+                    ),
+                  })}
                 </Fragment>
               }
             />

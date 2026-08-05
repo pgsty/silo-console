@@ -44,6 +44,7 @@ import { AppState, useAppDispatch } from "../../../../store";
 import WebhookSettings from "../WebhookSettings/WebhookSettings";
 import ConfTargetGeneric from "../ConfTargetGeneric";
 import ResetConfigurationModal from "./ResetConfigurationModal";
+import { useT } from "i18n";
 
 interface IAddNotificationEndpointProps {
   selectedConfiguration: IConfigurationElement;
@@ -57,6 +58,7 @@ const EditConfiguration = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { pathname = "" } = useLocation();
+  const t = useT();
 
   let selConfigTab = pathname.substring(pathname.lastIndexOf("/") + 1);
   selConfigTab = selConfigTab === "settings" ? "region" : selConfigTab;
@@ -133,7 +135,7 @@ const EditConfiguration = ({
           dispatch(setServerNeedsRestart(res.data.restart || false));
           dispatch(configurationIsLoading(true));
           if (!res.data.restart) {
-            dispatch(setSnackBarMessage("Configuration saved successfully"));
+            dispatch(setSnackBarMessage(t("Configuration saved successfully")));
           }
         })
         .catch((err) => {
@@ -141,7 +143,7 @@ const EditConfiguration = ({
           dispatch(setErrorSnackMessage(errorToHandler(err.error)));
         });
     }
-  }, [saving, dispatch, selectedConfiguration, valuesObj, navigate]);
+  }, [saving, dispatch, selectedConfiguration, valuesObj, navigate, t]);
 
   //Fetch Actions
   const submitForm = (event: React.FormEvent) => {
@@ -253,7 +255,7 @@ const EditConfiguration = ({
                       id={"restore-defaults"}
                       variant="secondary"
                       onClick={resetConfigurationMOpen}
-                      label={"Restore Defaults"}
+                      label={t("Restore Defaults")}
                     />
                     &nbsp; &nbsp;
                     <Button
@@ -261,7 +263,7 @@ const EditConfiguration = ({
                       type="submit"
                       variant="callAction"
                       disabled={saving}
-                      label={"Save"}
+                      label={t("Save")}
                     />
                   </Grid>
                 </form>

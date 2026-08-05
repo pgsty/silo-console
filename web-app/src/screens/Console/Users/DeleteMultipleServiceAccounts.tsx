@@ -22,6 +22,7 @@ import { useAppDispatch } from "../../../store";
 import { api } from "api";
 import { ApiError, HttpResponse } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IDeleteMultiSAsProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -35,6 +36,7 @@ const DeleteMultipleSAs = ({
   selectedSAs,
 }: IDeleteMultiSAsProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeDeleteModalAndRefresh(false);
   const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
 
@@ -57,8 +59,8 @@ const DeleteMultipleSAs = ({
   };
   return (
     <ConfirmDialog
-      title={`Delete Access Keys`}
-      confirmText={"Delete"}
+      title={t("Delete Access Keys")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={loadingDelete}
@@ -66,8 +68,9 @@ const DeleteMultipleSAs = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete the selected {selectedSAs.length}{" "}
-          Access Keys?{" "}
+          {t(
+            "Are you sure you want to delete the selected {count} Access Keys?",
+          ).replace("{count}", `${selectedSAs.length}`)}
         </Fragment>
       }
     />

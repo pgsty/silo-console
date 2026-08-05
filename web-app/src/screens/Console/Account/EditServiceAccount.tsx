@@ -33,6 +33,7 @@ import { setErrorSnackMessage, setModalErrorSnackMessage } from "systemSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { DateTime } from "luxon";
+import { useLocalizedLink, useT } from "i18n";
 
 interface IServiceAccountPolicyProps {
   open: boolean;
@@ -46,6 +47,8 @@ const EditServiceAccount = ({
   closeModalAndRefresh,
 }: IServiceAccountPolicyProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const localize = useLocalizedLink();
   const [loading, setLoading] = useState<boolean>(false);
   const [policyDefinition, setPolicyDefinition] = useState<any>("");
 
@@ -103,7 +106,10 @@ const EditServiceAccount = ({
 
   return (
     <ModalWrapper
-      title={`Edit details of - ${selectedAccessKey}`}
+      title={t("Edit details of - {name}").replace(
+        "{name}",
+        selectedAccessKey || "",
+      )}
       modalOpen={open}
       onClose={() => {
         closeModalAndRefresh();
@@ -120,7 +126,7 @@ const EditServiceAccount = ({
         <Grid container>
           <Grid item xs={12}>
             <CodeMirrorWrapper
-              label={`Access Key Policy`}
+              label={t("Access Key Policy")}
               value={policyDefinition}
               onChange={(value) => {
                 setPolicyDefinition(value);
@@ -130,9 +136,11 @@ const EditServiceAccount = ({
                 <Fragment>
                   <a
                     target="blank"
-                    href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                    href={localize(
+                      "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                    )}
                   >
-                    Guide to access policy structure
+                    {t("Guide to access policy structure")}
                   </a>
                 </Fragment>
               }
@@ -154,7 +162,7 @@ const EditServiceAccount = ({
                 setExpiry(e);
               }}
               id="expiryTime"
-              label={"Expiry"}
+              label={t("Expiry")}
               timeFormat={"24h"}
               secondsSelector={false}
             />
@@ -168,11 +176,11 @@ const EditServiceAccount = ({
             <InputBox
               value={name}
               size={120}
-              label={"Name"}
+              label={t("Name")}
               id={"name"}
               name={"name"}
               type={"text"}
-              placeholder={"Enter a name"}
+              placeholder={t("Enter a name")}
               onChange={(e) => {
                 setName(e.target.value);
               }}
@@ -187,11 +195,11 @@ const EditServiceAccount = ({
             <InputBox
               size={120}
               value={description}
-              label={"Description"}
+              label={t("Description")}
               id={"description"}
               name={"description"}
               type={"text"}
-              placeholder={"Enter a description"}
+              placeholder={t("Enter a description")}
               onChange={(e) => {
                 setDescription(e.target.value);
               }}
@@ -209,7 +217,7 @@ const EditServiceAccount = ({
               marginBottom: "15px",
             }}
           >
-            <label style={{ width: "150px" }}>Status</label>
+            <label style={{ width: "150px" }}>{t("Status")}</label>
             <Box
               sx={{
                 padding: "2px",
@@ -219,7 +227,7 @@ const EditServiceAccount = ({
                 style={{
                   gap: "115px",
                 }}
-                indicatorLabels={["Enabled", "Disabled"]}
+                indicatorLabels={[t("Enabled"), t("Disabled")]}
                 checked={status === "on"}
                 id="saStatus"
                 name="saStatus"
@@ -240,7 +248,7 @@ const EditServiceAccount = ({
                 closeModalAndRefresh();
               }}
               disabled={loading}
-              label={"Cancel"}
+              label={t("Cancel")}
             />
             <Button
               id={"save-sa-policy"}
@@ -248,7 +256,7 @@ const EditServiceAccount = ({
               variant="callAction"
               color="primary"
               disabled={loading}
-              label={"Update"}
+              label={t("Update")}
             />
           </Grid>
         </Grid>

@@ -1,6 +1,7 @@
 import React from "react";
 import { StatsResponseType } from "../SiteReplicationStatus";
 import { Box } from "mds";
+import { interpolate, useT } from "i18n";
 
 export function syncStatus(mismatch: boolean, set: boolean): string | boolean {
   if (!set) {
@@ -30,6 +31,7 @@ export const EntityNotFound = ({
   entityType: string;
   entityValue: string;
 }) => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -39,11 +41,18 @@ export const EntityNotFound = ({
         justifyContent: "center",
       }}
     >
-      {entityType}:{" "}
-      <Box sx={{ marginLeft: "5px", marginRight: "5px", fontWeight: 600 }}>
-        {entityValue}
-      </Box>{" "}
-      not found.
+      {interpolate(
+        t("{type}: {name} not found.").replace("{type}", t(entityType)),
+        {
+          name: (
+            <Box
+              sx={{ marginLeft: "5px", marginRight: "5px", fontWeight: 600 }}
+            >
+              {entityValue}
+            </Box>
+          ),
+        },
+      )}
     </Box>
   );
 };

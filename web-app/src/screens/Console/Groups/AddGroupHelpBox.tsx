@@ -16,6 +16,7 @@
 import React from "react";
 
 import { Box, GroupsIcon, HelpIconFilled, IAMPoliciesIcon } from "mds";
+import { useT } from "i18n";
 
 const FeatureItem = ({
   icon,
@@ -44,6 +45,7 @@ const FeatureItem = ({
   );
 };
 const AddGroupHelpBox = () => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -72,21 +74,24 @@ const AddGroupHelpBox = () => {
         }}
       >
         <HelpIconFilled />
-        <div>Learn more about Groups</div>
+        <div>{t("Learn more about Groups")}</div>
       </Box>
       <Box sx={{ fontSize: "14px", marginBottom: "15px" }}>
-        Adding groups lets you assign IAM policies to multiple users at once.
+        {t(
+          "Adding groups lets you assign IAM policies to multiple users at once.",
+        )}
         <Box sx={{ paddingTop: "20px", paddingBottom: "10px" }}>
-          Users inherit access permissions to data and resources through the
-          groups they belong to.
+          {t(
+            "Users inherit access permissions to data and resources through the groups they belong to.",
+          )}
         </Box>
         <Box sx={{ paddingTop: "10px", paddingBottom: "10px" }}>
-          A user can be a member of multiple groups.
+          {t("A user can be a member of multiple groups.")}
         </Box>
         <Box sx={{ paddingTop: "10px", paddingBottom: "10px" }}>
-          Groups provide a simplified method for managing shared permissions
-          among users with common access patterns and workloads. Client’s cannot
-          authenticate to a SILO deployment using a group as an identity.
+          {t(
+            "Groups provide a simplified method for managing shared permissions among users with common access patterns and workloads. Client’s cannot authenticate to a SILO deployment using a group as an identity.",
+          )}
         </Box>
       </Box>
 
@@ -96,20 +101,23 @@ const AddGroupHelpBox = () => {
           flexFlow: "column",
         }}
       >
-        <FeatureItem icon={<GroupsIcon />} description={`Add Users to Group`} />
+        <FeatureItem
+          icon={<GroupsIcon />}
+          description={t("Add Users to Group")}
+        />
         <Box sx={{ paddingTop: "10px", paddingBottom: "10px" }}>
-          Select from the list of displayed users to assign users to the new
-          group at creation. These users inherit the policies assigned to the
-          group.
+          {t(
+            "Select from the list of displayed users to assign users to the new group at creation. These users inherit the policies assigned to the group.",
+          )}
         </Box>
         <FeatureItem
           icon={<IAMPoliciesIcon />}
-          description={`Assign Custom IAM Policies for Group`}
+          description={t("Assign Custom IAM Policies for Group")}
         />
         <Box sx={{ paddingTop: "10px", paddingBottom: "10px" }}>
-          You can add policies to the group by selecting it from the Groups view
-          after creation. The Policy view lets you manage the assigned policies
-          for the group.
+          {t(
+            "You can add policies to the group by selecting it from the Groups view after creation. The Policy view lets you manage the assigned policies for the group.",
+          )}
         </Box>
       </Box>
     </Box>

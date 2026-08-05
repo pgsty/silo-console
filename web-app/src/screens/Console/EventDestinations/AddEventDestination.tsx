@@ -40,6 +40,7 @@ import withSuspense from "../Common/Components/withSuspense";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import TargetTitle from "./TargetTitle";
 import HelpMenu from "../HelpMenu";
+import { useT } from "i18n";
 
 const ConfMySql = withSuspense(
   React.lazy(() => import("./CustomForms/ConfMySql")),
@@ -63,6 +64,7 @@ const AddEventDestination = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
 
   //Local States
   const [valuesArr, setValueArr] = useState<IElementValue[]>([]);
@@ -146,7 +148,7 @@ const AddEventDestination = ({
         label={
           <Fragment>
             <BackLink
-              label="Event Destinations"
+              label={t("Event Destinations")}
               onClick={() => navigate(IAM_PAGES.EVENT_DESTINATIONS_ADD)}
             />
           </Fragment>
@@ -170,11 +172,11 @@ const AddEventDestination = ({
                 <InputBox
                   id={"identifier-field"}
                   name={"identifier-field"}
-                  label={"Identifier"}
+                  label={t("Identifier")}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  tooltip={"Unique descriptive string for this destination"}
-                  placeholder="Enter Destination Identifier"
+                  tooltip={t("Unique descriptive string for this destination")}
+                  placeholder={t("Enter Destination Identifier")}
                   required
                 />
                 <Grid item xs={12}>
@@ -194,7 +196,7 @@ const AddEventDestination = ({
                     type="submit"
                     variant="callAction"
                     disabled={saving || identifier.trim() === ""}
-                    label={"Save Event Destination"}
+                    label={t("Save Event Destination")}
                   />
                 </Grid>
               </FormLayout>

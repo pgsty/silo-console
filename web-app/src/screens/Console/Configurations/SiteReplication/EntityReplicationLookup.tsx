@@ -32,8 +32,10 @@ import PolicyEntityStatus from "./LookupStatus/PolicyEntityStatus";
 import GroupEntityStatus from "./LookupStatus/GroupEntityStatus";
 import UserEntityStatus from "./LookupStatus/UserEntityStatus";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import { useT } from "i18n";
 
 const EntityReplicationLookup = () => {
+  const t = useT();
   const [entityType, setEntityType] = useState<string>("bucket");
   const [entityValue, setEntityValue] = useState<string>("");
 
@@ -84,7 +86,7 @@ const EntityReplicationLookup = () => {
         }}
       >
         <Box sx={{ width: "240px", flexGrow: "0" }}>
-          View Replication Status for a:
+          {t("View Replication Status for a:")}
         </Box>
         <Box
           sx={{
@@ -105,19 +107,19 @@ const EntityReplicationLookup = () => {
             value={entityType}
             options={[
               {
-                label: "Bucket",
+                label: t("Bucket"),
                 value: "bucket",
               },
               {
-                label: "User",
+                label: t("User"),
                 value: "user",
               },
               {
-                label: "Group",
+                label: t("Group"),
                 value: "group",
               },
               {
-                label: "Policy",
+                label: t("Policy"),
                 value: "policy",
               },
             ]}
@@ -147,14 +149,14 @@ const EntityReplicationLookup = () => {
             maxWidth: "80px",
           }}
         >
-          <TooltipWrapper tooltip={"View across sites"}>
+          <TooltipWrapper tooltip={t("View across sites")}>
             <Button
               id={"view-across-sites"}
               type={"button"}
               onClick={() => {
                 getStats(entityType, entityValue);
               }}
-              label={`View`}
+              label={t("View")}
               icon={<ClustersIcon />}
               collapseOnSmall={false}
               disabled={!entityValue || !entityType}

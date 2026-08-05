@@ -27,12 +27,14 @@ import {
   Switch,
 } from "mds";
 import { IElementValue } from "../../Configurations/types";
+import { useT } from "i18n";
 
 interface IConfPostgresProps {
   onChange: (newValue: IElementValue[]) => void;
 }
 
 const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
+  const t = useT();
   //Local States
   const [useConnectionString, setUseConnectionString] =
     useState<boolean>(false);
@@ -196,7 +198,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
   return (
     <FormLayout containerPadding={false} withBorders={false}>
       <Switch
-        label={"Manually Configure String"}
+        label={t("Manually Configure String")}
         checked={useConnectionString}
         id="manualString"
         name="manualString"
@@ -210,7 +212,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
           <InputBox
             id="connection-string"
             name="connection_string"
-            label="Connection String"
+            label={t("Connection String")}
             value={connectionString}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setConnectionString(e.target.value);
@@ -233,7 +235,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 id="host"
                 name="host"
                 label=""
-                placeholder="Enter Host"
+                placeholder={t("Enter Host")}
                 value={host}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setHostname(e.target.value);
@@ -243,7 +245,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 id="db-name"
                 name="db-name"
                 label=""
-                placeholder="Enter DB Name"
+                placeholder={t("Enter DB Name")}
                 value={dbName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setDbName(e.target.value);
@@ -253,7 +255,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 id="port"
                 name="port"
                 label=""
-                placeholder="Enter Port"
+                placeholder={t("Enter Port")}
                 value={port}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPort(e.target.value);
@@ -270,7 +272,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                   }
                 }}
                 options={[
-                  { label: "Enter SSL Mode", value: " " },
+                  { label: t("Enter SSL Mode"), value: " " },
                   { label: "Require", value: "require" },
                   { label: "Disable", value: "disable" },
                   { label: "Verify CA", value: "verify-ca" },
@@ -281,7 +283,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 id="user"
                 name="user"
                 label=""
-                placeholder="Enter User"
+                placeholder={t("Enter User")}
                 value={user}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setUser(e.target.value);
@@ -292,7 +294,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 name="password"
                 label=""
                 type="password"
-                placeholder="Enter Password"
+                placeholder={t("Enter Password")}
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPassword(e.target.value);
@@ -300,7 +302,7 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
               />
             </Box>
           </Grid>
-          <ReadBox label={"Connection String"} multiLine>
+          <ReadBox label={t("Connection String")} multiLine>
             {connectionString}
           </ReadBox>
         </Fragment>
@@ -308,10 +310,12 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
       <InputBox
         id="table"
         name="table"
-        label="Table"
-        placeholder={"Enter Table Name"}
+        label={t("Table")}
+        placeholder={t("Enter Table Name")}
         value={table}
-        tooltip="DB table name to store/update events, table is auto-created"
+        tooltip={t(
+          "DB table name to store/update events, table is auto-created",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setTable(e.target.value);
         }}
@@ -320,11 +324,13 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
         currentValue={format}
         id="format"
         name="format"
-        label="Format"
+        label={t("Format")}
         onChange={(e) => {
           setFormat(e.target.value);
         }}
-        tooltip="'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'"
+        tooltip={t(
+          "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'",
+        )}
         selectorOptions={[
           { label: "Namespace", value: "namespace" },
           { label: "Access", value: "access" },
@@ -333,10 +339,12 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
       <InputBox
         id="queue-dir"
         name="queue_dir"
-        label="Queue Dir"
-        placeholder="Enter Queue Directory"
+        label={t("Queue Dir")}
+        placeholder={t("Enter Queue Directory")}
         value={queueDir}
-        tooltip="Staging directory for undelivered messages e.g. '/home/events'"
+        tooltip={t(
+          "Staging directory for undelivered messages e.g. '/home/events'",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setQueueDir(e.target.value);
         }}
@@ -344,11 +352,13 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
       <InputBox
         id="queue-limit"
         name="queue_limit"
-        label="Queue Limit"
-        placeholder="Enter Queue Limit"
+        label={t("Queue Limit")}
+        placeholder={t("Enter Queue Limit")}
         type="number"
         value={queueLimit}
-        tooltip="Maximum limit for undelivered messages, defaults to '10000'"
+        tooltip={t(
+          "Maximum limit for undelivered messages, defaults to '10000'",
+        )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           setQueueLimit(e.target.value);
         }}
@@ -356,8 +366,8 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
       <CommentBox
         id="comment"
         name="comment"
-        label="Comment"
-        placeholder="Enter custom notes if any"
+        label={t("Comment")}
+        placeholder={t("Enter custom notes if any")}
         value={comment}
         onChange={(e) => {
           setComment(e.target.value);

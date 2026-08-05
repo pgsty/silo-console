@@ -32,6 +32,7 @@ import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary
 import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface ITierCredentialsModal {
   open: boolean;
@@ -45,6 +46,7 @@ const UpdateTierCredentialsModal = ({
   tierData,
 }: ITierCredentialsModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [savingTiers, setSavingTiers] = useState<boolean>(false);
   const [creds, setCreds] = useState<string>("");
   const [encodedCreds, setEncodedCreds] = useState<string>("");
@@ -103,7 +105,7 @@ const UpdateTierCredentialsModal = ({
         });
     } else {
       setModalErrorSnackMessage({
-        errorMessage: "There was an error retrieving tier information",
+        errorMessage: t("There was an error retrieving tier information"),
         detailedError: "",
       });
     }
@@ -116,7 +118,9 @@ const UpdateTierCredentialsModal = ({
       onClose={() => {
         closeModalAndRefresh(false);
       }}
-      title={`Update Credentials - ${type} / ${name}`}
+      title={t("Update Credentials - {type} / {name}")
+        .replace("{type}", type)
+        .replace("{name}", name)}
     >
       <form
         noValidate
@@ -133,8 +137,8 @@ const UpdateTierCredentialsModal = ({
               <InputBox
                 id="accessKey"
                 name="accessKey"
-                label="Access Key"
-                placeholder="Enter Access Key"
+                label={t("Access Key")}
+                placeholder={t("Enter Access Key")}
                 value={accountName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setAccountName(e.target.value);
@@ -143,8 +147,8 @@ const UpdateTierCredentialsModal = ({
               <InputBox
                 id="secretKey"
                 name="secretKey"
-                label="Secret Key"
-                placeholder="Enter Secret Key"
+                label={t("Secret Key")}
+                placeholder={t("Enter Secret Key")}
                 value={accountKey}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setAccountKey(e.target.value);
@@ -157,7 +161,7 @@ const UpdateTierCredentialsModal = ({
               <FileSelector
                 accept=".json"
                 id="creds"
-                label="Credentials"
+                label={t("Credentials")}
                 name="creds"
                 returnEncodedData
                 onChange={(_, fileName, encodedValue) => {
@@ -175,8 +179,8 @@ const UpdateTierCredentialsModal = ({
               <InputBox
                 id="accountName"
                 name="accountName"
-                label="Account Name"
-                placeholder="Enter Account Name"
+                label={t("Account Name")}
+                placeholder={t("Enter Account Name")}
                 value={accountName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setAccountName(e.target.value);
@@ -185,8 +189,8 @@ const UpdateTierCredentialsModal = ({
               <InputBox
                 id="accountKey"
                 name="accountKey"
-                label="Account Key"
-                placeholder="Enter Account Key"
+                label={t("Account Key")}
+                placeholder={t("Enter Account Key")}
                 value={accountKey}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setAccountKey(e.target.value);
@@ -206,7 +210,7 @@ const UpdateTierCredentialsModal = ({
             type="submit"
             variant="callAction"
             disabled={savingTiers || !isFormValid}
-            label={"Save"}
+            label={t("Save")}
           />
         </Grid>
       </form>

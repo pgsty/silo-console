@@ -18,6 +18,7 @@ import React, { Fragment } from "react";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import { AddIcon, Box, Button, Grid, InputBox, RemoveIcon } from "mds";
 import { SiteInputRow } from "./Types";
+import { useT } from "i18n";
 
 interface ISRSiteInputRowProps {
   rowData: SiteInputRow;
@@ -44,6 +45,7 @@ const SRSiteInputRow = ({
   disabledFields = [],
   fieldErrors = {},
 }: ISRSiteInputRowProps) => {
+  const t = useT();
   const { endpoint = "", accessKey = "", secretKey = "", name = "" } = rowData;
   return (
     <Fragment key={`${index}`}>
@@ -126,7 +128,7 @@ const SRSiteInputRow = ({
         >
           {showRowActions ? (
             <React.Fragment>
-              <TooltipWrapper tooltip={"Add a Row"}>
+              <TooltipWrapper tooltip={t("Add a Row")}>
                 <Button
                   id={`add-row-${index}`}
                   variant="regular"
@@ -143,7 +145,7 @@ const SRSiteInputRow = ({
                   }}
                 />
               </TooltipWrapper>
-              <TooltipWrapper tooltip={"Remove Row"}>
+              <TooltipWrapper tooltip={t("Remove Row")}>
                 <Button
                   id={`remove-row-${index}`}
                   variant="regular"

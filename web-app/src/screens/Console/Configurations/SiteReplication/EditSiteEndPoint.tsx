@@ -26,6 +26,7 @@ import { useAppDispatch } from "../../../../store";
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import styled from "styled-components";
 import get from "lodash/get";
+import { useT } from "i18n";
 
 const SiteEndpointContainer = styled.div(({ theme }) => ({
   "& .alertText": {
@@ -43,6 +44,7 @@ const EditSiteEndPoint = ({
   onComplete: () => void;
 }) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [editEndPointName, setEditEndPointName] = useState<string>("");
 
   const [isEditing, invokeSiteEditApi] = useApi(
@@ -52,7 +54,7 @@ const EditSiteEndPoint = ({
       } else {
         dispatch(
           setErrorSnackMessage({
-            errorMessage: "Error",
+            errorMessage: t("Error"),
             detailedError: res.status,
           }),
         );
@@ -84,7 +86,7 @@ const EditSiteEndPoint = ({
 
   return (
     <ModalWrapper
-      title={`Edit Replication Endpoint `}
+      title={t("Edit Replication Endpoint")}
       modalOpen={true}
       titleIcon={<EditIcon />}
       onClose={onClose}
@@ -98,17 +100,17 @@ const EditSiteEndPoint = ({
           }}
         >
           <Box sx={{ marginBottom: "10px" }}>
-            <strong>Site:</strong> {"  "}
+            <strong>{t("Site:")}</strong> {"  "}
             {editSite.name}
           </Box>
           <Box sx={{ marginBottom: "10px" }}>
-            <strong>Current Endpoint:</strong> {"  "}
+            <strong>{t("Current Endpoint:")}</strong> {"  "}
             {editSite.endpoint}
           </Box>
         </Box>
 
         <Grid item xs={12}>
-          <InputLabel sx={{ marginBottom: 5 }}>New Endpoint:</InputLabel>
+          <InputLabel sx={{ marginBottom: 5 }}>{t("New Endpoint:")}</InputLabel>
           <InputBox
             id="edit-rep-peer-endpoint"
             name="edit-rep-peer-endpoint"
@@ -132,9 +134,11 @@ const EditSiteEndPoint = ({
             marginTop: 2,
           }}
         >
-          <strong>Note:</strong>&nbsp;
+          <strong>{t("Note:")}</strong>&nbsp;
           <span className={"alertText"}>
-            Access Key and Secret Key should be same on the new site/endpoint.
+            {t(
+              "Access Key and Secret Key should be same on the new site/endpoint.",
+            )}
           </span>
         </Grid>
       </SiteEndpointContainer>
@@ -145,7 +149,7 @@ const EditSiteEndPoint = ({
           type="button"
           variant="regular"
           onClick={onClose}
-          label={"Cancel"}
+          label={t("Cancel")}
         />
         <Button
           id={"update"}
@@ -153,7 +157,7 @@ const EditSiteEndPoint = ({
           variant="callAction"
           disabled={isEditing || !isValidEndPointUrl}
           onClick={updatePeerSite}
-          label={"Update"}
+          label={t("Update")}
         />
       </Grid>
     </ModalWrapper>

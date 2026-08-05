@@ -35,10 +35,13 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../../store";
 import { emptyPolicy } from "./utils";
 import { api } from "../../../api";
+import { useLocalizedLink, useT } from "i18n";
 
 const AddPolicyScreen = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [policyName, setPolicyName] = useState<string>("");
@@ -63,11 +66,10 @@ const AddPolicyScreen = () => {
         setAddLoading(false);
         dispatch(
           setErrorSnackMessage({
-            errorMessage: "There was an error creating a Policy ",
-            detailedError:
-              "There was an error creating a Policy: " +
-              (err.error.detailedMessage || "") +
-              ". Please check Policy syntax.",
+            errorMessage: t("There was an error creating a Policy "),
+            detailedError: t(
+              "There was an error creating a Policy: {details}. Please check Policy syntax.",
+            ).replace("{details}", err.error.detailedMessage || ""),
           }),
         );
       });
@@ -80,7 +82,7 @@ const AddPolicyScreen = () => {
 
   const validatePolicyname = (policyName: string) => {
     if (policyName.trim() === "") {
-      return "Policy name cannot be empty";
+      return t("Policy name cannot be empty");
     } else return "";
   };
 
@@ -96,7 +98,7 @@ const AddPolicyScreen = () => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"Policies"}
+              label={t("Policies")}
               onClick={() => navigate(IAM_PAGES.POLICIES)}
             />
           }
@@ -104,7 +106,7 @@ const AddPolicyScreen = () => {
         />
         <PageLayout>
           <FormLayout
-            title={"Create Policy"}
+            title={t("Create Policy")}
             icon={<AddAccessRuleIcon />}
             helpBox={<AddPolicyHelpBox />}
           >
@@ -120,7 +122,7 @@ const AddPolicyScreen = () => {
                   <InputBox
                     id="policy-name"
                     name="policy-name"
-                    label="Policy Name"
+                    label={t("Policy Name")}
                     autoFocus={true}
                     value={policyName}
                     error={validatePolicyname(policyName)}
@@ -131,7 +133,7 @@ const AddPolicyScreen = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <CodeMirrorWrapper
-                    label={"Write Policy"}
+                    label={t("Write Policy")}
                     value={policyDefinition}
                     onChange={(value) => {
                       setPolicyDefinition(value);
@@ -141,9 +143,11 @@ const AddPolicyScreen = () => {
                       <Fragment>
                         <a
                           target="blank"
-                          href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                          href={localize(
+                            "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                          )}
                         >
-                          Guide to access policy structure
+                          {t("Guide to access policy structure")}
                         </a>
                       </Fragment>
                     }
@@ -164,7 +168,7 @@ const AddPolicyScreen = () => {
                       type="button"
                       variant="regular"
                       onClick={resetForm}
-                      label={"Clear"}
+                      label={t("Clear")}
                     />
 
                     <Button
@@ -173,7 +177,7 @@ const AddPolicyScreen = () => {
                       variant="callAction"
                       color="primary"
                       disabled={addLoading || !validSave}
-                      label={"Save"}
+                      label={t("Save")}
                     />
                   </Box>
                 </Grid>

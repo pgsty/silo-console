@@ -25,6 +25,7 @@ import { AppState, useAppDispatch } from "../../../store";
 import { setSelectedPolicies } from "../Users/AddUsersSlice";
 import { useSelector } from "react-redux";
 import { api } from "../../../api";
+import { useT } from "i18n";
 
 interface ISelectPolicyProps {
   selectedPolicy?: string[];
@@ -33,6 +34,7 @@ interface ISelectPolicyProps {
 
 const PolicySelectors = ({ noTitle = false }: ISelectPolicyProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   // Local State
   const [records, setRecords] = useState<any[]>([]);
   const [loading, isLoading] = useState<boolean>(false);
@@ -100,22 +102,32 @@ const PolicySelectors = ({ noTitle = false }: ISelectPolicyProps) => {
         <Fragment>
           <Grid item xs={12} className={"inputItem"}>
             <SearchBox
-              placeholder="Start typing to search for a Policy"
+              placeholder={t("Start typing to search for a Policy")}
               onChange={(value) => {
                 setFilter(value);
               }}
               value={filter}
-              label={!noTitle ? "Assign Policies" : ""}
+              label={!noTitle ? t("Assign Policies") : ""}
             />
           </Grid>
 
           <DataTable
-            columns={[{ label: "Policy", elementKey: "name" }]}
+            columns={[{ label: t("Policy"), elementKey: "name" }]}
             onSelect={selectionChanged}
+            onSelectAll={() =>
+              dispatch(
+                setSelectedPolicies(
+                  currentPolicies.length === filteredRecords.length
+                    ? []
+                    : filteredRecords.map((r) => `${r.name}`),
+                ),
+              )
+            }
             selectedItems={currentPolicies}
             isLoading={loading}
             records={filteredRecords}
-            entityName="Policies"
+            entityName={t("Policies")}
+            customEmptyMessage={t("There are no Policies yet.")}
             idField="name"
             customPaperHeight={"200px"}
           />
@@ -127,7 +139,7 @@ const PolicySelectors = ({ noTitle = false }: ISelectPolicyProps) => {
             padding: "10px 0",
           }}
         >
-          No Policies Available
+          {t("No Policies Available")}
         </Box>
       )}
     </Grid>

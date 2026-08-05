@@ -36,6 +36,7 @@ import { useAppDispatch } from "../../../store";
 import { api } from "api";
 import { AccountChangePasswordRequest, ApiError } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 interface IChangePasswordProps {
   open: boolean;
@@ -44,6 +45,8 @@ interface IChangePasswordProps {
 
 const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const localize = useLocalizedLink();
   const [currentPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [reNewPassword, setReNewPassword] = useState<string>("");
@@ -57,7 +60,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
     if (newPassword !== reNewPassword) {
       dispatch(
         setModalErrorSnackMessage({
-          errorMessage: "New passwords don't match",
+          errorMessage: t("New passwords don't match"),
           detailedError: "",
         }),
       );
@@ -67,7 +70,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
     if (newPassword.length < 8) {
       dispatch(
         setModalErrorSnackMessage({
-          errorMessage: "Passwords must be at least 8 characters long",
+          errorMessage: t("Passwords must be at least 8 characters long"),
           detailedError: "",
         }),
       );
@@ -91,7 +94,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
         setNewPassword("");
         setReNewPassword("");
         setCurrentPassword("");
-        dispatch(setSnackBarMessage("Successfully updated the password."));
+        dispatch(setSnackBarMessage(t("Successfully updated the password.")));
         closeModal();
       })
       .catch(async (res) => {
@@ -106,7 +109,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
 
   return open ? (
     <ModalWrapper
-      title={`Change Password for ${userLoggedIn}`}
+      title={t("Change Password for {user}").replace("{user}", userLoggedIn)}
       modalOpen={open}
       onClose={() => {
         setNewPassword("");
@@ -117,24 +120,30 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
       titleIcon={<ChangePasswordIcon />}
     >
       <div>
-        This will change your Console password. Please note your new password
-        down, as it will be required to log into Console after this session.
+        {t(
+          "This will change your Console password. Please note your new password down, as it will be required to log into Console after this session.",
+        )}
       </div>
       <InformativeMessage
         variant={"warning"}
-        title={"Warning"}
+        title={t("Warning")}
         message={
           <Fragment>
-            If you are looking to change MINIO_ROOT_USER credentials, <br />
-            Please refer to{" "}
-            <a
-              target="_blank"
-              rel="noopener"
-              href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/#minio-root-user"
-            >
-              rotating
-            </a>{" "}
-            credentials.
+            {t("If you are looking to change MINIO_ROOT_USER credentials,")}{" "}
+            <br />
+            {interpolate(t("Please refer to {link} credentials."), {
+              link: (
+                <a
+                  target="_blank"
+                  rel="noopener"
+                  href={localize(
+                    "https://silo.pgsty.com/administration/identity-access-management/minio-user-management/#minio-root-user",
+                  )}
+                >
+                  {t("rotating")}
+                </a>
+              ),
+            })}
           </Fragment>
         }
         sx={{ margin: "15px 0" }}
@@ -155,7 +164,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setCurrentPassword(event.target.value);
                 }}
-                label="Current Password"
+                label={t("Current Password")}
                 type={"password"}
                 value={currentPassword}
               />
@@ -165,7 +174,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setNewPassword(event.target.value);
                 }}
-                label="New Password"
+                label={t("New Password")}
                 type={"password"}
                 value={newPassword}
               />
@@ -175,7 +184,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setReNewPassword(event.target.value);
                 }}
-                label="Type New Password Again"
+                label={t("Type New Password Again")}
                 type={"password"}
                 value={reNewPassword}
               />
@@ -195,7 +204,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
                   reNewPassword.length > 0
                 )
               }
-              label="Save"
+              label={t("Save")}
             />
           </Grid>
           {loading && (

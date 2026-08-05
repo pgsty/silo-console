@@ -24,6 +24,7 @@ import { usersSort } from "../../../utils/sortFunctions";
 import { setModalErrorSnackMessage } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import SearchBox from "../Common/SearchBox";
+import { useT } from "i18n";
 
 interface IGroupsProps {
   selectedUsers: string[];
@@ -37,6 +38,7 @@ const UsersSelectors = ({
   editMode = false,
 }: IGroupsProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   //Local States
   const [records, setRecords] = useState<any[]>([]);
   const [loading, isLoading] = useState<boolean>(false);
@@ -106,19 +108,27 @@ const UsersSelectors = ({
           <Fragment>
             <Grid item xs={12} className={"inputItem"}>
               <SearchBox
-                label={editMode ? "Edit Members" : "Assign Users"}
-                placeholder="Filter Users"
+                label={editMode ? t("Edit Members") : t("Assign Users")}
+                placeholder={t("Filter Users")}
                 onChange={setFilter}
                 value={filter}
               />
             </Grid>
             <DataTable
-              columns={[{ label: "Access Key", elementKey: "accessKey" }]}
+              columns={[{ label: t("Access Key"), elementKey: "accessKey" }]}
               onSelect={selectionChanged}
+              onSelectAll={() =>
+                setSelectedUsers(
+                  selUsers.length === filteredRecords.length
+                    ? []
+                    : filteredRecords.map((r) => `${r.accessKey}`),
+                )
+              }
               selectedItems={selUsers}
               isLoading={loading}
               records={filteredRecords}
-              entityName="Users"
+              entityName={t("Users")}
+              customEmptyMessage={t("There are no Users yet.")}
               idField="accessKey"
               customPaperHeight={"200px"}
             />
@@ -130,7 +140,7 @@ const UsersSelectors = ({
               padding: "10px 0",
             }}
           >
-            No Users to display
+            {t("No Users to display")}
           </Box>
         )}
       </Box>
