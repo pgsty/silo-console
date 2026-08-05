@@ -45,6 +45,7 @@ import { SecureComponent } from "../../../../common/SecureComponent";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import AddKeyModal from "./AddKeyModal";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface IEnableBucketEncryptionProps {
   open: boolean;
@@ -61,6 +62,7 @@ const EnableBucketEncryption = ({
   closeModalAndRefresh,
 }: IEnableBucketEncryptionProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [loading, setLoading] = useState<boolean>(false);
   const [kmsKeyID, setKmsKeyID] = useState<string>("");
   const [encryptionType, setEncryptionType] = useState<
@@ -149,7 +151,7 @@ const EnableBucketEncryption = ({
         onClose={() => {
           closeModalAndRefresh();
         }}
-        title="Enable Bucket Encryption"
+        title={t("Enable Bucket Encryption")}
         titleIcon={<BucketEncryptionIcon />}
       >
         <form
@@ -166,11 +168,11 @@ const EnableBucketEncryption = ({
               }}
               id="select-encryption-type"
               name="select-encryption-type"
-              label={"Encryption Type"}
+              label={t("Encryption Type")}
               value={encryptionType}
               options={[
                 {
-                  label: "Disabled",
+                  label: t("Disabled"),
                   value: "disabled",
                 },
                 {
@@ -192,7 +194,7 @@ const EnableBucketEncryption = ({
                     }}
                     id="select-kms-key-id"
                     name="select-kms-key-id"
-                    label={"KMS Key ID"}
+                    label={t("KMS Key ID")}
                     value={kmsKeyID}
                     options={keys.map((key: KmsKeyInfo) => {
                       return {
@@ -207,7 +209,7 @@ const EnableBucketEncryption = ({
                   resource={CONSOLE_UI_RESOURCE}
                   errorProps={{ disabled: true }}
                 >
-                  <TooltipWrapper tooltip={"Add key"}>
+                  <TooltipWrapper tooltip={t("Add key")}>
                     <Button
                       id={"import-key"}
                       variant={"regular"}
@@ -230,14 +232,14 @@ const EnableBucketEncryption = ({
                   closeModalAndRefresh();
                 }}
                 disabled={loading}
-                label={"Cancel"}
+                label={t("Cancel")}
               />
               <Button
                 id={"save"}
                 type="submit"
                 variant="callAction"
                 disabled={loading}
-                label={"Save"}
+                label={t("Save")}
               />
             </Grid>
             {loading && (

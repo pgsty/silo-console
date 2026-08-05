@@ -18,10 +18,15 @@ import { DateTime } from "luxon";
 import { BucketObjectItem } from "./types";
 import { niceBytes } from "../../../../../../common/utils";
 import { displayFileIconName } from "./utils";
+import { getStoredLanguage } from "i18n";
+
+// The table definitions below are built by callers that already hold a
+// translator, so this module stays free of store/react imports.
+type Translator = (text: string) => string;
 
 // Functions
 
-const displayParsedDate = (object: BucketObjectItem) => {
+const displayParsedDate = (t: Translator) => (object: BucketObjectItem) => {
   if (object.name.endsWith("/")) {
     return "";
   }
@@ -35,10 +40,15 @@ const displayParsedDate = (object: BucketObjectItem) => {
     currTime.hasSame(objectTime, "year");
 
   if (isToday) {
-    return `Today, ${objectTime.toFormat("HH:mm")}`;
+    return t("Today, {time}").replace("{time}", objectTime.toFormat("HH:mm"));
   }
 
-  return objectTime.toFormat("ccc, LLL dd yyyy HH:mm (ZZZZ)");
+  // zh keeps a compact ISO-like stamp; the verbose English form stays as-is.
+  return objectTime.toFormat(
+    getStoredLanguage() === "zh"
+      ? "yyyy-MM-dd HH:mm"
+      : "ccc, LLL dd yyyy HH:mm (ZZZZ)",
+  );
 };
 
 const displayNiceBytes = (object: BucketObjectItem) => {
@@ -48,28 +58,28 @@ const displayNiceBytes = (object: BucketObjectItem) => {
   return niceBytes(String(object.size));
 };
 
-const displayDeleteFlag = (state: boolean) => {
-  return state ? "Yes" : "No";
+const displayDeleteFlag = (t: Translator) => (state: boolean) => {
+  return state ? t("Yes") : t("No");
 };
 
 // Table Props
 
-export const listModeColumns = [
+export const listModeColumns = (t: Translator) => [
   {
-    label: "Name",
+    label: t("Name"),
     elementKey: "name",
     renderFunction: displayFileIconName,
     enableSort: true,
   },
   {
-    label: "Last Modified",
+    label: t("Last Modified"),
     elementKey: "last_modified",
-    renderFunction: displayParsedDate,
+    renderFunction: displayParsedDate(t),
     renderFullObject: true,
     enableSort: true,
   },
   {
-    label: "Size",
+    label: t("Size"),
     elementKey: "size",
     renderFunction: displayNiceBytes,
     renderFullObject: true,
@@ -78,22 +88,22 @@ export const listModeColumns = [
   },
 ];
 
-export const rewindModeColumns = [
+export const rewindModeColumns = (t: Translator) => [
   {
-    label: "Name",
+    label: t("Name"),
     elementKey: "name",
     renderFunction: displayFileIconName,
     enableSort: true,
   },
   {
-    label: "Object Date",
+    label: t("Object Date"),
     elementKey: "last_modified",
-    renderFunction: displayParsedDate,
+    renderFunction: displayParsedDate(t),
     renderFullObject: true,
     enableSort: true,
   },
   {
-    label: "Size",
+    label: t("Size"),
     elementKey: "size",
     renderFunction: displayNiceBytes,
     renderFullObject: true,
@@ -101,9 +111,9 @@ export const rewindModeColumns = [
     enableSort: true,
   },
   {
-    label: "Deleted",
+    label: t("Deleted"),
     elementKey: "delete_flag",
-    renderFunction: displayDeleteFlag,
+    renderFunction: displayDeleteFlag(t),
     width: 60,
   },
 ];

@@ -33,11 +33,14 @@ import { setErrorSnackMessage, setHelpName } from "../../../../systemSlice";
 import { selBucketDetailsLoading } from "./bucketDetailsSlice";
 import { useAppDispatch } from "../../../../store";
 import { Policy } from "../../../../api/consoleApi";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const AccessDetails = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
 
@@ -148,26 +151,38 @@ const AccessDetails = () => {
         <HelpTip
           content={
             <Fragment>
-              Understand which{" "}
-              <a
-                target="blank"
-                href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/"
-              >
-                Policies
-              </a>{" "}
-              and{" "}
-              <a
-                target="blank"
-                href="https://silo.pgsty.com/administration/identity-access-management/minio-user-management/"
-              >
-                Users
-              </a>{" "}
-              are authorized to access this Bucket.
+              {interpolate(
+                t(
+                  "Understand which {policies} and {users} are authorized to access this Bucket.",
+                ),
+                {
+                  policies: (
+                    <a
+                      target="blank"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/",
+                      )}
+                    >
+                      {t("Policies")}
+                    </a>
+                  ),
+                  users: (
+                    <a
+                      target="blank"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/identity-access-management/minio-user-management/",
+                      )}
+                    >
+                      {t("Users")}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
           placement="right"
         >
-          Access Audit
+          {t("Access Audit")}
         </HelpTip>
       </SectionTitle>
       <Tabs
@@ -178,7 +193,7 @@ const AccessDetails = () => {
         horizontal
         options={[
           {
-            tabConfig: { label: "Policies", id: "simple-tab-0" },
+            tabConfig: { label: t("Policies"), id: "simple-tab-0" },
             content: (
               <SecureComponent
                 scopes={[IAM_SCOPES.ADMIN_LIST_USER_POLICIES]}
@@ -189,10 +204,11 @@ const AccessDetails = () => {
                   <DataTable
                     noBackground={true}
                     itemActions={PolicyActions}
-                    columns={[{ label: "Name", elementKey: "name" }]}
+                    columns={[{ label: t("Name"), elementKey: "name" }]}
                     isLoading={loadingPolicies}
                     records={bucketPolicy}
-                    entityName="Policies"
+                    entityName={t("Policies")}
+                    customEmptyMessage={t("There are no Policies yet.")}
                     idField="name"
                   />
                 )}
@@ -200,7 +216,7 @@ const AccessDetails = () => {
             ),
           },
           {
-            tabConfig: { label: "Users", id: "simple-tab-1" },
+            tabConfig: { label: t("Users"), id: "simple-tab-1" },
             content: (
               <SecureComponent
                 scopes={[
@@ -215,10 +231,11 @@ const AccessDetails = () => {
                 <DataTable
                   noBackground={true}
                   itemActions={userTableActions}
-                  columns={[{ label: "User", elementKey: "accessKey" }]}
+                  columns={[{ label: t("User"), elementKey: "accessKey" }]}
                   isLoading={loadingUsers}
                   records={bucketUsers}
-                  entityName="Users"
+                  entityName={t("Users")}
+                  customEmptyMessage={t("There are no Users yet.")}
                   idField="accessKey"
                 />
               </SecureComponent>

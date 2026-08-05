@@ -24,6 +24,7 @@ import { modalStyleUtils } from "../../../../Common/FormComponents/common/styleL
 import { setModalErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface ISetRetentionProps {
   open: boolean;
@@ -41,6 +42,7 @@ const SetLegalHoldModal = ({
   actualInfo,
 }: ISetRetentionProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [legalHoldEnabled, setLegalHoldEnabled] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const versionId = actualInfo.version_id;
@@ -83,7 +85,7 @@ const SetLegalHoldModal = ({
 
   return (
     <ModalWrapper
-      title="Set Legal Hold"
+      title={t("Set Legal Hold")}
       modalOpen={open}
       onClose={() => {
         resetForm();
@@ -99,7 +101,7 @@ const SetLegalHoldModal = ({
       >
         <FormLayout withBorders={false} containerPadding={false}>
           <Box className={"inputItem"}>
-            <strong>Object</strong>: {bucketName + "/" + objectName}
+            <strong>{t("Object")}</strong>: {bucketName + "/" + objectName}
           </Box>
           <Switch
             value="legalhold"
@@ -109,11 +111,11 @@ const SetLegalHoldModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setLegalHoldEnabled(!legalHoldEnabled);
             }}
-            label={"Legal Hold Status"}
-            indicatorLabels={["Enabled", "Disabled"]}
-            tooltip={
-              "To enable this feature you need to enable versioning on the bucket before creation"
-            }
+            label={t("Legal Hold Status")}
+            indicatorLabels={[t("Enabled"), t("Disabled")]}
+            tooltip={t(
+              "To enable this feature you need to enable versioning on the bucket before creation",
+            )}
           />
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
             <Button
@@ -121,14 +123,14 @@ const SetLegalHoldModal = ({
               type="button"
               variant="regular"
               onClick={resetForm}
-              label={"Clear"}
+              label={t("Clear")}
             />
             <Button
               id={"save"}
               type="submit"
               variant="callAction"
               disabled={isSaving}
-              label={" Save"}
+              label={t("Save")}
             />
           </Grid>
         </FormLayout>

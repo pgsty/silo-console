@@ -15,27 +15,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from "react";
+import { useT } from "i18n";
 
 interface ISpecificVersionPillProps {
   type: "null" | "current" | "deleted";
 }
 
 const SpecificVersionPill = ({ type }: ISpecificVersionPillProps) => {
+  const t = useT();
   let bgColor = "#000";
   let message = "";
 
   switch (type) {
     case "null":
       bgColor = "#07193E";
-      message = "NULL VERSION";
+      message = t("NULL VERSION");
       break;
     case "deleted":
       bgColor = "#868686";
-      message = "DELETED";
+      message = t("DELETED");
       break;
     default:
       bgColor = "#174551";
-      message = "CURRENT VERSION";
+      message = t("CURRENT VERSION");
   }
 
   return (

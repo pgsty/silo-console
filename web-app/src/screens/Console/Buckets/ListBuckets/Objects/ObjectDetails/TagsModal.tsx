@@ -42,6 +42,7 @@ import {
   setModalErrorSnackMessage,
 } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
+import { interpolate, useT } from "i18n";
 
 interface ITagModal {
   modalOpen: boolean;
@@ -62,6 +63,7 @@ const AddTagModal = ({
   actualInfo,
 }: ITagModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const distributedSetup = useSelector(selDistSet);
   const [newKey, setNewKey] = useState<string>("");
   const [newLabel, setNewLabel] = useState<string>("");
@@ -151,7 +153,9 @@ const AddTagModal = ({
         width: "100%",
       }}
     >
-      Tag{plural ? "s" : ""} for: <strong>{currentItem}</strong>
+      {interpolate(plural ? t("Tags for: {object}") : t("Tag for: {object}"), {
+        object: <strong>{currentItem}</strong>,
+      })}
     </Box>
   );
 
@@ -159,7 +163,7 @@ const AddTagModal = ({
     <Fragment>
       <ModalWrapper
         modalOpen={modalOpen}
-        title={deleteEnabled ? "Delete Tag" : `Edit Tags`}
+        title={deleteEnabled ? t("Delete Tag") : t("Edit Tags")}
         onClose={() => {
           onCloseAndUpdate(true);
         }}
@@ -170,25 +174,30 @@ const AddTagModal = ({
           <Fragment>
             <Grid container>
               {tagsFor(false)}
-              Are you sure you want to delete the tag{" "}
-              <DeleteTag>
-                {deleteKey} : {deleteLabel}
-              </DeleteTag>{" "}
-              ?
+              {interpolate(
+                t("Are you sure you want to delete the tag {tag}?"),
+                {
+                  tag: (
+                    <DeleteTag>
+                      {deleteKey} : {deleteLabel}
+                    </DeleteTag>
+                  ),
+                },
+              )}
               <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
                 <Button
                   id={"cancel"}
                   type="button"
                   variant="regular"
                   onClick={cancelDelete}
-                  label={"Cancel"}
+                  label={t("Cancel")}
                 />
                 <Button
                   type="submit"
                   variant="secondary"
                   onClick={deleteTagProcess}
                   id={"deleteTag"}
-                  label={"Delete Tag"}
+                  label={t("Delete Tag")}
                 />
               </Grid>
             </Grid>
@@ -216,11 +225,11 @@ const AddTagModal = ({
                     fontWeight: "normal",
                   }}
                 >
-                  Current Tags:
+                  {t("Current Tags:")}
                   <br />
                   {currTagKeys.length === 0 ? (
                     <span className={"muted"}>
-                      There are no tags for this object
+                      {t("There are no tags for this object")}
                     </span>
                   ) : (
                     <Fragment />
@@ -270,25 +279,25 @@ const AddTagModal = ({
             >
               <Box>
                 <SectionTitle icon={<AddNewTagIcon />} separator={false}>
-                  Add New Tag
+                  {t("Add New Tag")}
                 </SectionTitle>
                 <FormLayout containerPadding={false} withBorders={false}>
                   <InputBox
                     value={newKey}
-                    label={"Tag Key"}
+                    label={t("Tag Key")}
                     id={"newTagKey"}
                     name={"newTagKey"}
-                    placeholder={"Enter Tag Key"}
+                    placeholder={t("Enter Tag Key")}
                     onChange={(e) => {
                       setNewKey(e.target.value);
                     }}
                   />
                   <InputBox
                     value={newLabel}
-                    label={"Tag Label"}
+                    label={t("Tag Label")}
                     id={"newTagLabel"}
                     name={"newTagLabel"}
-                    placeholder={"Enter Tag Label"}
+                    placeholder={t("Enter Tag Label")}
                     onChange={(e) => {
                       setNewLabel(e.target.value);
                     }}
@@ -300,7 +309,7 @@ const AddTagModal = ({
                       variant="regular"
                       color="primary"
                       onClick={resetForm}
-                      label={"Clear"}
+                      label={t("Clear")}
                     />
                     <Button
                       type="submit"
@@ -312,7 +321,7 @@ const AddTagModal = ({
                       }
                       onClick={addTagProcess}
                       id="saveTag"
-                      label={"Save"}
+                      label={t("Save")}
                     />
                   </Grid>
                 </FormLayout>

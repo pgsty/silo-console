@@ -19,16 +19,18 @@ import { setSearchObjects } from "./objectBrowserSlice";
 import SearchBox from "../Common/SearchBox";
 import { AppState, useAppDispatch } from "../../../store";
 import { useSelector } from "react-redux";
+import { useT } from "i18n";
 
 const FilterObjectsSB = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const searchObjects = useSelector(
     (state: AppState) => state.objectBrowser.searchObjects,
   );
   return (
     <SearchBox
-      placeholder={"Start typing to filter objects in the bucket"}
+      placeholder={t("Start typing to filter objects in the bucket")}
       onChange={(value) => {
         dispatch(setSearchObjects(value));
       }}

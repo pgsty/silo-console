@@ -18,12 +18,14 @@ import React from "react";
 import { DisabledIcon, EnabledIcon, Box } from "mds";
 import { BucketVersioningResponse } from "api/consoleApi";
 import LabelWithIcon from "./BucketDetails/SummaryItems/LabelWithIcon";
+import { useT } from "i18n";
 
 const VersioningInfo = ({
   versioningState = {},
 }: {
   versioningState?: BucketVersioningResponse;
 }) => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -44,7 +46,7 @@ const VersioningInfo = ({
             }
             label={
               <label style={{ textDecoration: "normal" }}>
-                Exclude Folders
+                {t("Exclude Folders")}
               </label>
             }
           />
@@ -61,7 +63,7 @@ const VersioningInfo = ({
             gap: 1,
           }}
         >
-          <Box>Excluded Prefixes :</Box>
+          <Box>{t("Excluded Prefixes :")}</Box>
           <div
             style={{
               maxHeight: "200px",

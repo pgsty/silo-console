@@ -23,6 +23,7 @@ import PreviewPDF from "./PreviewPDF";
 import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { useAppDispatch } from "../../../../../../store";
 import { BucketObject } from "../../../../../../api/consoleApi";
+import { useT } from "i18n";
 
 interface IPreviewFileProps {
   bucketName: string;
@@ -36,6 +37,7 @@ const PreviewFile = ({
   isFullscreen = false,
 }: IPreviewFileProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -170,7 +172,7 @@ const PreviewFile = ({
                 maxHeight: "100vh",
               }}
               src={path}
-              alt={"preview"}
+              alt={t("preview")}
               onLoad={iframeLoaded}
             />
           )}
@@ -189,9 +191,10 @@ const PreviewFile = ({
           {objectType === "none" && (
             <div>
               <InformativeMessage
-                message=" File couldn't be previewed using file extension or mime type. Please
-            try Download instead"
-                title="Preview unavailable"
+                message={t(
+                  "File couldn't be previewed using file extension or mime type. Please try Download instead",
+                )}
+                title={t("Preview unavailable")}
                 sx={{ margin: "15px 0" }}
               />
             </div>
@@ -204,14 +207,14 @@ const PreviewFile = ({
               <div className={`iframeBase ${loading ? "iframeHidden" : ""}`}>
                 <iframe
                   src={path}
-                  title="File Preview"
+                  title={t("File Preview")}
                   allowTransparency
                   className={`iframeContainer ${
                     isFullscreen ? "fullHeight" : objectType
                   }`}
                   onLoad={iframeLoaded}
                 >
-                  File couldn't be loaded. Please try Download instead
+                  {t("File couldn't be loaded. Please try Download instead")}
                 </iframe>
               </div>
             )}

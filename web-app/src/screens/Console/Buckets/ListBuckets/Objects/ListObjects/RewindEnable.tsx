@@ -33,6 +33,7 @@ import {
   setRewindEnable,
 } from "../../../../ObjectBrowser/objectBrowserSlice";
 import { modalStyleUtils } from "../../../../Common/FormComponents/common/styleLibrary";
+import { useT } from "i18n";
 
 interface IRewindEnable {
   closeModalAndRefresh: () => void;
@@ -46,6 +47,7 @@ const RewindEnable = ({
   bucketName,
 }: IRewindEnable) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const rewindEnabled = useSelector(
     (state: AppState) => state.objectBrowser.rewind.rewindEnabled,
@@ -93,14 +95,14 @@ const RewindEnable = ({
       onClose={() => {
         closeModalAndRefresh();
       }}
-      title={`Rewind - ${bucketName}`}
+      title={t("Rewind - {bucket}").replace("{bucket}", bucketName)}
     >
       <FormLayout withBorders={false} containerPadding={false}>
         <DateTimeInput
           value={dateSelected}
           onChange={(dateTime) => (dateTime ? setDateSelected(dateTime) : null)}
           id="rewind-selector"
-          label="Rewind to"
+          label={t("Rewind to")}
           timeFormat={"24h"}
           secondsSelector={false}
           disabled={!rewindEnableButton}
@@ -115,8 +117,8 @@ const RewindEnable = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setRewindEnableButton(e.target.checked);
             }}
-            label={"Current Status"}
-            indicatorLabels={["Enabled", "Disabled"]}
+            label={t("Current Status")}
+            indicatorLabels={[t("Enabled"), t("Disabled")]}
           />
         )}
         <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
@@ -128,8 +130,8 @@ const RewindEnable = ({
             id={"rewind-apply-button"}
             label={
               !rewindEnableButton && rewindEnabled
-                ? "Show Current Data"
-                : "Show Rewind Data"
+                ? t("Show Current Data")
+                : t("Show Rewind Data")
             }
           />
         </Grid>

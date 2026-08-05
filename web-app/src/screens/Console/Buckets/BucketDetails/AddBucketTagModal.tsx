@@ -22,6 +22,7 @@ import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IBucketTagModal {
   modalOpen: boolean;
@@ -37,6 +38,7 @@ const AddBucketTagModal = ({
   bucketName,
 }: IBucketTagModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [newKey, setNewKey] = useState<string>("");
   const [newLabel, setNewLabel] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
@@ -70,7 +72,7 @@ const AddBucketTagModal = ({
   return (
     <ModalWrapper
       modalOpen={modalOpen}
-      title={`Add New Tag `}
+      title={t("Add New Tag ")}
       onClose={() => {
         onCloseAndUpdate(false);
       }}
@@ -78,24 +80,24 @@ const AddBucketTagModal = ({
     >
       <FormLayout withBorders={false} containerPadding={false}>
         <Box sx={{ marginBottom: 15 }}>
-          <strong>Bucket</strong>: {bucketName}
+          <strong>{t("Bucket")}</strong>: {bucketName}
         </Box>
         <InputBox
           value={newKey}
-          label={"New Tag Key"}
+          label={t("New Tag Key")}
           id={"newTagKey"}
           name={"newTagKey"}
-          placeholder={"Enter New Tag Key"}
+          placeholder={t("Enter New Tag Key")}
           onChange={(e: any) => {
             setNewKey(e.target.value);
           }}
         />
         <InputBox
           value={newLabel}
-          label={"New Tag Label"}
+          label={t("New Tag Label")}
           id={"newTagLabel"}
           name={"newTagLabel"}
-          placeholder={"Enter New Tag Label"}
+          placeholder={t("Enter New Tag Label")}
           onChange={(e: any) => {
             setNewLabel(e.target.value);
           }}
@@ -106,7 +108,7 @@ const AddBucketTagModal = ({
             type="button"
             variant="regular"
             onClick={resetForm}
-            label={"Clear"}
+            label={t("Clear")}
           />
           <Button
             id={"save-add-bucket-tag"}
@@ -117,7 +119,7 @@ const AddBucketTagModal = ({
               newLabel.trim() === "" || newKey.trim() === "" || isSending
             }
             onClick={addTagProcess}
-            label={"Save"}
+            label={t("Save")}
           />
         </Grid>
       </FormLayout>

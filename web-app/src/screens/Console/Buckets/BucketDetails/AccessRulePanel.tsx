@@ -31,6 +31,7 @@ import { selBucketDetailsLoading } from "./bucketDetailsSlice";
 import { useAppDispatch } from "../../../../store";
 import withSuspense from "../../Common/Components/withSuspense";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const AddAccessRuleModal = withSuspense(
   React.lazy(() => import("./AddAccessRule")),
@@ -45,6 +46,8 @@ const EditAccessRuleModal = withSuspense(
 const AccessRule = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
 
@@ -180,13 +183,13 @@ const AccessRule = () => {
             matchAll
             errorProps={{ disabled: true }}
           >
-            <TooltipWrapper tooltip={"Add Access Rule"}>
+            <TooltipWrapper tooltip={t("Add Access Rule")}>
               <Button
                 id={"add-bucket-access-rule"}
                 onClick={() => {
                   setAddAccessRuleOpen(true);
                 }}
-                label={"Add Access Rule"}
+                label={t("Add Access Rule")}
                 icon={<AddIcon />}
                 variant={"callAction"}
               />
@@ -197,21 +200,28 @@ const AccessRule = () => {
         <HelpTip
           content={
             <Fragment>
-              Setting an{" "}
-              <a
-                href="https://silo.pgsty.com/reference/minio-mc/mc-anonymous-set/"
-                target="blank"
-              >
-                Anonymous
-              </a>{" "}
-              policy allows clients to access the Bucket or prefix contents and
-              perform actions consistent with the specified policy without
-              authentication.
+              {interpolate(
+                t(
+                  "Setting an {anonymous} policy allows clients to access the Bucket or prefix contents and perform actions consistent with the specified policy without authentication.",
+                ),
+                {
+                  anonymous: (
+                    <a
+                      href={localize(
+                        "https://silo.pgsty.com/reference/minio-mc/mc-anonymous-set/",
+                      )}
+                      target="blank"
+                    >
+                      {t("Anonymous")}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
           placement="right"
         >
-          Anonymous Access
+          {t("Anonymous Access")}
         </HelpTip>
       </SectionTitle>
       <SecureComponent
@@ -223,17 +233,18 @@ const AccessRule = () => {
           itemActions={AccessRuleActions}
           columns={[
             {
-              label: "Prefix",
+              label: t("Prefix"),
               elementKey: "prefix",
               renderFunction: (prefix: string) => {
                 return prefix || "/";
               },
             },
-            { label: "Access", elementKey: "access" },
+            { label: t("Access"), elementKey: "access" },
           ]}
           isLoading={loadingAccessRules}
           records={accessRules || []}
-          entityName="Access Rules"
+          entityName={t("Access Rules")}
+          customEmptyMessage={t("There are no Access Rules yet.")}
           idField="prefix"
         />
       </SecureComponent>

@@ -24,6 +24,7 @@ import {
 import { useAppDispatch } from "../../../../store";
 import useApi from "../../Common/Hooks/useApi";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteBucketProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -37,6 +38,7 @@ const DeleteBucket = ({
   selectedBucket,
 }: IDeleteBucketProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onDelSuccess = () => {
     closeDeleteModalAndRefresh(true);
     // Update BucketListing in Menu
@@ -60,8 +62,8 @@ const DeleteBucket = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Bucket`}
-      confirmText={"Delete"}
+      title={t("Delete Bucket")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -69,8 +71,11 @@ const DeleteBucket = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete bucket <b>{selectedBucket}</b>? <br />
-          A bucket can only be deleted if it's empty.
+          {interpolate(t("Are you sure you want to delete bucket {bucket}?"), {
+            bucket: <b>{selectedBucket}</b>,
+          })}{" "}
+          <br />
+          {t("A bucket can only be deleted if it's empty.")}
         </Fragment>
       }
     />

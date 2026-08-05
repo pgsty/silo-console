@@ -28,6 +28,7 @@ import {
 import { AppDispatch } from "../../../store";
 import { setSnackBarMessage } from "../../../systemSlice";
 import { BucketObject } from "api/consoleApi";
+import { getStoredLanguage, translate } from "i18n/lang";
 
 export const downloadObject = (
   dispatch: AppDispatch,
@@ -75,7 +76,10 @@ export const downloadObject = (
     () => {
       dispatch(
         setSnackBarMessage(
-          "File download will be handled directly by the browser.",
+          translate(
+            getStoredLanguage(),
+            "File download will be handled directly by the browser.",
+          ),
         ),
       );
     },

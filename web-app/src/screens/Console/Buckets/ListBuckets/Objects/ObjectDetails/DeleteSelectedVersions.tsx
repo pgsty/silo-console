@@ -24,6 +24,7 @@ import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions
 import { useSelector } from "react-redux";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteSelectedVersionsProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -41,6 +42,7 @@ const DeleteObject = ({
   selectedObject,
 }: IDeleteSelectedVersionsProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [bypassGovernance, setBypassGovernance] = useState<boolean>(false);
 
@@ -101,8 +103,8 @@ const DeleteObject = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Selected Versions`}
-      confirmText={"Delete"}
+      title={t("Delete Selected Versions")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -110,8 +112,12 @@ const DeleteObject = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete the selected {selectedVersions.length}{" "}
-          versions for <strong>{selectedObject}</strong>?
+          {interpolate(
+            t(
+              "Are you sure you want to delete the selected {count} versions for {object}?",
+            ).replace("{count}", String(selectedVersions.length)),
+            { object: <strong>{selectedObject}</strong> },
+          )}
           {canBypass && (
             <Fragment>
               <div
@@ -120,8 +126,8 @@ const DeleteObject = ({
                 }}
               >
                 <Switch
-                  label={"Bypass Governance Mode"}
-                  indicatorLabels={["Yes", "No"]}
+                  label={t("Bypass Governance Mode")}
+                  indicatorLabels={[t("Yes"), t("No")]}
                   checked={bypassGovernance}
                   value={"bypass_governance"}
                   id="bypass_governance"

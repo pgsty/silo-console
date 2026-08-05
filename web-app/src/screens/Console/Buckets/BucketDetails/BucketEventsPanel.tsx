@@ -41,6 +41,7 @@ import { selBucketDetailsLoading } from "./bucketDetailsSlice";
 import { useAppDispatch } from "../../../../store";
 import withSuspense from "../../Common/Components/withSuspense";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const DeleteEvent = withSuspense(React.lazy(() => import("./DeleteEvent")));
 const AddEvent = withSuspense(React.lazy(() => import("./AddEvent")));
@@ -48,6 +49,8 @@ const AddEvent = withSuspense(React.lazy(() => import("./AddEvent")));
 const BucketEventsPanel = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
 
@@ -99,7 +102,7 @@ const BucketEventsPanel = () => {
 
   const eventsDisplay = (events: string[] | null) => {
     if (!events) {
-      return "other";
+      return t("other");
     }
 
     const cleanEvents = events.reduce((acc: string[], read: string) => {
@@ -163,13 +166,13 @@ const BucketEventsPanel = () => {
             matchAll
             errorProps={{ disabled: true }}
           >
-            <TooltipWrapper tooltip={"Subscribe to Event"}>
+            <TooltipWrapper tooltip={t("Subscribe to Event")}>
               <Button
                 id={"Subscribe-bucket-event"}
                 onClick={() => {
                   setAddEventScreenOpen(true);
                 }}
-                label={"Subscribe to Event"}
+                label={t("Subscribe to Event")}
                 icon={<AddIcon />}
                 variant={"callAction"}
               />
@@ -180,20 +183,28 @@ const BucketEventsPanel = () => {
         <HelpTip
           content={
             <Fragment>
-              SILO{" "}
-              <a
-                target="blank"
-                href="https://silo.pgsty.com/administration/monitoring/"
-              >
-                bucket notifications
-              </a>{" "}
-              allow administrators to send notifications to supported external
-              services on certain object or bucket events.
+              {interpolate(
+                t(
+                  "SILO {bucketNotifications} allow administrators to send notifications to supported external services on certain object or bucket events.",
+                ),
+                {
+                  bucketNotifications: (
+                    <a
+                      target="blank"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/monitoring/",
+                      )}
+                    >
+                      {t("bucket notifications")}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
           placement="right"
         >
-          Events
+          {t("Events")}
         </HelpTip>
       </SectionTitle>
 
@@ -212,16 +223,17 @@ const BucketEventsPanel = () => {
               columns={[
                 { label: "SQS", elementKey: "arn" },
                 {
-                  label: "Events",
+                  label: t("Events"),
                   elementKey: "events",
                   renderFunction: eventsDisplay,
                 },
-                { label: "Prefix", elementKey: "prefix" },
-                { label: "Suffix", elementKey: "suffix" },
+                { label: t("Prefix"), elementKey: "prefix" },
+                { label: t("Suffix"), elementKey: "suffix" },
               ]}
               isLoading={loadingEvents}
               records={records}
-              entityName="Events"
+              entityName={t("Events")}
+              customEmptyMessage={t("There are no Events yet.")}
               idField="id"
               customPaperHeight={"400px"}
             />
@@ -231,25 +243,31 @@ const BucketEventsPanel = () => {
           <Grid item xs={12}>
             <br />
             <HelpBox
-              title={"Event Notifications"}
+              title={t("Event Notifications")}
               iconComponent={<LambdaIcon />}
               help={
                 <Fragment>
-                  SILO bucket notifications allow administrators to send
-                  notifications to supported external services on certain object
-                  or bucket events. SILO supports bucket and object-level S3
-                  events similar to the Amazon S3 Event Notifications.
+                  {t(
+                    "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.",
+                  )}
                   <br />
                   <br />
-                  You can learn more at the{" "}
-                  <a
-                    href="https://silo.pgsty.com/administration/monitoring/bucket-notifications/"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    documentation
-                  </a>
-                  .
+                  {interpolate(
+                    t("You can learn more at the {documentation}."),
+                    {
+                      documentation: (
+                        <a
+                          href={localize(
+                            "https://silo.pgsty.com/administration/monitoring/bucket-notifications/",
+                          )}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          {t("documentation")}
+                        </a>
+                      ),
+                    },
+                  )}
                 </Fragment>
               }
             />

@@ -58,6 +58,7 @@ import LabelWithIcon from "./SummaryItems/LabelWithIcon";
 import EditablePropertyItem from "./SummaryItems/EditablePropertyItem";
 import ReportedUsage from "./SummaryItems/ReportedUsage";
 import BucketQuotaSize from "./SummaryItems/BucketQuotaSize";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const SetAccessPolicy = withSuspense(
   React.lazy(() => import("./SetAccessPolicy")),
@@ -79,6 +80,8 @@ const EnableQuota = withSuspense(React.lazy(() => import("./EnableQuota")));
 const BucketSummary = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
   const bucketInfo = useSelector(selBucketDetailsInfo);
@@ -358,11 +361,11 @@ const BucketSummary = () => {
   };
 
   let versioningStatus = versioningInfo?.status;
-  let versioningText = "Unversioned (Default)";
+  let versioningText = t("Unversioned (Default)");
   if (versioningStatus === "Enabled") {
-    versioningText = "Versioned";
+    versioningText = t("Versioned");
   } else if (versioningStatus === "Suspended") {
-    versioningText = "Suspended";
+    versioningText = t("Suspended");
   }
 
   return (
@@ -412,7 +415,7 @@ const BucketSummary = () => {
       )}
 
       <SectionTitle separator sx={{ marginBottom: 15 }}>
-        Summary
+        {t("Summary")}
       </SectionTitle>
       <Grid container>
         <SecureComponent
@@ -435,30 +438,48 @@ const BucketSummary = () => {
                       IAM_SCOPES.S3_PUT_ACTIONS,
                     ]}
                     resourceName={bucketName}
-                    property={"Access Policy:"}
-                    value={accessPolicy.toLowerCase()}
+                    property={t("Access Policy:")}
+                    value={t(accessPolicy.toLowerCase())}
                     onEdit={() => {
                       setAccessPolicyScreenOpen(true);
                     }}
                     isLoading={bucketLoading}
                     helpTip={
                       <Fragment>
-                        <strong>Private</strong> policy limits access to
-                        credentialled accounts with appropriate permissions
+                        {interpolate(
+                          t(
+                            "{private} policy limits access to credentialled accounts with appropriate permissions",
+                          ),
+                          { private: <strong>{t("Private")}</strong> },
+                        )}
                         <br />
-                        <strong>Public</strong> policy anyone will be able to
-                        upload, download and delete files from this Bucket once
-                        logged in
+                        {interpolate(
+                          t(
+                            "{public} policy anyone will be able to upload, download and delete files from this Bucket once logged in",
+                          ),
+                          { public: <strong>{t("Public")}</strong> },
+                        )}
                         <br />
-                        <strong>Custom</strong> policy can be written to define
-                        which accounts are authorized to access this Bucket
+                        {interpolate(
+                          t(
+                            "{custom} policy can be written to define which accounts are authorized to access this Bucket",
+                          ),
+                          { custom: <strong>{t("Custom")}</strong> },
+                        )}
                         <br />
                         <br />
-                        To allow Bucket access without credentials, use the{" "}
-                        <a href={`/buckets/${bucketName}/admin/prefix`}>
-                          Anonymous
-                        </a>{" "}
-                        setting
+                        {interpolate(
+                          t(
+                            "To allow Bucket access without credentials, use the {anonymous} setting",
+                          ),
+                          {
+                            anonymous: (
+                              <a href={`/buckets/${bucketName}/admin/prefix`}>
+                                {t("Anonymous")}
+                              </a>
+                            ),
+                          },
+                        )}
                       </Fragment>
                     }
                   />
@@ -477,30 +498,41 @@ const BucketSummary = () => {
                       IAM_SCOPES.S3_PUT_ACTIONS,
                     ]}
                     resourceName={bucketName}
-                    property={"Encryption:"}
-                    value={encryptionEnabled ? "Enabled" : "Disabled"}
+                    property={t("Encryption:")}
+                    value={encryptionEnabled ? t("Enabled") : t("Disabled")}
                     onEdit={() => {
                       setEnableEncryptionScreenOpen(true);
                     }}
                     isLoading={loadingEncryption}
                     helpTip={
                       <Fragment>
-                        SILO supports enabling automatic{" "}
-                        <a
-                          href="https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-kms/"
-                          target="blank"
-                        >
-                          SSE-KMS
-                        </a>{" "}
-                        and{" "}
-                        <a
-                          href="https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-s3/"
-                          target="blank"
-                        >
-                          SSE-S3
-                        </a>{" "}
-                        encryption of all objects written to a bucket using a
-                        specific External Key (EK) stored on the external KMS.
+                        {interpolate(
+                          t(
+                            "SILO supports enabling automatic {sseKms} and {sseS3} encryption of all objects written to a bucket using a specific External Key (EK) stored on the external KMS.",
+                          ),
+                          {
+                            sseKms: (
+                              <a
+                                href={localize(
+                                  "https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-kms/",
+                                )}
+                                target="blank"
+                              >
+                                SSE-KMS
+                              </a>
+                            ),
+                            sseS3: (
+                              <a
+                                href={localize(
+                                  "https://silo.pgsty.com/administration/server-side-encryption/server-side-encryption-sse-s3/",
+                                )}
+                                target="blank"
+                              >
+                                SSE-S3
+                              </a>
+                            ),
+                          },
+                        )}
                       </Fragment>
                     }
                   />
@@ -514,7 +546,7 @@ const BucketSummary = () => {
                   resource={bucketName}
                 >
                   <ValuePair
-                    label={"Replication:"}
+                    label={t("Replication:")}
                     value={
                       <LabelWithIcon
                         icon={
@@ -522,7 +554,7 @@ const BucketSummary = () => {
                         }
                         label={
                           <label className={"muted"}>
-                            {replicationRules ? "Enabled" : "Disabled"}
+                            {replicationRules ? t("Enabled") : t("Disabled")}
                           </label>
                         }
                       />
@@ -538,7 +570,7 @@ const BucketSummary = () => {
                   resource={bucketName}
                 >
                   <ValuePair
-                    label={"Object Locking:"}
+                    label={t("Object Locking:")}
                     value={
                       <LabelWithIcon
                         icon={
@@ -546,7 +578,7 @@ const BucketSummary = () => {
                         }
                         label={
                           <label className={"muted"}>
-                            {hasObjectLocking ? "Enabled" : "Disabled"}
+                            {hasObjectLocking ? t("Enabled") : t("Disabled")}
                           </label>
                         }
                       />
@@ -555,28 +587,36 @@ const BucketSummary = () => {
                 </SecureComponent>
                 <Box>
                   <ValuePair
-                    label={"Tags:"}
+                    label={t("Tags:")}
                     value={<BucketTags bucketName={bucketName} />}
                   />
                 </Box>
                 <EditablePropertyItem
                   iamScopes={[IAM_SCOPES.ADMIN_SET_BUCKET_QUOTA]}
                   resourceName={bucketName}
-                  property={"Quota:"}
-                  value={quotaEnabled ? "Enabled" : "Disabled"}
+                  property={t("Quota:")}
+                  value={quotaEnabled ? t("Enabled") : t("Disabled")}
                   onEdit={setBucketQuota}
                   isLoading={loadingQuota}
                   helpTip={
                     <Fragment>
-                      Setting a{" "}
-                      <a
-                        href="https://silo.pgsty.com/reference/deprecated/mc-quota-set/"
-                        target="blank"
-                      >
-                        quota
-                      </a>{" "}
-                      assigns a hard limit to a bucket beyond which SILO does
-                      not allow writes.
+                      {interpolate(
+                        t(
+                          "Setting a {quota} assigns a hard limit to a bucket beyond which SILO does not allow writes.",
+                        ),
+                        {
+                          quota: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/reference/deprecated/mc-quota-set/",
+                              )}
+                              target="blank"
+                            >
+                              {t("quota")}
+                            </a>
+                          ),
+                        },
+                      )}
                     </Fragment>
                   }
                 />
@@ -607,7 +647,7 @@ const BucketSummary = () => {
           >
             <Grid item xs={12} sx={{ marginTop: 5 }}>
               <SectionTitle separator sx={{ marginBottom: 15 }}>
-                Versioning
+                {t("Versioning")}
               </SectionTitle>
 
               <Box sx={twoColCssGridLayoutConfig}>
@@ -618,7 +658,7 @@ const BucketSummary = () => {
                       IAM_SCOPES.S3_PUT_ACTIONS,
                     ]}
                     resourceName={bucketName}
-                    property={"Current Status:"}
+                    property={t("Current Status:")}
                     value={
                       <Box
                         sx={{
@@ -657,7 +697,7 @@ const BucketSummary = () => {
           >
             <Grid item xs={12} sx={{ marginTop: 5 }}>
               <SectionTitle separator sx={{ marginBottom: 15 }}>
-                Retention
+                {t("Retention")}
               </SectionTitle>
 
               <Box sx={twoColCssGridLayoutConfig}>
@@ -665,29 +705,37 @@ const BucketSummary = () => {
                   <EditablePropertyItem
                     iamScopes={[IAM_SCOPES.ADMIN_SET_BUCKET_QUOTA]}
                     resourceName={bucketName}
-                    property={"Retention:"}
-                    value={retentionEnabled ? "Enabled" : "Disabled"}
+                    property={t("Retention:")}
+                    value={retentionEnabled ? t("Enabled") : t("Disabled")}
                     onEdit={() => {
                       setRetentionConfigOpen(true);
                     }}
                     isLoading={loadingRetention}
                     helpTip={
                       <Fragment>
-                        SILO{" "}
-                        <a
-                          target="blank"
-                          href="https://silo.pgsty.com/administration/object-management/#object-retention"
-                        >
-                          Object Locking
-                        </a>{" "}
-                        enforces Write-Once Read-Many (WORM) immutability to
-                        protect versioned objects from deletion.
+                        {interpolate(
+                          t(
+                            "SILO {objectLocking} enforces Write-Once Read-Many (WORM) immutability to protect versioned objects from deletion.",
+                          ),
+                          {
+                            objectLocking: (
+                              <a
+                                target="blank"
+                                href={localize(
+                                  "https://silo.pgsty.com/administration/object-management/#object-retention",
+                                )}
+                              >
+                                {t("Object Locking")}
+                              </a>
+                            ),
+                          },
+                        )}
                       </Fragment>
                     }
                   />
 
                   <ValuePair
-                    label={"Mode:"}
+                    label={t("Mode:")}
                     value={
                       <label
                         className={"muted"}
@@ -700,7 +748,7 @@ const BucketSummary = () => {
                     }
                   />
                   <ValuePair
-                    label={"Validity:"}
+                    label={t("Validity:")}
                     value={
                       <label
                         className={"muted"}

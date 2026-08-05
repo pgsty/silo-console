@@ -21,6 +21,7 @@ import { useAppDispatch } from "../../../store";
 import { downloadObject } from "./utils";
 import { BucketObject } from "api/consoleApi";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface IRenameLongFilename {
   open: boolean;
@@ -40,6 +41,7 @@ const RenameLongFileName = ({
   bucketName,
 }: IRenameLongFilename) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [newFileName, setNewFileName] = useState<string>(currentItem);
   const [acceptLongName, setAcceptLongName] = useState<boolean>(false);
@@ -52,18 +54,19 @@ const RenameLongFileName = ({
 
   return (
     <ModalWrapper
-      title={`Rename Download`}
+      title={t("Rename Download")}
       modalOpen={open}
       onClose={closeModal}
       titleIcon={<EditIcon />}
     >
       <div>
-        The file you are trying to download has a long name.
+        {t("The file you are trying to download has a long name.")}
         <br />
-        This can cause issues on Windows Systems by trimming the file name after
-        download.
+        {t(
+          "This can cause issues on Windows Systems by trimming the file name after download.",
+        )}
         <br />
-        <br /> We recommend to rename the file download
+        <br /> {t("We recommend to rename the file download")}
       </div>
       <form
         noValidate
@@ -84,7 +87,7 @@ const RenameLongFileName = ({
             value={newFileName}
             error={
               newFileName.length > 200 && !acceptLongName
-                ? "Filename should be less than 200 characters long."
+                ? t("Filename should be less than 200 characters long.")
                 : ""
             }
           />
@@ -99,7 +102,7 @@ const RenameLongFileName = ({
                 setNewFileName(currentItem);
               }
             }}
-            label={"Use Original Name"}
+            label={t("Use Original Name")}
           />
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
             <Button
@@ -108,7 +111,7 @@ const RenameLongFileName = ({
               variant="callAction"
               color="primary"
               disabled={newFileName.length > 200 && !acceptLongName}
-              label={"Download File"}
+              label={t("Download File")}
             />
           </Grid>
         </FormLayout>

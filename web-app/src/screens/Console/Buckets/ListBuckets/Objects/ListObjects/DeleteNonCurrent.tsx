@@ -25,6 +25,7 @@ import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions
 import { useSelector } from "react-redux";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteNonCurrentProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -40,6 +41,7 @@ const DeleteNonCurrentVersions = ({
   selectedObject,
 }: IDeleteNonCurrentProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [typeConfirm, setTypeConfirm] = useState<string>("");
   const [bypassGovernance, setBypassGovernance] = useState<boolean>(false);
@@ -88,8 +90,8 @@ const DeleteNonCurrentVersions = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Non-Current versions`}
-      confirmText={"Delete"}
+      title={t("Delete Non-Current versions")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -100,8 +102,13 @@ const DeleteNonCurrentVersions = ({
       }}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete all the non-current versions for:{" "}
-          <b>{selectedObject}</b>? <br />
+          {interpolate(
+            t(
+              "Are you sure you want to delete all the non-current versions for: {object}?",
+            ),
+            { object: <b>{selectedObject}</b> },
+          )}{" "}
+          <br />
           {canBypass && (
             <Fragment>
               <div
@@ -110,8 +117,8 @@ const DeleteNonCurrentVersions = ({
                 }}
               >
                 <Switch
-                  label={"Bypass Governance Mode"}
-                  indicatorLabels={["Yes", "No"]}
+                  label={t("Bypass Governance Mode")}
+                  indicatorLabels={[t("Yes"), t("No")]}
                   checked={bypassGovernance}
                   value={"bypass_governance"}
                   id="bypass_governance"
@@ -125,7 +132,9 @@ const DeleteNonCurrentVersions = ({
             </Fragment>
           )}
           <br />
-          To continue please type <b>YES, PROCEED</b> in the box.
+          {interpolate(t("To continue please type {phrase} in the box."), {
+            phrase: <b>YES, PROCEED</b>,
+          })}
           <br />
           <br />
           <Grid item xs={12}>

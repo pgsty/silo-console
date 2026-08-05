@@ -17,8 +17,10 @@
 import React from "react";
 import { ReportedUsageFullIcon, Box } from "mds";
 import { niceBytes } from "../../../../../common/utils";
+import { useT } from "i18n";
 
 const ReportedUsage = ({ bucketSize }: { bucketSize: string }) => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -48,7 +50,7 @@ const ReportedUsage = ({ bucketSize }: { bucketSize: string }) => {
             fontWeight: 600,
           }}
         >
-          Reported Usage:
+          {t("Reported Usage:")}
         </label>
         <label>{niceBytes(bucketSize)}</label>
       </Box>

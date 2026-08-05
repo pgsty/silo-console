@@ -32,6 +32,7 @@ import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary
 import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 interface ISetRetentionConfigProps {
   open: boolean;
@@ -45,6 +46,8 @@ const SetRetentionConfig = ({
   closeModalAndRefresh,
 }: ISetRetentionConfigProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const localize = useLocalizedLink();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [loadingForm, setLoadingForm] = useState<boolean>(true);
   const [retentionMode, setRetentionMode] = useState<
@@ -108,7 +111,7 @@ const SetRetentionConfig = ({
 
   return (
     <ModalWrapper
-      title="Set Retention Configuration"
+      title={t("Set Retention Configuration")}
       modalOpen={open}
       onClose={() => {
         closeModalAndRefresh();
@@ -129,35 +132,52 @@ const SetRetentionConfig = ({
               currentValue={retentionMode as string}
               id="retention_mode"
               name="retention_mode"
-              label="Retention Mode"
+              label={t("Retention Mode")}
               onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                 setRetentionMode(e.target.value as ObjectRetentionMode);
               }}
               selectorOptions={[
-                { value: "compliance", label: "Compliance" },
-                { value: "governance", label: "Governance" },
+                { value: "compliance", label: t("Compliance") },
+                { value: "governance", label: t("Governance") },
               ]}
               helpTip={
                 <Fragment>
-                  {" "}
-                  <a
-                    href="https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode"
-                    target="blank"
-                  >
-                    Compliance
-                  </a>{" "}
-                  lock protects Objects from write operations by all users,
-                  including the SILO root user.
+                  {interpolate(
+                    t(
+                      "{compliance} lock protects Objects from write operations by all users, including the SILO root user.",
+                    ),
+                    {
+                      compliance: (
+                        <a
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode",
+                          )}
+                          target="blank"
+                        >
+                          {t("Compliance")}
+                        </a>
+                      ),
+                    },
+                  )}
                   <br />
                   <br />
-                  <a
-                    href="https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode"
-                    target="blank"
-                  >
-                    Governance
-                  </a>{" "}
-                  lock protects Objects from write operations by non-privileged
-                  users.
+                  {interpolate(
+                    t(
+                      "{governance} lock protects Objects from write operations by non-privileged users.",
+                    ),
+                    {
+                      governance: (
+                        <a
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode",
+                          )}
+                          target="blank"
+                        >
+                          {t("Governance")}
+                        </a>
+                      ),
+                    },
+                  )}
                 </Fragment>
               }
               helpTipPlacement="right"
@@ -166,13 +186,13 @@ const SetRetentionConfig = ({
               currentValue={retentionUnit as string}
               id="retention_unit"
               name="retention_unit"
-              label="Retention Unit"
+              label={t("Retention Unit")}
               onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                 setRetentionUnit(e.target.value as ObjectRetentionUnit);
               }}
               selectorOptions={[
-                { value: "days", label: "Days" },
-                { value: "years", label: "Years" },
+                { value: "days", label: t("Days") },
+                { value: "years", label: t("Years") },
               ]}
             />
             <InputBox
@@ -182,7 +202,7 @@ const SetRetentionConfig = ({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setRetentionValidity(e.target.valueAsNumber);
               }}
-              label="Retention Validity"
+              label={t("Retention Validity")}
               value={String(retentionValidity)}
               required
               min="1"
@@ -196,7 +216,7 @@ const SetRetentionConfig = ({
                 onClick={() => {
                   closeModalAndRefresh();
                 }}
-                label={"Cancel"}
+                label={t("Cancel")}
               />
               <Button
                 id={"set"}
@@ -204,7 +224,7 @@ const SetRetentionConfig = ({
                 variant="callAction"
                 color="primary"
                 disabled={addLoading || !valid}
-                label={"Set"}
+                label={t("Set")}
               />
             </Grid>
             {addLoading && (

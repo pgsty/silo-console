@@ -38,6 +38,7 @@ import { useAppDispatch } from "../../../../store";
 import { api } from "api";
 import { MultiLifecycleResult } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IBulkReplicationModal {
   open: boolean;
@@ -51,6 +52,7 @@ const AddBulkReplicationModal = ({
   buckets,
 }: IBulkReplicationModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [loadingTiers, setLoadingTiers] = useState<boolean>(true);
   const [tiersList, setTiersList] = useState<ITiersDropDown[]>([]);
@@ -194,38 +196,38 @@ const AddBulkReplicationModal = ({
       onClose={() => {
         closeModalAndRefresh(false);
       }}
-      title="Set Lifecycle to multiple buckets"
+      title={t("Set Lifecycle to multiple buckets")}
     >
       <Wizard
         loadingStep={addLoading || loadingTiers}
         wizardSteps={[
           {
-            label: "Lifecycle Configuration",
+            label: t("Lifecycle Configuration"),
             componentRender: (
               <Fragment>
                 <FormLayout withBorders={false} containerPadding={false}>
                   <Grid item xs={12}>
                     <ReadBox
-                      label="Local Buckets to replicate"
+                      label={t("Local Buckets to replicate")}
                       sx={{ maxWidth: "440px", width: "100%" }}
                     >
                       {buckets.join(", ")}
                     </ReadBox>
                   </Grid>
-                  <h4>Remote Endpoint Configuration</h4>
+                  <h4>{t("Remote Endpoint Configuration")}</h4>
                   <fieldset className={"inputItem"}>
-                    <legend>Lifecycle Configuration</legend>
+                    <legend>{t("Lifecycle Configuration")}</legend>
                     <RadioGroup
                       currentValue={ilmType}
                       id="quota_type"
                       name="quota_type"
-                      label="ILM Rule"
+                      label={t("ILM Rule")}
                       onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                         setIlmType(e.target.value as "expiry" | "transition");
                       }}
                       selectorOptions={[
-                        { value: "expiry", label: "Expiry" },
-                        { value: "transition", label: "Transition" },
+                        { value: "expiry", label: t("Expiry") },
+                        { value: "transition", label: t("Transition") },
                       ]}
                     />
                     {ilmType === "expiry" ? (
@@ -239,7 +241,7 @@ const AddBulkReplicationModal = ({
                           ) => {
                             setExpiryDays(e.target.value);
                           }}
-                          label="Expiry Days"
+                          label={t("Expiry Days")}
                           value={expiryDays}
                           min="0"
                         />
@@ -252,7 +254,7 @@ const AddBulkReplicationModal = ({
                           ) => {
                             setNCExpirationDays(e.target.value);
                           }}
-                          label="Non-current Expiration Days"
+                          label={t("Non-current Expiration Days")}
                           value={NCExpirationDays}
                           min="0"
                         />
@@ -268,7 +270,7 @@ const AddBulkReplicationModal = ({
                           ) => {
                             setTransitionDays(e.target.value);
                           }}
-                          label="Transition Days"
+                          label={t("Transition Days")}
                           value={transitionDays}
                           min="0"
                         />
@@ -281,7 +283,7 @@ const AddBulkReplicationModal = ({
                           ) => {
                             setNCTransitionDays(e.target.value);
                           }}
-                          label="Non-current Transition Days"
+                          label={t("Non-current Transition Days")}
                           value={NCTransitionDays}
                           min="0"
                         />
@@ -293,12 +295,16 @@ const AddBulkReplicationModal = ({
                           ) => {
                             setNCTransitionSC(e.target.value);
                           }}
-                          placeholder="Set Non-current Version Transition Storage Class"
-                          label="Non-current Version Transition Storage Class"
+                          placeholder={t(
+                            "Set Non-current Version Transition Storage Class",
+                          )}
+                          label={t(
+                            "Non-current Version Transition Storage Class",
+                          )}
                           value={NCTransitionSC}
                         />
                         <Select
-                          label="Storage Class"
+                          label={t("Storage Class")}
                           id="storage_class"
                           name="storage_class"
                           value={storageClass}
@@ -311,25 +317,25 @@ const AddBulkReplicationModal = ({
                     )}
                   </fieldset>
                   <fieldset className={"inputItem"}>
-                    <legend>File Configuration</legend>
+                    <legend>{t("File Configuration")}</legend>
                     <InputBox
                       id="prefix"
                       name="prefix"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setPrefix(e.target.value);
                       }}
-                      label="Prefix"
+                      label={t("Prefix")}
                       value={prefix}
                     />
                     <QueryMultiSelector
                       name="tags"
-                      label="Tags"
+                      label={t("Tags")}
                       elements={tags}
                       onChange={(vl: string) => {
                         setTags(vl);
                       }}
-                      keyPlaceholder="Tag Key"
-                      valuePlaceholder="Tag Value"
+                      keyPlaceholder={t("Tag Key")}
+                      valuePlaceholder={t("Tag Value")}
                       withBorder
                     />
                     <Switch
@@ -342,7 +348,7 @@ const AddBulkReplicationModal = ({
                       ) => {
                         setExpiredObjectDM(event.target.checked);
                       }}
-                      label={"Expired Object Delete Marker"}
+                      label={t("Expired Object Delete Marker")}
                     />
                     <Switch
                       value="expired_delete_all"
@@ -354,7 +360,7 @@ const AddBulkReplicationModal = ({
                       ) => {
                         setExpiredAllVersionsDM(event.target.checked);
                       }}
-                      label={"Expired All Versions"}
+                      label={t("Expired All Versions")}
                     />
                   </fieldset>
                 </FormLayout>
@@ -363,20 +369,20 @@ const AddBulkReplicationModal = ({
             buttons: [
               {
                 type: "custom",
-                label: "Create Rules",
+                label: t("Create Rules"),
                 enabled: !loadingTiers && !addLoading && isFormValid,
                 action: createLifecycleRules,
               },
             ],
           },
           {
-            label: "Results",
+            label: t("Results"),
             componentRender: (
               <Fragment>
-                <h3>Multi Bucket lifecycle Assignments Results</h3>
+                <h3>{t("Multi Bucket lifecycle Assignments Results")}</h3>
                 <Grid container>
                   <Grid item xs={12}>
-                    <h4>Buckets Results</h4>
+                    <h4>{t("Buckets Results")}</h4>
                     {results?.results?.map((resultItem) => {
                       return (
                         <Box
@@ -399,7 +405,7 @@ const AddBulkReplicationModal = ({
             buttons: [
               {
                 type: "custom",
-                label: "Done",
+                label: t("Done"),
                 enabled: !addLoading,
                 action: () => closeModalAndRefresh(true),
               },

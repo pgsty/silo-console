@@ -43,6 +43,7 @@ import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import QueryMultiSelector from "../../Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
 import InputUnitMenu from "../../Common/FormComponents/InputUnitMenu/InputUnitMenu";
 import { IAM_PAGES } from "common/SecureComponent/permissions";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 interface IReplicationModal {
   open: boolean;
@@ -56,6 +57,8 @@ const AddLifecycleModal = ({
   bucketName,
 }: IReplicationModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const localize = useLocalizedLink();
   const distributedSetup = useSelector(selDistSet);
   const [loadingTiers, setLoadingTiers] = useState<boolean>(true);
   const [tiersList, setTiersList] = useState<ITiersDropDown[]>([]);
@@ -204,7 +207,7 @@ const AddLifecycleModal = ({
       onClose={() => {
         closeModalAndRefresh(false);
       }}
-      title="Add Lifecycle Rule"
+      title={t("Add Lifecycle Rule")}
       titleIcon={<LifecycleConfigIcon />}
     >
       {loadingTiers && (
@@ -230,38 +233,53 @@ const AddLifecycleModal = ({
               currentValue={ilmType}
               id="ilm_type"
               name="ilm_type"
-              label="Type of Lifecycle"
+              label={t("Type of Lifecycle")}
               onChange={(e) => {
                 setIlmType(e.target.value as "expiry" | "transition");
               }}
               selectorOptions={[
-                { value: "expiry", label: "Expiry" },
-                { value: "transition", label: "Transition" },
+                { value: "expiry", label: t("Expiry") },
+                { value: "transition", label: t("Transition") },
               ]}
               helpTip={
                 <Fragment>
-                  Select{" "}
-                  <a
-                    target="blank"
-                    href="https://silo.pgsty.com/administration/object-management/create-lifecycle-management-expiration-rule/"
-                  >
-                    Expiry
-                  </a>{" "}
-                  to delete Objects per this rule. Select{" "}
-                  <a
-                    target="blank"
-                    href="https://silo.pgsty.com/administration/object-management/transition-objects-to-minio/"
-                  >
-                    Transition
-                  </a>{" "}
-                  to move Objects to a remote storage{" "}
-                  <a
-                    target="blank"
-                    href="https://silo.pgsty.com/administration/object-management/transition-objects-to-minio/#configure-the-remote-storage-tier"
-                  >
-                    Tier
-                  </a>{" "}
-                  per this rule.
+                  {interpolate(
+                    t(
+                      "Select {expiry} to delete Objects per this rule. Select {transition} to move Objects to a remote storage {tier} per this rule.",
+                    ),
+                    {
+                      expiry: (
+                        <a
+                          target="blank"
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/create-lifecycle-management-expiration-rule/",
+                          )}
+                        >
+                          {t("Expiry")}
+                        </a>
+                      ),
+                      transition: (
+                        <a
+                          target="blank"
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/transition-objects-to-minio/",
+                          )}
+                        >
+                          {t("Transition")}
+                        </a>
+                      ),
+                      tier: (
+                        <a
+                          target="blank"
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/transition-objects-to-minio/#configure-the-remote-storage-tier",
+                          )}
+                        >
+                          {t("Tier")}
+                        </a>
+                      ),
+                    },
+                  )}
                 </Fragment>
               }
               helpTipPlacement="right"
@@ -271,25 +289,33 @@ const AddLifecycleModal = ({
                 value={targetVersion}
                 id="object_version"
                 name="object_version"
-                label="Object Version"
+                label={t("Object Version")}
                 onChange={(value) => {
                   setTargetVersion(value as "current" | "noncurrent");
                 }}
                 options={[
-                  { value: "current", label: "Current Version" },
-                  { value: "noncurrent", label: "Non-Current Version" },
+                  { value: "current", label: t("Current Version") },
+                  { value: "noncurrent", label: t("Non-Current Version") },
                 ]}
                 helpTip={
                   <Fragment>
-                    Select whether to apply the rule to current or non-current
-                    Object
-                    <a
-                      target="blank"
-                      href="https://silo.pgsty.com/administration/object-management/create-lifecycle-management-expiration-rule/#expire-versioned-objects"
-                    >
-                      {" "}
-                      Versions
-                    </a>
+                    {interpolate(
+                      t(
+                        "Select whether to apply the rule to current or non-current Object {versions}",
+                      ),
+                      {
+                        versions: (
+                          <a
+                            target="blank"
+                            href={localize(
+                              "https://silo.pgsty.com/administration/object-management/create-lifecycle-management-expiration-rule/#expire-versioned-objects",
+                            )}
+                          >
+                            {t("Versions")}
+                          </a>
+                        ),
+                      },
+                    )}
                   </Fragment>
                 }
                 helpTipPlacement="right"
@@ -300,9 +326,13 @@ const AddLifecycleModal = ({
               error={
                 lifecycleDays && !isFormValid
                   ? parseInt(lifecycleDays) <= 0
-                    ? `Number of ${expiryUnit} to retain must be greater than zero`
+                    ? t(
+                        "Number of {unit} to retain must be greater than zero",
+                      ).replace("{unit}", t(expiryUnit))
                     : parseInt(lifecycleDays) > 2147483647
-                      ? `Number of ${expiryUnit} must be less than or equal to 2147483647`
+                      ? t(
+                          "Number of {unit} must be less than or equal to 2147483647",
+                        ).replace("{unit}", t(expiryUnit))
                       : ""
                   : ""
               }
@@ -314,7 +344,7 @@ const AddLifecycleModal = ({
                 }
               }}
               pattern={"[0-9]*"}
-              label="After"
+              label={t("After")}
               value={lifecycleDays}
               overlayObject={
                 <Fragment>
@@ -323,8 +353,8 @@ const AddLifecycleModal = ({
                       id={"expire-current-unit"}
                       unitSelected={expiryUnit}
                       unitsList={[
-                        { label: "Days", value: "days" },
-                        { label: "Versions", value: "versions" },
+                        { label: t("Days"), value: "days" },
+                        { label: t("Versions"), value: "versions" },
                       ]}
                       disabled={
                         targetVersion !== "noncurrent" || ilmType !== "expiry"
@@ -337,8 +367,9 @@ const AddLifecycleModal = ({
                       <HelpTip
                         content={
                           <Fragment>
-                            Select to set expiry by days or newer noncurrent
-                            versions
+                            {t(
+                              "Select to set expiry by days or newer noncurrent versions",
+                            )}
                           </Fragment>
                         }
                         placement="right"
@@ -356,7 +387,7 @@ const AddLifecycleModal = ({
               <Fragment />
             ) : (
               <Select
-                label="To Tier"
+                label={t("To Tier")}
                 id="storage_class"
                 name="storage_class"
                 value={storageClass}
@@ -366,15 +397,22 @@ const AddLifecycleModal = ({
                 options={tiersList}
                 helpTip={
                   <Fragment>
-                    Configure a{" "}
-                    <a
-                      href={IAM_PAGES.TIERS_ADD}
-                      color="secondary"
-                      style={{ textDecoration: "underline" }}
-                    >
-                      remote tier
-                    </a>{" "}
-                    to receive transitioned Objects
+                    {interpolate(
+                      t(
+                        "Configure a {remoteTier} to receive transitioned Objects",
+                      ),
+                      {
+                        remoteTier: (
+                          <a
+                            href={IAM_PAGES.TIERS_ADD}
+                            color="secondary"
+                            style={{ textDecoration: "underline" }}
+                          >
+                            {t("remote tier")}
+                          </a>
+                        ),
+                      },
+                    )}
                   </Fragment>
                 }
                 helpTipPlacement="right"
@@ -382,7 +420,7 @@ const AddLifecycleModal = ({
             )}
             <Grid item xs={12} sx={formFieldRowFilter}>
               <Accordion
-                title={"Filters"}
+                title={t("Filters")}
                 id={"lifecycle-filters"}
                 expanded={expanded}
                 onTitleClick={() => setExpanded(!expanded)}
@@ -394,20 +432,20 @@ const AddLifecycleModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setPrefix(e.target.value);
                     }}
-                    label="Prefix"
+                    label={t("Prefix")}
                     value={prefix}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <QueryMultiSelector
                     name="tags"
-                    label="Tags"
+                    label={t("Tags")}
                     elements={""}
                     onChange={(vl: string) => {
                       setTags(vl);
                     }}
-                    keyPlaceholder="Tag Key"
-                    valuePlaceholder="Tag Value"
+                    keyPlaceholder={t("Tag Key")}
+                    valuePlaceholder={t("Tag Value")}
                     withBorder
                   />
                 </Grid>
@@ -416,7 +454,7 @@ const AddLifecycleModal = ({
             {ilmType === "expiry" && targetVersion === "noncurrent" && (
               <Grid item xs={12} sx={formFieldRowFilter}>
                 <Accordion
-                  title={"Advanced"}
+                  title={t("Advanced")}
                   id={"lifecycle-advanced-filters"}
                   expanded={expandedAdv}
                   onTitleClick={() => setExpandedAdv(!expandedAdv)}
@@ -433,10 +471,10 @@ const AddLifecycleModal = ({
                       ) => {
                         setExpiredObjectDM(event.target.checked);
                       }}
-                      label={"Expire Delete Marker"}
-                      description={
-                        "Remove the reference to the object if no versions are left"
-                      }
+                      label={t("Expire Delete Marker")}
+                      description={t(
+                        "Remove the reference to the object if no versions are left",
+                      )}
                     />
                     <Switch
                       value="expired_delete_all"
@@ -448,10 +486,10 @@ const AddLifecycleModal = ({
                       ) => {
                         setExpiredAllVersionsDM(event.target.checked);
                       }}
-                      label={"Expire All Versions"}
-                      description={
-                        "Removes all the versions of the object already expired"
-                      }
+                      label={t("Expire All Versions")}
+                      description={t(
+                        "Removes all the versions of the object already expired",
+                      )}
                     />
                   </Grid>
                 </Accordion>
@@ -467,7 +505,7 @@ const AddLifecycleModal = ({
                 onClick={() => {
                   closeModalAndRefresh(false);
                 }}
-                label={"Cancel"}
+                label={t("Cancel")}
               />
               <Button
                 id={"save-lifecycle"}
@@ -475,7 +513,7 @@ const AddLifecycleModal = ({
                 variant="callAction"
                 color="primary"
                 disabled={addLoading || !isFormValid}
-                label={"Save"}
+                label={t("Save")}
               />
             </Grid>
             {addLoading && (

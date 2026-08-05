@@ -18,6 +18,7 @@ import React, { Fragment, useState } from "react";
 import { ConfirmDeleteIcon } from "mds";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 import { api } from "api";
 import { ApiError, HttpResponse, PrefixWrapper } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
@@ -37,6 +38,7 @@ const DeleteAccessRule = ({
   toDelete,
 }: IDeleteAccessRule) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [loadingDeleteAccessRule, setLoadingDeleteAccessRule] =
     useState<boolean>(false);
@@ -58,15 +60,17 @@ const DeleteAccessRule = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Anonymous Access Rule`}
-      confirmText={"Delete"}
+      title={t("Delete Anonymous Access Rule")}
+      confirmText={t("Delete")}
       isOpen={modalOpen}
       isLoading={loadingDeleteAccessRule}
       onConfirm={onConfirmDelete}
       titleIcon={<ConfirmDeleteIcon />}
       onClose={onClose}
       confirmationContent={
-        <Fragment>Are you sure you want to delete this access rule?</Fragment>
+        <Fragment>
+          {t("Are you sure you want to delete this access rule?")}
+        </Fragment>
       }
     />
   );

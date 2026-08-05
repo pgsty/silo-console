@@ -60,10 +60,12 @@ import BulkLifecycleModal from "./BulkLifecycleModal";
 import hasPermission from "../../../../common/SecureComponent/accessControl";
 import BucketListItem from "./BucketListItem";
 import BulkReplicationModal from "./BulkReplicationModal";
+import { interpolate, useT } from "i18n";
 
 const ListBuckets = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [records, setRecords] = useState<Bucket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -206,7 +208,7 @@ const ListBuckets = () => {
         />
       )}
       {!obOnly && (
-        <PageHeaderWrapper label={"Buckets"} actions={<HelpMenu />} />
+        <PageHeaderWrapper label={t("Buckets")} actions={<HelpMenu />} />
       )}
 
       <PageLayout>
@@ -219,7 +221,7 @@ const ListBuckets = () => {
           {hasBuckets && (
             <SearchBox
               onChange={setFilterBuckets}
-              placeholder="Search Buckets"
+              placeholder={t("Search Buckets")}
               value={filterBuckets}
               sx={{
                 minWidth: 380,
@@ -247,8 +249,8 @@ const ListBuckets = () => {
                     !hasBuckets
                       ? ""
                       : bulkSelect
-                        ? "Unselect Buckets"
-                        : "Select Multiple Buckets"
+                        ? t("Unselect Buckets")
+                        : t("Select Multiple Buckets")
                   }
                 >
                   <Button
@@ -269,8 +271,8 @@ const ListBuckets = () => {
                       !hasBuckets
                         ? ""
                         : selectedBuckets.length === filteredRecords.length
-                          ? "Unselect All Buckets"
-                          : "Select All Buckets"
+                          ? t("Unselect All Buckets")
+                          : t("Select All Buckets")
                     }
                   >
                     <Button
@@ -289,13 +291,17 @@ const ListBuckets = () => {
                       : !canPutLifecycle
                         ? permissionTooltipHelper(
                             IAM_PERMISSIONS[IAM_ROLES.BUCKET_LIFECYCLE],
-                            "configure lifecycle for the selected buckets",
+                            t("configure lifecycle for the selected buckets"),
                           )
                         : selectedBuckets.length === 0
                           ? bulkSelect
-                            ? "Please select at least one bucket on which to configure Lifecycle"
-                            : "Use the Select Multiple Buckets button to choose buckets on which to configure Lifecycle"
-                          : "Set Lifecycle"
+                            ? t(
+                                "Please select at least one bucket on which to configure Lifecycle",
+                              )
+                            : t(
+                                "Use the Select Multiple Buckets button to choose buckets on which to configure Lifecycle",
+                              )
+                          : t("Set Lifecycle")
                   }
                 >
                   <Button
@@ -315,9 +321,13 @@ const ListBuckets = () => {
                       ? ""
                       : selectedBuckets.length === 0
                         ? bulkSelect
-                          ? "Please select at least one bucket on which to configure Replication"
-                          : "Use the Select Multiple Buckets button to choose buckets on which to configure Replication"
-                        : "Set Replication"
+                          ? t(
+                              "Please select at least one bucket on which to configure Replication",
+                            )
+                          : t(
+                              "Use the Select Multiple Buckets button to choose buckets on which to configure Replication",
+                            )
+                        : t("Set Replication")
                   }
                 >
                   <Button
@@ -333,7 +343,7 @@ const ListBuckets = () => {
               </Fragment>
             )}
 
-            <TooltipWrapper tooltip={"Refresh"}>
+            <TooltipWrapper tooltip={t("Refresh")}>
               <Button
                 id={"refresh-buckets"}
                 onClick={() => {
@@ -351,7 +361,7 @@ const ListBuckets = () => {
                     ? ""
                     : permissionTooltipHelper(
                         [IAM_SCOPES.S3_CREATE_BUCKET],
-                        "create a bucket",
+                        t("create a bucket"),
                       )
                 }
               >
@@ -363,7 +373,7 @@ const ListBuckets = () => {
                   icon={<AddIcon />}
                   variant={"callAction"}
                   disabled={!canCreateBucket}
-                  label={"Create Bucket"}
+                  label={t("Create Bucket")}
                 />
               </TooltipWrapper>
             )}
@@ -395,10 +405,10 @@ const ListBuckets = () => {
                 <Grid item xs={8}>
                   <HelpBox
                     iconComponent={<BucketsIcon />}
-                    title={"No Results"}
+                    title={t("No Results")}
                     help={
                       <Fragment>
-                        No buckets match the filtering condition
+                        {t("No buckets match the filtering condition")}
                       </Fragment>
                     }
                   />
@@ -410,12 +420,12 @@ const ListBuckets = () => {
                 <Grid item xs={8}>
                   <HelpBox
                     iconComponent={<BucketsIcon />}
-                    title={"Buckets"}
+                    title={t("Buckets")}
                     help={
                       <Fragment>
-                        SILO uses buckets to organize objects. A bucket is
-                        similar to a folder or directory in a filesystem, where
-                        each bucket can hold an arbitrary number of objects.
+                        {t(
+                          "SILO uses buckets to organize objects. A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.",
+                        )}
                         <br />
                         {canListBuckets ? (
                           ""
@@ -427,7 +437,7 @@ const ListBuckets = () => {
                                 IAM_SCOPES.S3_LIST_BUCKET,
                                 IAM_SCOPES.S3_ALL_LIST_BUCKET,
                               ],
-                              "view the buckets on this server",
+                              t("view the buckets on this server"),
                             )}
                             <br />
                           </Fragment>
@@ -437,14 +447,17 @@ const ListBuckets = () => {
                           resource={CONSOLE_UI_RESOURCE}
                         >
                           <br />
-                          To get started,&nbsp;
-                          <ActionLink
-                            onClick={() => {
-                              navigate(IAM_PAGES.ADD_BUCKETS);
-                            }}
-                          >
-                            Create a Bucket.
-                          </ActionLink>
+                          {interpolate(t("To get started, {createBucket}"), {
+                            createBucket: (
+                              <ActionLink
+                                onClick={() => {
+                                  navigate(IAM_PAGES.ADD_BUCKETS);
+                                }}
+                              >
+                                {t("Create a Bucket.")}
+                              </ActionLink>
+                            ),
+                          })}
                         </SecureComponent>
                       </Fragment>
                     }

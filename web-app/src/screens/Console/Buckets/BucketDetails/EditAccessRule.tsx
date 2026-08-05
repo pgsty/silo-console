@@ -22,6 +22,7 @@ import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 
 interface IEditAccessRule {
   modalOpen: boolean;
@@ -39,12 +40,13 @@ const EditAccessRule = ({
   initial,
 }: IEditAccessRule) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [selectedAccess, setSelectedAccess] = useState<any>(initial);
 
   const accessOptions = [
-    { label: "readonly", value: "readonly" },
-    { label: "writeonly", value: "writeonly" },
-    { label: "readwrite", value: "readwrite" },
+    { label: t("readonly"), value: "readonly" },
+    { label: t("writeonly"), value: "writeonly" },
+    { label: t("readwrite"), value: "readwrite" },
   ];
 
   const resetForm = () => {
@@ -70,7 +72,10 @@ const EditAccessRule = ({
     <Fragment>
       <ModalWrapper
         modalOpen={modalOpen}
-        title={`Edit Anonymous Access Rule for ${`${bucket}/${toEdit || ""}`}`}
+        title={t("Edit Anonymous Access Rule for {target}").replace(
+          "{target}",
+          `/`,
+        )}
         onClose={onClose}
         titleIcon={<AddAccessRuleIcon />}
       >
@@ -81,7 +86,7 @@ const EditAccessRule = ({
             onChange={(value) => {
               setSelectedAccess(value);
             }}
-            label="Access"
+            label={t("Access")}
             value={selectedAccess}
             options={accessOptions}
             disabled={false}
@@ -93,14 +98,14 @@ const EditAccessRule = ({
             type="button"
             variant="regular"
             onClick={resetForm}
-            label={"Clear"}
+            label={t("Clear")}
           />
           <Button
             id={"save"}
             type="submit"
             variant="callAction"
             onClick={createProcess}
-            label={"Save"}
+            label={t("Save")}
           />
         </Grid>
       </ModalWrapper>

@@ -125,6 +125,7 @@ import ListObjectsTable from "./ListObjectsTable";
 import FilterObjectsSB from "../../../../ObjectBrowser/FilterObjectsSB";
 import AddAccessRule from "../../../BucketDetails/AddAccessRule";
 import { sanitizeFilePath } from "./utils";
+import { useLanguage, useT } from "i18n";
 
 const DeleteMultipleObjects = withSuspense(
   React.lazy(() => import("./DeleteMultipleObjects")),
@@ -152,6 +153,8 @@ const acceptDnDStyle = {
 
 const ListObjects = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const language = useLanguage();
   const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -457,7 +460,7 @@ const ListObjects = () => {
     setDeleteMultipleOpen(false);
 
     if (refresh) {
-      dispatch(setSnackBarMessage(`Objects deleted successfully.`));
+      dispatch(setSnackBarMessage(t("Objects deleted successfully.")));
       dispatch(setSelectedObjects([]));
       dispatch(setReloadObjectsList(true));
     }
@@ -561,12 +564,12 @@ const ListObjects = () => {
             // xhr.setRequestHeader("X-Anonymous", "1");
 
             const areMultipleFiles = files.length > 1;
-            let errorMessage = `An error occurred while uploading the file${
-              areMultipleFiles ? "s" : ""
-            }.`;
+            let errorMessage = areMultipleFiles
+              ? t("An error occurred while uploading the files.")
+              : t("An error occurred while uploading the file.");
 
             const errorMessages: any = {
-              413: "Error - File size too large",
+              413: t("Error - File size too large"),
             };
 
             xhr.withCredentials = false;
@@ -586,7 +589,7 @@ const ListObjects = () => {
                     const err = JSON.parse(xhr.response);
                     errorMessage = err.detailedMessage;
                   } catch (e) {
-                    errorMessage = "something went wrong";
+                    errorMessage = t("something went wrong");
                   }
                 }
 
@@ -683,8 +686,10 @@ const ListObjects = () => {
             const successUploadedFiles =
               uploadFilePromises.length - errors.length;
             const err: ErrorResponseHandler = {
-              errorMessage: "There were some errors during file upload",
-              detailedError: `Uploaded files ${successUploadedFiles}/${totalFiles}`,
+              errorMessage: t("There were some errors during file upload"),
+              detailedError: t("Uploaded files {done}/{total}")
+                .replace("{done}", String(successUploadedFiles))
+                .replace("{total}", String(totalFiles)),
             };
             dispatch(setErrorSnackMessage(err));
           }
@@ -723,10 +728,10 @@ const ListObjects = () => {
           if (allowedFiles.length !== acceptedFiles.length) {
             dispatch(
               setErrorSnackMessage({
-                errorMessage: "Upload is restricted.",
+                errorMessage: t("Upload is restricted."),
                 detailedError: permissionTooltipHelper(
                   [IAM_SCOPES.S3_PUT_OBJECT, IAM_SCOPES.S3_PUT_ACTIONS],
-                  "upload objects to this location",
+                  t("upload objects to this location"),
                 ),
               }),
             );
@@ -734,10 +739,10 @@ const ListObjects = () => {
         } else {
           dispatch(
             setErrorSnackMessage({
-              errorMessage: "Could not process drag and drop.",
+              errorMessage: t("Could not process drag and drop."),
               detailedError: permissionTooltipHelper(
                 [IAM_SCOPES.S3_PUT_OBJECT, IAM_SCOPES.S3_PUT_ACTIONS],
-                "upload objects to this location",
+                t("upload objects to this location"),
               ),
             }),
           );
@@ -752,10 +757,10 @@ const ListObjects = () => {
       if (!canUpload) {
         dispatch(
           setErrorSnackMessage({
-            errorMessage: "Upload not allowed",
+            errorMessage: t("Upload not allowed"),
             detailedError: permissionTooltipHelper(
               [IAM_SCOPES.S3_PUT_OBJECT, IAM_SCOPES.S3_PUT_ACTIONS],
-              "upload objects to this location",
+              t("upload objects to this location"),
             ),
           }),
         );
@@ -845,49 +850,55 @@ const ListObjects = () => {
 
   const downloadToolTip =
     selectedObjects?.length <= 1
-      ? "Download Selected"
-      : ` Download selected objects as Zip. Any Deleted objects in the selection would be skipped from download.`;
+      ? t("Download Selected")
+      : t(
+          "Download selected objects as Zip. Any Deleted objects in the selection would be skipped from download.",
+        );
 
   const multiActionButtons = [
     {
       action: () => {
         dispatch(downloadSelected(bucketName));
       },
-      label: "Download",
+      label: t("Download"),
       disabled: !canDownload || isSelObjectDelMarker,
       icon: <DownloadIcon />,
       tooltip: canDownload
         ? downloadToolTip
         : permissionTooltipHelper(
             [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS],
-            "download objects from this bucket",
+            t("download objects from this bucket"),
           ),
     },
     {
       action: () => {
         dispatch(openShare());
       },
-      label: "Share",
+      label: t("Share"),
       disabled:
         selectedObjects.length !== 1 || !canShareFile || isSelObjectDelMarker,
       icon: <ShareIcon />,
-      tooltip: canShareFile ? "Share Selected File" : "Sharing unavailable",
+      tooltip: canShareFile
+        ? t("Share Selected File")
+        : t("Sharing unavailable"),
     },
     {
       action: () => {
         dispatch(openPreview());
       },
-      label: "Preview",
+      label: t("Preview"),
       disabled:
         selectedObjects.length !== 1 || !canPreviewFile || isSelObjectDelMarker,
       icon: <PreviewIcon />,
-      tooltip: canPreviewFile ? "Preview Selected File" : "Preview unavailable",
+      tooltip: canPreviewFile
+        ? t("Preview Selected File")
+        : t("Preview unavailable"),
     },
     {
       action: () => {
         dispatch(openAnonymousAccess());
       },
-      label: "Anonymous Access",
+      label: t("Anonymous Access"),
       disabled:
         selectedObjects.length !== 1 ||
         !selectedObjects[0].endsWith("/") ||
@@ -895,21 +906,21 @@ const ListObjects = () => {
       icon: <AccessRuleIcon />,
       tooltip:
         selectedObjects.length === 1 && selectedObjects[0].endsWith("/")
-          ? "Set Anonymous Access to this Folder"
-          : "Anonymous Access unavailable",
+          ? t("Set Anonymous Access to this Folder")
+          : t("Anonymous Access unavailable"),
     },
     {
       action: () => {
         setDeleteMultipleOpen(true);
       },
-      label: "Delete",
+      label: t("Delete"),
       icon: <DeleteIcon />,
       disabled: !canDelete || selectedObjects.length === 0,
       tooltip: canDelete
-        ? "Delete Selected Files"
+        ? t("Delete Selected Files")
         : permissionTooltipHelper(
             [IAM_SCOPES.S3_DELETE_OBJECT, IAM_SCOPES.S3_DELETE_ACTIONS],
-            "delete objects in this bucket",
+            t("delete objects in this bucket"),
           ),
     },
   ];
@@ -1008,17 +1019,19 @@ const ListObjects = () => {
                   }}
                 >
                   <span className={"detailsSpacer"}>
-                    Created on:&nbsp;
+                    {t("Created on:")}&nbsp;
                     <strong>
                       {bucketInfo?.creation_date
                         ? createdTime.toFormat(
-                            "ccc, LLL dd yyyy HH:mm:ss (ZZZZ)",
+                            language === "zh"
+                              ? "yyyy-MM-dd HH:mm:ss"
+                              : "ccc, LLL dd yyyy HH:mm:ss (ZZZZ)",
                           )
                         : ""}
                     </strong>
                   </span>
                   <span className={"detailsSpacer"}>
-                    Access:&nbsp;&nbsp;
+                    {t("Access:")}&nbsp;&nbsp;
                     <strong>{bucketInfo?.access || ""}</strong>
                   </span>
                   {bucketInfo && (
@@ -1036,10 +1049,10 @@ const ListObjects = () => {
                         {bucketInfo.size && bucketInfo.objects ? " - " : ""}
                         {bucketInfo.objects && (
                           <Fragment>
-                            {bucketInfo.objects}&nbsp;Object
-                            {bucketInfo.objects && bucketInfo.objects !== 1
-                              ? "s"
-                              : ""}
+                            {(bucketInfo.objects === 1
+                              ? t("{count} Object")
+                              : t("{count} Objects")
+                            ).replace("{count}", String(bucketInfo.objects))}
                           </Fragment>
                         )}
                       </span>
@@ -1054,20 +1067,20 @@ const ListObjects = () => {
                   <TooltipWrapper
                     tooltip={
                       canRewind
-                        ? "Rewind Bucket"
+                        ? t("Rewind Bucket")
                         : permissionTooltipHelper(
                             [
                               IAM_SCOPES.S3_GET_OBJECT,
                               IAM_SCOPES.S3_GET_ACTIONS,
                               IAM_SCOPES.S3_GET_BUCKET_VERSIONING,
                             ],
-                            "apply rewind in this bucket",
+                            t("apply rewind in this bucket"),
                           )
                     }
                   >
                     <Button
                       id={"rewind-objects-list"}
-                      label={"Rewind"}
+                      label={t("Rewind")}
                       icon={
                         <Badge color="alert" dotOnly invisible={!rewindEnabled}>
                           <HistoryIcon
@@ -1089,10 +1102,10 @@ const ListObjects = () => {
                     />
                   </TooltipWrapper>
                 )}
-                <TooltipWrapper tooltip={"Reload List"}>
+                <TooltipWrapper tooltip={t("Reload List")}>
                   <Button
                     id={"refresh-objects-list"}
-                    label={"Refresh"}
+                    label={t("Refresh")}
                     icon={<RefreshIcon />}
                     variant={"regular"}
                     onClick={() => {
@@ -1218,7 +1231,7 @@ const ListObjects = () => {
                               name={"deleted_objects"}
                               id={"showDeletedObjects"}
                               value={"deleted_on"}
-                              label={"Show deleted objects"}
+                              label={t("Show deleted objects")}
                               onChange={setDeletedAction}
                               checked={showDeleted}
                               sx={{
@@ -1258,7 +1271,7 @@ const ListObjects = () => {
                   {selectedObjects.length > 0 && (
                     <ActionsList
                       items={multiActionButtons}
-                      title={"Selected Objects:"}
+                      title={t("Selected Objects:")}
                     />
                   )}
                   {selectedInternalPaths !== null && (

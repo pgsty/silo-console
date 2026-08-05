@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Box, RecoverIcon } from "mds";
 import { BucketObject } from "api/consoleApi";
 import { api } from "api";
@@ -23,6 +23,7 @@ import ConfirmDialog from "../../../../Common/ModalWrapper/ConfirmDialog";
 import { setErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import { restoreLocalObjectList } from "../../../../ObjectBrowser/objectBrowserSlice";
+import { interpolate, useT } from "i18n";
 
 interface IRestoreFileVersion {
   restoreOpen: boolean;
@@ -40,6 +41,7 @@ const RestoreFileVersion = ({
   onCloseAndUpdate,
 }: IRestoreFileVersion) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [restoreLoading, setRestoreLoading] = useState<boolean>(false);
 
   const restoreVersion = () => {
@@ -68,8 +70,8 @@ const RestoreFileVersion = ({
 
   return (
     <ConfirmDialog
-      title={`Restore File Version`}
-      confirmText={"Restore"}
+      title={t("Restore File Version")}
+      confirmText={t("Restore")}
       isOpen={restoreOpen}
       isLoading={restoreLoading}
       titleIcon={<RecoverIcon />}
@@ -83,10 +85,26 @@ const RestoreFileVersion = ({
       }}
       confirmationContent={
         <Box id="alert-dialog-description">
-          Are you sure you want to restore <br />
-          <b>{objectPath}</b> <br /> with Version ID:
-          <br />
-          <b>{versionToRestore.version_id}</b>?
+          {interpolate(
+            t(
+              "Are you sure you want to restore {object} with Version ID: {version}?",
+            ),
+            {
+              object: (
+                <Fragment>
+                  <br />
+                  <b>{objectPath}</b>
+                  <br />
+                </Fragment>
+              ),
+              version: (
+                <Fragment>
+                  <br />
+                  <b>{versionToRestore.version_id}</b>
+                </Fragment>
+              ),
+            },
+          )}
         </Box>
       }
     />

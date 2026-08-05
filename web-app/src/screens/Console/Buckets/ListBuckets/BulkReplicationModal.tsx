@@ -37,6 +37,7 @@ import { api } from "api";
 import { MultiBucketResponseItem } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import { SelectorTypes } from "../../../../common/types";
+import { useT } from "i18n";
 
 interface IBulkReplicationModal {
   open: boolean;
@@ -50,6 +51,7 @@ const AddBulkReplicationModal = ({
   buckets,
 }: IBulkReplicationModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [bucketsToAlter, setBucketsToAlter] = useState<string[]>([]);
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [externalLoading, setExternalLoading] = useState<boolean>(false);
@@ -299,25 +301,27 @@ const AddBulkReplicationModal = ({
       onClose={() => {
         closeModalAndRefresh(false);
       }}
-      title="Set Multiple Bucket Replication"
+      title={t("Set Multiple Bucket Replication")}
     >
       <Wizard
         loadingStep={addLoading || externalLoading}
         wizardSteps={[
           {
-            label: "Remote Configuration",
+            label: t("Remote Configuration"),
             componentRender: (
               <Fragment>
                 <FormLayout containerPadding={false} withBorders={false}>
                   <ReadBox
-                    label="Local Buckets to replicate"
+                    label={t("Local Buckets to replicate")}
                     sx={{ maxWidth: "440px", width: "100%" }}
                   >
                     {bucketsToAlter.join(", ")}
                   </ReadBox>
-                  <h4>Remote Endpoint Configuration</h4>
+                  <h4>{t("Remote Endpoint Configuration")}</h4>
                   <span style={{ fontSize: 14 }}>
-                    Please avoid the use of root credentials for this feature
+                    {t(
+                      "Please avoid the use of root credentials for this feature",
+                    )}
                     <br />
                     <br />
                   </span>
@@ -327,7 +331,7 @@ const AddBulkReplicationModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setAccessKey(e.target.value);
                     }}
-                    label="Access Key"
+                    label={t("Access Key")}
                     value={accessKey}
                   />
                   <InputBox
@@ -336,7 +340,7 @@ const AddBulkReplicationModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setSecretKey(e.target.value);
                     }}
-                    label="Secret Key"
+                    label={t("Secret Key")}
                     value={secretKey}
                   />
                   <InputBox
@@ -346,14 +350,14 @@ const AddBulkReplicationModal = ({
                       setTargetURL(e.target.value);
                     }}
                     placeholder="s3.example.com:9000"
-                    label="Target URL"
+                    label={t("Target URL")}
                     value={targetURL}
                   />
                   <Switch
                     checked={useTLS}
                     id="useTLS"
                     name="useTLS"
-                    label="Use TLS"
+                    label={t("Use TLS")}
                     onChange={(e) => {
                       setUseTLS(e.target.checked);
                     }}
@@ -365,7 +369,7 @@ const AddBulkReplicationModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setRegion(e.target.value);
                     }}
-                    label="Region"
+                    label={t("Region")}
                     value={region}
                   />
                   <Select
@@ -374,11 +378,11 @@ const AddBulkReplicationModal = ({
                     onChange={(value) => {
                       setReplicationMode(value as "sync" | "async");
                     }}
-                    label="Replication Mode"
+                    label={t("Replication Mode")}
                     value={replicationMode}
                     options={[
-                      { label: "Asynchronous", value: "async" },
-                      { label: "Synchronous", value: "sync" },
+                      { label: t("Asynchronous"), value: "async" },
+                      { label: t("Synchronous"), value: "sync" },
                     ]}
                   />
                   {replicationMode === "async" && (
@@ -391,7 +395,7 @@ const AddBulkReplicationModal = ({
                           setBandwidthScalar(e.target.value as string);
                         }
                       }}
-                      label="Bandwidth"
+                      label={t("Bandwidth")}
                       value={bandwidthScalar}
                       min="0"
                       pattern={"[0-9]*"}
@@ -414,7 +418,7 @@ const AddBulkReplicationModal = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setHealthCheck(e.target.value as string);
                     }}
-                    label="Health Check Duration"
+                    label={t("Health Check Duration")}
                     value={healthCheck}
                   />
                 </FormLayout>
@@ -423,20 +427,21 @@ const AddBulkReplicationModal = ({
             buttons: [
               {
                 type: "custom",
-                label: "Next",
+                label: t("Next"),
                 enabled: !externalLoading,
                 action: retrieveRemoteBuckets,
               },
             ],
           },
           {
-            label: "Bucket Assignments",
+            label: t("Bucket Assignments"),
             componentRender: (
               <Fragment>
-                <h3>Remote Bucket Assignments</h3>
+                <h3>{t("Remote Bucket Assignments")}</h3>
                 <span style={{ fontSize: 14 }}>
-                  Please select / type the desired remote bucket were you want
-                  the local data to be replicated.
+                  {t(
+                    "Please select / type the desired remote bucket were you want the local data to be replicated.",
+                  )}
                 </span>
                 <Box
                   sx={{
@@ -476,12 +481,12 @@ const AddBulkReplicationModal = ({
             buttons: [
               {
                 type: "back",
-                label: "Back",
+                label: t("Back"),
                 enabled: true,
               },
               {
                 type: "next",
-                label: "Create",
+                label: t("Create"),
                 enabled: !addLoading,
                 action: addRecord,
               },

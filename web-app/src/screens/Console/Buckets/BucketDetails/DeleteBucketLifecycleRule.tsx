@@ -20,6 +20,7 @@ import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { interpolate, useT } from "i18n";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
 
 interface IDeleteLifecycleRule {
@@ -36,6 +37,7 @@ const DeleteBucketLifecycleRule = ({
   id,
 }: IDeleteLifecycleRule) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [deletingRule, setDeletingRule] = useState<boolean>(false);
 
   useEffect(() => {
@@ -59,8 +61,8 @@ const DeleteBucketLifecycleRule = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Lifecycle Rule`}
-      confirmText={"Delete"}
+      title={t("Delete Lifecycle Rule")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       isLoading={deletingRule}
       onConfirm={onConfirmDelete}
@@ -68,7 +70,9 @@ const DeleteBucketLifecycleRule = ({
       onClose={() => onCloseAndRefresh(false)}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete the <strong>{id}</strong> rule?
+          {interpolate(t("Are you sure you want to delete the {rule} rule?"), {
+            rule: <strong>{id}</strong>,
+          })}
         </Fragment>
       }
     />

@@ -32,6 +32,7 @@ import {
 
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { useT } from "i18n";
 import InputUnitMenu from "../../Common/FormComponents/InputUnitMenu/InputUnitMenu";
 
 import { setModalErrorSnackMessage } from "../../../../systemSlice";
@@ -56,6 +57,7 @@ const EnableQuota = ({
   closeModalAndRefresh,
 }: IEnableQuotaProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [loading, setLoading] = useState<boolean>(false);
   const [quotaEnabled, setQuotaEnabled] = useState<boolean>(false);
   const [quotaSize, setQuotaSize] = useState<string>("1");
@@ -113,7 +115,7 @@ const EnableQuota = ({
       onClose={() => {
         closeModalAndRefresh();
       }}
-      title="Enable Bucket Quota"
+      title={t("Enable Bucket Quota")}
       titleIcon={<BucketQuotaIcon />}
     >
       <form
@@ -133,7 +135,7 @@ const EnableQuota = ({
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setQuotaEnabled(event.target.checked);
             }}
-            label={"Enabled"}
+            label={t("Enabled")}
           />
           {quotaEnabled && (
             <InputBox
@@ -147,7 +149,7 @@ const EnableQuota = ({
                   setValidInput(true);
                 }
               }}
-              label="Quota"
+              label={t("Quota")}
               value={quotaSize}
               required
               min="1"
@@ -162,7 +164,7 @@ const EnableQuota = ({
                   disabled={false}
                 />
               }
-              error={!validInput ? "Please enter a valid quota" : ""}
+              error={!validInput ? t("Please enter a valid quota") : ""}
             />
           )}
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
@@ -174,7 +176,7 @@ const EnableQuota = ({
               onClick={() => {
                 closeModalAndRefresh();
               }}
-              label={"Cancel"}
+              label={t("Cancel")}
             />
 
             <Button
@@ -182,7 +184,7 @@ const EnableQuota = ({
               type="submit"
               variant="callAction"
               disabled={loading || !validInput}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
           {loading && (

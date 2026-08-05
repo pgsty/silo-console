@@ -43,10 +43,13 @@ import DeleteBucketLifecycleRule from "./DeleteBucketLifecycleRule";
 import EditLifecycleConfiguration from "./EditLifecycleConfiguration";
 import AddLifecycleModal from "./AddLifecycleModal";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const BucketLifecyclePanel = () => {
   const loadingBucket = useSelector(selBucketDetailsLoading);
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [loadingLifecycle, setLoadingLifecycle] = useState<boolean>(true);
   const [lifecycleRecords, setLifecycleRecords] = useState<
@@ -138,7 +141,7 @@ const BucketLifecyclePanel = () => {
 
   const lifecycleColumns = [
     {
-      label: "Type",
+      label: t("Type"),
       renderFullObject: true,
       renderFunction: (el: LifeCycleItem) => {
         if (!el) {
@@ -151,19 +154,19 @@ const BucketLifecyclePanel = () => {
             (el.expiration.newer_noncurrent_expiration_versions &&
               el.expiration.newer_noncurrent_expiration_versions > 0))
         ) {
-          return <span>Expiry</span>;
+          return <span>{t("Expiry")}</span>;
         }
         if (
           el.transition &&
           (el.transition.days > 0 || el.transition.noncurrent_transition_days)
         ) {
-          return <span>Transition</span>;
+          return <span>{t("Transition")}</span>;
         }
         return <Fragment />;
       },
     },
     {
-      label: "Version",
+      label: t("Version"),
       renderFullObject: true,
       renderFunction: (el: LifeCycleItem) => {
         if (!el) {
@@ -171,25 +174,25 @@ const BucketLifecyclePanel = () => {
         }
         if (el.expiration) {
           if (el.expiration.days > 0) {
-            return <span>Current</span>;
+            return <span>{t("Current")}</span>;
           } else if (
             el.expiration.noncurrent_expiration_days ||
             el.expiration.newer_noncurrent_expiration_versions
           ) {
-            return <span>Non-Current</span>;
+            return <span>{t("Non-Current")}</span>;
           }
         }
         if (el.transition) {
           if (el.transition.days > 0) {
-            return <span>Current</span>;
+            return <span>{t("Current")}</span>;
           } else if (el.transition.noncurrent_transition_days) {
-            return <span>Non-Current</span>;
+            return <span>{t("Non-Current")}</span>;
           }
         }
       },
     },
     {
-      label: "Expire Delete Marker",
+      label: t("Expire Delete Marker"),
       elementKey: "expire_delete_marker",
       renderFunction: (el: LifeCycleItem) => {
         if (!el) {
@@ -204,38 +207,44 @@ const BucketLifecyclePanel = () => {
       renderFullObject: true,
     },
     {
-      label: "Tier",
+      label: t("Tier"),
       elementKey: "storage_class",
       renderFunction: renderStorageClass,
       renderFullObject: true,
     },
     {
-      label: "Prefix",
+      label: t("Prefix"),
       elementKey: "prefix",
     },
     {
-      label: "After",
+      label: t("After"),
       renderFullObject: true,
       renderFunction: (el: LifeCycleItem) => {
         if (!el) {
           return <Fragment />;
         }
+        const days = (value: number | string) => (
+          <span>{t("{count} days").replace("{count}", `${value}`)}</span>
+        );
         if (el.transition) {
           if (el.transition.days > 0) {
-            return <span>{el.transition.days} days</span>;
+            return days(el.transition.days);
           } else if (el.transition.noncurrent_transition_days) {
-            return <span>{el.transition.noncurrent_transition_days} days</span>;
+            return days(el.transition.noncurrent_transition_days);
           }
         }
         if (el.expiration) {
           if (el.expiration.days > 0) {
-            return <span>{el.expiration.days} days</span>;
+            return days(el.expiration.days);
           } else if (el.expiration.noncurrent_expiration_days) {
-            return <span>{el.expiration.noncurrent_expiration_days} days</span>;
+            return days(el.expiration.noncurrent_expiration_days);
           } else {
             return (
               <span>
-                {el.expiration.newer_noncurrent_expiration_versions} versions
+                {t("{count} versions").replace(
+                  "{count}",
+                  `${el.expiration.newer_noncurrent_expiration_versions}`,
+                )}
               </span>
             );
           }
@@ -243,7 +252,7 @@ const BucketLifecyclePanel = () => {
       },
     },
     {
-      label: "Status",
+      label: t("Status"),
       elementKey: "status",
     },
   ];
@@ -305,13 +314,13 @@ const BucketLifecyclePanel = () => {
             matchAll
             errorProps={{ disabled: true }}
           >
-            <TooltipWrapper tooltip={"Add Lifecycle Rule"}>
+            <TooltipWrapper tooltip={t("Add Lifecycle Rule")}>
               <Button
                 id={"add-bucket-lifecycle-rule"}
                 onClick={() => {
                   setAddLifecycleOpen(true);
                 }}
-                label={"Add Lifecycle Rule"}
+                label={t("Add Lifecycle Rule")}
                 icon={<AddIcon />}
                 variant={"callAction"}
               />
@@ -322,20 +331,26 @@ const BucketLifecyclePanel = () => {
         <HelpTip
           content={
             <Fragment>
-              SILO derives its behavior and syntax from{" "}
-              <a
-                target="blank"
-                href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
-              >
-                S3 lifecycle
-              </a>{" "}
-              for compatibility in migrating workloads and lifecycle rules from
-              S3 to SILO.
+              {interpolate(
+                t(
+                  "SILO derives its behavior and syntax from {s3Lifecycle} for compatibility in migrating workloads and lifecycle rules from S3 to SILO.",
+                ),
+                {
+                  s3Lifecycle: (
+                    <a
+                      target="blank"
+                      href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+                    >
+                      {t("S3 lifecycle")}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
           placement="right"
         >
-          Lifecycle Rules
+          {t("Lifecycle Rules")}
         </HelpTip>
       </SectionTitle>
       <Grid container>
@@ -353,8 +368,8 @@ const BucketLifecyclePanel = () => {
               columns={lifecycleColumns}
               isLoading={loadingLifecycle}
               records={lifecycleRecords}
-              entityName="Lifecycle"
-              customEmptyMessage="There are no Lifecycle rules yet"
+              entityName={t("Lifecycle")}
+              customEmptyMessage={t("There are no Lifecycle rules yet")}
               idField="id"
               customPaperHeight={"400px"}
             />
@@ -364,25 +379,31 @@ const BucketLifecyclePanel = () => {
           <Grid item xs={12}>
             <br />
             <HelpBox
-              title={"Lifecycle Rules"}
+              title={t("Lifecycle Rules")}
               iconComponent={<TiersIcon />}
               help={
                 <Fragment>
-                  SILO Object Lifecycle Management allows creating rules for
-                  time or date based automatic transition or expiry of objects.
-                  For object transition, SILO automatically moves the object to
-                  a configured remote storage tier.
+                  {t(
+                    "SILO Object Lifecycle Management allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.",
+                  )}
                   <br />
                   <br />
-                  You can learn more at the{" "}
-                  <a
-                    href="https://silo.pgsty.com/administration/object-management/object-lifecycle-management/"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    documentation
-                  </a>
-                  .
+                  {interpolate(
+                    t("You can learn more at the {documentation}."),
+                    {
+                      documentation: (
+                        <a
+                          href={localize(
+                            "https://silo.pgsty.com/administration/object-management/object-lifecycle-management/",
+                          )}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          {t("documentation")}
+                        </a>
+                      ),
+                    },
+                  )}
                 </Fragment>
               }
             />

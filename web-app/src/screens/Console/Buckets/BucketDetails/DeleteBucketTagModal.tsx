@@ -21,6 +21,7 @@ import { ErrorResponseHandler } from "../../../../common/types";
 import { ConfirmDeleteIcon } from "mds";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteBucketTagModal {
   deleteOpen: boolean;
@@ -38,6 +39,7 @@ const DeleteBucketTagModal = ({
   bucketName,
 }: IDeleteBucketTagModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [tagKey, tagLabel] = selectedTag;
 
   const onDelSuccess = () => onCloseAndUpdate(true);
@@ -62,8 +64,8 @@ const DeleteBucketTagModal = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Tag`}
-      confirmText={"Delete"}
+      title={t("Delete Tag")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -71,17 +73,19 @@ const DeleteBucketTagModal = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete the tag{" "}
-          <b
-            style={{
-              maxWidth: 200,
-              whiteSpace: "normal",
-              wordWrap: "break-word",
-            }}
-          >
-            {tagKey} : {tagLabel}
-          </b>{" "}
-          ?
+          {interpolate(t("Are you sure you want to delete the tag {tag} ?"), {
+            tag: (
+              <b
+                style={{
+                  maxWidth: 200,
+                  whiteSpace: "normal",
+                  wordWrap: "break-word",
+                }}
+              >
+                {tagKey} : {tagLabel}
+              </b>
+            ),
+          })}
         </Fragment>
       }
     />

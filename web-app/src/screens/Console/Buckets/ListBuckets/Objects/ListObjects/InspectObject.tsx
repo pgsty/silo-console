@@ -33,6 +33,7 @@ import { modalStyleUtils } from "../../../../Common/FormComponents/common/styleL
 import KeyRevealer from "../../../../Tools/KeyRevealer";
 import { setErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
+import { interpolate, useT } from "i18n";
 
 interface IInspectObjectProps {
   closeInspectModalAndRefresh: (refresh: boolean) => void;
@@ -48,6 +49,7 @@ const InspectObject = ({
   volumeName,
 }: IInspectObjectProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeInspectModalAndRefresh(false);
   const [isEncrypt, setIsEncrypt] = useState<boolean>(true);
   const [decryptionKey, setDecryptionKey] = useState<string>("");
@@ -111,7 +113,7 @@ const InspectObject = ({
         <ModalWrapper
           modalOpen={inspectOpen}
           titleIcon={<InspectMenuIcon />}
-          title={`Inspect Object`}
+          title={t("Inspect Object")}
           onClose={onClose}
         >
           <form
@@ -121,10 +123,13 @@ const InspectObject = ({
               onSubmit(e);
             }}
           >
-            Would you like to encrypt <b>{inspectPath}</b>? <br />
+            {interpolate(t("Would you like to encrypt {object}?"), {
+              object: <b>{inspectPath}</b>,
+            })}{" "}
+            <br />
             <Switch
-              label={"Encrypt"}
-              indicatorLabels={["Yes", "No"]}
+              label={t("Encrypt")}
+              indicatorLabels={[t("Yes"), t("No")]}
               checked={isEncrypt}
               value={"encrypt"}
               id="encrypt"
@@ -141,7 +146,7 @@ const InspectObject = ({
                 variant="callAction"
                 color="primary"
                 onClick={performInspect}
-                label={"Inspect"}
+                label={t("Inspect")}
               />
             </Grid>
           </form>
@@ -150,14 +155,14 @@ const InspectObject = ({
       {decryptionKey ? (
         <ModalWrapper
           modalOpen={inspectOpen}
-          title="Inspect Decryption Key"
+          title={t("Inspect Decryption Key")}
           onClose={onCloseDecKeyModal}
           titleIcon={<PasswordKeyIcon />}
         >
           <Box>
-            This will be displayed only once. It cannot be recovered.
+            {t("This will be displayed only once. It cannot be recovered.")}
             <br />
-            Use secure medium to share this key.
+            {t("Use secure medium to share this key.")}
           </Box>
           <Box>
             <KeyRevealer value={decryptionKey} />

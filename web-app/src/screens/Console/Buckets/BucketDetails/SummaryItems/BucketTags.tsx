@@ -25,6 +25,7 @@ import { setErrorSnackMessage } from "../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../store";
 import useApi from "../../../Common/Hooks/useApi";
 import withSuspense from "../../../Common/Components/withSuspense";
+import { useT } from "i18n";
 
 const AddBucketTagModal = withSuspense(
   React.lazy(() => import("../AddBucketTagModal")),
@@ -39,6 +40,7 @@ type BucketTagProps = {
 
 const BucketTags = ({ bucketName }: BucketTagProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [tags, setTags] = useState<any>(null);
   const [tagModalOpen, setTagModalOpen] = useState<boolean>(false);
@@ -148,7 +150,7 @@ const BucketTags = ({ bucketName }: BucketTagProps) => {
               errorProps={{ disabled: true, onClick: null }}
             >
               <Tag
-                label="Add tag"
+                label={t("Add tag")}
                 icon={<AddIcon />}
                 id={"create-tag"}
                 variant={"outlined"}

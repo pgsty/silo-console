@@ -69,6 +69,7 @@ import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper"
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import HelpMenu from "../../HelpMenu";
+import { useT } from "i18n";
 
 const DeleteBucket = withSuspense(
   React.lazy(() => import("../ListBuckets/DeleteBucket")),
@@ -97,6 +98,7 @@ const BucketDetails = () => {
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
+  const t = useT();
 
   const distributedSetup = useSelector(selDistSet);
   const loadingBucket = useSelector(selBucketDetailsLoading);
@@ -178,14 +180,14 @@ const BucketDetails = () => {
       )}
       <PageHeaderWrapper
         label={
-          <BackLink label={"Buckets"} onClick={() => navigate("/buckets")} />
+          <BackLink label={t("Buckets")} onClick={() => navigate("/buckets")} />
         }
         actions={
           <Fragment>
             <TooltipWrapper
               tooltip={
                 canBrowse
-                  ? "Browse Bucket"
+                  ? t("Browse Bucket")
                   : permissionTooltipHelper(
                       IAM_PERMISSIONS[IAM_ROLES.BUCKET_VIEWER],
                       "browsing this bucket",
@@ -194,7 +196,7 @@ const BucketDetails = () => {
             >
               <Button
                 id={"switch-browse-view"}
-                aria-label="Browse Bucket"
+                aria-label={t("Browse Bucket")}
                 onClick={() => {
                   navigate(`/browser/${bucketName}`);
                 }}
@@ -229,7 +231,7 @@ const BucketDetails = () => {
               ]}
               resource={bucketName}
             >
-              <span style={{ fontSize: 15 }}>Access: </span>
+              <span style={{ fontSize: 15 }}>{t("Access: ")}</span>
               <span
                 style={{
                   fontWeight: 600,
@@ -237,7 +239,7 @@ const BucketDetails = () => {
                   textTransform: "capitalize",
                 }}
               >
-                {bucketInfo?.access?.toLowerCase()}
+                {t(bucketInfo?.access?.toLowerCase() ?? "")}
               </span>
             </SecureComponent>
           }
@@ -266,7 +268,7 @@ const BucketDetails = () => {
                     onClick={() => {
                       setDeleteOpen(true);
                     }}
-                    label={"Delete Bucket"}
+                    label={t("Delete Bucket")}
                     icon={<TrashIcon />}
                     variant={"secondary"}
                     disabled={!canDelete}
@@ -278,7 +280,7 @@ const BucketDetails = () => {
                 onClick={() => {
                   dispatch(setBucketDetailsLoad(true));
                 }}
-                label={"Refresh"}
+                label={t("Refresh")}
                 icon={<RefreshIcon />}
               />
             </Fragment>
@@ -295,14 +297,14 @@ const BucketDetails = () => {
             options={[
               {
                 tabConfig: {
-                  label: "Summary",
+                  label: t("Summary"),
                   id: "summary",
                   to: getRoutePath("summary"),
                 },
               },
               {
                 tabConfig: {
-                  label: "Events",
+                  label: t("Events"),
                   id: "events",
                   disabled: !hasPermission(bucketName, [
                     IAM_SCOPES.S3_GET_BUCKET_NOTIFICATIONS,
@@ -315,7 +317,7 @@ const BucketDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Replication",
+                  label: t("Replication"),
                   id: "replication",
                   disabled:
                     !distributedSetup ||
@@ -332,7 +334,7 @@ const BucketDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Lifecycle",
+                  label: t("Lifecycle"),
                   id: "lifecycle",
                   disabled:
                     !distributedSetup ||
@@ -347,7 +349,7 @@ const BucketDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Access",
+                  label: t("Access"),
                   id: "access",
                   disabled: !hasPermission(bucketName, [
                     IAM_SCOPES.ADMIN_GET_POLICY,
@@ -359,7 +361,7 @@ const BucketDetails = () => {
               },
               {
                 tabConfig: {
-                  label: "Anonymous",
+                  label: t("Anonymous"),
                   id: "anonymous",
                   disabled: !hasPermission(bucketName, [
                     IAM_SCOPES.S3_GET_BUCKET_POLICY,

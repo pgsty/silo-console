@@ -26,6 +26,7 @@ import { setModalErrorSnackMessage } from "../../../../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../../../../store";
 import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
 import DateSelector from "../../../../Common/FormComponents/DateSelector/DateSelector";
+import { useT } from "i18n";
 
 interface ISetRetentionProps {
   open: boolean;
@@ -47,6 +48,7 @@ const SetRetention = ({
   bucketName,
 }: ISetRetentionProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const retentionConfig = useSelector(
     (state: AppState) => state.objectBrowser.retentionConfig,
   );
@@ -164,7 +166,7 @@ const SetRetention = ({
 
   return (
     <ModalWrapper
-      title="Set Retention Policy"
+      title={t("Set Retention Policy")}
       modalOpen={open}
       onClose={() => {
         resetForm();
@@ -180,7 +182,7 @@ const SetRetention = ({
       >
         <FormLayout withBorders={false} containerPadding={false}>
           <Box className={"inputItem"}>
-            <strong>Selected Object</strong>: {objectName}
+            <strong>{t("Selected Object")}</strong>: {objectName}
           </Box>
           {showSwitcher && (
             <Switch
@@ -191,15 +193,15 @@ const SetRetention = ({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setStatusEnabled(!statusEnabled);
               }}
-              label={"Status"}
-              indicatorLabels={["Enabled", "Disabled"]}
+              label={t("Status")}
+              indicatorLabels={[t("Enabled"), t("Disabled")]}
             />
           )}
           <RadioGroup
             currentValue={type}
             id="type"
             name="type"
-            label="Type"
+            label={t("Type")}
             disableOptions={
               !statusEnabled || (alreadyConfigured && type !== "")
             }
@@ -207,13 +209,13 @@ const SetRetention = ({
               setType(e.target.value as ObjectRetentionMode);
             }}
             selectorOptions={[
-              { label: "Governance", value: ObjectRetentionMode.Governance },
-              { label: "Compliance", value: ObjectRetentionMode.Compliance },
+              { label: t("Governance"), value: ObjectRetentionMode.Governance },
+              { label: t("Compliance"), value: ObjectRetentionMode.Compliance },
             ]}
           />
           <DateSelector
             id="date"
-            label="Date"
+            label={t("Date")}
             disableOptions={dateFieldDisabled()}
             ref={dateElement}
             value={date}
@@ -231,7 +233,7 @@ const SetRetention = ({
               type="button"
               variant="regular"
               onClick={resetForm}
-              label={"Reset"}
+              label={t("Reset")}
             />
             <Button
               id={"save"}
@@ -243,7 +245,7 @@ const SetRetention = ({
                 isSaving
               }
               onClick={saveNewRetentionPolicy}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
         </FormLayout>

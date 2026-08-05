@@ -32,6 +32,7 @@ import {
 import { niceBytes } from "../../../../../../common/utils";
 import SpecificVersionPill from "./SpecificVersionPill";
 import { BucketObject } from "api/consoleApi";
+import { useLanguage, useT } from "i18n";
 
 interface IFileVersionItem {
   fileName: string;
@@ -174,28 +175,34 @@ const FileVersionItem = ({
   key,
   style,
 }: IFileVersionItem) => {
+  const t = useT();
+  const language = useLanguage();
   const disableButtons = versionInfo.is_delete_marker;
 
   const versionItemButtons = [
     {
       icon: <PreviewIcon />,
       action: onPreview,
-      tooltip: "Preview",
+      name: "preview",
+      tooltip: t("Preview"),
     },
     {
       icon: <DownloadIcon />,
       action: onDownload,
-      tooltip: "Download this version",
+      name: "download",
+      tooltip: t("Download this version"),
     },
     {
       icon: <ShareIcon />,
       action: onShare,
-      tooltip: "Share this version",
+      name: "share",
+      tooltip: t("Share this version"),
     },
     {
       icon: <RecoverIcon />,
       action: onRestore,
-      tooltip: "Restore this version",
+      name: "restore",
+      tooltip: t("Restore this version"),
     },
   ];
 
@@ -276,13 +283,13 @@ const FileVersionItem = ({
                       <Tooltip
                         tooltip={button.tooltip}
                         key={`version-action-${
-                          button.tooltip
+                          button.name
                         }-${index.toString()}`}
                       >
                         <IconButton
                           size={"small"}
                           id={`version-action-${
-                            button.tooltip
+                            button.name
                           }-${index.toString()}`}
                           className={`${"spacing"} ${
                             disableButtons ? "buttonDisabled" : ""
@@ -321,11 +328,16 @@ const FileVersionItem = ({
             </Grid>
             <Grid item xs={12} className={"collapsableInfo"}>
               <span className={"versionData"}>
-                <strong>Last modified:</strong>{" "}
-                {lastModified.toFormat("ccc, LLL dd yyyy HH:mm:ss (ZZZZ)")}
+                <strong>{t("Last modified:")}</strong>{" "}
+                {lastModified.toFormat(
+                  language === "zh"
+                    ? "yyyy-MM-dd HH:mm:ss"
+                    : "ccc, LLL dd yyyy HH:mm:ss (ZZZZ)",
+                )}
               </span>
               <span className={"versionData"}>
-                <strong>Size:</strong> {niceBytes(`${versionInfo.size || "0"}`)}
+                <strong>{t("Size:")}</strong>{" "}
+                {niceBytes(`${versionInfo.size || "0"}`)}
               </span>
             </Grid>
           </Grid>

@@ -39,6 +39,7 @@ import { setSnackBarMessage } from "../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../store";
 import { setVersionsModeEnabled } from "./objectBrowserSlice";
 import { getSessionGrantsWildCard } from "../Buckets/ListBuckets/UploadPermissionUtils";
+import { useT } from "i18n";
 
 const CreatePathModal = withSuspense(
   React.lazy(
@@ -76,6 +77,7 @@ const BrowserBreadcrumbs = ({
 }: IObjectBrowser) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const rewindEnabled = useSelector(
     (state: AppState) => state.objectBrowser.rewind.rewindEnabled,
@@ -182,7 +184,7 @@ const BrowserBreadcrumbs = ({
       <Fragment key={`breadcrumbs-versionedItem`}>
         <span>
           <span className={"slashSpacingStyle"}>/</span>
-          {versionedFile} - Versions
+          {t("{file} - Versions").replace("{file}", versionedFile)}
         </span>
       </Fragment>,
     ];
@@ -271,7 +273,7 @@ const BrowserBreadcrumbs = ({
                   }
                   variant={"regular"}
                   onClick={() => {
-                    dispatch(setSnackBarMessage("Path copied to clipboard"));
+                    dispatch(setSnackBarMessage(t("Path copied to clipboard")));
                   }}
                   style={{
                     width: "28px",
@@ -292,7 +294,7 @@ const BrowserBreadcrumbs = ({
           <Tooltip
             tooltip={
               canCreatePath
-                ? "Choose or create a new path"
+                ? t("Choose or create a new path")
                 : permissionTooltipHelper(
                     [IAM_SCOPES.S3_PUT_OBJECT, IAM_SCOPES.S3_PUT_ACTIONS],
                     "create a new path",
@@ -310,7 +312,7 @@ const BrowserBreadcrumbs = ({
                 whiteSpace: "nowrap",
               }}
               variant={"regular"}
-              label={"Create new path"}
+              label={t("Create new path")}
             />
           </Tooltip>
         )}

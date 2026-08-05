@@ -37,10 +37,12 @@ import HelpMenu from "../../HelpMenu";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import QueryMultiSelector from "screens/Console/Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
+import { useT } from "i18n";
 
 const EditBucketReplication = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
   let params = new URLSearchParams(document.location.search);
 
   const bucketName = params.get("bucketName") || "";
@@ -144,7 +146,7 @@ const EditBucketReplication = () => {
       <PageHeaderWrapper
         label={
           <BackLink
-            label={"Edit Bucket Replication"}
+            label={t("Edit Bucket Replication")}
             onClick={() => navigate(backLink)}
           />
         }
@@ -165,30 +167,28 @@ const EditBucketReplication = () => {
             helpBox={
               <HelpBox
                 iconComponent={<BucketReplicationIcon />}
-                title="Bucket Replication Configuration"
+                title={t("Bucket Replication Configuration")}
                 help={
                   <Fragment>
                     <Box sx={{ paddingTop: "10px" }}>
-                      For each write operation to the bucket, SILO checks all
-                      configured replication rules for the bucket and applies
-                      the matching rule with highest configured priority.
+                      {t(
+                        "For each write operation to the bucket, SILO checks all configured replication rules for the bucket and applies the matching rule with highest configured priority.",
+                      )}
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      SILO supports enabling replication of existing objects in
-                      a bucket.
+                      {t(
+                        "SILO supports enabling replication of existing objects in a bucket.",
+                      )}
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      SILO does not enable existing object replication by
-                      default. Objects created before replication was configured
-                      or while replication is disabled are not synchronized to
-                      the target deployment unless replication of existing
-                      objects is enabled.
+                      {t(
+                        "SILO does not enable existing object replication by default. Objects created before replication was configured or while replication is disabled are not synchronized to the target deployment unless replication of existing objects is enabled.",
+                      )}
                     </Box>
                     <Box sx={{ paddingTop: "10px" }}>
-                      SILO supports replicating delete operations, where SILO
-                      synchronizes deleting specific object versions and new
-                      delete markers. Delete operation replication uses the same
-                      replication process as all other replication operations.
+                      {t(
+                        "SILO supports replicating delete operations, where SILO synchronizes deleting specific object versions and new delete markers. Delete operation replication uses the same replication process as all other replication operations.",
+                      )}
                     </Box>{" "}
                   </Fragment>
                 }
@@ -199,12 +199,12 @@ const EditBucketReplication = () => {
               checked={ruleState}
               id="ruleState"
               name="ruleState"
-              label="Rule State"
+              label={t("Rule State")}
               onChange={(e) => {
                 setRuleState(e.target.checked);
               }}
             />
-            <ReadBox label={"Destination"} sx={{ width: "100%" }}>
+            <ReadBox label={t("Destination")} sx={{ width: "100%" }}>
               {destination}
             </ReadBox>
             <InputBox
@@ -215,7 +215,7 @@ const EditBucketReplication = () => {
                   setPriority(e.target.value);
                 }
               }}
-              label="Priority"
+              label={t("Priority")}
               value={priority}
               pattern={"[0-9]*"}
             />
@@ -225,75 +225,75 @@ const EditBucketReplication = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setTargetStorageClass(e.target.value);
               }}
-              placeholder="STANDARD_IA,REDUCED_REDUNDANCY etc"
-              label="Storage Class"
+              placeholder={t("STANDARD_IA,REDUCED_REDUNDANCY etc")}
+              label={t("Storage Class")}
               value={targetStorageClass}
             />
             <fieldset className={"inputItem"}>
-              <legend>Object Filters</legend>
+              <legend>{t("Object Filters")}</legend>
               <InputBox
                 id="prefix"
                 name="prefix"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPrefix(e.target.value);
                 }}
-                placeholder="prefix"
-                label="Prefix"
+                placeholder={t("prefix")}
+                label={t("Prefix")}
                 value={prefix}
               />
               <QueryMultiSelector
                 name="tags"
-                label="Tags"
+                label={t("Tags")}
                 elements={initialTags}
                 onChange={(vl: string) => {
                   setTags(vl);
                 }}
-                keyPlaceholder="Tag Key"
-                valuePlaceholder="Tag Value"
+                keyPlaceholder={t("Tag Key")}
+                valuePlaceholder={t("Tag Value")}
                 withBorder
               />
             </fieldset>
             <fieldset className={"inputItem"}>
-              <legend>Replication Options</legend>
+              <legend>{t("Replication Options")}</legend>
               <Switch
                 checked={repExisting}
                 id="repExisting"
                 name="repExisting"
-                label="Existing Objects"
+                label={t("Existing Objects")}
                 onChange={(e) => {
                   setRepExisting(e.target.checked);
                 }}
-                description={"Replicate existing objects"}
+                description={t("Replicate existing objects")}
               />
               <Switch
                 checked={metadataSync}
                 id="metadatataSync"
                 name="metadatataSync"
-                label="Metadata Sync"
+                label={t("Metadata Sync")}
                 onChange={(e) => {
                   setMetadataSync(e.target.checked);
                 }}
-                description={"Metadata Sync"}
+                description={t("Metadata Sync")}
               />
               <Switch
                 checked={repDeleteMarker}
                 id="deleteMarker"
                 name="deleteMarker"
-                label="Delete Marker"
+                label={t("Delete Marker")}
                 onChange={(e) => {
                   setRepDeleteMarker(e.target.checked);
                 }}
-                description={"Replicate soft deletes"}
+                description={t("Replicate soft deletes")}
               />
               <Switch
                 checked={repDelete}
                 id="repDelete"
                 name="repDelete"
-                label="Deletes"
+                label={t("Deletes")}
                 onChange={(e) => {
                   setRepDelete(e.target.checked);
                 }}
-                description={"Replicate versioned deletes"}
+                description={t("Replicate versioned deletes")}
               />
             </fieldset>
             <Grid
@@ -315,14 +315,14 @@ const EditBucketReplication = () => {
                 onClick={() => {
                   navigate(backLink);
                 }}
-                label={"Cancel"}
+                label={t("Cancel")}
               />
               <Button
                 id={"save-replication"}
                 type="submit"
                 variant="callAction"
                 disabled={editLoading || saveEdit}
-                label={"Save"}
+                label={t("Save")}
               />
             </Grid>
           </FormLayout>

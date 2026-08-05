@@ -19,23 +19,25 @@ import { InputBox } from "mds";
 import { useSelector } from "react-redux";
 import { setIsDirty, setName } from "./addBucketsSlice";
 import { AppState, useAppDispatch } from "../../../../../store";
+import { useT } from "i18n";
 
 const AddBucketName = ({ hasErrors }: { hasErrors: boolean }) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const bucketName = useSelector((state: AppState) => state.addBucket.name);
   return (
     <InputBox
       id="bucket-name"
       name="bucket-name"
-      error={hasErrors ? "Invalid bucket name" : ""}
+      error={hasErrors ? t("Invalid bucket name") : ""}
       onFocus={() => {
         dispatch(setIsDirty(true));
       }}
       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(setName(event.target.value));
       }}
-      label="Bucket Name"
+      label={t("Bucket Name")}
       value={bucketName}
       required
     />

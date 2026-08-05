@@ -40,6 +40,7 @@ import {
 import { hasPermission } from "../../../../common/SecureComponent";
 import { Bucket } from "../../../../api/consoleApi";
 import { usageClarifyingContent } from "screens/Console/Dashboard/BasicDashboard/ReportedUsage";
+import { useLanguage, useT } from "i18n";
 
 const BucketItemMain = styled.div(({ theme }) => ({
   border: `${get(theme, "borderColor", "#eaeaea")} 1px solid`,
@@ -132,6 +133,8 @@ const BucketListItem = ({
   bulkSelect,
 }: IBucketListItem) => {
   const navigate = useNavigate();
+  const t = useT();
+  const language = useLanguage();
 
   const [clickOverride, setClickOverride] = useState<boolean>(false);
 
@@ -191,15 +194,17 @@ const BucketListItem = ({
       </Box>
       <Box className={"bucketDetails"}>
         <span id={`created-${bucket.name}`}>
-          <strong>Created:</strong>{" "}
+          <strong>{t("Created:")}</strong>{" "}
           {bucket.creation_date
             ? DateTime.fromISO(bucket.creation_date).toFormat(
-                "ccc, LLL dd yyyy HH:mm (ZZZZ)",
+                language === "zh"
+                  ? "yyyy-MM-dd HH:mm"
+                  : "ccc, LLL dd yyyy HH:mm (ZZZZ)",
               )
             : "n/a"}
         </span>
         <span id={`access-${bucket.name}`}>
-          <strong>Access:</strong> {accessToStr(bucket)}
+          <strong>{t("Access:")}</strong> {accessToStr(bucket)}
         </span>
       </Box>
       <Box className={"bucketMetrics"}>
@@ -229,7 +234,7 @@ const BucketListItem = ({
             </HelpTip>
           )}
           {!bucket.details?.versioning && <ReportedUsageIcon />}
-          <span className={"metricLabel"}>Usage</span>
+          <span className={"metricLabel"}>{t("Usage")}</span>
           <div className={"metricText"}>
             {usageScalar}
             <span className={"unit"}>{usageUnit}</span>
@@ -245,7 +250,7 @@ const BucketListItem = ({
 
         <Grid item className={"metric"}>
           <TotalObjectsIcon />
-          <span className={"metricLabel"}>Objects</span>
+          <span className={"metricLabel"}>{t("Objects")}</span>
           <div className={"metricText"}>
             {bucket.objects ? prettyNumber(bucket.objects) : 0}
           </div>

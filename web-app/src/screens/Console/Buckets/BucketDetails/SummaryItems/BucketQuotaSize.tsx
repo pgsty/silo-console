@@ -17,8 +17,10 @@
 import React from "react";
 import { HardBucketQuotaIcon, Box } from "mds";
 import { niceBytes } from "../../../../../common/utils";
+import { useT } from "i18n";
 
 const BucketQuotaSize = ({ quota }: { quota: any }) => {
+  const t = useT();
   return (
     <Box
       sx={{
@@ -48,7 +50,7 @@ const BucketQuotaSize = ({ quota }: { quota: any }) => {
             textTransform: "capitalize",
           }}
         >
-          {quota?.type} Quota
+          {t("{type} Quota").replace("{type}", t(quota?.type ?? ""))}
         </label>
         <label> {niceBytes(`${quota?.quota}`, true)}</label>
       </Box>

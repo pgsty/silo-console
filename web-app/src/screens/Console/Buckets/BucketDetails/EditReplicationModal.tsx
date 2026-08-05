@@ -31,6 +31,7 @@ import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IEditReplicationModal {
   closeModalAndRefresh: (refresh: boolean) => void;
@@ -46,6 +47,7 @@ const EditReplicationModal = ({
   ruleID,
 }: IEditReplicationModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [editLoading, setEditLoading] = useState<boolean>(true);
   const [saveEdit, setSaveEdit] = useState<boolean>(false);
   const [priority, setPriority] = useState<string>("1");
@@ -138,7 +140,7 @@ const EditReplicationModal = ({
       onClose={() => {
         closeModalAndRefresh(false);
       }}
-      title="Edit Bucket Replication"
+      title={t("Edit Bucket Replication")}
       titleIcon={<BucketReplicationIcon />}
     >
       <form
@@ -154,12 +156,12 @@ const EditReplicationModal = ({
             checked={ruleState}
             id="ruleState"
             name="ruleState"
-            label="Rule State"
+            label={t("Rule State")}
             onChange={(e) => {
               setRuleState(e.target.checked);
             }}
           />
-          <ReadBox label={"Destination"} sx={{ width: "100%" }}>
+          <ReadBox label={t("Destination")} sx={{ width: "100%" }}>
             {destination}
           </ReadBox>
 
@@ -171,7 +173,7 @@ const EditReplicationModal = ({
                 setPriority(e.target.value);
               }
             }}
-            label="Priority"
+            label={t("Priority")}
             value={priority}
             pattern={"[0-9]*"}
           />
@@ -181,78 +183,78 @@ const EditReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setTargetStorageClass(e.target.value);
             }}
-            placeholder="STANDARD_IA,REDUCED_REDUNDANCY etc"
-            label="Storage Class"
+            placeholder={t("STANDARD_IA,REDUCED_REDUNDANCY etc")}
+            label={t("Storage Class")}
             value={targetStorageClass}
           />
           <fieldset className={"inputItem"}>
-            <legend>Object Filters</legend>
+            <legend>{t("Object Filters")}</legend>
             <InputBox
               id="prefix"
               name="prefix"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setPrefix(e.target.value);
               }}
-              placeholder="prefix"
-              label="Prefix"
+              placeholder={t("prefix")}
+              label={t("Prefix")}
               value={prefix}
             />
             <QueryMultiSelector
               name="tags"
-              label="Tags"
+              label={t("Tags")}
               elements={initialTags}
               onChange={(vl: string) => {
                 setTags(vl);
               }}
-              keyPlaceholder="Tag Key"
-              valuePlaceholder="Tag Value"
+              keyPlaceholder={t("Tag Key")}
+              valuePlaceholder={t("Tag Value")}
               withBorder
             />
           </fieldset>
           <fieldset className={"inputItem"}>
-            <legend>Replication Options</legend>
+            <legend>{t("Replication Options")}</legend>
 
             <Switch
               checked={repExisting}
               id="repExisting"
               name="repExisting"
-              label="Existing Objects"
+              label={t("Existing Objects")}
               onChange={(e) => {
                 setRepExisting(e.target.checked);
               }}
-              description={"Replicate existing objects"}
+              description={t("Replicate existing objects")}
             />
 
             <Switch
               checked={metadataSync}
               id="metadatataSync"
               name="metadatataSync"
-              label="Metadata Sync"
+              label={t("Metadata Sync")}
               onChange={(e) => {
                 setMetadataSync(e.target.checked);
               }}
-              description={"Metadata Sync"}
+              description={t("Metadata Sync")}
             />
 
             <Switch
               checked={repDeleteMarker}
               id="deleteMarker"
               name="deleteMarker"
-              label="Delete Marker"
+              label={t("Delete Marker")}
               onChange={(e) => {
                 setRepDeleteMarker(e.target.checked);
               }}
-              description={"Replicate soft deletes"}
+              description={t("Replicate soft deletes")}
             />
             <Switch
               checked={repDelete}
               id="repDelete"
               name="repDelete"
-              label="Deletes"
+              label={t("Deletes")}
               onChange={(e) => {
                 setRepDelete(e.target.checked);
               }}
-              description={"Replicate versioned deletes"}
+              description={t("Replicate versioned deletes")}
             />
           </fieldset>
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
@@ -264,14 +266,14 @@ const EditReplicationModal = ({
               onClick={() => {
                 closeModalAndRefresh(false);
               }}
-              label={"Cancel"}
+              label={t("Cancel")}
             />
             <Button
               id={"save-replication"}
               type="submit"
               variant="callAction"
               disabled={editLoading || saveEdit}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
         </FormLayout>

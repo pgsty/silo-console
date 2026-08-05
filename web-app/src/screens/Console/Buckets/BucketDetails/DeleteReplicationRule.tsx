@@ -21,6 +21,7 @@ import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import useApi from "../../Common/Hooks/useApi";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
+import { interpolate, useT } from "i18n";
 
 interface IDeleteReplicationProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -44,7 +45,9 @@ const DeleteReplicationRule = ({
   deleteSelectedRules = false,
 }: IDeleteReplicationProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [confirmationText, setConfirmationText] = useState<string>("");
+  const confirmationPhrase = t("Yes, I am sure");
 
   const onDelSuccess = () => closeDeleteModalAndRefresh(true);
   const onDelError = (err: ErrorResponseHandler) =>
@@ -79,26 +82,34 @@ const DeleteReplicationRule = ({
     <ConfirmDialog
       title={
         deleteSelectedRules
-          ? "Delete Selected Replication Rules"
-          : "Delete Replication Rule"
+          ? t("Delete Selected Replication Rules")
+          : t("Delete Replication Rule")
       }
-      confirmText={"Delete"}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
       onConfirm={onConfirmDelete}
       onClose={onClose}
       confirmButtonProps={{
-        disabled: deleteSelectedRules && confirmationText !== "Yes, I am sure",
+        disabled:
+          deleteSelectedRules && confirmationText !== confirmationPhrase,
       }}
       confirmationContent={
         <Fragment>
           {deleteSelectedRules ? (
             <Fragment>
-              Are you sure you want to remove the selected replication rules for
-              bucket <b>{selectedBucket}</b>?<br />
+              {interpolate(
+                t(
+                  "Are you sure you want to remove the selected replication rules for bucket {bucket}?",
+                ),
+                { bucket: <b>{selectedBucket}</b> },
+              )}
               <br />
-              To continue please type <b>Yes, I am sure</b> in the box.
+              <br />
+              {interpolate(t("To continue please type {phrase} in the box."), {
+                phrase: <b>{confirmationPhrase}</b>,
+              })}
               <Grid item xs={12}>
                 <InputBox
                   id="retype-tenant"
@@ -113,8 +124,10 @@ const DeleteReplicationRule = ({
             </Fragment>
           ) : (
             <Fragment>
-              Are you sure you want to delete replication rule{" "}
-              <b>{ruleToDelete}</b>?
+              {interpolate(
+                t("Are you sure you want to delete replication rule {rule}?"),
+                { rule: <b>{ruleToDelete}</b> },
+              )}
             </Fragment>
           )}
         </Fragment>

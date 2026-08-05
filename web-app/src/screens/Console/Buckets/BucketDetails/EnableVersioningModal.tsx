@@ -22,6 +22,7 @@ import { errorToHandler } from "api/errors";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import CSVMultiSelector from "../../Common/FormComponents/CSVMultiSelector/CSVMultiSelector";
+import { useT } from "i18n";
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 
 interface IVersioningEventProps {
@@ -52,6 +53,7 @@ const EnableVersioningModal = ({
   objectLockingEnabled,
 }: IVersioningEventProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [versioningLoading, setVersioningLoading] = useState<boolean>(false);
   const [versionState, setVersionState] = useState<boolean>(
@@ -98,32 +100,32 @@ const EnableVersioningModal = ({
     <ModalBox
       onClose={() => closeVersioningModalAndRefresh(false)}
       open={modalOpen}
-      title={`Versioning on Bucket`}
+      title={t("Versioning on Bucket")}
     >
       <FormLayout withBorders={false} containerPadding={false}>
         <Switch
           id={"activateVersioning"}
-          label={"Versioning Status"}
+          label={t("Versioning Status")}
           checked={versionState}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setVersionState(e.target.checked);
           }}
-          indicatorLabels={["Enabled", "Disabled"]}
+          indicatorLabels={[t("Enabled"), t("Disabled")]}
         />
         {versionState && !objectLockingEnabled && (
           <Fragment>
             <Switch
               id={"excludeFolders"}
-              label={"Exclude Folders"}
+              label={t("Exclude Folders")}
               checked={excludeFolders}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setExcludeFolders(e.target.checked);
               }}
-              indicatorLabels={["Enabled", "Disabled"]}
+              indicatorLabels={[t("Enabled"), t("Disabled")]}
             />
             <CSVMultiSelector
               elements={excludedPrefixes}
-              label={"Excluded Prefixes"}
+              label={t("Excluded Prefixes")}
               name={"excludedPrefixes"}
               onChange={(value: string | string[]) => {
                 let valCh = "";
@@ -146,14 +148,14 @@ const EnableVersioningModal = ({
             variant="regular"
             color="primary"
             onClick={resetForm}
-            label={"Clear"}
+            label={t("Clear")}
           />
           <Button
             type="submit"
             variant="callAction"
             onClick={enableVersioning}
             id="saveTag"
-            label={"Save"}
+            label={t("Save")}
           />
         </Box>
       </FormLayout>

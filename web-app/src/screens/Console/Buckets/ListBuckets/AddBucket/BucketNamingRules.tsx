@@ -22,20 +22,27 @@ import { useSelector } from "react-redux";
 import ValidRule from "./ValidRule";
 import InvalidRule from "./InvalidRule";
 import NARule from "./NARule";
+import { useT } from "i18n";
 
 const BucketNamingRules = ({ errorList }: { errorList: boolean[] }) => {
-  const lengthRuleText =
-    "Bucket names must be between 3 (min) and 63 (max) characters long.";
-  const characterRuleText =
-    "Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).";
-  const periodRuleText =
-    "Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.";
-  const ipRuleText =
-    "Bucket names must not be formatted as an IP address (for example, 192.168.5.4).";
-  const prefixRuleText = "Bucket names must not start with the prefix xn--.";
-  const suffixRuleText =
-    "Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.";
-  const uniqueRuleText = "Bucket names must be unique within a partition.";
+  const t = useT();
+  const lengthRuleText = t(
+    "Bucket names must be between 3 (min) and 63 (max) characters long.",
+  );
+  const characterRuleText = t(
+    "Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).",
+  );
+  const periodRuleText = t(
+    "Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.",
+  );
+  const ipRuleText = t(
+    "Bucket names must not be formatted as an IP address (for example, 192.168.5.4).",
+  );
+  const prefixRuleText = t("Bucket names must not start with the prefix xn--.");
+  const suffixRuleText = t(
+    "Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.",
+  );
+  const uniqueRuleText = t("Bucket names must be unique within a partition.");
 
   const bucketName = useSelector((state: AppState) => state.addBucket.name);
 
@@ -63,7 +70,11 @@ const BucketNamingRules = ({ errorList }: { errorList: boolean[] }) => {
         id={"toggle-naming-rules"}
         type="button"
         open={showNamingRules}
-        label={`${showNamingRules ? "Hide" : "View"} Bucket Naming Rules`}
+        label={
+          showNamingRules
+            ? t("Hide Bucket Naming Rules")
+            : t("View Bucket Naming Rules")
+        }
         onClick={() => {
           toggleNamingRules();
         }}

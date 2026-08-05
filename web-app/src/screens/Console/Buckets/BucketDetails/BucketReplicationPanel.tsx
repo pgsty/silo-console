@@ -49,6 +49,7 @@ import { selBucketDetailsLoading } from "./bucketDetailsSlice";
 import { useAppDispatch } from "../../../../store";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import withSuspense from "../../Common/Components/withSuspense";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const EditReplicationModal = withSuspense(
   React.lazy(() => import("./EditReplicationModal")),
@@ -63,6 +64,8 @@ const DeleteReplicationRule = withSuspense(
 const BucketReplicationPanel = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loadingBucket = useSelector(selBucketDetailsLoading);
 
@@ -169,7 +172,9 @@ const BucketReplicationPanel = () => {
   };
 
   const tagDisplay = (events: BucketReplicationRule) => {
-    return <Fragment>{events && events.tags !== "" ? "Yes" : "No"}</Fragment>;
+    return (
+      <Fragment>{events && events.tags !== "" ? t("Yes") : t("No")}</Fragment>
+    );
   };
 
   const selectAllItems = () => {
@@ -265,13 +270,13 @@ const BucketReplicationPanel = () => {
               matchAll
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={"Remove Selected Replication Rules"}>
+              <TooltipWrapper tooltip={t("Remove Selected Replication Rules")}>
                 <Button
                   id={"remove-bucket-replication-rule"}
                   onClick={() => {
                     confirmDeleteSelectedReplicationRules();
                   }}
-                  label={"Remove Selected Rules"}
+                  label={t("Remove Selected Rules")}
                   icon={<TrashIcon />}
                   color={"secondary"}
                   disabled={
@@ -291,7 +296,7 @@ const BucketReplicationPanel = () => {
               matchAll
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={"Add Replication Rule"}>
+              <TooltipWrapper tooltip={t("Add Replication Rule")}>
                 <Button
                   id={"add-bucket-replication-rule"}
                   onClick={() => {
@@ -302,7 +307,7 @@ const BucketReplicationPanel = () => {
                         }`,
                     );
                   }}
-                  label={"Add Replication Rule"}
+                  label={t("Add Replication Rule")}
                   icon={<AddIcon />}
                   variant={"callAction"}
                 />
@@ -314,20 +319,28 @@ const BucketReplicationPanel = () => {
         <HelpTip
           content={
             <Fragment>
-              SILO{" "}
-              <a
-                target="blank"
-                href="https://silo.pgsty.com/administration/bucket-replication/"
-              >
-                server-side bucket replication
-              </a>{" "}
-              is an automatic bucket-level configuration that synchronizes
-              objects between a source and destination bucket.
+              {interpolate(
+                t(
+                  "SILO {serverSideReplication} is an automatic bucket-level configuration that synchronizes objects between a source and destination bucket.",
+                ),
+                {
+                  serverSideReplication: (
+                    <a
+                      target="blank"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/bucket-replication/",
+                      )}
+                    >
+                      {t("server-side bucket replication")}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
           placement="right"
         >
-          Replication
+          {t("Replication")}
         </HelpTip>
       </SectionTitle>
       <Grid container>
@@ -344,32 +357,33 @@ const BucketReplicationPanel = () => {
               itemActions={replicationTableActions}
               columns={[
                 {
-                  label: "Priority",
+                  label: t("Priority"),
                   elementKey: "priority",
                   width: 55,
                   contentTextAlign: "center",
                 },
                 {
-                  label: "Destination",
+                  label: t("Destination"),
                   elementKey: "destination",
                   renderFunction: ruleDestDisplay,
                 },
                 {
-                  label: "Prefix",
+                  label: t("Prefix"),
                   elementKey: "prefix",
                   width: 200,
                 },
                 {
-                  label: "Tags",
+                  label: t("Tags"),
                   elementKey: "tags",
                   renderFunction: tagDisplay,
                   width: 60,
                 },
-                { label: "Status", elementKey: "status", width: 100 },
+                { label: t("Status"), elementKey: "status", width: 100 },
               ]}
               isLoading={loadingReplication}
               records={replicationRules}
-              entityName="Replication Rules"
+              entityName={t("Replication Rules")}
+              customEmptyMessage={t("There are no Replication Rules yet.")}
               idField="id"
               customPaperHeight={"400px"}
               textSelectable
@@ -382,23 +396,28 @@ const BucketReplicationPanel = () => {
         <Grid item xs={12}>
           <br />
           <HelpBox
-            title={"Replication"}
+            title={t("Replication")}
             iconComponent={<BucketsIcon />}
             help={
               <Fragment>
-                SILO supports server-side and client-side replication of objects
-                between source and destination buckets.
+                {t(
+                  "SILO supports server-side and client-side replication of objects between source and destination buckets.",
+                )}
                 <br />
                 <br />
-                You can learn more at the{" "}
-                <a
-                  href="https://silo.pgsty.com/administration/bucket-replication/"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  documentation
-                </a>
-                .
+                {interpolate(t("You can learn more at the {documentation}."), {
+                  documentation: (
+                    <a
+                      href={localize(
+                        "https://silo.pgsty.com/administration/bucket-replication/",
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {t("documentation")}
+                    </a>
+                  ),
+                })}
               </Fragment>
             }
           />

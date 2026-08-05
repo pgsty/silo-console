@@ -30,6 +30,7 @@ import { modalStyleUtils } from "../../../../Common/FormComponents/common/styleL
 import { BucketObjectItem } from "./types";
 import { AppState, useAppDispatch } from "../../../../../../store";
 import { setModalErrorSnackMessage } from "../../../../../../systemSlice";
+import { useT } from "i18n";
 
 interface ICreatePath {
   modalOpen: boolean;
@@ -49,6 +50,7 @@ const CreatePathModal = ({
   limitedSubPath,
 }: ICreatePath) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const navigate = useNavigate();
 
   const [pathUrl, setPathUrl] = useState("");
@@ -84,7 +86,9 @@ const CreatePathModal = ({
     if (records.findIndex(sharesName) !== -1) {
       dispatch(
         setModalErrorSnackMessage({
-          errorMessage: "Folder cannot have the same name as an existing file",
+          errorMessage: t(
+            "Folder cannot have the same name as an existing file",
+          ),
           detailedError: "",
         }),
       );
@@ -130,13 +134,13 @@ const CreatePathModal = ({
     <React.Fragment>
       <ModalWrapper
         modalOpen={modalOpen}
-        title="Choose or create a new path"
+        title={t("Choose or create a new path")}
         onClose={onClose}
         titleIcon={<CreateNewPathIcon />}
       >
         <FormLayout withBorders={false} containerPadding={false}>
           <Box className={"inputItem"} sx={{ display: "flex", gap: 8 }}>
-            <strong>Current Path:</strong> <br />
+            <strong>{t("Current Path:")}</strong> <br />
             <Box
               sx={{
                 textOverflow: "ellipsis",
@@ -152,16 +156,18 @@ const CreatePathModal = ({
           </Box>
           <InputBox
             value={pathUrl}
-            label={"New Folder Path"}
+            label={t("New Folder Path")}
             id={"folderPath"}
             name={"folderPath"}
-            placeholder={"Enter the new Folder Path"}
+            placeholder={t("Enter the new Folder Path")}
             onChange={inputChange}
             onKeyPress={keyPressed}
             required
             tooltip={
               (limitedSubPath &&
-                "You may only have write access on a limited set of subpaths within this path. Please carefully review your User permissions to understand the paths to which you may write.") ||
+                t(
+                  "You may only have write access on a limited set of subpaths within this path. Please carefully review your User permissions to understand the paths to which you may write.",
+                )) ||
               ""
             }
           />
@@ -172,7 +178,7 @@ const CreatePathModal = ({
               color="primary"
               variant="regular"
               onClick={resetForm}
-              label={"Clear"}
+              label={t("Clear")}
             />
             <Button
               id={"create"}
@@ -180,7 +186,7 @@ const CreatePathModal = ({
               variant="callAction"
               disabled={!isFormValid}
               onClick={createProcess}
-              label={"Create"}
+              label={t("Create")}
             />
           </Grid>
         </FormLayout>

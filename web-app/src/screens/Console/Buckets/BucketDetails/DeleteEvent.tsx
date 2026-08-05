@@ -22,6 +22,7 @@ import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
 import { ConfirmDeleteIcon } from "mds";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 import { NotificationConfig } from "api/consoleApi";
 
 interface IDeleteEventProps {
@@ -38,6 +39,7 @@ const DeleteEvent = ({
   bucketEvent,
 }: IDeleteEventProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onDelSuccess = () => closeDeleteModalAndRefresh(true);
   const onDelError = (err: ErrorResponseHandler) =>
     dispatch(setErrorSnackMessage(err));
@@ -78,15 +80,15 @@ const DeleteEvent = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Event`}
-      confirmText={"Delete"}
+      title={t("Delete Event")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
       onConfirm={onConfirmDelete}
       onClose={onClose}
       confirmationContent={
-        <Fragment>Are you sure you want to delete this event?</Fragment>
+        <Fragment>{t("Are you sure you want to delete this event?")}</Fragment>
       }
     />
   );

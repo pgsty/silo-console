@@ -42,6 +42,7 @@ import { errorToHandler } from "api/errors";
 import { getMaxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserThunks";
 import { maxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserSlice";
 import debounce from "lodash/debounce";
+import { interpolate, useT } from "i18n";
 
 interface IShareFileProps {
   open: boolean;
@@ -57,6 +58,7 @@ const ShareFile = ({
   dataObject,
 }: IShareFileProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const distributedSetup = useSelector(selDistSet);
   const maxShareLinkExpTimeVal = useSelector(maxShareLinkExpTime);
   const [shareURL, setShareURL] = useState<string>("");
@@ -168,7 +170,7 @@ const ShareFile = ({
   return (
     <React.Fragment>
       <ModalWrapper
-        title="Share File"
+        title={t("Share File")}
         titleIcon={<ShareIcon style={{ fill: "#4CCB92" }} />}
         modalOpen={open}
         onClose={() => {
@@ -194,22 +196,34 @@ const ShareFile = ({
                 placement="right"
                 tooltip={
                   <span>
-                    You can reset your session by logging out and logging back
-                    in to the web UI. <br /> <br />
-                    You can increase the maximum configuration time by setting
-                    the MINIO_STS_DURATION environment variable on all your
-                    nodes. <br /> <br />
-                    You can use <b>mc share</b> as an alternative to this UI,
-                    where the session length does not limit the URL validity.
+                    {t(
+                      "You can reset your session by logging out and logging back in to the web UI.",
+                    )}{" "}
+                    <br /> <br />
+                    {t(
+                      "You can increase the maximum configuration time by setting the MINIO_STS_DURATION environment variable on all your nodes.",
+                    )}{" "}
+                    <br /> <br />
+                    {interpolate(
+                      t(
+                        "You can use {mcShare} as an alternative to this UI, where the session length does not limit the URL validity.",
+                      ),
+                      { mcShare: <b>mc share</b> },
+                    )}
                   </span>
                 }
               >
                 <span>
-                  The following URL lets you share this object without requiring
-                  a login. <br />
-                  The URL expires automatically at the earlier of your
-                  configured time ({niceTimeFromSeconds(maxShareLinkExpTimeVal)}
-                  ) or the expiration of your current web session.
+                  {t(
+                    "The following URL lets you share this object without requiring a login.",
+                  )}{" "}
+                  <br />
+                  {t(
+                    "The URL expires automatically at the earlier of your configured time ({time}) or the expiration of your current web session.",
+                  ).replace(
+                    "{time}",
+                    niceTimeFromSeconds(maxShareLinkExpTimeVal),
+                  )}
                 </span>
               </Tooltip>
             </Grid>
@@ -217,7 +231,7 @@ const ShareFile = ({
             <Grid item xs={12}>
               <DaysSelector
                 id="date"
-                label="Active for"
+                label={t("Active for")}
                 maxSeconds={maxShareLinkExpTimeVal}
                 onChange={debouncedDateChange}
                 entity="Link"
@@ -238,7 +252,9 @@ const ShareFile = ({
                       variant="regular"
                       onClick={() => {
                         dispatch(
-                          setModalSnackMessage("Share URL Copied to clipboard"),
+                          setModalSnackMessage(
+                            t("Share URL Copied to clipboard"),
+                          ),
                         );
                       }}
                       disabled={shareURL === "" || isLoadingFile}
@@ -258,9 +274,11 @@ const ShareFile = ({
                 sx={{
                   marginTop: 20,
                 }}
-                tooltip="Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable"
+                tooltip={t(
+                  "Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable",
+                )}
                 id="switch_toggle_url"
-                label="Toogle Share URL"
+                label={t("Toogle Share URL")}
                 onChange={(e) => {
                   setToggleURL(e.target.checked);
                 }}

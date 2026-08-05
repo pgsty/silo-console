@@ -26,6 +26,7 @@ import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import { useSelector } from "react-redux";
 import { AppState } from "../../../../store";
 import { getSessionGrantsWildCard } from "./UploadPermissionUtils";
+import { useT } from "i18n";
 
 interface IUploadFilesButton {
   uploadPath: string;
@@ -44,6 +45,7 @@ const UploadFilesButton = ({
   uploadFolderFunction,
   overrideStyles = {},
 }: IUploadFilesButton) => {
+  const t = useT();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [uploadOptionsOpen, uploadOptionsSetOpen] = useState<boolean>(false);
 
@@ -104,10 +106,10 @@ const UploadFilesButton = ({
       <TooltipWrapper
         tooltip={
           uploadEnabled
-            ? "Upload Files"
+            ? t("Upload Files")
             : permissionTooltipHelper(
                 [IAM_SCOPES.S3_PUT_OBJECT, IAM_SCOPES.S3_PUT_ACTIONS],
-                "upload files to this bucket",
+                t("upload files to this bucket"),
               )
         }
       >
@@ -117,7 +119,7 @@ const UploadFilesButton = ({
           aria-haspopup="true"
           aria-expanded={openUploadMenu ? "true" : undefined}
           onClick={handleClick}
-          label={"Upload"}
+          label={t("Upload")}
           icon={<UploadIcon />}
           variant={"callAction"}
           disabled={forceDisable || !uploadEnabled}
@@ -128,13 +130,13 @@ const UploadFilesButton = ({
         id={"upload-files-main-menu"}
         options={[
           {
-            label: "Upload File",
+            label: t("Upload File"),
             icon: <UploadIcon />,
             value: "file",
             disabled: !uploadObjectAllowed || forceDisable,
           },
           {
-            label: "Upload Folder",
+            label: t("Upload Folder"),
             icon: <UploadFolderIcon />,
             value: "folder",
             disabled: !uploadFolderAllowed || forceDisable,

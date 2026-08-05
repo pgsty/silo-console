@@ -36,6 +36,7 @@ import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import QueryMultiSelector from "../../Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
 import InputUnitMenu from "../../Common/FormComponents/InputUnitMenu/InputUnitMenu";
+import { useT } from "i18n";
 
 interface IReplicationModal {
   open: boolean;
@@ -52,6 +53,7 @@ const AddReplicationModal = ({
   setReplicationRules,
 }: IReplicationModal) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [priority, setPriority] = useState<string>("1");
   const [accessKey, setAccessKey] = useState<string>("");
@@ -151,7 +153,7 @@ const AddReplicationModal = ({
         }
         dispatch(
           setModalErrorSnackMessage({
-            errorMessage: "No changes applied",
+            errorMessage: t("No changes applied"),
             detailedError: "",
           }),
         );
@@ -168,7 +170,7 @@ const AddReplicationModal = ({
       onClose={() => {
         closeModalAndRefresh();
       }}
-      title="Set Bucket Replication"
+      title={t("Set Bucket Replication")}
       titleIcon={<BucketReplicationIcon />}
     >
       <form
@@ -189,7 +191,7 @@ const AddReplicationModal = ({
                 setPriority(e.target.value);
               }
             }}
-            label="Priority"
+            label={t("Priority")}
             value={priority}
             pattern={"[0-9]*"}
           />
@@ -201,7 +203,7 @@ const AddReplicationModal = ({
               setTargetURL(e.target.value);
             }}
             placeholder="s3.example.com"
-            label="Target URL"
+            label={t("Target URL")}
             value={targetURL}
           />
 
@@ -209,7 +211,7 @@ const AddReplicationModal = ({
             checked={useTLS}
             id="useTLS"
             name="useTLS"
-            label="Use TLS"
+            label={t("Use TLS")}
             onChange={(e) => {
               setUseTLS(e.target.checked);
             }}
@@ -222,7 +224,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setAccessKey(e.target.value);
             }}
-            label="Access Key"
+            label={t("Access Key")}
             value={accessKey}
           />
 
@@ -232,7 +234,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSecretKey(e.target.value);
             }}
-            label="Secret Key"
+            label={t("Secret Key")}
             value={secretKey}
           />
 
@@ -242,7 +244,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setTargetBucket(e.target.value);
             }}
-            label="Target Bucket"
+            label={t("Target Bucket")}
             value={targetBucket}
           />
 
@@ -252,7 +254,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setRegion(e.target.value);
             }}
-            label="Region"
+            label={t("Region")}
             value={region}
           />
 
@@ -262,11 +264,11 @@ const AddReplicationModal = ({
             onChange={(value) => {
               setReplicationMode(value as "async" | "sync");
             }}
-            label="Replication Mode"
+            label={t("Replication Mode")}
             value={replicationMode}
             options={[
-              { label: "Asynchronous", value: "async" },
-              { label: "Synchronous", value: "sync" },
+              { label: t("Asynchronous"), value: "async" },
+              { label: t("Synchronous"), value: "sync" },
             ]}
           />
 
@@ -281,7 +283,7 @@ const AddReplicationModal = ({
                     setBandwidthScalar(e.target.value as string);
                   }
                 }}
-                label="Bandwidth"
+                label={t("Bandwidth")}
                 value={bandwidthScalar}
                 min="0"
                 pattern={"[0-9]*"}
@@ -306,7 +308,7 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setHealthCheck(e.target.value as string);
             }}
-            label="Health Check Duration"
+            label={t("Health Check Duration")}
             value={healthCheck}
           />
 
@@ -316,66 +318,66 @@ const AddReplicationModal = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setTargetStorageClass(e.target.value);
             }}
-            placeholder="STANDARD_IA,REDUCED_REDUNDANCY etc"
-            label="Storage Class"
+            placeholder={t("STANDARD_IA,REDUCED_REDUNDANCY etc")}
+            label={t("Storage Class")}
             value={targetStorageClass}
           />
 
           <fieldset className={"inputItem"}>
-            <legend>Object Filters</legend>
+            <legend>{t("Object Filters")}</legend>
             <InputBox
               id="prefix"
               name="prefix"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setPrefix(e.target.value);
               }}
-              placeholder="prefix"
-              label="Prefix"
+              placeholder={t("prefix")}
+              label={t("Prefix")}
               value={prefix}
             />
             <QueryMultiSelector
               name="tags"
-              label="Tags"
+              label={t("Tags")}
               elements={""}
               onChange={(vl: string) => {
                 setTags(vl);
               }}
-              keyPlaceholder="Tag Key"
-              valuePlaceholder="Tag Value"
+              keyPlaceholder={t("Tag Key")}
+              valuePlaceholder={t("Tag Value")}
               withBorder
             />
           </fieldset>
           <fieldset className={"inputItem"}>
-            <legend>Replication Options</legend>
+            <legend>{t("Replication Options")}</legend>
             <Switch
               checked={metadataSync}
               id="metadatataSync"
               name="metadatataSync"
-              label="Metadata Sync"
+              label={t("Metadata Sync")}
               onChange={(e) => {
                 setMetadataSync(e.target.checked);
               }}
-              description={"Metadata Sync"}
+              description={t("Metadata Sync")}
             />
             <Switch
               checked={repDeleteMarker}
               id="deleteMarker"
               name="deleteMarker"
-              label="Delete Marker"
+              label={t("Delete Marker")}
               onChange={(e) => {
                 setRepDeleteMarker(e.target.checked);
               }}
-              description={"Replicate soft deletes"}
+              description={t("Replicate soft deletes")}
             />
             <Switch
               checked={repDelete}
               id="repDelete"
               name="repDelete"
-              label="Deletes"
+              label={t("Deletes")}
               onChange={(e) => {
                 setRepDelete(e.target.checked);
               }}
-              description={"Replicate versioned deletes"}
+              description={t("Replicate versioned deletes")}
             />
           </fieldset>
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
@@ -387,7 +389,7 @@ const AddReplicationModal = ({
               onClick={() => {
                 closeModalAndRefresh();
               }}
-              label={"Cancel"}
+              label={t("Cancel")}
             />
             <Button
               id={"submit"}
@@ -395,7 +397,7 @@ const AddReplicationModal = ({
               variant="callAction"
               color="primary"
               disabled={addLoading}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
         </FormLayout>

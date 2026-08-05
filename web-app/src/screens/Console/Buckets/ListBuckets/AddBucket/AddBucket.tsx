@@ -76,6 +76,7 @@ import { ObjectRetentionMode } from "../../../../../api/consoleApi";
 import { errorToHandler } from "../../../../../api/errors";
 import HelpMenu from "../../../HelpMenu";
 import CSVMultiSelector from "../../../Common/FormComponents/CSVMultiSelector/CSVMultiSelector";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const ErrorBox = styled.div(({ theme }) => ({
   color: get(theme, "signalColors.danger", "#C51B3F"),
@@ -87,6 +88,8 @@ const ErrorBox = styled.div(({ theme }) => ({
 const AddBucket = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const validBucketCharacters = new RegExp(
     `^[a-z0-9][a-z0-9\\.\\-]{1,61}[a-z0-9]$`,
@@ -227,42 +230,55 @@ const AddBucket = () => {
     <Fragment>
       <PageHeaderWrapper
         label={
-          <BackLink label={"Buckets"} onClick={() => navigate("/buckets")} />
+          <BackLink label={t("Buckets")} onClick={() => navigate("/buckets")} />
         }
         actions={<HelpMenu />}
       />
       <PageLayout>
         <FormLayout
-          title={"Create Bucket"}
+          title={t("Create Bucket")}
           icon={<BucketsIcon />}
           helpBox={
             <HelpBox
               iconComponent={<BucketsIcon />}
-              title={"Buckets"}
+              title={t("Buckets")}
               help={
                 <Fragment>
-                  SILO uses buckets to organize objects. A bucket is similar to
-                  a folder or directory in a filesystem, where each bucket can
-                  hold an arbitrary number of objects.
+                  {t(
+                    "SILO uses buckets to organize objects. A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.",
+                  )}
                   <br />
                   <br />
-                  <b>Versioning</b> allows to keep multiple versions of the same
-                  object under the same key.
+                  {interpolate(
+                    t(
+                      "{versioning} allows to keep multiple versions of the same object under the same key.",
+                    ),
+                    { versioning: <b>{t("Versioning")}</b> },
+                  )}
                   <br />
                   <br />
-                  <b>Object Locking</b> prevents objects from being deleted.
-                  Required to support retention and legal hold. Can only be
-                  enabled at bucket creation.
+                  {interpolate(
+                    t(
+                      "{objectLocking} prevents objects from being deleted. Required to support retention and legal hold. Can only be enabled at bucket creation.",
+                    ),
+                    { objectLocking: <b>{t("Object Locking")}</b> },
+                  )}
                   <br />
                   <br />
-                  <b>Quota</b> limits the amount of data in the bucket.
+                  {interpolate(
+                    t("{quota} limits the amount of data in the bucket."),
+                    { quota: <b>{t("Quota")}</b> },
+                  )}
                   {lockingAllowed && (
                     <Fragment>
                       <br />
                       <br />
-                      <b>Retention</b> imposes rules to prevent object deletion
-                      for a period of time. Versioning must be enabled in order
-                      to set bucket retention policies.
+                      {interpolate(
+                        t(
+                          "{retention} imposes rules to prevent object deletion for a period of time. Versioning must be enabled in order to set bucket retention policies.",
+                        ),
+                        { retention: <b>{t("Retention")}</b> },
+                      )}
                     </Fragment>
                   )}
                   <br />
@@ -285,22 +301,33 @@ const AddBucket = () => {
               <Box sx={{ margin: "10px 0" }}>
                 <BucketNamingRules errorList={validationResult} />
               </Box>
-              <SectionTitle separator>Features</SectionTitle>
+              <SectionTitle separator>{t("Features")}</SectionTitle>
               <Box sx={{ marginTop: 10 }}>
                 {!distributedSetup && (
                   <Fragment>
                     <ErrorBox>
-                      These features are unavailable in a single-disk setup.
+                      {t(
+                        "These features are unavailable in a single-disk setup.",
+                      )}
                       <br />
-                      Please deploy a server in{" "}
-                      <a
-                        href="https://silo.pgsty.com/operations/concepts/architecture/#distributed-minio-deployments"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        Distributed Mode
-                      </a>{" "}
-                      to use these features.
+                      {interpolate(
+                        t(
+                          "Please deploy a server in {distributedMode} to use these features.",
+                        ),
+                        {
+                          distributedMode: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/operations/concepts/architecture/#distributed-minio-deployments",
+                              )}
+                              target="_blank"
+                              rel="noopener"
+                            >
+                              {t("Distributed Mode")}
+                            </a>
+                          ),
+                        },
+                      )}
                     </ErrorBox>
                     <br />
                     <br />
@@ -323,8 +350,10 @@ const AddBucket = () => {
                         },
                       }}
                     >
-                      <InfoIcon /> Versioning setting cannot be changed as
-                      cluster replication is enabled for this site.
+                      <InfoIcon />{" "}
+                      {t(
+                        "Versioning setting cannot be changed as cluster replication is enabled for this site.",
+                      )}
                     </Box>
                     <br />
                   </Fragment>
@@ -337,7 +366,7 @@ const AddBucket = () => {
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     dispatch(setVersioning(event.target.checked));
                   }}
-                  label={"Versioning"}
+                  label={t("Versioning")}
                   disabled={
                     !distributedSetup ||
                     lockingEnabled ||
@@ -352,7 +381,7 @@ const AddBucket = () => {
                             IAM_SCOPES.S3_PUT_BUCKET_VERSIONING,
                             IAM_SCOPES.S3_PUT_ACTIONS,
                           ],
-                          "Versioning",
+                          t("Versioning"),
                         )
                   }
                   helpTip={
@@ -360,34 +389,57 @@ const AddBucket = () => {
                       {lockingEnabled && versioningEnabled && (
                         <strong>
                           {" "}
-                          You must disable Object Locking before Versioning can
-                          be disabled <br />
+                          {t(
+                            "You must disable Object Locking before Versioning can be disabled",
+                          )}{" "}
+                          <br />
                         </strong>
                       )}
-                      SILO supports keeping multiple{" "}
-                      <a
-                        href="https://silo.pgsty.com/administration/object-management/object-versioning/#bucket-versioning"
-                        target="blank"
-                      >
-                        versions
-                      </a>{" "}
-                      of an object in a single bucket.
+                      {interpolate(
+                        t(
+                          "SILO supports keeping multiple {versions} of an object in a single bucket.",
+                        ),
+                        {
+                          versions: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/object-management/object-versioning/#bucket-versioning",
+                              )}
+                              target="blank"
+                            >
+                              {t("versions")}
+                            </a>
+                          ),
+                        },
+                      )}
                       <br />
-                      Versioning is required to enable{" "}
-                      <a
-                        href="https://silo.pgsty.com/administration/object-management/object-retention/"
-                        target="blank"
-                      >
-                        Object Locking
-                      </a>{" "}
-                      and{" "}
-                      <a
-                        href="https://silo.pgsty.com/administration/object-management/object-retention/#object-retention-modes"
-                        target="blank"
-                      >
-                        Retention
-                      </a>
-                      .
+                      {interpolate(
+                        t(
+                          "Versioning is required to enable {objectLocking} and {retention}.",
+                        ),
+                        {
+                          objectLocking: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/object-management/object-retention/",
+                              )}
+                              target="blank"
+                            >
+                              {t("Object Locking")}
+                            </a>
+                          ),
+                          retention: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/object-management/object-retention/#object-retention-modes",
+                              )}
+                              target="blank"
+                            >
+                              {t("Retention")}
+                            </a>
+                          ),
+                        },
+                      )}
                     </Fragment>
                   }
                   helpTipPlacement="right"
@@ -396,31 +448,45 @@ const AddBucket = () => {
                   <Fragment>
                     <Switch
                       id={"excludeFolders"}
-                      label={"Exclude Folders"}
+                      label={t("Exclude Folders")}
                       checked={excludeFolders}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         dispatch(setExcludeFolders(e.target.checked));
                       }}
-                      indicatorLabels={["Enabled", "Disabled"]}
+                      indicatorLabels={[t("Enabled"), t("Disabled")]}
                       helpTip={
                         <Fragment>
-                          You can choose to{" "}
-                          <a href="https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning">
-                            exclude folders and prefixes
-                          </a>{" "}
-                          from versioning if Object Locking is not enabled.
+                          {interpolate(
+                            t(
+                              "You can choose to {excludePrefixes} from versioning if Object Locking is not enabled.",
+                            ),
+                            {
+                              excludePrefixes: (
+                                <a
+                                  href={localize(
+                                    "https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning",
+                                  )}
+                                >
+                                  {t("exclude folders and prefixes")}
+                                </a>
+                              ),
+                            },
+                          )}
                           <br />
-                          SILO requires versioning to support replication.
+                          {t(
+                            "SILO requires versioning to support replication.",
+                          )}
                           <br />
-                          Objects in excluded prefixes do not replicate to any
-                          peer site or remote site.
+                          {t(
+                            "Objects in excluded prefixes do not replicate to any peer site or remote site.",
+                          )}
                         </Fragment>
                       }
                       helpTipPlacement="right"
                     />
                     <CSVMultiSelector
                       elements={excludedPrefixes}
-                      label={"Excluded Prefixes"}
+                      label={t("Excluded Prefixes")}
                       name={"excludedPrefixes"}
                       onChange={(value: string | string[]) => {
                         let valCh = "";
@@ -450,7 +516,7 @@ const AddBucket = () => {
                       dispatch(setVersioning(true));
                     }
                   }}
-                  label={"Object Locking"}
+                  label={t("Object Locking")}
                   tooltip={
                     lockingAllowed
                       ? ``
@@ -460,7 +526,7 @@ const AddBucket = () => {
                             IAM_SCOPES.S3_PUT_BUCKET_OBJECT_LOCK_CONFIGURATION,
                             IAM_SCOPES.S3_PUT_ACTIONS,
                           ],
-                          "Locking",
+                          t("Locking"),
                         )
                   }
                   helpTip={
@@ -468,24 +534,47 @@ const AddBucket = () => {
                       {retentionEnabled && (
                         <strong>
                           {" "}
-                          You must disable Retention before Object Locking can
-                          be disabled <br />
+                          {t(
+                            "You must disable Retention before Object Locking can be disabled",
+                          )}{" "}
+                          <br />
                         </strong>
                       )}
-                      You can only enable{" "}
-                      <a
-                        href="https://silo.pgsty.com/administration/object-management/#object-retention"
-                        target="blank"
-                      >
-                        Object Locking
-                      </a>{" "}
-                      when first creating a bucket.
+                      {interpolate(
+                        t(
+                          "You can only enable {objectLocking} when first creating a bucket.",
+                        ),
+                        {
+                          objectLocking: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/object-management/#object-retention",
+                              )}
+                              target="blank"
+                            >
+                              {t("Object Locking")}
+                            </a>
+                          ),
+                        },
+                      )}
                       <br />
                       <br />
-                      <a href="https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning">
-                        Exclude folders and prefixes
-                      </a>{" "}
-                      options will not be available if this option is enabled.
+                      {interpolate(
+                        t(
+                          "{excludeFolders} options will not be available if this option is enabled.",
+                        ),
+                        {
+                          excludeFolders: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/administration/object-management/object-versioning/#exclude-folders-from-versioning",
+                              )}
+                            >
+                              {t("Exclude folders and prefixes")}
+                            </a>
+                          ),
+                        },
+                      )}
                     </Fragment>
                   }
                   helpTipPlacement="right"
@@ -498,19 +587,27 @@ const AddBucket = () => {
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     dispatch(setQuota(event.target.checked));
                   }}
-                  label={"Quota"}
+                  label={t("Quota")}
                   disabled={!distributedSetup}
                   helpTip={
                     <Fragment>
-                      Setting a{" "}
-                      <a
-                        href="https://silo.pgsty.com/reference/deprecated/mc-quota-set/"
-                        target="blank"
-                      >
-                        quota
-                      </a>{" "}
-                      assigns a hard limit to a bucket beyond which SILO does
-                      not allow writes.
+                      {interpolate(
+                        t(
+                          "Setting a {quota} assigns a hard limit to a bucket beyond which SILO does not allow writes.",
+                        ),
+                        {
+                          quota: (
+                            <a
+                              href={localize(
+                                "https://silo.pgsty.com/reference/deprecated/mc-quota-set/",
+                              )}
+                              target="blank"
+                            >
+                              {t("quota")}
+                            </a>
+                          ),
+                        },
+                      )}
                     </Fragment>
                   }
                   helpTipPlacement="right"
@@ -524,7 +621,7 @@ const AddBucket = () => {
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         dispatch(setQuotaSize(e.target.value));
                       }}
-                      label="Capacity"
+                      label={t("Capacity")}
                       value={quotaSize}
                       required
                       min="1"
@@ -541,7 +638,7 @@ const AddBucket = () => {
                       }
                       error={
                         invalidFields.includes("quotaSize")
-                          ? "Please enter a valid quota"
+                          ? t("Please enter a valid quota")
                           : ""
                       }
                     />
@@ -556,21 +653,31 @@ const AddBucket = () => {
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       dispatch(setRetention(event.target.checked));
                     }}
-                    label={"Retention"}
+                    label={t("Retention")}
                     helpTip={
                       <Fragment>
-                        SILO supports setting both{" "}
-                        <a
-                          href="https://silo.pgsty.com/administration/object-management/object-retention/#configure-bucket-default-object-retention"
-                          target="blank"
-                        >
-                          bucket-default
-                        </a>{" "}
-                        and per-object retention rules.
+                        {interpolate(
+                          t(
+                            "SILO supports setting both {bucketDefault} and per-object retention rules.",
+                          ),
+                          {
+                            bucketDefault: (
+                              <a
+                                href={localize(
+                                  "https://silo.pgsty.com/administration/object-management/object-retention/#configure-bucket-default-object-retention",
+                                )}
+                                target="blank"
+                              >
+                                {t("bucket-default")}
+                              </a>
+                            ),
+                          },
+                        )}
                         <br />
-                        <br /> For per-object retention settings, defer to the
-                        documentation for the PUT operation used by your
-                        preferred SDK.
+                        <br />{" "}
+                        {t(
+                          "For per-object retention settings, defer to the documentation for the PUT operation used by your preferred SDK.",
+                        )}
                       </Fragment>
                     }
                     helpTipPlacement="right"
@@ -582,7 +689,7 @@ const AddBucket = () => {
                       currentValue={retentionMode}
                       id="retention_mode"
                       name="retention_mode"
-                      label="Mode"
+                      label={t("Mode")}
                       onChange={(e: React.ChangeEvent<{ value: unknown }>) => {
                         dispatch(
                           setRetentionMode(
@@ -591,30 +698,48 @@ const AddBucket = () => {
                         );
                       }}
                       selectorOptions={[
-                        { value: "compliance", label: "Compliance" },
-                        { value: "governance", label: "Governance" },
+                        { value: "compliance", label: t("Compliance") },
+                        { value: "governance", label: t("Governance") },
                       ]}
                       helpTip={
                         <Fragment>
                           {" "}
-                          <a
-                            href="https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode"
-                            target="blank"
-                          >
-                            Compliance
-                          </a>{" "}
-                          lock protects Objects from write operations by all
-                          users, including the SILO root user.
+                          {interpolate(
+                            t(
+                              "{compliance} lock protects Objects from write operations by all users, including the SILO root user.",
+                            ),
+                            {
+                              compliance: (
+                                <a
+                                  href={localize(
+                                    "https://silo.pgsty.com/administration/object-management/object-retention/#compliance-mode",
+                                  )}
+                                  target="blank"
+                                >
+                                  {t("Compliance")}
+                                </a>
+                              ),
+                            },
+                          )}
                           <br />
                           <br />
-                          <a
-                            href="https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode"
-                            target="blank"
-                          >
-                            Governance
-                          </a>{" "}
-                          lock protects Objects from write operations by
-                          non-privileged users.
+                          {interpolate(
+                            t(
+                              "{governance} lock protects Objects from write operations by non-privileged users.",
+                            ),
+                            {
+                              governance: (
+                                <a
+                                  href={localize(
+                                    "https://silo.pgsty.com/administration/object-management/object-retention/#governance-mode",
+                                  )}
+                                  target="blank"
+                                >
+                                  {t("Governance")}
+                                </a>
+                              ),
+                            },
+                          )}
                         </Fragment>
                       }
                       helpTipPlacement="right"
@@ -626,7 +751,7 @@ const AddBucket = () => {
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         dispatch(setRetentionValidity(e.target.valueAsNumber));
                       }}
-                      label="Validity"
+                      label={t("Validity")}
                       value={String(retentionValidity)}
                       required
                       overlayObject={
@@ -637,8 +762,8 @@ const AddBucket = () => {
                           }}
                           unitSelected={retentionUnit}
                           unitsList={[
-                            { value: "days", label: "Days" },
-                            { value: "years", label: "Years" },
+                            { value: "days", label: t("Days") },
+                            { value: "years", label: t("Years") },
                           ]}
                           disabled={false}
                         />
@@ -665,12 +790,12 @@ const AddBucket = () => {
                 variant={"regular"}
                 className={"clearButton"}
                 onClick={resForm}
-                label={"Clear"}
+                label={t("Clear")}
               />
               <TooltipWrapper
                 tooltip={
                   invalidFields.length > 0 || !isDirty || hasErrors
-                    ? "You must apply a valid name to the bucket"
+                    ? t("You must apply a valid name to the bucket")
                     : ""
                 }
               >
@@ -685,7 +810,7 @@ const AddBucket = () => {
                     !isDirty ||
                     hasErrors
                   }
-                  label={"Create Bucket"}
+                  label={t("Create Bucket")}
                 />
               </TooltipWrapper>
             </Grid>

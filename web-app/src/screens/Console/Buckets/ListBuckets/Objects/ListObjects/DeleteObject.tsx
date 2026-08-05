@@ -26,6 +26,7 @@ import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions
 import { useSelector } from "react-redux";
 import { isVersionedMode } from "../../../../../../utils/validationFunctions";
 import { BucketVersioningResponse } from "api/consoleApi";
+import { useT } from "i18n";
 
 interface IDeleteObjectProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
@@ -46,6 +47,7 @@ const DeleteObject = ({
   selectedVersion = "",
 }: IDeleteObjectProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onDelSuccess = () => closeDeleteModalAndRefresh(true);
   const onDelError = (err: ErrorResponseHandler) => {
     dispatch(setErrorSnackMessage(err));
@@ -88,8 +90,8 @@ const DeleteObject = ({
 
   return (
     <ConfirmDialog
-      title={`Delete Object`}
-      confirmText={"Delete"}
+      title={t("Delete Object")}
+      confirmText={t("Delete")}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={deleteLoading}
@@ -97,13 +99,13 @@ const DeleteObject = ({
       onClose={onClose}
       confirmationContent={
         <Fragment>
-          Are you sure you want to delete: <br />
+          {t("Are you sure you want to delete:")} <br />
           <b>{selectedObject}</b>{" "}
           {selectedVersion !== "" ? (
             <Fragment>
               <br />
               <br />
-              Version ID:
+              {t("Version ID:")}
               <br />
               <strong>{selectedVersion}</strong>
             </Fragment>
@@ -116,8 +118,8 @@ const DeleteObject = ({
             selectedVersion === "" && (
               <Fragment>
                 <Switch
-                  label={"Delete All Versions"}
-                  indicatorLabels={["Yes", "No"]}
+                  label={t("Delete All Versions")}
+                  indicatorLabels={[t("Yes"), t("No")]}
                   checked={deleteVersions}
                   value={"delete_versions"}
                   id="delete-versions"
@@ -137,8 +139,8 @@ const DeleteObject = ({
                 }}
               >
                 <Switch
-                  label={"Bypass Governance Mode"}
-                  indicatorLabels={["Yes", "No"]}
+                  label={t("Bypass Governance Mode")}
+                  indicatorLabels={[t("Yes"), t("No")]}
                   checked={bypassGovernance}
                   value={"bypass_governance"}
                   id="bypass_governance"
@@ -163,12 +165,14 @@ const DeleteObject = ({
                   color: "#c83b51",
                 }}
               >
-                This will remove the object as well as all of its versions,{" "}
+                {t(
+                  "This will remove the object as well as all of its versions,",
+                )}{" "}
                 <br />
-                This action is irreversible.
+                {t("This action is irreversible.")}
               </div>
               <br />
-              Are you sure you want to continue?
+              {t("Are you sure you want to continue?")}
             </Fragment>
           )}
         </Fragment>

@@ -21,6 +21,11 @@ import { ContentType, PermissionResource } from "api/consoleApi";
 import { api } from "../../../../../api";
 import { setErrorSnackMessage } from "../../../../../systemSlice";
 import { StatusCodes } from "http-status-codes";
+import { translate } from "i18n";
+
+// This module is not a component, so it reads the active language off the
+// store the same way it already reads anonymousMode.
+const t = (text: string) => translate(store.getState().system.language, text);
 const downloadWithLink = (href: string, downloadFileName: string) => {
   const link = document.createElement("a");
   link.href = href;
@@ -57,7 +62,9 @@ export const downloadSelectedAsZip = async (
   } catch (err: any) {
     store.dispatch(
       setErrorSnackMessage({
-        errorMessage: `Download of multiple files failed. ${err.statusText}`,
+        errorMessage: `${t("Download of multiple files failed.")} ${
+          err.statusText
+        }`,
         detailedError: "",
       }),
     );
@@ -150,13 +157,13 @@ export const download = (
             return;
           }
         }
-        errorCallback(`Unexpected response, download incomplete.`);
+        errorCallback(t("Unexpected response, download incomplete."));
       }
     }
   };
   req.onerror = () => {
     if (errorCallback) {
-      errorCallback("A network error occurred.");
+      errorCallback(t("A network error occurred."));
     }
   };
   req.onabort = () => {

@@ -57,6 +57,7 @@ import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { BucketObject } from "api/consoleApi";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IVersionsNavigatorProps {
   internalPaths: string;
@@ -80,6 +81,7 @@ const VersionsNavigator = ({
   bucketName,
 }: IVersionsNavigatorProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const searchVersions = useSelector(
     (state: AppState) => state.objectBrowser.searchVersions,
@@ -433,18 +435,26 @@ const VersionsNavigator = ({
                     <VersionsIcon style={{ width: 20, height: 20 }} />
                   </span>
                 }
-                title={`${
+                title={t("{object} Versions").replace(
+                  "{object}",
                   objectNameArray.length > 0
                     ? objectNameArray[objectNameArray.length - 1]
-                    : actualInfo.name
-                } Versions`}
+                    : actualInfo.name || "",
+                )}
                 subTitle={
                   <Fragment>
                     <span className={"detailsSpacer"}>
                       <strong>
-                        {versions.length}
-                        {moreVersionsThanLimit ? "+" : ""} Version
-                        {versions.length === 1 ? "" : "s"}&nbsp;&nbsp;&nbsp;
+                        {(versions.length === 1
+                          ? t("{count} Version")
+                          : t("{count} Versions")
+                        ).replace(
+                          "{count}",
+                          `${versions.length}${
+                            moreVersionsThanLimit ? "+" : ""
+                          }`,
+                        )}
+                        &nbsp;&nbsp;&nbsp;
                       </strong>
                     </span>
                     <span className={"detailsSpacer"}>
@@ -454,9 +464,9 @@ const VersionsNavigator = ({
                       </strong>
                     </span>
                     {moreVersionsThanLimit && (
-                      <TooltipWrapper tooltip={"Load more Versions"}>
+                      <TooltipWrapper tooltip={t("Load more Versions")}>
                         <Button
-                          label="Load more"
+                          label={t("Load more")}
                           id={"load-more-versions"}
                           onClick={() => {
                             dispatch(setVersionsLimit(versionsLimit + 10));
@@ -472,7 +482,7 @@ const VersionsNavigator = ({
                 }
                 actions={
                   <Fragment>
-                    <TooltipWrapper tooltip={"Select Multiple Versions"}>
+                    <TooltipWrapper tooltip={t("Select Multiple Versions")}>
                       <Button
                         id={"select-multiple-versions"}
                         onClick={() => {
@@ -484,7 +494,7 @@ const VersionsNavigator = ({
                       />
                     </TooltipWrapper>
                     {selectEnabled && (
-                      <TooltipWrapper tooltip={"Delete Selected Versions"}>
+                      <TooltipWrapper tooltip={t("Delete Selected Versions")}>
                         <Button
                           id={"delete-multiple-versions"}
                           onClick={() => {
@@ -497,7 +507,7 @@ const VersionsNavigator = ({
                         />
                       </TooltipWrapper>
                     )}
-                    <TooltipWrapper tooltip={"Delete Non Current Versions"}>
+                    <TooltipWrapper tooltip={t("Delete Non Current Versions")}>
                       <Button
                         id={"delete-non-current"}
                         onClick={() => {
@@ -512,14 +522,14 @@ const VersionsNavigator = ({
                     <Select
                       id={"sort-by"}
                       options={[
-                        { label: "Date", value: "date" },
+                        { label: t("Date"), value: "date" },
                         {
-                          label: "Size",
+                          label: t("Size"),
                           value: "size",
                         },
                       ]}
                       value={sortValue}
-                      label={"Sort by"}
+                      label={t("Sort by")}
                       onChange={(newValue) => {
                         setSortValue(newValue);
                       }}

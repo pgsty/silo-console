@@ -17,6 +17,7 @@
 import React, { Fragment, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Box, Button, InformativeMessage } from "mds";
+import { useT } from "i18n";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "./scripts/pdf.worker.min.mjs";
 
@@ -33,6 +34,7 @@ const PreviewPDF = ({
   onLoad,
   downloadFile,
 }: IPreviewPDFProps) => {
+  const t = useT();
   const [errorState, setErrorState] = useState<boolean>(false);
   const [totalPages, setTotalPages] = useState<number>(0);
 
@@ -48,10 +50,12 @@ const PreviewPDF = ({
       {errorState && totalPages === 0 && (
         <InformativeMessage
           variant={"error"}
-          title={"Error"}
+          title={t("Error")}
           message={
             <Fragment>
-              File preview couldn't be displayed, Please try Download instead.
+              {t(
+                "File preview couldn't be displayed, Please try Download instead.",
+              )}
               <Box
                 sx={{
                   display: "flex",
@@ -64,7 +68,7 @@ const PreviewPDF = ({
                   onClick={downloadFile}
                   variant={"callAction"}
                 >
-                  Download File
+                  {t("Download File")}
                 </Button>
               </Box>
             </Fragment>
@@ -75,12 +79,12 @@ const PreviewPDF = ({
       {!loading && !errorState && (
         <InformativeMessage
           variant={"warning"}
-          title={"File Preview"}
+          title={t("File Preview")}
           message={
             <Fragment>
-              This is a File Preview for the first {arrayCreate.length} pages of
-              the document, if you wish to work with the full document please
-              download instead.
+              {t(
+                "This is a File Preview for the first {count} pages of the document, if you wish to work with the full document please download instead.",
+              ).replace("{count}", String(arrayCreate.length))}
               <Box
                 sx={{
                   display: "flex",
@@ -93,7 +97,7 @@ const PreviewPDF = ({
                   onClick={downloadFile}
                   variant={"callAction"}
                 >
-                  Download File
+                  {t("Download File")}
                 </Button>
               </Box>
             </Fragment>

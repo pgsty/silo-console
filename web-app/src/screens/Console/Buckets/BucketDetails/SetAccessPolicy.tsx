@@ -31,6 +31,7 @@ import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import { emptyPolicy } from "../../Policies/utils";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
+import { useLocalizedLink, useT } from "i18n";
 import CodeMirrorWrapper from "../../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
 
 interface ISetAccessPolicyProps {
@@ -49,6 +50,8 @@ const SetAccessPolicy = ({
   closeModalAndRefresh,
 }: ISetAccessPolicyProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const localize = useLocalizedLink();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [accessPolicy, setAccessPolicy] = useState<BucketAccess | string>("");
   const [policyDefinition, setPolicyDefinition] = useState<string>(emptyPolicy);
@@ -84,7 +87,7 @@ const SetAccessPolicy = ({
 
   return (
     <ModalWrapper
-      title="Change Access Policy"
+      title={t("Change Access Policy")}
       modalOpen={open}
       onClose={() => {
         closeModalAndRefresh();
@@ -101,16 +104,16 @@ const SetAccessPolicy = ({
         <FormLayout withBorders={false} containerPadding={false}>
           <Select
             value={accessPolicy}
-            label="Access Policy"
+            label={t("Access Policy")}
             id="select-access-policy"
             name="select-access-policy"
             onChange={(value) => {
               setAccessPolicy(value as BucketAccess);
             }}
             options={[
-              { value: BucketAccess.PRIVATE, label: "Private" },
-              { value: BucketAccess.PUBLIC, label: "Public" },
-              { value: BucketAccess.CUSTOM, label: "Custom" },
+              { value: BucketAccess.PRIVATE, label: t("Private") },
+              { value: BucketAccess.PUBLIC, label: t("Public") },
+              { value: BucketAccess.CUSTOM, label: t("Custom") },
             ]}
           />
           {accessPolicy === "PUBLIC" && (
@@ -122,14 +125,15 @@ const SetAccessPolicy = ({
                 fontStyle: "italic",
               }}
             >
-              * Warning: With Public access anyone will be able to upload,
-              download and delete files from this Bucket *
+              {t(
+                "* Warning: With Public access anyone will be able to upload, download and delete files from this Bucket *",
+              )}
             </Box>
           )}
           {accessPolicy === "CUSTOM" && (
             <Grid item xs={12}>
               <CodeMirrorWrapper
-                label={`Write Policy`}
+                label={t("Write Policy")}
                 value={policyDefinition}
                 onChange={(value) => {
                   setPolicyDefinition(value);
@@ -139,9 +143,11 @@ const SetAccessPolicy = ({
                   <Fragment>
                     <a
                       target="blank"
-                      href="https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                      )}
                     >
-                      Guide to access policy structure
+                      {t("Guide to access policy structure")}
                     </a>
                   </Fragment>
                 }
@@ -158,7 +164,7 @@ const SetAccessPolicy = ({
               closeModalAndRefresh();
             }}
             disabled={addLoading}
-            label={"Cancel"}
+            label={t("Cancel")}
           />
           <Button
             id={"set"}
@@ -167,7 +173,7 @@ const SetAccessPolicy = ({
             disabled={
               addLoading || (accessPolicy === "CUSTOM" && !policyDefinition)
             }
-            label={"Set"}
+            label={t("Set")}
           />
         </Box>
       </form>

@@ -56,12 +56,14 @@ import { Bucket } from "../../../api/consoleApi";
 import { api } from "../../../api";
 import { errorToHandler } from "../../../api/errors";
 import HelpMenu from "../HelpMenu";
-import { usageClarifyingContent } from "../Dashboard/BasicDashboard/ReportedUsage";
+import { UsageClarifyingContent } from "../Dashboard/BasicDashboard/ReportedUsage";
 import { setAddBucketOpen } from "screens/Console/Buckets/ListBuckets/AddBucket/addBucketsSlice";
+import { interpolate, useT } from "i18n";
 
 const OBListBuckets = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [records, setRecords] = useState<Bucket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -142,7 +144,7 @@ const OBListBuckets = () => {
               onChange={(value) => {
                 dispatch(setFilterBucket(value));
               }}
-              placeholder="Filter Buckets"
+              placeholder={t("Filter Buckets")}
               value={filterBuckets}
               sx={{
                 minWidth: 380,
@@ -163,7 +165,7 @@ const OBListBuckets = () => {
               gap: 8,
             }}
           >
-            <TooltipWrapper tooltip={"Refresh"}>
+            <TooltipWrapper tooltip={t("Refresh")}>
               <Button
                 id={"refresh-buckets"}
                 onClick={() => {
@@ -194,7 +196,8 @@ const OBListBuckets = () => {
               <DataTable
                 isLoading={loading}
                 records={filteredRecords}
-                entityName={"Buckets"}
+                entityName={t("Buckets")}
+                customEmptyMessage={t("There are no Buckets yet.")}
                 idField={"name"}
                 sx={{
                   [`@media (max-width: ${breakPoints.sm}px)`]: {
@@ -235,7 +238,7 @@ const OBListBuckets = () => {
                 }}
                 columns={[
                   {
-                    label: "Name",
+                    label: t("Name"),
                     elementKey: "name",
                     renderFunction: (label) => (
                       <div style={{ display: "flex" }}>
@@ -257,13 +260,13 @@ const OBListBuckets = () => {
                     ),
                   },
                   {
-                    label: "Objects",
+                    label: t("Objects"),
                     elementKey: "objects",
                     renderFunction: (size: number | null) =>
                       size ? size.toLocaleString() : 0,
                   },
                   {
-                    label: "Size",
+                    label: t("Size"),
                     elementKey: "size",
                     renderFunction: (size: number) => (
                       <div
@@ -271,7 +274,7 @@ const OBListBuckets = () => {
                         onMouseLeave={() => setClickOverride(false)}
                       >
                         <HelpTip
-                          content={usageClarifyingContent}
+                          content={<UsageClarifyingContent />}
                           placement="right"
                         >
                           {niceBytesInt(size || 0)}
@@ -280,7 +283,7 @@ const OBListBuckets = () => {
                     ),
                   },
                   {
-                    label: "Access",
+                    label: t("Access"),
                     elementKey: "rw_access",
                     renderFullObject: true,
                     renderFunction: (bucket: Bucket) => {
@@ -310,10 +313,10 @@ const OBListBuckets = () => {
                 <Grid item xs={8}>
                   <HelpBox
                     iconComponent={<BucketsIcon />}
-                    title={"No Results"}
+                    title={t("No Results")}
                     help={
                       <Fragment>
-                        No buckets match the filtering condition
+                        {t("No buckets match the filtering condition")}
                       </Fragment>
                     }
                   />
@@ -332,12 +335,12 @@ const OBListBuckets = () => {
                 <Grid item xs={8}>
                   <HelpBox
                     iconComponent={<BucketsIcon />}
-                    title={"Buckets"}
+                    title={t("Buckets")}
                     help={
                       <Fragment>
-                        SILO uses buckets to organize objects. A bucket is
-                        similar to a folder or directory in a filesystem, where
-                        each bucket can hold an arbitrary number of objects.
+                        {t(
+                          "SILO uses buckets to organize objects. A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.",
+                        )}
                         <br />
                         {canListBuckets ? (
                           ""
@@ -359,14 +362,17 @@ const OBListBuckets = () => {
                           resource={CONSOLE_UI_RESOURCE}
                         >
                           <br />
-                          To get started,&nbsp;
-                          <ActionLink
-                            onClick={() => {
-                              dispatch(setAddBucketOpen(true));
-                            }}
-                          >
-                            Create a Bucket.
-                          </ActionLink>
+                          {interpolate(t("To get started, {createBucket}"), {
+                            createBucket: (
+                              <ActionLink
+                                onClick={() => {
+                                  dispatch(setAddBucketOpen(true));
+                                }}
+                              >
+                                {t("Create a Bucket.")}
+                              </ActionLink>
+                            ),
+                          })}
                         </SecureComponent>
                       </Fragment>
                     }

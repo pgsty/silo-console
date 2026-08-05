@@ -38,9 +38,11 @@ import { hasPermission } from "../../../../../../common/SecureComponent";
 import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { DataTable, ItemActions } from "mds";
 import { BucketObject } from "api/consoleApi";
+import { useT } from "i18n";
 
 const ListObjectsTable = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const params = useParams();
   const navigate = useNavigate();
 
@@ -126,7 +128,7 @@ const ListObjectsTable = () => {
   const tableActions: ItemActions[] = [
     {
       type: "view",
-      tooltip: "View",
+      tooltip: t("View"),
       onClick: openPath,
       sendOnlyId: false,
     },
@@ -175,15 +177,16 @@ const ListObjectsTable = () => {
     !displayListObjects && !anonymousMode
       ? permissionTooltipHelper(
           [IAM_SCOPES.S3_LIST_BUCKET, IAM_SCOPES.S3_ALL_LIST_BUCKET],
-          "view Objects in this bucket",
+          t("view Objects in this bucket"),
         )
-      : `This location is empty${
-          !rewindEnabled ? ", please try uploading a new file" : ""
-        }`;
+      : !rewindEnabled
+        ? t("This location is empty, please try uploading a new file")
+        : t("This location is empty");
 
   if (connectionError) {
-    errorMessage =
-      "Objects List unavailable. Please review your WebSockets configuration and try again";
+    errorMessage = t(
+      "Objects List unavailable. Please review your WebSockets configuration and try again",
+    );
   }
 
   let customPaperHeight = "calc(100vh - 290px)";
@@ -195,9 +198,9 @@ const ListObjectsTable = () => {
   return (
     <DataTable
       itemActions={tableActions}
-      columns={rewindEnabled ? rewindModeColumns : listModeColumns}
+      columns={rewindEnabled ? rewindModeColumns(t) : listModeColumns(t)}
       isLoading={requestInProgress}
-      entityName="Objects"
+      entityName={t("Objects")}
       idField="name"
       records={payload}
       customPaperHeight={customPaperHeight}

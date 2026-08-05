@@ -36,6 +36,7 @@ import {
 } from "../screens/Console/Buckets/ListBuckets/Objects/ListObjects/types";
 import { permissionItems } from "../screens/Console/Buckets/ListBuckets/Objects/utils";
 import { setErrorSnackMessage } from "../systemSlice";
+import { getStoredLanguage, translate } from "../i18n/lang";
 
 let wsInFlight: boolean = false;
 let currentRequestID: number = 0;
@@ -84,10 +85,13 @@ export const objectBrowserWSMiddleware = (
         };
 
         objectsWS.onmessage = (message) => {
+          const lang = getStoredLanguage();
           const basicErrorMessage = {
-            errorMessage: "An error occurred",
-            detailedMessage:
+            errorMessage: translate(lang, "An error occurred"),
+            detailedMessage: translate(
+              lang,
               "An unknown error occurred. Please refer to Console logs to get more information.",
+            ),
           };
 
           const response: WebsocketResponse = JSON.parse(

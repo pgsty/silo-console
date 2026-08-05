@@ -34,6 +34,7 @@ import {
   modalBasic,
   modalStyleUtils,
 } from "../../Common/FormComponents/common/styleLibrary";
+import { useT } from "i18n";
 
 interface IAddEventProps {
   open: boolean;
@@ -47,6 +48,7 @@ const AddEvent = ({
   closeModalAndRefresh,
 }: IAddEventProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [prefix, setPrefix] = useState<string>("");
   const [suffix, setSuffix] = useState<string>("");
@@ -103,17 +105,21 @@ const AddEvent = ({
   }, [fetchArnList]);
 
   const events = [
-    { label: "PUT - Object Uploaded", value: NotificationEventType.Put },
-    { label: "GET - Object accessed", value: NotificationEventType.Get },
-    { label: "DELETE - Object Deleted", value: NotificationEventType.Delete },
+    { label: t("PUT - Object Uploaded"), value: NotificationEventType.Put },
+    { label: t("GET - Object accessed"), value: NotificationEventType.Get },
     {
-      label: "REPLICA - Object Replicated",
+      label: t("DELETE - Object Deleted"),
+      value: NotificationEventType.Delete,
+    },
+    {
+      label: t("REPLICA - Object Replicated"),
       value: NotificationEventType.Replica,
     },
-    { label: "ILM - Object Transitioned", value: NotificationEventType.Ilm },
+    { label: t("ILM - Object Transitioned"), value: NotificationEventType.Ilm },
     {
-      label:
+      label: t(
         "SCANNER - Object has too many versions / Prefixes has too many sub-folders",
+      ),
       value: NotificationEventType.Scanner,
     },
   ];
@@ -145,7 +151,7 @@ const AddEvent = ({
       onClose={() => {
         closeModalAndRefresh();
       }}
-      title="Subscribe To Bucket Events"
+      title={t("Subscribe To Bucket Events")}
       titleIcon={<EventSubscriptionIcon />}
     >
       <form
@@ -182,7 +188,7 @@ const AddEvent = ({
                       target="blank"
                       href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html"
                     >
-                      Amazon Resource Name
+                      {t("Amazon Resource Name")}
                     </a>
                   </Fragment>
                 }
@@ -192,7 +198,7 @@ const AddEvent = ({
               <InputBox
                 id="prefix-input"
                 name="prefix-input"
-                label="Prefix"
+                label={t("Prefix")}
                 value={prefix}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setPrefix(e.target.value);
@@ -203,7 +209,7 @@ const AddEvent = ({
               <InputBox
                 id="suffix-input"
                 name="suffix-input"
-                label="Suffix"
+                label={t("Suffix")}
                 value={suffix}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setSuffix(e.target.value);
@@ -212,10 +218,17 @@ const AddEvent = ({
             </Grid>
             <Grid item xs={12} sx={formFieldStyles.formFieldRow}>
               <DataTable
-                columns={[{ label: "Event", elementKey: "label" }]}
+                columns={[{ label: t("Event"), elementKey: "label" }]}
                 idField={"value"}
                 records={events}
                 onSelect={handleClick}
+                onSelectAll={() =>
+                  setSelectedEvents(
+                    selectedEvents.length === events.length
+                      ? []
+                      : events.map((ev) => ev.value),
+                  )
+                }
                 selectedItems={selectedEvents}
                 noBackground
                 customPaperHeight={"260px"}
@@ -231,14 +244,14 @@ const AddEvent = ({
               onClick={() => {
                 closeModalAndRefresh();
               }}
-              label={"Cancel"}
+              label={t("Cancel")}
             />
             <Button
               id={"save-event"}
               type="submit"
               variant="callAction"
               disabled={addLoading || arn === "" || selectedEvents.length === 0}
-              label={"Save"}
+              label={t("Save")}
             />
           </Grid>
         </Grid>

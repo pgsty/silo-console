@@ -23,6 +23,7 @@ import KMSHelpBox from "../../KMS/KMSHelpbox";
 import { api } from "api";
 import { ApiError, HttpResponse } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 
 interface IAddKeyModalProps {
   closeAddModalAndRefresh: (refresh: boolean) => void;
@@ -34,6 +35,7 @@ const AddKeyModal = ({
   addOpen,
 }: IAddKeyModalProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onClose = () => closeAddModalAndRefresh(false);
 
   const [loadingAdd, setLoadingAdd] = useState<boolean>(false);
@@ -57,7 +59,7 @@ const AddKeyModal = ({
   return (
     <ConfirmDialog
       title={""}
-      confirmText={"Create"}
+      confirmText={t("Create")}
       isOpen={addOpen}
       isLoading={loadingAdd}
       onConfirm={onConfirmAdd}
@@ -69,9 +71,11 @@ const AddKeyModal = ({
       confirmationContent={
         <Fragment>
           <KMSHelpBox
-            helpText={"Create Key"}
+            helpText={t("Create Key")}
             contents={[
-              "Create a new cryptographic key in the Key Management Service server connected to SILO.",
+              t(
+                "Create a new cryptographic key in the Key Management Service server connected to SILO.",
+              ),
             ]}
           />
 
@@ -79,12 +83,12 @@ const AddKeyModal = ({
             <InputBox
               id="key-name"
               name="key-name"
-              label="Key Name"
+              label={t("Key Name")}
               autoFocus={true}
               value={keyName}
               error={
                 keyName.indexOf(" ") !== -1
-                  ? "Key name cannot contain spaces"
+                  ? t("Key name cannot contain spaces")
                   : ""
               }
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

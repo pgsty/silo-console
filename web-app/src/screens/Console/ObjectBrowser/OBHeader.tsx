@@ -37,6 +37,7 @@ import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import ObjectManagerButton from "../Common/ObjectManager/ObjectManagerButton";
 import HelpMenu from "../HelpMenu";
 import { setHelpName } from "../../../systemSlice";
+import { useT } from "i18n";
 
 interface IOBHeader {
   bucketName: string;
@@ -44,6 +45,7 @@ interface IOBHeader {
 
 const OBHeader = ({ bucketName }: IOBHeader) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const features = useSelector(selFeatures);
 
   const versionsMode = useSelector(
@@ -98,7 +100,10 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
       ) : (
         <Fragment>
           <SearchBox
-            placeholder={`Start typing to filter versions of ${versionedFile}`}
+            placeholder={t("Start typing to filter versions of {file}").replace(
+              "{file}",
+              versionedFile,
+            )}
             onChange={(value) => {
               dispatch(setSearchVersions(value));
             }}
@@ -120,7 +125,7 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"Object Browser"}
+              label={t("Object Browser")}
               onClick={() => {
                 navigate(IAM_PAGES.OBJECT_BROWSER_VIEW);
               }}
@@ -136,16 +141,16 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
                 <TooltipWrapper
                   tooltip={
                     configureBucketAllowed
-                      ? "Configure Bucket"
-                      : "You do not have the required permissions to configure this bucket. Please contact your SILO administrator to request " +
-                        IAM_ROLES.BUCKET_ADMIN +
-                        " permisions."
+                      ? t("Configure Bucket")
+                      : t(
+                          "You do not have the required permissions to configure this bucket. Please contact your SILO administrator to request {role} permisions.",
+                        ).replace("{role}", IAM_ROLES.BUCKET_ADMIN)
                   }
                 >
                   <Button
                     id={"configure-bucket-main"}
                     color="primary"
-                    aria-label="Configure Bucket"
+                    aria-label={t("Configure Bucket")}
                     onClick={() => navigate(`/buckets/${bucketName}/admin`)}
                     icon={
                       <SettingsIcon
