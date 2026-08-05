@@ -22,6 +22,7 @@ import { baseUrl } from "../../history";
 import { Box, Button, WarnIcon } from "mds";
 import get from "lodash/get";
 import LoginLayout from "./LoginLayout";
+import { useT } from "i18n";
 
 const CallBackContainer = styled.div(({ theme }) => ({
   "& .errorDescription": {
@@ -60,6 +61,7 @@ const CallBackContainer = styled.div(({ theme }) => ({
 
 const LoginCallback = () => {
   const navigate = useNavigate();
+  const t = useT();
 
   const [error, setError] = useState<string>("");
   const [errorDescription, setErrorDescription] = useState<string>("");
@@ -112,7 +114,7 @@ const LoginCallback = () => {
             <span className={"messageIcon"}>
               <WarnIcon />
             </span>
-            <span className={"errorLabel"}>Error from IDP</span>
+            <span className={"errorLabel"}>{t("Error from IDP")}</span>
           </div>
           <div className={"simpleError"}>{error}</div>
           <Box className={"errorDescription"}>{errorDescription}</Box>
@@ -125,7 +127,7 @@ const LoginCallback = () => {
             variant="callAction"
             fullWidth
           >
-            Back to Login
+            {t("Back to Login")}
           </Button>
         </CallBackContainer>
       </LoginLayout>

@@ -39,6 +39,7 @@ import { DocItem } from "./HelpMenu.types";
 import HelpItem from "./HelpItem";
 import MoreLink from "../../common/MoreLink";
 import helpTopicsJSON from "../Console/helpTopics.json";
+import { Lang, localizeUrl, useLanguage, useLocalizedLink, useT } from "i18n";
 
 const SILO_BLOG_URL = "https://silo.pgsty.com/blog/";
 const SILO_BLOG_FEED_URL = "https://silo.pgsty.com/blog/index.xml";
@@ -155,7 +156,12 @@ const HelpMenu = () => {
   const [helpItemsBlog, setHelpItemsBlog] =
     useState<DocItem[]>(SILO_BLOG_FALLBACK);
   const [helpMenuOpen, setHelpMenuOpen] = useState<boolean>(false);
-  const blogFeedLoaded = useRef(false);
+  // Feed items per language; a miss (or failed fetch) keeps the fallback so
+  // the next open retries.
+  const blogCache = useRef<Partial<Record<Lang, DocItem[]>>>({});
+  const t = useT();
+  const localize = useLocalizedLink();
+  const language = useLanguage();
 
   const systemHelpName = useSelector(
     (state: AppState) => state.system.helpName,
@@ -193,7 +199,13 @@ const HelpMenu = () => {
   useOutsideAlerter(wrapperRef);
 
   useEffect(() => {
-    if (!helpMenuOpen || helpTabName !== "blog" || blogFeedLoaded.current) {
+    if (!helpMenuOpen || helpTabName !== "blog") {
+      return;
+    }
+
+    const cached = blogCache.current[language];
+    if (cached) {
+      setHelpItemsBlog(cached);
       return;
     }
 
@@ -201,14 +213,17 @@ const HelpMenu = () => {
 
     const loadBlogFeed = async () => {
       try {
-        const response = await fetch(SILO_BLOG_FEED_URL, {
-          headers: {
-            Accept:
-              "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8",
+        const response = await fetch(
+          localizeUrl(SILO_BLOG_FEED_URL, language),
+          {
+            headers: {
+              Accept:
+                "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8",
+            },
+            credentials: "omit",
+            signal: abortController.signal,
           },
-          credentials: "omit",
-          signal: abortController.signal,
-        });
+        );
 
         if (!response.ok) {
           return;
@@ -216,9 +231,9 @@ const HelpMenu = () => {
 
         const blogItems = parseSiloBlogFeed(await response.text());
         if (blogItems.length > 0) {
+          blogCache.current[language] = blogItems;
           setHelpItemsBlog(blogItems);
         }
-        blogFeedLoaded.current = true;
       } catch {
         // Keep the local SILO Blog fallback when the remote feed is unavailable.
       }
@@ -227,7 +242,7 @@ const HelpMenu = () => {
     void loadBlogFeed();
 
     return () => abortController.abort();
-  }, [helpMenuOpen, helpTabName]);
+  }, [helpMenuOpen, helpTabName, language]);
 
   useEffect(() => {
     let docsTotal = 0;
@@ -298,7 +313,7 @@ const HelpMenu = () => {
       {headerDocs && (
         <div style={{ paddingLeft: 16, paddingRight: 16 }}>
           <div>
-            <ReactMarkdown>{`${headerDocs}`}</ReactMarkdown>
+            <ReactMarkdown>{t(headerDocs)}</ReactMarkdown>
           </div>
           <div style={{ borderBottom: "1px solid #dedede" }} />
         </div>
@@ -315,8 +330,8 @@ const HelpMenu = () => {
       <div style={{ padding: 16 }}>
         <MoreLink
           LeadingIcon={DocumentationIcon}
-          text={"Visit SILO Documentation"}
-          link={"https://silo.pgsty.com/docs/"}
+          text={t("Visit SILO Documentation")}
+          link={localize("https://silo.pgsty.com/docs/")}
           color={"#007FA8"}
         />
       </div>
@@ -325,13 +340,14 @@ const HelpMenu = () => {
   const helpContentVideo = (
     <Box className={"helpContainer"}>
       <VideoNotice>
-        SILO does not yet maintain a native video catalog. These links open
-        upstream MinIO compatibility material.
+        {t(
+          "SILO does not yet maintain a native video catalog. These links open upstream MinIO compatibility material.",
+        )}
       </VideoNotice>
       {headerVideo && (
         <Fragment>
           <div style={{ paddingLeft: 16, paddingRight: 16 }}>
-            <ReactMarkdown>{`${headerVideo}`}</ReactMarkdown>
+            <ReactMarkdown>{t(headerVideo)}</ReactMarkdown>
           </div>
           <div style={{ borderBottom: "1px solid #dedede" }} />
         </Fragment>
@@ -348,7 +364,7 @@ const HelpMenu = () => {
       <div style={{ padding: 16 }}>
         <MoreLink
           LeadingIcon={FileVideoIcon}
-          text={"Visit MinIO Videos (upstream)"}
+          text={t("Visit MinIO Videos (upstream)")}
           link={"https://resources.min.io/l/library?contentType=video"}
           color={"#007FA8"}
         />
@@ -369,8 +385,8 @@ const HelpMenu = () => {
       <div style={{ padding: 16 }}>
         <MoreLink
           LeadingIcon={ReportIcon}
-          text={"Visit SILO Blog"}
-          link={SILO_BLOG_URL}
+          text={t("Visit SILO Blog")}
+          link={localize(SILO_BLOG_URL)}
           color={"#007FA8"}
         />
       </div>
@@ -382,21 +398,21 @@ const HelpMenu = () => {
 
     if (helpItems.length !== 0) {
       helpMenuElements.push({
-        tabConfig: { label: "Documentation", id: "docs" },
+        tabConfig: { label: t("Documentation"), id: "docs" },
         content: helpContent,
       });
     }
 
     if (helpItemsVideo.length !== 0) {
       helpMenuElements.push({
-        tabConfig: { label: "Video", id: "video" },
+        tabConfig: { label: t("Video"), id: "video" },
         content: helpContentVideo,
       });
     }
 
     if (helpItemsBlog.length !== 0) {
       helpMenuElements.push({
-        tabConfig: { label: "Blog", id: "blog" },
+        tabConfig: { label: t("Blog"), id: "blog" },
         content: helpContentBlog,
       });
     }
@@ -422,7 +438,7 @@ const HelpMenu = () => {
             optionsEndComponent={
               <Box sx={{ marginRight: 15 }}>
                 <IconButton
-                  aria-label="Close help"
+                  aria-label={t("Close help")}
                   onClick={() => {
                     setHelpMenuOpen(false);
                   }}
@@ -439,7 +455,7 @@ const HelpMenu = () => {
       )}
       <Button
         aria-expanded={helpMenuOpen}
-        aria-label="Open help"
+        aria-label={t("Open help")}
         id={systemHelpName ?? "help_button"}
         icon={<HelpIcon />}
         onClick={toggleHelpMenu}

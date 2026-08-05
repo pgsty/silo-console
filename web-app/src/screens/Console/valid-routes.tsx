@@ -91,9 +91,21 @@ const validateItem = (item: IMenuItem) => {
   return false;
 };
 
-export const validRoutes = (features: string[] | null | undefined) => {
+export const validRoutes = (
+  features: string[] | null | undefined,
+  t: (text: string) => string = (text) => text,
+) => {
   const ldapIsEnabled = (features && features.includes("ldap-idp")) || false;
   const kmsIsEnabled = (features && features.includes("kms")) || false;
+
+  // Menu entries keep their English literals; display strings are translated
+  // on the way out so callers re-render in the active language.
+  const translateItem = (item: IMenuItem): IMenuItem => ({
+    ...item,
+    name: item.name ? t(item.name) : item.name,
+    group: item.group ? t(item.group) : item.group,
+    children: item.children ? item.children.map(translateItem) : item.children,
+  });
 
   let consoleMenus: IMenuItem[] = [
     {
@@ -268,12 +280,14 @@ export const validRoutes = (features: string[] | null | undefined) => {
     },
   ];
 
-  return consoleMenus.reduce((acc: IMenuItem[], item) => {
-    const validation = validateItem(item);
-    if (!validation) {
-      return [...acc];
-    }
+  return consoleMenus
+    .reduce((acc: IMenuItem[], item) => {
+      const validation = validateItem(item);
+      if (!validation) {
+        return [...acc];
+      }
 
-    return [...acc, validation];
-  }, []);
+      return [...acc, validation];
+    }, [])
+    .map(translateItem);
 };

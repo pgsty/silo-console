@@ -42,9 +42,11 @@ import { AppState, useAppDispatch } from "../../store";
 import { useSelector } from "react-redux";
 import { doLoginAsync } from "./loginThunks";
 import { RedirectRule } from "api/consoleApi";
+import { useT } from "i18n";
 
 const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [ssoOptionsOpen, ssoOptionsSetOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = React.useState<
@@ -74,7 +76,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
 
   let selectOptions = [
     {
-      label: useSTS ? "Use Credentials" : "Use STS",
+      label: useSTS ? t("Use Credentials") : t("Use STS"),
       value: useSTS ? "use-sts-cred" : "use-sts",
     },
   ];
@@ -88,8 +90,8 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
     }));
 
     selectOptions = [
-      { label: "Use Credentials", value: "use-sts-cred" },
-      { label: "Use STS", value: "use-sts" },
+      { label: t("Use Credentials"), value: "use-sts-cred" },
+      { label: t("Use STS"), value: "use-sts" },
     ];
   }
 
@@ -134,7 +136,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                         ? ` - ${redirectRules[0].serviceType}`
                         : ""
                     }`
-                  : `Login with SSO`
+                  : t("Login with SSO")
               }
               fullWidth
               sx={{ height: 50 }}
@@ -180,7 +182,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                   color="ok"
                   icon={<IdentitiesMenuIcon />}
                   id="ldap-enabled-tag"
-                  label="LDAP Authentication"
+                  label={t("LDAP Authentication")}
                   variant="outlined"
                   sx={{
                     marginBottom: 14,
@@ -195,7 +197,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     dispatch(setAccessKey(e.target.value))
                   }
-                  placeholder={useSTS ? "STS Username" : "Username"}
+                  placeholder={useSTS ? t("STS Username") : t("Username")}
                   name="accessKey"
                   autoComplete="username"
                   disabled={loginSending}
@@ -214,7 +216,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                   id="secretKey"
                   autoComplete="current-password"
                   disabled={loginSending}
-                  placeholder={useSTS ? "STS Secret" : "Password"}
+                  placeholder={useSTS ? t("STS Secret") : t("Password")}
                   startIcon={<LockFilledIcon />}
                 />
               </Grid>
@@ -227,7 +229,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       dispatch(setSTS(e.target.value))
                     }
-                    placeholder={"STS Token"}
+                    placeholder={t("STS Token")}
                     name="STS"
                     autoComplete="sts"
                     disabled={loginSending}
@@ -256,7 +258,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
                     (accessKey === "" || secretKey === "" || sts === "")) ||
                   loginSending
                 }
-                label={"Login"}
+                label={t("Login")}
                 sx={{
                   margin: "30px 0px 8px",
                   height: 40,
@@ -282,7 +284,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
           <Select
             id="alternativeMethods"
             name="alternativeMethods"
-            fixedLabel="Other Authentication Methods"
+            fixedLabel={t("Other Authentication Methods")}
             options={selectOptions}
             onChange={extraActionSelector}
             value={""}

@@ -32,18 +32,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import UserMenu from "./UserMenu";
 import { SILO_EMBLEM_URL, SILO_WORDMARK_URL } from "../../../common/SiloBrand";
+import { useLocalizedLink, useT } from "i18n";
 
 const MenuWrapper = () => {
   const dispatch = useAppDispatch();
   const features = useSelector(selFeatures);
   const navigate = useNavigate();
   const { pathname = "" } = useLocation();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const sidebarOpen = useSelector(
     (state: AppState) => state.system.sidebarOpen,
   );
 
-  const allowedMenuItems = validRoutes(features);
+  const allowedMenuItems = validRoutes(features, t);
 
   useLayoutEffect(() => {
     const menuToggle = document.querySelector<HTMLElement>(
@@ -53,7 +56,7 @@ const MenuWrapper = () => {
       return;
     }
 
-    const toggleLabel = sidebarOpen ? "Collapse menu" : "Expand menu";
+    const toggleLabel = sidebarOpen ? t("Collapse menu") : t("Expand menu");
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -70,7 +73,7 @@ const MenuWrapper = () => {
     return () => {
       menuToggle.removeEventListener("keydown", handleKeyDown);
     };
-  }, [sidebarOpen]);
+  }, [sidebarOpen, t]);
 
   return (
     <Menu
@@ -190,14 +193,14 @@ const MenuWrapper = () => {
         >
           <MenuDivider />
           <MenuItem
-            name={"Documentation"}
+            name={t("Documentation")}
             icon={<DocumentationIcon />}
-            path={"https://silo.pgsty.com/docs/"}
+            path={localize("https://silo.pgsty.com/docs/")}
             visibleTooltip={!sidebarOpen}
             id="menu-documentation"
           />
           <MenuItem
-            name={"License"}
+            name={t("License")}
             icon={<LicenseIcon />}
             path={IAM_PAGES.LICENSE}
             onClick={() => navigate(IAM_PAGES.LICENSE)}

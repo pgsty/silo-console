@@ -19,6 +19,7 @@ import get from "lodash/get";
 import styled from "styled-components";
 import { DocItem } from "./HelpMenu.types";
 import MoreLink from "../../common/MoreLink";
+import { useLocalizedLink, useT } from "i18n";
 
 interface IHelpItemProps {
   item: DocItem;
@@ -50,13 +51,27 @@ const HelpDescription = styled.div({
 });
 
 const HelpItem = ({ item }: IHelpItemProps) => {
+  // Every help entry (helpTopics.json, RSS items, fallbacks) renders through
+  // here, so translation and URL localization apply in one place. Untranslated
+  // titles/bodies (e.g. live feed content) pass through unchanged.
+  const t = useT();
+  const localize = useLocalizedLink();
+
   return (
     <HelpItemContainer>
-      <HelpTitle href={item.url} target="_blank" rel="noopener noreferrer">
-        {item.title}
+      <HelpTitle
+        href={localize(item.url)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t(item.title)}
       </HelpTitle>
-      <HelpDescription>{item.body}</HelpDescription>
-      <MoreLink text={"Learn more"} link={item.url} color={"#3874A6"} />
+      <HelpDescription>{t(item.body)}</HelpDescription>
+      <MoreLink
+        text={t("Learn more")}
+        link={localize(item.url)}
+        color={"#3874A6"}
+      />
     </HelpItemContainer>
   );
 };

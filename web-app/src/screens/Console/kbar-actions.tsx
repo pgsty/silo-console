@@ -24,16 +24,20 @@ export const routesAsKbarActions = (
   buckets: Bucket[],
   navigate: (url: string) => void,
   features?: string[],
+  t: (text: string) => string = (text) => text,
 ) => {
   const initialActions: Action[] = [];
+  // Untranslated routes: names display through t() below while the English
+  // originals stay searchable as keywords.
   const allowedMenuItems = validRoutes(features);
   for (const i of allowedMenuItems) {
     if (i.children && i.children.length > 0) {
       for (const childI of i.children) {
         const a: Action = {
           id: `${childI.id}`,
-          name: childI.name,
-          section: i.name,
+          name: t(childI.name),
+          keywords: childI.name,
+          section: t(i.name),
           perform: () => navigate(`${childI.path}`),
           icon: childI.icon,
         };
@@ -42,8 +46,9 @@ export const routesAsKbarActions = (
     } else {
       const a: Action = {
         id: `${i.id}`,
-        name: i.name,
-        section: "Navigation",
+        name: t(i.name),
+        keywords: i.name,
+        section: t("Navigation"),
         perform: () => navigate(`${i.path}`),
         icon: i.icon,
       };
@@ -54,8 +59,9 @@ export const routesAsKbarActions = (
   // Add additional actions
   const a: Action = {
     id: `create-bucket`,
-    name: "Create Bucket",
-    section: "Buckets",
+    name: t("Create Bucket"),
+    keywords: "Create Bucket",
+    section: t("Buckets"),
     perform: () => navigate(IAM_PAGES.ADD_BUCKETS),
     icon: <BucketsIcon />,
   };
@@ -66,7 +72,7 @@ export const routesAsKbarActions = (
       initialActions.push({
         id: buck.name,
         name: buck.name,
-        section: "List of Buckets",
+        section: t("List of Buckets"),
         perform: () => {
           navigate(`/browser/${buck.name}`);
         },

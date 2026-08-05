@@ -21,9 +21,11 @@ import { useTheme } from "styled-components";
 import { AppState, useAppDispatch } from "../../../../store";
 import { menuOpen, setFilterBucket } from "../../../../systemSlice";
 import { useSelector } from "react-redux";
+import { useT } from "i18n";
 
 const BucketFiltering = () => {
   const theme = useTheme();
+  const t = useT();
   const ref = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
   const bucketFilter = useSelector(
@@ -42,7 +44,7 @@ const BucketFiltering = () => {
     <>
       {!sidebarOpen ? (
         <MenuItem
-          name={"Filter Bucket"}
+          name={t("Filter Bucket")}
           icon={<SearchIcon />}
           onClick={expandSearchBox}
           id={`filter-buckets-expand`}
@@ -61,7 +63,7 @@ const BucketFiltering = () => {
       >
         <InputBox
           id={"filter-buckets"}
-          placeholder={"Filter Buckets"}
+          placeholder={t("Filter Buckets")}
           sx={{
             "& input": {
               backgroundColor: "rgba(255,255,255,0.1)",

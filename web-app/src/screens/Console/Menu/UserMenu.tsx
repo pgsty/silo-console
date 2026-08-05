@@ -16,12 +16,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import BucketsListing from "./Listing/BucketsListing";
 import { setAddBucketOpen } from "../Buckets/ListBuckets/AddBucket/addBucketsSlice";
+import { useT } from "i18n";
 
 const UserMenu = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
   const { pathname = "" } = useLocation();
+  const t = useT();
 
   const sidebarOpen = useSelector(
     (state: AppState) => state.system.sidebarOpen,
@@ -31,9 +33,9 @@ const UserMenu = () => {
 
   return (
     <>
-      <MenuSectionHeader label={"User"} />
+      <MenuSectionHeader label={t("User")} />
       <MenuItem
-        name={"Create Bucket"}
+        name={t("Create Bucket")}
         icon={<AddIcon />}
         onClick={() => dispatch(setAddBucketOpen(true))}
         visibleTooltip={!sidebarOpen}
@@ -41,7 +43,7 @@ const UserMenu = () => {
       />
       <MenuItem
         group="User"
-        name="Object Browser"
+        name={t("Object Browser")}
         id="object-browser"
         path={IAM_PAGES.OBJECT_BROWSER_VIEW}
         icon={<ObjectBrowserIcon />}
@@ -54,7 +56,7 @@ const UserMenu = () => {
         group="User"
         id="nav-accesskeys"
         path={IAM_PAGES.ACCOUNT}
-        name="Access Keys"
+        name={t("Access Keys")}
         icon={<AccountsMenuIcon />}
         currentPath={pathname}
         onClick={(path) => {
@@ -64,7 +66,7 @@ const UserMenu = () => {
       <Accordion
         title={
           <MenuItem
-            name={"Buckets"}
+            name={t("Buckets")}
             icon={<MultipleBucketsIcon />}
             visibleTooltip={!sidebarOpen}
             id="menu-bucket-list-button"

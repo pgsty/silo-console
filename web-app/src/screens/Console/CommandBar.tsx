@@ -37,6 +37,7 @@ import { useSelector } from "react-redux";
 import { selFeatures } from "./consoleSlice";
 import { Bucket } from "../../api/consoleApi";
 import { api } from "../../api";
+import { useLanguage, useT } from "i18n";
 
 const searchStyle = {
   padding: "12px 16px",
@@ -111,6 +112,8 @@ const KBarStateChangeMonitor = ({
 const CommandBar = () => {
   const features = useSelector(selFeatures);
   const navigate = useNavigate();
+  const t = useT();
+  const language = useLanguage();
 
   const [buckets, setBuckets] = useState<Bucket[]>([]);
 
@@ -131,9 +134,11 @@ const CommandBar = () => {
     buckets,
     navigate,
     features,
+    t,
   );
 
-  useRegisterActions(initialActions, [buckets, features]);
+  // language is a dependency so a toggle re-registers translated actions.
+  useRegisterActions(initialActions, [buckets, features, language]);
 
   //fetch buckets everytime the kbar is shown so that new buckets created elsewhere , within first page is also shown
 

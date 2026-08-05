@@ -12,6 +12,8 @@ import { SILO_COLORS, SiloBrand } from "../../common/SiloBrand";
 import WaveMeshCanvas from "./WaveMeshCanvas";
 import HelpMenu from "../Console/HelpMenu";
 import DarkModeActivator from "../Console/Common/DarkModeActivator/DarkModeActivator";
+import LanguageActivator from "../Console/Common/LanguageActivator/LanguageActivator";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 // Chakra Petch (the wordmark typeface) is registered app-wide in index.css.
 const displayFont =
@@ -274,70 +276,107 @@ interface LoginLayoutProps {
 }
 
 const LoginLayout = ({ children, footer }: LoginLayoutProps) => {
+  const t = useT();
+  const localize = useLocalizedLink();
+
   return (
     <LoginShell>
       <BrandPanel>
         <WaveMeshCanvas />
         <BrandContent>
           <div className="eyebrow">
-            Open-Source S3/MinIO-Compatible Object Storage
+            {t("Open-Source S3/MinIO-Compatible Object Storage")}
           </div>
           <h1>
-            Keep the <span className="accentSky">S3 Interface</span>
+            {interpolate(t("Keep the {s3}"), {
+              s3: <span className="accentSky">{t("S3 Interface")}</span>,
+            })}
             <br />
-            Own the <span className="accentCopper">Object Store</span>
+            {interpolate(t("Own the {store}"), {
+              store: <span className="accentCopper">{t("Object Store")}</span>,
+            })}
           </h1>
           <p className="descriptor">
-            Community maintained{" "}
-            <a
-              href="https://github.com/minio/minio"
-              target="_blank"
-              rel="noopener"
-            >
-              MinIO
-            </a>
-            , forked by{" "}
-            <a href="https://pigsty.io" target="_blank" rel="noopener">
-              Pigsty
-            </a>{" "}
-            ·{" "}
-            <a
-              href="https://silo.pgsty.com/about/license/"
-              target="_blank"
-              rel="noopener"
-            >
-              AGPLv3
-            </a>
+            {interpolate(
+              t("Community maintained {minio}, forked by {pigsty} · {agpl}"),
+              {
+                minio: (
+                  <a
+                    href="https://github.com/minio/minio"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    MinIO
+                  </a>
+                ),
+                pigsty: (
+                  <a
+                    href={localize("https://pigsty.io")}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Pigsty
+                  </a>
+                ),
+                agpl: (
+                  <a
+                    href={localize("https://silo.pgsty.com/about/license/")}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    AGPLv3
+                  </a>
+                ),
+              },
+            )}
           </p>
           <p className="intro">
-            A high-performance object store that runs on any infrastructure —
-            public cloud, private cloud, or bare metal. It powers data lakes,
-            AI/ML, and fast backup &amp; recovery, with erasure coding,
-            encryption, and replication built in.
+            {t(
+              "A high-performance object store that runs on any infrastructure — public cloud, private cloud, or bare metal. It powers data lakes, AI/ML, and fast backup & recovery, with erasure coding, encryption, and replication built in.",
+            )}
           </p>
           <div className="spacer" />
           <p className="legal">
             <span>
-              MinIO® is a registered trademark of{" "}
-              <a href="https://min.io" target="_blank" rel="noopener">
-                MinIO, Inc.
-              </a>
-              ; SILO incorporates{" "}
-              <a
-                href="https://github.com/minio/minio"
-                target="_blank"
-                rel="noopener"
-              >
-                MinIO source code
-              </a>
-              .
+              {interpolate(
+                t(
+                  "MinIO® is a registered trademark of {minioInc}; SILO incorporates {minioSource}.",
+                ),
+                {
+                  minioInc: (
+                    <a href="https://min.io" target="_blank" rel="noopener">
+                      MinIO, Inc.
+                    </a>
+                  ),
+                  minioSource: (
+                    <a
+                      href="https://github.com/minio/minio"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {t("MinIO source code")}
+                    </a>
+                  ),
+                },
+              )}
             </span>
             <span>
-              SILO is maintained by{" "}
-              <a href="https://pigsty.io" target="_blank" rel="noopener">
-                PIGSTY
-              </a>
-              , without MinIO affiliation, endorsement, or sponsorship.
+              {interpolate(
+                t(
+                  "SILO is maintained by {pigsty}, without MinIO affiliation, endorsement, or sponsorship.",
+                ),
+                {
+                  pigsty: (
+                    <a
+                      href={localize("https://pigsty.io")}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      PIGSTY
+                    </a>
+                  ),
+                },
+              )}
             </span>
           </p>
         </BrandContent>
@@ -346,19 +385,20 @@ const LoginLayout = ({ children, footer }: LoginLayoutProps) => {
         <div className="logoBand">
           <div className="headerActions">
             <HelpMenu />
+            <LanguageActivator />
             <DarkModeActivator />
           </div>
           <a
             className="logoLockup"
-            href="https://silo.pgsty.com"
+            href={localize("https://silo.pgsty.com")}
             target="_blank"
             rel="noopener"
-            aria-label="SILO website"
+            aria-label={t("SILO website")}
           >
             <SiloBrand variant="emblem" className="emblem" />
             <SiloBrand variant="wordmark" className="wordmark" />
           </a>
-          <span className="consoleTag">Object Storage Console</span>
+          <span className="consoleTag">{t("Object Storage Console")}</span>
         </div>
         <div className="formArea">
           <div className="formBox">{children}</div>

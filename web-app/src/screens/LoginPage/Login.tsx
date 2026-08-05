@@ -28,10 +28,13 @@ import { RedirectRule } from "api/consoleApi";
 import { redirectRules } from "./login.utils";
 import { setHelpName } from "../../systemSlice";
 import LoginLayout from "./LoginLayout";
+import { useLocalizedLink, useT } from "i18n";
 
 const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const loginStrategy = useSelector(
     (state: AppState) => state.login.loginStrategy,
@@ -93,9 +96,9 @@ const Login = () => {
             <Fragment>
               <Box>
                 <p style={{ textAlign: "center" }}>
-                  An error has occurred
+                  {t("An error has occurred")}
                   <br />
-                  The backend cannot be reached.
+                  {t("The backend cannot be reached.")}
                 </p>
               </Box>
               <div className={"buttonRetry"}>
@@ -107,7 +110,7 @@ const Login = () => {
                   iconLocation={"end"}
                   variant="regular"
                   id="retry"
-                  label={"Retry"}
+                  label={t("Retry")}
                 />
               </div>
             </Fragment>
@@ -136,12 +139,16 @@ const Login = () => {
               },
             }}
           >
-            <a href="https://silo.pgsty.com" target="_blank" rel="noopener">
+            <a
+              href={localize("https://silo.pgsty.com")}
+              target="_blank"
+              rel="noopener"
+            >
               SILO
             </a>
             <span className={"separator"}>|</span>
-            <a href={docsURL} target="_blank" rel="noopener">
-              Documentation
+            <a href={localize(docsURL)} target="_blank" rel="noopener">
+              {t("Documentation")}
             </a>
             <span className={"separator"}>|</span>
             <a
@@ -153,11 +160,11 @@ const Login = () => {
             </a>
             <span className={"separator"}>|</span>
             <a
-              href="https://silo.pgsty.com/download/"
+              href={localize("https://silo.pgsty.com/download/")}
               target="_blank"
               rel="noopener"
             >
-              Download
+              {t("Download")}
             </a>
           </Box>
         }
