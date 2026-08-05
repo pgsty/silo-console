@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, useState } from "react";
+import styled from "styled-components";
+import get from "lodash/get";
 import {
   Box,
   breakPoints,
@@ -54,6 +56,16 @@ interface IPrDashboard {
   apiPrefix?: string;
   usage: AdminInfoResponse | null;
 }
+
+const SectionHeader = styled.h2(({ theme }) => ({
+  margin: 0,
+  marginTop: 12,
+  paddingBottom: 10,
+  fontSize: 18,
+  fontWeight: 700,
+  color: get(theme, "fontColor", "#000"),
+  borderBottom: `1px solid ${get(theme, "borderColor", "#E2E2E2")}`,
+}));
 
 const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
   const dispatch = useAppDispatch();
@@ -305,9 +317,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
               />
             )}
             {panelInformation.length ? renderResourcesPanels() : null}
-            <h2 style={{ margin: 0, borderBottom: "1px solid #dedede" }}>
-              Advanced
-            </h2>
+            <SectionHeader>Advanced</SectionHeader>
             {panelInformation.length ? renderAdvancedResourcesPanels() : null}
           </RowPanelLayout>
         </Fragment>

@@ -25,22 +25,26 @@ import { IDashboardPanel } from "../types";
 const StateIndicator = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  marginTop: "5px",
-  gap: 8,
+  marginTop: 7,
+  gap: 6,
+  "& .min-icon": {
+    margin: 0,
+    width: 8,
+    height: 8,
+    flexShrink: 0,
+  },
   "&.online": {
     "& .min-icon": {
-      margin: 0,
       fill: get(theme, "signalColors.good", "#4CCB92"),
     },
   },
   "&.offline": {
     "& .min-icon": {
-      margin: 0,
       fill: get(theme, "signalColors.danger", "#C51B3F"),
     },
   },
   "& .indicatorText": {
-    color: get(theme, "mutedText", "#C51B3F"),
+    color: get(theme, "mutedText", "#87888d"),
     fontSize: 12,
   },
 }));

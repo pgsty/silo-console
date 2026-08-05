@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import get from "lodash/get";
 import { Box, breakPoints, Loader, ReportedUsageIcon } from "mds";
 import { Cell, Pie, PieChart } from "recharts";
@@ -33,51 +33,89 @@ import { setErrorSnackMessage } from "../../../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../../../store";
 
 const CapacityItemMain = styled.div(({ theme }) => ({
-  flex: 1,
   display: "flex",
-  alignItems: "center",
-  flexFlow: "row",
-  "& .usableLabel": {
-    color: get(theme, "mutedText", "#87888d"),
-    fontSize: "10px",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  gap: 6,
+  height: "100%",
+  width: "100%",
+  cursor: "default",
+  "& .cardHeader": {
     display: "flex",
-    flexFlow: "column",
     alignItems: "center",
-    textAlign: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
+  },
+  "& .capacityRow": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+    minWidth: 0,
   },
   "& .usedLabel": {
     color: get(theme, "mutedText", "#87888d"),
-    fontWeight: "bold",
-    fontSize: "14px",
+    fontWeight: 500,
+    fontSize: 12,
   },
   "& .totalUsed": {
     display: "flex",
+    alignItems: "baseline",
+    marginTop: 4,
     "& .value": {
-      fontSize: "50px",
-      fontFamily: "Inter",
+      fontSize: 40,
       fontWeight: 600,
-      alignSelf: "flex-end",
       lineHeight: 1,
+      color: get(theme, "fontColor", "#18181B"),
+      fontVariantNumeric: "tabular-nums",
+      [`@media (max-width: ${breakPoints.sm}px)`]: {
+        fontSize: 28,
+      },
     },
     "& .unit": {
       color: get(theme, "mutedText", "#87888d"),
-      fontWeight: "bold",
-      fontSize: "14px",
-      marginLeft: "12px",
-      alignSelf: "flex-end",
+      fontWeight: 500,
+      fontSize: 14,
+      marginLeft: 6,
     },
   },
   "& .ofUsed": {
-    marginTop: "5px",
+    marginTop: 4,
     "& .value": {
       color: get(theme, "mutedText", "#87888d"),
-      fontWeight: "bold",
-      fontSize: "14px",
-      textAlign: "right",
+      fontSize: 12,
     },
   },
-  [`@media (max-width: ${breakPoints.sm}px)`]: {
-    flexFlow: "column",
+  "& .donutCenter": {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    textAlign: "center",
+    "& .pct": {
+      fontSize: 12,
+      fontWeight: 600,
+      lineHeight: 1.1,
+      color: get(theme, "fontColor", "#18181B"),
+      fontVariantNumeric: "tabular-nums",
+    },
+    "& .pctLabel": {
+      fontSize: 9,
+      color: get(theme, "mutedText", "#87888d"),
+    },
   },
 }));
 
@@ -93,6 +131,7 @@ const CapacityItem = ({
   apiPrefix: string;
 }) => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
 
   const [totalUsableFree, setTotalUsableFree] = useState<number>(0);
@@ -171,7 +210,7 @@ const CapacityItem = ({
   const plotValues = [
     {
       value: totalUsableFree,
-      color: "#D6D6D6",
+      color: get(theme, "borderColor", "#E4E4E7"),
       label: "Usable Available Space",
     },
     {
@@ -182,73 +221,15 @@ const CapacityItem = ({
   ];
   return (
     <CapacityItemMain>
-      <Box
-        sx={{
-          fontSize: "16px",
-          fontWeight: 600,
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            alignSelf: "flex-start",
-          },
-        }}
-      >
-        Capacity
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>Capacity</Box>
+        {loading ? (
+          <Loader style={{ width: 16, height: 16 }} />
+        ) : (
+          <ReportedUsageIcon />
+        )}
       </Box>
-      <Box
-        sx={{
-          position: "relative",
-          width: 110,
-          height: 110,
-          marginLeft: "auto",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            marginLeft: "",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            display: "flex",
-            flexFlow: "column",
-            alignItems: "center",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            fontWeight: "bold",
-            fontSize: 12,
-          }}
-        >
-          {`${totalUsableFreeRatio}%`}
-          <br />
-          <Box className={"usableLabel"}>Free</Box>
-        </Box>
-        <PieChart width={110} height={110}>
-          <Pie
-            data={plotValues}
-            cx={"50%"}
-            cy={"50%"}
-            dataKey="value"
-            outerRadius={50}
-            innerRadius={40}
-            startAngle={-70}
-            endAngle={360}
-            animationDuration={1}
-          >
-            {plotValues.map((entry, index) => (
-              <Cell key={`cellCapacity-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-        </PieChart>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          marginLeft: "auto",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            marginLeft: "",
-          },
-        }}
-      >
+      <Box className={"capacityRow"}>
         <Box>
           <Box className={"usedLabel"}>Used:</Box>
           <Box className={"totalUsed"}>
@@ -259,22 +240,35 @@ const CapacityItem = ({
             <div className="value">Of: {niceBytesInt(totalUsable)}</div>
           </Box>
         </Box>
-
         <Box
           sx={{
-            marginLeft: "15px",
-            height: "100%",
-            display: "flex",
-            alignItems: "flex-start",
+            position: "relative",
+            width: 72,
+            height: 72,
+            flexShrink: 0,
           }}
         >
-          <Box>
-            {loading ? (
-              <Loader style={{ width: "26px", height: "26px" }} />
-            ) : (
-              <ReportedUsageIcon />
-            )}
+          <Box className={"donutCenter"}>
+            <div className="pct">{`${totalUsableFreeRatio}%`}</div>
+            <div className="pctLabel">Free</div>
           </Box>
+          <PieChart width={72} height={72}>
+            <Pie
+              data={plotValues}
+              cx={"50%"}
+              cy={"50%"}
+              dataKey="value"
+              outerRadius={34}
+              innerRadius={27}
+              startAngle={-70}
+              endAngle={360}
+              animationDuration={1}
+            >
+              {plotValues.map((entry, index) => (
+                <Cell key={`cellCapacity-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
         </Box>
       </Box>
     </CapacityItemMain>

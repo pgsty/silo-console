@@ -24,24 +24,40 @@ import NetworkGetItem from "./NetworkGetItem";
 import NetworkPutItem from "./NetworkPutItem";
 
 const NetworkItemBase = styled.div(({ theme }) => ({
-  flex: 1,
   display: "flex",
-  alignItems: "center",
-  flexFlow: "row",
-  gap: "15px",
-  "& .unitText": {
-    fontSize: "14px",
-    color: get(theme, "mutedText", "#87888d"),
-    marginLeft: "5px",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  gap: 12,
+  height: "100%",
+  width: "100%",
+  cursor: "default",
+  "& .cardHeader": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
   },
-  "& .unit": {
-    color: get(theme, "mutedText", "#87888d"),
-    fontSize: "18px",
-    marginLeft: "12px",
-    marginTop: "10px",
-  },
-  [`@media (max-width: ${breakPoints.sm}px)`]: {
-    flexFlow: "column",
+  "& .statRow": {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: 48,
+    minWidth: 0,
+    [`@media (max-width: ${breakPoints.lg}px)`]: {
+      gap: 32,
+    },
   },
 }));
 
@@ -100,74 +116,13 @@ const NetworkItem = ({
 
   return (
     <NetworkItemBase>
-      <Box
-        sx={{
-          fontSize: "16px",
-          fontWeight: 600,
-        }}
-      >
-        Network
-      </Box>
-      <Box
-        sx={{
-          position: "relative",
-          width: 110,
-          height: 110,
-          marginLeft: "auto",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            marginLeft: "0",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            display: "flex",
-            flexFlow: "column",
-            alignItems: "center",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            fontWeight: "bold",
-            fontSize: 12,
-          }}
-        >
-          {leftCmp}
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          marginLeft: "auto",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            marginLeft: "0",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            "& .value": { fontSize: "50px", fontFamily: "Inter" },
-          }}
-        >
-          {rightCmp}
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          marginLeft: "15px",
-          height: "100%",
-          display: "flex",
-          alignItems: "flex-start",
-          "& .min-icon": {
-            height: "15px",
-            width: "15px",
-          },
-        }}
-      >
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>Network</Box>
         <SpeedtestIcon />
+      </Box>
+      <Box className={"statRow"}>
+        {leftCmp}
+        {rightCmp}
       </Box>
     </NetworkItemBase>
   );

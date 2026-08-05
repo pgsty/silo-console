@@ -17,30 +17,44 @@
 import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
-import { Box, Loader, NetworkPutIcon } from "mds";
+import { Box, breakPoints, Loader, NetworkPutIcon } from "mds";
 
 const NetworkPutBase = styled.div(({ theme }) => ({
+  "& .valueText": {
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    minHeight: "1em",
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
+    whiteSpace: "nowrap",
+    "& .unitText": {
+      fontSize: 14,
+      fontWeight: 500,
+      marginLeft: 4,
+      color: get(theme, "mutedText", "#87888d"),
+    },
+    [`@media (max-width: ${breakPoints.sm}px)`]: {
+      fontSize: 28,
+    },
+  },
   "& .putLabel": {
     display: "flex",
-    gap: 10,
+    gap: 6,
     alignItems: "center",
-    marginTop: "10px",
+    marginTop: 7,
 
     "& .min-icon": {
-      height: 15,
-      width: 15,
+      height: 14,
+      width: 14,
+      flexShrink: 0,
       fill: get(theme, "signalColors.info", "#2781B0"),
     },
 
     "& .putText": {
-      fontSize: "18px",
+      fontSize: 12,
+      fontWeight: 500,
       color: get(theme, "mutedText", "#87888d"),
-      fontWeight: "bold",
-    },
-    "& .valueText": {
-      fontSize: 50,
-      fontFamily: "Inter",
-      fontWeight: 600,
     },
   },
 }));
@@ -56,15 +70,15 @@ const NetworkPutItem = ({
 }) => {
   return (
     <NetworkPutBase>
+      <Box className={"valueText"}>{value}</Box>
       <Box className={"putLabel"}>
         <Box className={"putText"}>PUT</Box>
         {loading ? (
-          <Loader style={{ width: "15px", height: "15px" }} />
+          <Loader style={{ width: "14px", height: "14px" }} />
         ) : (
           <NetworkPutIcon />
         )}
       </Box>
-      <Box className={"valueText"}>{value}</Box>
     </NetworkPutBase>
   );
 };

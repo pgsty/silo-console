@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import get from "lodash/get";
 import { useSelector } from "react-redux";
 import {
@@ -27,7 +27,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Box, breakPoints, Grid, Loader } from "mds";
+import { Box, breakPoints, Loader } from "mds";
 import { ILinearGraphConfiguration } from "./types";
 import { widgetCommon } from "../../../Common/FormComponents/common/styleLibrary";
 import { IDashboardPanel } from "../types";
@@ -57,22 +57,26 @@ const LinearGraphMain = styled.div(({ theme }) => ({
   ...widgetCommon(theme),
   "& .chartCont": {
     position: "relative",
-    height: 140,
-    width: "100%",
+    flex: "1 1 auto",
+    minWidth: 0,
+    height: 200,
   },
   "& .legendChart": {
     display: "flex",
     flexDirection: "column",
-    flex: "0 1 auto",
-    maxHeight: 130,
+    flex: "0 0 auto",
+    maxWidth: "44%",
+    // 8 whole 22px rows + 7 row gaps; keeps the overflow cutoff on a row boundary
+    maxHeight: 8 * 22 + 7 * 2,
     margin: 0,
     overflowY: "auto",
+    scrollbarWidth: "thin",
     position: "relative",
-    textAlign: "center",
-    width: "100%",
     justifyContent: "flex-start",
+    gap: 2,
+    paddingLeft: 12,
     color: get(theme, "mutedText", "#87888d"),
-    fontWeight: "bold",
+    fontWeight: 400,
     fontSize: 12,
     [`@media (max-width: ${breakPoints.md}px)`]: {
       display: "none",
@@ -82,7 +86,7 @@ const LinearGraphMain = styled.div(({ theme }) => ({
     width: 40,
     height: 40,
     textAlign: "center",
-    margin: "15px auto",
+    margin: "80px auto",
   },
 }));
 
@@ -99,6 +103,7 @@ const LinearGraphWidget = ({
   zoomActivated = false,
 }: ILinearGraphWidget) => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
   const [hover, setHover] = useState<boolean>(false);
   const [data, setData] = useState<object[]>([]);
@@ -217,26 +222,12 @@ const LinearGraphWidget = ({
         onMouseLeave={onStopHover}
       >
         {!zoomActivated && (
-          <Grid container>
-            <Grid item xs={10} sx={{ alignItems: "start" }}>
-              <Box className={"titleContainer"}>{title}</Box>
-            </Grid>
-            <Grid
-              item
-              xs={1}
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignContent: "flex-end",
-              }}
-            >
-              {hover && <ExpandGraphLink panelItem={panelItem} />}
-            </Grid>
-            <Grid
-              item
-              xs={1}
-              sx={{ display: "flex", justifyContent: "flex-end" }}
-            >
+          <Box className={"widgetHeader"}>
+            <Box className={"titleContainer"}>{title}</Box>
+            <Box className={"widgetActions"}>
+              <Box className={"actionSlot"}>
+                {hover && <ExpandGraphLink panelItem={panelItem} />}
+              </Box>
               {componentRef !== null && (
                 <DownloadWidgetDataButton
                   title={title}
@@ -244,8 +235,8 @@ const LinearGraphWidget = ({
                   data={csvData}
                 />
               )}
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         )}
         <div ref={componentRef}>
           <Box
@@ -253,23 +244,21 @@ const LinearGraphWidget = ({
               zoomActivated
                 ? { flexDirection: "column" }
                 : {
-                    height: "100%",
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    [`@media (max-width: ${breakPoints.md}px)`]: {
-                      gridTemplateColumns: "1fr",
-                    },
+                    display: "flex",
+                    alignItems: "stretch",
                   }
             }
-            style={areaWidget ? { gridTemplateColumns: "1fr" } : {}}
           >
             {loading && <Loader className={"loadingAlign"} />}
-            {!loading && (
+            {!loading && data.length === 0 && (
+              <Box className={"emptyStateContainer"}>No data available</Box>
+            )}
+            {!loading && data.length > 0 && (
               <Fragment>
                 <Box className={zoomActivated ? "zoomChartCont" : "chartCont"}>
                   <ResponsiveContainer
                     width="99%"
-                    initialDimension={{ width: 820, height: 140 }}
+                    initialDimension={{ width: 820, height: 200 }}
                   >
                     <AreaChart
                       data={data}
@@ -296,24 +285,23 @@ const LinearGraphWidget = ({
                             />
                             <stop
                               offset="100%"
-                              stopColor="#ffffff"
+                              stopColor={get(theme, "bgColor", "#ffffff")}
                               stopOpacity={0}
                             />
 
                             <stop
                               offset="95%"
-                              stopColor="#ffffff"
+                              stopColor={get(theme, "bgColor", "#ffffff")}
                               stopOpacity={0.8}
                             />
                           </linearGradient>
                         </defs>
                       )}
                       <CartesianGrid
-                        strokeDasharray={areaWidget ? "2 2" : "5 5"}
                         strokeWidth={1}
-                        strokeOpacity={1}
-                        stroke={"#eee0e0"}
-                        vertical={!areaWidget}
+                        strokeOpacity={0.6}
+                        stroke={get(theme, "borderColor", "#E2E2E2")}
+                        vertical={false}
                       />
                       <XAxis
                         dataKey="name"
@@ -322,12 +310,12 @@ const LinearGraphWidget = ({
                         }
                         interval={intervalCount}
                         tick={{
-                          fontSize: "68%",
-                          fontWeight: "normal",
-                          color: "#404143",
+                          fontSize: 11,
+                          fill: get(theme, "mutedText", "#87888d"),
                         }}
+                        tickLine={false}
                         tickCount={10}
-                        stroke={"#082045"}
+                        stroke={get(theme, "borderColor", "#E2E2E2")}
                       />
                       <YAxis
                         type={"number"}
@@ -335,11 +323,11 @@ const LinearGraphWidget = ({
                         hide={hideYAxis}
                         tickFormatter={(value: any) => yAxisFormatter(value)}
                         tick={{
-                          fontSize: "68%",
-                          fontWeight: "normal",
-                          color: "#404143",
+                          fontSize: 11,
+                          fill: get(theme, "mutedText", "#87888d"),
                         }}
-                        stroke={"#082045"}
+                        tickLine={false}
+                        stroke={get(theme, "borderColor", "#E2E2E2")}
                       />
                       {linearConfiguration.map((section, index) => {
                         return (
@@ -353,7 +341,7 @@ const LinearGraphWidget = ({
                               areaWidget ? "url(#colorUv)" : section.fillColor
                             }
                             fillOpacity={areaWidget ? 0.65 : 0}
-                            strokeWidth={!areaWidget ? 3 : 0}
+                            strokeWidth={!areaWidget ? 2 : 0}
                             strokeLinecap={"round"}
                             dot={areaWidget ? <CustomizedDot /> : false}
                           />
@@ -396,7 +384,10 @@ const LinearGraphWidget = ({
                               className={"colorContainer"}
                               style={{ backgroundColor: section.lineColor }}
                             />
-                            <Box className={"legendLabel"}>
+                            <Box
+                              className={"legendLabel"}
+                              title={section.keyLabel}
+                            >
                               {section.keyLabel}
                             </Box>
                           </Box>

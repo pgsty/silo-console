@@ -15,8 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import { Box, breakPoints, Grid, Loader } from "mds";
+import styled, { useTheme } from "styled-components";
+import get from "lodash/get";
+import { Box, breakPoints, Loader } from "mds";
 import { useSelector } from "react-redux";
 import {
   Bar,
@@ -50,21 +51,22 @@ interface IBarChartWidget {
 
 const BarChartMain = styled.div(({ theme }) => ({
   ...widgetCommon(theme),
-  loadingAlign: {
+  "& .loadingAlign": {
     width: "100%",
-    paddingTop: "15px",
-    textAlign: "center",
-    margin: "auto",
+    height: 200,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 }));
 
-const CustomizedAxisTick = ({ y, payload }: any) => {
+const CustomizedAxisTick = ({ y, payload, fill }: any) => {
   return (
     <text
       width={50}
-      fontSize={"69.7%"}
+      fontSize={11}
       textAnchor="start"
-      fill="#333"
+      fill={fill || "#333"}
       transform={`translate(5,${y})`}
       fontWeight={400}
       dy={3}
@@ -83,6 +85,7 @@ const BarChartWidget = ({
   zoomActivated = false,
 }: IBarChartWidget) => {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
   const [result, setResult] = useState<IDashboardPanel | null>(null);
@@ -183,104 +186,105 @@ const BarChartWidget = ({
         onMouseLeave={onStopHover}
       >
         {!zoomActivated && (
-          <Grid container>
-            <Grid
-              item
-              xs={10}
-              sx={{ alignItems: "start", justifyItems: "start" }}
-            >
-              <div className={"titleContainer"}>{title}</div>
-            </Grid>
-            <Grid
-              item
-              xs={1}
-              sx={{ display: "flex", justifyContent: "flex-end" }}
-            >
-              {hover && <ExpandGraphLink panelItem={panelItem} />}
-            </Grid>
-            <Grid
-              item
-              xs={1}
-              sx={{ display: "flex", justifyContent: "flex-end" }}
-            >
+          <Box className={"widgetHeader"}>
+            <Box className={"titleContainer"}>{title}</Box>
+            <Box className={"widgetActions"}>
+              <Box className={"actionSlot"}>
+                {hover && <ExpandGraphLink panelItem={panelItem} />}
+              </Box>
               <DownloadWidgetDataButton
                 title={title}
                 componentRef={componentRef}
                 data={data}
               />
-            </Grid>
-          </Grid>
-        )}
-        {loading && (
-          <Box className={"loadingAlign"}>
-            <Loader />
+            </Box>
           </Box>
         )}
-        {!loading && (
-          <div
-            ref={componentRef as React.RefObject<HTMLDivElement>}
-            className={zoomActivated ? "zoomChartCont" : "contentContainer"}
-          >
-            <ResponsiveContainer
-              width="99%"
-              initialDimension={{ width: 820, height: 140 }}
+        <div ref={componentRef as React.RefObject<HTMLDivElement>}>
+          {loading && (
+            <Box className={"loadingAlign"}>
+              <Loader />
+            </Box>
+          )}
+          {!loading && data.length === 0 && (
+            <Box className={"emptyStateContainer"}>No data available</Box>
+          )}
+          {!loading && data.length > 0 && (
+            <div
+              className={zoomActivated ? "zoomChartCont" : "contentContainer"}
             >
-              <BarChart
-                data={data as object[]}
-                layout={"vertical"}
-                barCategoryGap={1}
+              <ResponsiveContainer
+                width="99%"
+                initialDimension={{ width: 820, height: 200 }}
               >
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  interval={0}
-                  tick={<CustomizedAxisTick />}
-                  tickLine={false}
-                  axisLine={false}
-                  width={150}
-                  hide={!biggerThanMd}
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: 100,
-                  }}
-                />
-                {barChartConfiguration.map((bar) => (
-                  <Bar
-                    key={`bar-${bar.dataKey}`}
-                    dataKey={bar.dataKey}
-                    fill={bar.color}
-                    background={bar.background}
-                    barSize={zoomActivated ? 25 : 12}
-                  >
-                    {barChartConfiguration.length === 1 ? (
-                      <Fragment>
-                        {data.map((_: any, index: number) => (
-                          <Cell
-                            key={`chart-bar-${index.toString()}`}
-                            fill={
-                              index === greatestIndex
-                                ? bar.greatestColor
-                                : bar.color
-                            }
-                          />
-                        ))}
-                      </Fragment>
-                    ) : null}
-                  </Bar>
-                ))}
-                <Tooltip
-                  cursor={{ fill: "rgba(255, 255, 255, 0.3)" }}
-                  content={
-                    <BarChartTooltip
-                      barChartConfiguration={barChartConfiguration}
-                    />
-                  }
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+                <BarChart
+                  data={data as object[]}
+                  layout={"vertical"}
+                  barCategoryGap={1}
+                >
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    interval={0}
+                    tick={
+                      <CustomizedAxisTick
+                        fill={get(theme, "mutedText", "#87888d")}
+                      />
+                    }
+                    tickLine={false}
+                    axisLine={false}
+                    width={150}
+                    hide={!biggerThanMd}
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 100,
+                    }}
+                  />
+                  {barChartConfiguration.map((bar) => (
+                    <Bar
+                      key={`bar-${bar.dataKey}`}
+                      dataKey={bar.dataKey}
+                      fill={bar.color}
+                      background={{
+                        ...bar.background,
+                        fill: get(theme, "borderColor", "#E2E2E2"),
+                        fillOpacity: 0.35,
+                      }}
+                      barSize={zoomActivated ? 25 : 12}
+                    >
+                      {barChartConfiguration.length === 1 ? (
+                        <Fragment>
+                          {data.map((_: any, index: number) => (
+                            <Cell
+                              key={`chart-bar-${index.toString()}`}
+                              fill={
+                                index === greatestIndex
+                                  ? bar.greatestColor
+                                  : bar.color
+                              }
+                            />
+                          ))}
+                        </Fragment>
+                      ) : null}
+                    </Bar>
+                  ))}
+                  <Tooltip
+                    cursor={{
+                      fill: get(theme, "boxBackground", "#FBFAFA"),
+                      fillOpacity: 0.6,
+                    }}
+                    content={
+                      <BarChartTooltip
+                        barChartConfiguration={barChartConfiguration}
+                      />
+                    }
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
       </Box>
     </BarChartMain>
   );

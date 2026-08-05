@@ -32,13 +32,14 @@ export const summaryPanelsLayout: DLayoutRowProps[] = [
     sx: {
       minWidth: 0,
       display: "grid",
-      gap: "30px",
+      gap: 20,
       gridTemplateColumns: "1fr 1fr 1fr 1fr",
+      // below xl the dual stat cards hit min-content and distort the tracks
+      [`@media (max-width: ${breakPoints.xl}px)`]: {
+        gridTemplateColumns: "1fr 1fr",
+      },
       [`@media (max-width: ${breakPoints.sm}px)`]: {
         gridTemplateColumns: "1fr",
-      },
-      [`@media (max-width: ${breakPoints.md}px)`]: {
-        gridTemplateColumns: "1fr 1fr",
       },
     },
     columns: [
@@ -60,7 +61,7 @@ export const summaryPanelsLayout: DLayoutRowProps[] = [
     sx: {
       display: "grid",
       minWidth: 0, // important to avoid css grid blow out.
-      gap: "30px",
+      gap: 20,
       gridTemplateColumns: "1fr 1fr",
       [`@media (max-width: ${breakPoints.md}px)`]: {
         gridTemplateColumns: "1fr",
@@ -79,7 +80,7 @@ export const summaryPanelsLayout: DLayoutRowProps[] = [
     sx: {
       display: "grid",
       minWidth: 0,
-      gap: "30px",
+      gap: 14,
       gridTemplateColumns: "1fr 1fr 1fr",
       [`@media (max-width: ${breakPoints.md}px)`]: {
         gridTemplateColumns: "1fr",
@@ -101,7 +102,7 @@ export const summaryPanelsLayout: DLayoutRowProps[] = [
     sx: {
       display: "grid",
       minWidth: 0,
-      gap: "30px",
+      gap: 20,
       gridTemplateColumns: "1fr 1fr",
       [`@media (max-width: ${breakPoints.md}px)`]: {
         gridTemplateColumns: "1fr",
@@ -120,7 +121,7 @@ export const summaryPanelsLayout: DLayoutRowProps[] = [
     sx: {
       display: "grid",
       minWidth: 0,
-      gap: "30px",
+      gap: 20,
       gridTemplateColumns: "1fr 1fr",
       [`@media (max-width: ${breakPoints.md}px)`]: {
         gridTemplateColumns: "1fr",
@@ -141,8 +142,9 @@ export const trafficPanelsLayout: DLayoutRowProps[] = [
   {
     sx: {
       display: "grid",
+      minWidth: 0,
       gridTemplateColumns: "1fr",
-      gap: "30px",
+      gap: 20,
     },
     columns: [
       {
@@ -154,7 +156,20 @@ export const trafficPanelsLayout: DLayoutRowProps[] = [
     sx: {
       display: "grid",
       minWidth: 0,
-      gap: "30px",
+      gridTemplateColumns: "1fr",
+      gap: 20,
+    },
+    columns: [
+      {
+        componentId: 71,
+      },
+    ],
+  },
+  {
+    sx: {
+      display: "grid",
+      minWidth: 0,
+      gap: 20,
       gridTemplateColumns: "1fr 1fr",
       [`@media (max-width: ${breakPoints.md}px)`]: {
         gridTemplateColumns: "1fr",
@@ -162,30 +177,8 @@ export const trafficPanelsLayout: DLayoutRowProps[] = [
     },
     columns: [
       {
-        componentId: 71,
-        sx: {
-          flex: 1,
-          width: "50%",
-          flexShrink: 0,
-        },
-      },
-      {
         componentId: 17,
-        sx: {
-          flex: 1,
-          width: "50%",
-          flexShrink: 0,
-        },
       },
-    ],
-  },
-  {
-    sx: {
-      display: "grid",
-      gridTemplateColumns: "1fr",
-      gap: "30px",
-    },
-    columns: [
       {
         componentId: 73,
       },
@@ -199,7 +192,10 @@ export const resourcesPanelsLayout: DLayoutRowProps[] = [
       display: "grid",
       minWidth: 0,
       gridTemplateColumns: "1fr 1fr",
-      gap: "30px",
+      gap: 20,
+      [`@media (max-width: ${breakPoints.md}px)`]: {
+        gridTemplateColumns: "1fr",
+      },
     },
     columns: [
       {
@@ -215,7 +211,10 @@ export const resourcesPanelsLayout: DLayoutRowProps[] = [
       display: "grid",
       minWidth: 0,
       gridTemplateColumns: "1fr 1fr",
-      gap: "30px",
+      gap: 20,
+      [`@media (max-width: ${breakPoints.md}px)`]: {
+        gridTemplateColumns: "1fr",
+      },
     },
     columns: [
       {
@@ -233,7 +232,10 @@ export const resourcesPanelsLayoutAdvanced: DLayoutRowProps[] = [
       display: "grid",
       minWidth: 0,
       gridTemplateColumns: "1fr 1fr",
-      gap: "30px",
+      gap: 20,
+      [`@media (max-width: ${breakPoints.md}px)`]: {
+        gridTemplateColumns: "1fr",
+      },
     },
     columns: [
       {
@@ -252,7 +254,7 @@ export const RowPanelLayout = ({ children }: { children: any }) => {
       sx={{
         display: "grid",
         gridTemplateColumns: "1fr",
-        gap: "30px",
+        gap: 20,
       }}
     >
       {children}

@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment } from "react";
+import { useTheme } from "styled-components";
+import get from "lodash/get";
 import { Box, DownloadIcon, DropdownSelector } from "mds";
 import { exportComponentAsPNG } from "react-component-export-image";
 import { ErrorResponseHandler } from "../../../common/types";
@@ -32,6 +34,7 @@ const DownloadWidgetDataButton = ({
   componentRef,
   data,
 }: IDownloadWidgetDataButton) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openDownloadMenu = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -127,19 +130,23 @@ const DownloadWidgetDataButton = ({
             borderRadius: 4,
             cursor: "pointer",
             "& svg": {
-              color: "#D0D0D0",
+              color: get(theme, "mutedText", "#87888d"),
               width: 18,
               height: 18,
             },
             "&:hover": {
               "& svg": {
-                color: "#404143",
+                color: get(theme, "fontColor", "#404143"),
               },
             },
           },
         }}
       >
-        <button className={"download-icon"} onClick={handleClick}>
+        <button
+          className={"download-icon"}
+          onClick={handleClick}
+          aria-label={"Download widget data"}
+        >
           <DownloadIcon />
         </button>
         <DropdownSelector

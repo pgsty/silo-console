@@ -20,15 +20,45 @@ import get from "lodash/get";
 import { Box, breakPoints, Loader, Tooltip } from "mds";
 
 const StatCardMain = styled.div(({ theme }) => ({
-  fontFamily: "Inter,sans-serif",
-  color: get(theme, "signalColors.main", "#07193E"),
-  maxWidth: "300px",
   display: "flex",
-  marginLeft: "auto",
-  marginRight: "auto",
-  cursor: "default",
-  position: "relative",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  gap: 12,
+  height: "100%",
   width: "100%",
+  cursor: "default",
+  "& .cardHeader": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
+  },
+  "& .cardValue": {
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    [`@media (max-width: ${breakPoints.sm}px)`]: {
+      fontSize: 28,
+    },
+  },
 }));
 
 const NumericStatCard = ({
@@ -42,93 +72,17 @@ const NumericStatCard = ({
   icon?: any;
   loading?: boolean;
 }) => {
-  const getContent = () => {
-    return (
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          width: "100%",
-          padding: "0 8px 0 8px",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            padding: "0 10px 0 10px",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexFlow: "column",
-            marginTop: "12px",
-            zIndex: 10,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              fontSize: "16px",
-              fontWeight: 600,
-            }}
-          >
-            {label}
-          </Box>
-
-          <Tooltip tooltip={value} placement="bottom">
-            <Box
-              sx={{
-                fontWeight: 600,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: 187,
-                flexFlow: "row",
-                fontSize: 55,
-                [`@media (max-width: ${breakPoints.sm}px)`]: {
-                  fontSize: 35,
-                  maxWidth: 200,
-                  flexFlow: "column",
-                },
-                [`@media (max-width: ${breakPoints.md}px)`]: {
-                  fontSize: 35,
-                },
-                [`@media (max-width: ${breakPoints.lg}px)`]: {
-                  fontSize: 36,
-                },
-                [`@media (max-width: ${breakPoints.xl}px)`]: {
-                  fontSize: 50,
-                },
-              }}
-            >
-              {value}
-            </Box>
-          </Tooltip>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexFlow: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            marginTop: "8px",
-            maxWidth: "26px",
-            "& .min-icon": {
-              width: "16px",
-              height: "16px",
-            },
-          }}
-        >
-          {}
-          {loading ? (
-            <Loader style={{ width: "16px", height: "16px" }} />
-          ) : (
-            icon
-          )}
-        </Box>
+  return (
+    <StatCardMain>
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>{label}</Box>
+        {loading ? <Loader style={{ width: 16, height: 16 }} /> : icon}
       </Box>
-    );
-  };
-
-  return <StatCardMain>{getContent()}</StatCardMain>;
+      <Tooltip tooltip={value} placement="bottom">
+        <Box className={"cardValue"}>{value}</Box>
+      </Tooltip>
+    </StatCardMain>
+  );
 };
 
 export default NumericStatCard;

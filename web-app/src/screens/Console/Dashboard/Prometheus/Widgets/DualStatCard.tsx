@@ -20,17 +20,49 @@ import get from "lodash/get";
 import { Box, breakPoints } from "mds";
 
 const DualSTCardContent = styled.div(({ theme }) => ({
-  fontFamily: "Inter,sans-serif",
-  color: get(theme, "signalColors.main", "#07193E"),
-  maxWidth: "321px",
   display: "flex",
-  marginLeft: "auto",
-  marginRight: "auto",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  gap: 12,
+  height: "100%",
+  width: "100%",
   cursor: "default",
-  "& .stat-text": {
-    color: get(theme, "mutedText", "#87888d"),
-    fontSize: "12px",
-    marginTop: "8px",
+  "& .cardHeader": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    "& .cardLabel": {
+      fontSize: 13,
+      fontWeight: 500,
+      letterSpacing: "0.02em",
+      color: get(theme, "mutedText", "#71717A"),
+    },
+    "& .min-icon": {
+      width: 18,
+      height: 18,
+      flexShrink: 0,
+      color: get(theme, "secondaryText", "#52525B"),
+      fill: get(theme, "secondaryText", "#52525B"),
+    },
+  },
+  "& .statRow": {
+    display: "flex",
+    alignItems: "flex-end",
+    gap: 48,
+    [`@media (max-width: ${breakPoints.lg}px)`]: {
+      gap: 32,
+    },
+  },
+  "& .stat-value": {
+    fontSize: 40,
+    fontWeight: 600,
+    lineHeight: 1,
+    color: get(theme, "fontColor", "#18181B"),
+    fontVariantNumeric: "tabular-nums",
+    [`@media (max-width: ${breakPoints.sm}px)`]: {
+      fontSize: 28,
+    },
   },
 }));
 
@@ -45,88 +77,18 @@ const DualStatCard = ({
   icon: any;
   label: string;
 }) => {
-  const getContent = () => {
-    return (
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          padding: "0 8px 0 8px",
-          [`@media (max-width: ${breakPoints.sm}px)`]: {
-            padding: "0 10px 0 10px",
-          },
-        }}
-      >
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexFlow: "column",
-          }}
-        >
-          <Box
-            sx={{
-              fontSize: "16px",
-              fontWeight: 600,
-            }}
-          >
-            {label}
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-              justifyContent: "space-between",
-              paddingBottom: 0,
-              fontSize: 55,
-              flexFlow: "row",
-              fontWeight: 600,
-              "& .stat-value": {
-                textAlign: "center",
-                height: "50px",
-              },
-              "& .min-icon": {
-                marginRight: "8px",
-                marginTop: "8px",
-                height: "10px",
-                width: "10px",
-              },
-              [`@media (max-width: ${breakPoints.sm}px)`]: {
-                fontSize: 35,
-              },
-              [`@media (max-width: ${breakPoints.lg}px)`]: {
-                fontSize: 45,
-              },
-              [`@media (max-width: ${breakPoints.xl}px)`]: {
-                fontSize: 50,
-              },
-            }}
-          >
-            {statItemLeft}
-            {statItemRight}
-          </Box>
-        </Box>
-        <Box
-          sx={{
-            width: "20px",
-            height: "20px",
-            marginTop: "8px",
-            maxWidth: "26px",
-            "& .min-icon": {
-              width: "16px",
-              height: "16px",
-            },
-          }}
-        >
-          {icon}
-        </Box>
+  return (
+    <DualSTCardContent>
+      <Box className={"cardHeader"}>
+        <Box className={"cardLabel"}>{label}</Box>
+        {icon}
       </Box>
-    );
-  };
-
-  return <DualSTCardContent>{getContent()}</DualSTCardContent>;
+      <Box className={"statRow"}>
+        {statItemLeft}
+        {statItemRight}
+      </Box>
+    </DualSTCardContent>
+  );
 };
 
 export default DualStatCard;
