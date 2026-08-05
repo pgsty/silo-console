@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { ClientFunction } from "testcafe";
 import * as elements from "../utils/elements";
 
 // Using subpath defined in `MINIO_BROWSER_REDIRECT_URL`
@@ -25,4 +26,22 @@ fixture("Tests using subpath").page(appBaseUrl);
 test("RootUrl redirects to Login Page", async (t) => {
   const loginButtonExists = elements.loginButton.exists;
   await t.navigateTo(rootUrl).expect(loginButtonExists).ok().wait(2000);
+});
+
+test("Deep routes redirect once to Login Page", async (t) => {
+  const getRedirectState = ClientFunction(() => ({
+    pathname: window.location.pathname,
+    redirectPath: window.localStorage.getItem("redirect-path"),
+  }));
+
+  await t
+    .navigateTo(`${appBaseUrl}/browser`)
+    .expect(elements.loginButton.exists)
+    .ok()
+    .wait(1000)
+    .expect(getRedirectState())
+    .eql({
+      pathname: "/console/subpath/login",
+      redirectPath: "/browser",
+    });
 });

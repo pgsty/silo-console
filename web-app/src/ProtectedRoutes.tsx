@@ -46,7 +46,7 @@ const ProtectedRoute = ({ Component }: ProtectedRouteProps) => {
 
   const StorePathAndRedirect = () => {
     localStorage.setItem("redirect-path", pathname);
-    return <Navigate to={{ pathname: `login` }} />;
+    return <Navigate to={{ pathname: `/login` }} />;
   };
 
   useEffect(() => {
