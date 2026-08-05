@@ -191,6 +191,7 @@ const AddServiceAccount = () => {
                 label={"Access Key"}
                 id={"accessKey"}
                 name={"accessKey"}
+                autoComplete="section-service-account username"
                 placeholder={"Enter Access Key"}
                 onChange={(e) => {
                   setAccessKey(e.target.value);
@@ -203,6 +204,7 @@ const AddServiceAccount = () => {
                 id={"secretKey"}
                 name={"secretKey"}
                 type={"password"}
+                autoComplete="section-service-account new-password"
                 placeholder={"Enter Secret Key"}
                 onChange={(e) => {
                   setSecretKey(e.target.value);

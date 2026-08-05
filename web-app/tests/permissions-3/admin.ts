@@ -16,6 +16,7 @@
 
 import * as roles from "../utils/roles";
 import * as elements from "../utils/elements-menu";
+import { Selector } from "testcafe";
 import {
   bucketsElement,
   dashboardElement,
@@ -73,4 +74,23 @@ test("All sidebar items exist", async (t) => {
     .ok()
     .expect(licenseExists)
     .ok();
+});
+
+test("Create Access Key forms identify new credentials", async (t) => {
+  const accessKeyInput = Selector("#accessKey");
+  const secretKeyInput = Selector("#secretKey");
+
+  for (const path of [
+    "/access-keys/new-account",
+    "/identity/users/new-user-sa/minioadmin",
+  ]) {
+    await t
+      .navigateTo(`http://localhost:9090${path}`)
+      .expect(accessKeyInput.getAttribute("autocomplete"))
+      .eql("section-service-account username")
+      .expect(secretKeyInput.getAttribute("autocomplete"))
+      .eql("section-service-account new-password")
+      .expect(secretKeyInput.getAttribute("type"))
+      .eql("password");
+  }
 });

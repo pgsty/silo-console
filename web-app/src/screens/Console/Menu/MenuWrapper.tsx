@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   Box,
@@ -45,6 +45,33 @@ const MenuWrapper = () => {
 
   const allowedMenuItems = validRoutes(features);
 
+  useLayoutEffect(() => {
+    const menuToggle = document.querySelector<HTMLElement>(
+      ".menuBox .menuHeaderContainer",
+    );
+    if (!menuToggle) {
+      return;
+    }
+
+    const toggleLabel = sidebarOpen ? "Collapse menu" : "Expand menu";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        menuToggle.click();
+      }
+    };
+
+    menuToggle.setAttribute("role", "button");
+    menuToggle.setAttribute("tabindex", "0");
+    menuToggle.setAttribute("aria-label", toggleLabel);
+    menuToggle.setAttribute("aria-expanded", String(sidebarOpen));
+    menuToggle.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      menuToggle.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [sidebarOpen]);
+
   return (
     <Menu
       isOpen={sidebarOpen}
@@ -64,6 +91,10 @@ const MenuWrapper = () => {
         transitionProperty: "width, min-width, max-width",
         "& .menuHeaderContainer": {
           position: "relative",
+        },
+        "& .menuHeaderContainer:focus-visible": {
+          outline: "2px solid rgba(88, 141, 192, 0.85)",
+          outlineOffset: -2,
         },
         "& .menuLogoContainer > svg": {
           display: "block",
@@ -124,6 +155,19 @@ const MenuWrapper = () => {
           opacity: 0,
           transform: "translateX(-10px)",
           transition: "opacity 0.08s ease, transform 0.12s ease",
+        },
+        "&.collapsed .labelContainer": {
+          display: "block",
+          position: "absolute",
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          clipPath: "inset(50%)",
+          whiteSpace: "nowrap",
+          border: 0,
         },
       }}
       callPathAction={(path) => {
