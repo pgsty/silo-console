@@ -22,6 +22,7 @@ import { IDashboardPanel } from "../types";
 import SingleValueWidget from "./SingleValueWidget";
 import NetworkGetItem from "./NetworkGetItem";
 import NetworkPutItem from "./NetworkPutItem";
+import { useT } from "i18n";
 
 const NetworkItemBase = styled.div(({ theme }) => ({
   display: "flex",
@@ -72,6 +73,7 @@ const NetworkItem = ({
   timeEnd: any;
   apiPrefix: string;
 }) => {
+  const t = useT();
   const { mergedPanels = [] } = value;
   const [leftPanel, rightPanel] = mergedPanels;
 
@@ -117,7 +119,7 @@ const NetworkItem = ({
   return (
     <NetworkItemBase>
       <Box className={"cardHeader"}>
-        <Box className={"cardLabel"}>Network</Box>
+        <Box className={"cardLabel"}>{t("Network")}</Box>
         <SpeedtestIcon />
       </Box>
       <Box className={"statRow"}>

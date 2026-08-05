@@ -31,6 +31,7 @@ import {
 } from "../../../../../common/utils";
 import { setErrorSnackMessage } from "../../../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../../../store";
+import { useT } from "i18n";
 
 const CapacityItemMain = styled.div(({ theme }) => ({
   display: "flex",
@@ -132,10 +133,13 @@ const CapacityItem = ({
 }) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
+  const t = useT();
   const [loading, setLoading] = useState<boolean>(false);
 
   const [totalUsableFree, setTotalUsableFree] = useState<number>(0);
-  const [totalUsableFreeRatio, setTotalUsableFreeRatio] = useState<number>(0);
+  const [totalUsableFreeRatio, setTotalUsableFreeRatio] = useState<
+    number | null
+  >(null);
   const [totalUsed, setTotalUsed] = useState<number>(0);
   const [totalUsable, setTotalUsable] = useState<number>(0);
   const widgetVersion = useSelector(
@@ -189,7 +193,9 @@ const CapacityItem = ({
             });
           });
 
-          const freeRatio = Math.round((tFree / tUsable) * 100);
+          // 0/0 when metrics are unavailable — keep it presentable.
+          const freeRatio =
+            tUsable > 0 ? Math.round((tFree / tUsable) * 100) : null;
 
           setTotalUsableFree(tFree);
           setTotalUsableFreeRatio(freeRatio);
@@ -222,7 +228,7 @@ const CapacityItem = ({
   return (
     <CapacityItemMain>
       <Box className={"cardHeader"}>
-        <Box className={"cardLabel"}>Capacity</Box>
+        <Box className={"cardLabel"}>{t("Capacity")}</Box>
         {loading ? (
           <Loader style={{ width: 16, height: 16 }} />
         ) : (
@@ -231,13 +237,15 @@ const CapacityItem = ({
       </Box>
       <Box className={"capacityRow"}>
         <Box>
-          <Box className={"usedLabel"}>Used:</Box>
+          <Box className={"usedLabel"}>{t("Used:")}</Box>
           <Box className={"totalUsed"}>
             <div className="value">{usedConvert.total}</div>
             <div className="unit">{usedConvert.unit}</div>
           </Box>
           <Box className={"ofUsed"}>
-            <div className="value">Of: {niceBytesInt(totalUsable)}</div>
+            <div className="value">
+              {t("Of:")} {niceBytesInt(totalUsable)}
+            </div>
           </Box>
         </Box>
         <Box
@@ -249,8 +257,10 @@ const CapacityItem = ({
           }}
         >
           <Box className={"donutCenter"}>
-            <div className="pct">{`${totalUsableFreeRatio}%`}</div>
-            <div className="pctLabel">Free</div>
+            <div className="pct">
+              {totalUsableFreeRatio !== null ? `${totalUsableFreeRatio}%` : "—"}
+            </div>
+            <div className="pctLabel">{t("Free")}</div>
           </Box>
           <PieChart width={72} height={72}>
             <Pie

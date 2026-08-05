@@ -39,10 +39,6 @@ const colorsMain = [
   "#D6D6D6",
 ];
 
-const niceDaysFromNS = (seconds: string) => {
-  return niceDays(seconds, "ns");
-};
-
 const roundNumber = (value: string) => {
   return parseInt(value).toString(10);
 };
@@ -59,31 +55,6 @@ export const panelsConfiguration: IDashboardPanel[] = [
   {
     id: 50,
     title: "Capacity",
-    data: [],
-    dataOuter: [{ name: "outer", value: 100 }],
-    widgetConfiguration: {
-      outerChart: {
-        colorList: ["#9c9c9c"],
-        innerRadius: 0,
-        outerRadius: 0,
-        startAngle: 0,
-        endAngle: 0,
-      },
-      innerChart: {
-        colorList: colorsMain,
-        innerRadius: 20,
-        outerRadius: 50,
-        startAngle: 90,
-        endAngle: -200,
-      },
-    },
-    type: widgetType.pieChart,
-    innerLabel: "N/A",
-    labelDisplayFunction: niceBytes,
-  },
-  {
-    id: 51,
-    title: "Usable Capacity",
     data: [],
     dataOuter: [{ name: "outer", value: 100 }],
     widgetConfiguration: {
@@ -137,30 +108,30 @@ export const panelsConfiguration: IDashboardPanel[] = [
       },
     ],
     customStructure: [
-      { originTag: "LESS_THAN_1024_B", displayTag: "Less than 1024B" },
+      { originTag: "LESS_THAN_1024_B", displayTag: "< 1024 B" },
       {
         originTag: "BETWEEN_1024B_AND_1_MB",
-        displayTag: "Between 1024B and 1MB",
+        displayTag: "1024 B – 1 MB",
       },
       {
         originTag: "BETWEEN_1_MB_AND_10_MB",
-        displayTag: "Between 1MB and 10MB",
+        displayTag: "1 MB – 10 MB",
       },
       {
         originTag: "BETWEEN_10_MB_AND_64_MB",
-        displayTag: "Between 10MB and 64MB",
+        displayTag: "10 MB – 64 MB",
       },
       {
         originTag: "BETWEEN_64_MB_AND_128_MB",
-        displayTag: "Between 64MB and 128MB",
+        displayTag: "64 MB – 128 MB",
       },
       {
         originTag: "BETWEEN_128_MB_AND_512_MB",
-        displayTag: "Between 128MB and 512MB",
+        displayTag: "128 MB – 512 MB",
       },
       {
         originTag: "GREATER_THAN_512_MB",
-        displayTag: "Greater than 512MB",
+        displayTag: "> 512 MB",
       },
     ],
     type: widgetType.barChart,
@@ -200,24 +171,6 @@ export const panelsConfiguration: IDashboardPanel[] = [
 
     xAxisFormatter: getTimeFromTimestamp,
     yAxisFormatter: niceBytes,
-  },
-  {
-    id: 61,
-    title: "Total Open FDs",
-    data: [],
-    innerLabel: "N/A",
-    type: widgetType.singleRep,
-    color: "#22B573",
-    fillColor: "#A6E8C4",
-  },
-  {
-    id: 62,
-    title: "Total Goroutines",
-    data: [],
-    innerLabel: "N/A",
-    type: widgetType.singleRep,
-    color: "#F7655E",
-    fillColor: "#F4CECE",
   },
   {
     id: 77,
@@ -304,20 +257,22 @@ export const panelsConfiguration: IDashboardPanel[] = [
     xAxisFormatter: getTimeFromTimestamp,
   },
   {
+    // Raw 1/0/empty from the erasure-set health query; the renderer maps it
+    // to Healthy / Unhealthy / Unknown, so no labelDisplayFunction here.
     id: 80,
-    title: "Time Since Last Heal Activity",
+    title: "Erasure Health",
     data: "N/A",
     type: widgetType.simpleWidget,
     widgetIcon: <HealIcon />,
-    labelDisplayFunction: niceDaysFromNS,
   },
   {
+    // Raw seconds from the usage staleness query; the renderer formats the
+    // duration and applies freshness thresholds, so no labelDisplayFunction.
     id: 81,
-    title: "Time Since Last Scan Activity",
+    title: "Usage Data Age",
     data: "N/A",
     type: widgetType.simpleWidget,
     widgetIcon: <DiagnosticsIcon />,
-    labelDisplayFunction: niceDaysFromNS,
   },
   {
     id: 71,
@@ -480,7 +435,9 @@ export const panelsConfiguration: IDashboardPanel[] = [
 
 const calculateMainValue = (elements: any[], metricCalc: string) => {
   if (elements.length === 0) {
-    return ["", "0"];
+    // an empty series is "no data", never a fabricated zero — widgets that can
+    // legitimately read 0 get an explicit 0 from their PromQL guard instead
+    return ["", ""];
   }
 
   switch (metricCalc) {
@@ -502,12 +459,15 @@ const calculateMainValue = (elements: any[], metricCalc: string) => {
 };
 
 const constructLabelNames = (metrics: any, legendFormat: string) => {
-  const keysToReplace = Object.keys(metrics);
+  // fully aggregated series (e.g. max() over cluster gauges) have an empty
+  // label set, which the API serializes as a missing `metric` field
+  const metricsMap = metrics || {};
+  const keysToReplace = Object.keys(metricsMap);
   const expToReplace = new RegExp(`{{(${keysToReplace.join("|")})}}`, "g");
 
   let replacedLegend = legendFormat.replace(expToReplace, (matchItem) => {
     const nwMatchItem = matchItem.replace(/({{|}})/g, "");
-    return metrics[nwMatchItem];
+    return metricsMap[nwMatchItem];
   });
 
   const countVarsOpen = (replacedLegend.match(/{{/g) || []).length;
@@ -521,7 +481,7 @@ const constructLabelNames = (metrics: any, legendFormat: string) => {
     countVarsClose !== 0
   ) {
     keysToReplace.forEach((element) => {
-      replacedLegend = replacedLegend.replace(element, metrics[element]);
+      replacedLegend = replacedLegend.replace(element, metricsMap[element]);
     });
 
     cleanLegend = replacedLegend;
@@ -560,9 +520,10 @@ export const widgetDetailsToPanel = (
 
         const valueDisplay = calculateMainValue(elements, metricCalc);
 
-        const data = panelItem.labelDisplayFunction
-          ? panelItem.labelDisplayFunction(valueDisplay[1])
-          : valueDisplay[1];
+        const data =
+          valueDisplay[1] !== "" && panelItem.labelDisplayFunction
+            ? panelItem.labelDisplayFunction(valueDisplay[1])
+            : valueDisplay[1];
 
         return {
           ...panelItem,
@@ -578,7 +539,7 @@ export const widgetDetailsToPanel = (
           "lastNotNull",
         );
 
-        let chartSeries = get(payloadData, "targets", []).filter(
+        let chartSeries = (get(payloadData, "targets", []) || []).filter(
           (seriesItem: any) => seriesItem !== null,
         );
 
@@ -590,13 +551,13 @@ export const widgetDetailsToPanel = (
 
           const values = resultMap.map((elementValue: any) => {
             const values = get(elementValue, "values", []);
-            const metricKeyItem = Object.keys(elementValue.metric);
+            const metricKeyItem = Object.keys(elementValue.metric || {});
             const sortResult = values.sort(
               (value1: any[], value2: any[]) =>
                 parseInt(value1[0][1]) - parseInt(value2[0][1]),
             );
 
-            const metricName = elementValue.metric[metricKeyItem[0]];
+            const metricName = (elementValue.metric || {})[metricKeyItem[0]];
             const value = sortResult[sortResult.length - 1];
             return {
               name: metricName,
@@ -609,15 +570,18 @@ export const widgetDetailsToPanel = (
         });
 
         const firstTarget =
-          chartSeries[0].result && chartSeries[0].result.length > 0
+          chartSeries.length > 0 &&
+          chartSeries[0].result &&
+          chartSeries[0].result.length > 0
             ? chartSeries[0].result[0].values
             : [];
 
         const totalValues = calculateMainValue(firstTarget, metricCalc);
 
-        const innerLabel = panelItem.labelDisplayFunction
-          ? panelItem.labelDisplayFunction(totalValues[1])
-          : totalValues[1];
+        const innerLabel =
+          totalValues[1] !== "" && panelItem.labelDisplayFunction
+            ? panelItem.labelDisplayFunction(totalValues[1])
+            : totalValues[1];
 
         return {
           ...panelItem,
@@ -752,9 +716,9 @@ export const widgetDetailsToPanel = (
         } else {
           // If no configuration is set, we construct the series for bar chart and return the element
           values = chartBars.map((elementValue: any) => {
-            const metricKeyItem = Object.keys(elementValue.metric);
+            const metricKeyItem = Object.keys(elementValue.metric || {});
 
-            const metricName = elementValue.metric[metricKeyItem[0]];
+            const metricName = (elementValue.metric || {})[metricKeyItem[0]];
 
             const elements = get(elementValue, "values", []);
 

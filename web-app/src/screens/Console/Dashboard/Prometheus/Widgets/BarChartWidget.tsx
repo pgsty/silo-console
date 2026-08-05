@@ -39,6 +39,7 @@ import ExpandGraphLink from "./ExpandGraphLink";
 import DownloadWidgetDataButton from "../../DownloadWidgetDataButton";
 import BarChartTooltip from "./tooltips/BarChartTooltip";
 import api from "../../../../../common/api";
+import { useT } from "i18n";
 
 interface IBarChartWidget {
   title: string;
@@ -86,6 +87,7 @@ const BarChartWidget = ({
 }: IBarChartWidget) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
+  const t = useT();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
   const [result, setResult] = useState<IDashboardPanel | null>(null);
@@ -207,7 +209,9 @@ const BarChartWidget = ({
             </Box>
           )}
           {!loading && data.length === 0 && (
-            <Box className={"emptyStateContainer"}>No data available</Box>
+            <Box className={"emptyStateContainer"}>
+              {t("No data available")}
+            </Box>
           )}
           {!loading && data.length > 0 && (
             <div

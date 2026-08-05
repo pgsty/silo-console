@@ -51,6 +51,7 @@ import ZoomWidget from "./ZoomWidget";
 import DateRangeSelector from "../../Common/FormComponents/DateRangeSelector/DateRangeSelector";
 import MergedWidgetsRenderer from "./Widgets/MergedWidgetsRenderer";
 import BasicDashboard from "../BasicDashboard/BasicDashboard";
+import { useT } from "i18n";
 
 interface IPrDashboard {
   apiPrefix?: string;
@@ -69,6 +70,7 @@ const SectionHeader = styled.h2(({ theme }) => ({
 
 const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const status = useAppSelector((state) => state.dashboard.status);
   const zoomOpen = useAppSelector((state) => state.dashboard.zoom.openZoom);
   const zoomWidget = useAppSelector(
@@ -121,6 +123,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
                   true,
                   apiPrefix,
                   zoomOpen,
+                  t,
                 )
               )}
             </Box>
@@ -179,7 +182,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
                 fontWeight: 700,
               }}
             >
-              Server Information
+              {t("Server Information")}
             </Box>
           </Grid>
           <Grid item xs>
@@ -194,7 +197,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
                   }}
                   disabled={status === "loading"}
                   icon={<SyncIcon />}
-                  label={"Sync"}
+                  label={t("Sync")}
                 />
               </Grid>
             </Grid>
@@ -213,7 +216,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
   );
 
   const infoTab: TabItemProps = {
-    tabConfig: { label: "Info", id: "info", disabled: false },
+    tabConfig: { label: t("Info"), id: "info", disabled: false },
     content: (
       <Fragment>
         {(!usage || status === "loading") && <ProgressBar />}
@@ -230,7 +233,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
   const prometheusTabs: TabItemProps[] = [
     {
       tabConfig: {
-        label: "Usage",
+        label: t("Usage"),
         id: "usage",
         disabled: prometheusOptionsDisabled,
       },
@@ -241,15 +244,16 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
             {usage?.advancedMetricsStatus === "unavailable" && (
               <HelpBox
                 iconComponent={<PrometheusErrorIcon />}
-                title={"We can’t retrieve advanced metrics at this time."}
+                title={t("We can’t retrieve advanced metrics at this time.")}
                 help={
                   <Box
                     sx={{
                       fontSize: "14px",
                     }}
                   >
-                    It looks like Prometheus is not available or reachable at
-                    the moment.
+                    {t(
+                      "It looks like Prometheus is not available or reachable at the moment.",
+                    )}
                   </Box>
                 }
               />
@@ -261,7 +265,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
     },
     {
       tabConfig: {
-        label: "Traffic",
+        label: t("Traffic"),
         id: "traffic",
         disabled: prometheusOptionsDisabled,
       },
@@ -272,15 +276,16 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
             {usage?.advancedMetricsStatus === "unavailable" && (
               <HelpBox
                 iconComponent={<PrometheusErrorIcon />}
-                title={"We can’t retrieve advanced metrics at this time."}
+                title={t("We can’t retrieve advanced metrics at this time.")}
                 help={
                   <Box
                     sx={{
                       fontSize: "14px",
                     }}
                   >
-                    It looks like Prometheus is not available or reachable at
-                    the moment.
+                    {t(
+                      "It looks like Prometheus is not available or reachable at the moment.",
+                    )}
                   </Box>
                 }
               />
@@ -292,7 +297,7 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
     },
     {
       tabConfig: {
-        label: "Resources",
+        label: t("Resources"),
         id: "resources",
         disabled: prometheusOptionsDisabled,
       },
@@ -303,21 +308,22 @@ const PrDashboard = ({ apiPrefix = "admin", usage }: IPrDashboard) => {
             {usage?.advancedMetricsStatus === "unavailable" && (
               <HelpBox
                 iconComponent={<PrometheusErrorIcon />}
-                title={"We can’t retrieve advanced metrics at this time."}
+                title={t("We can’t retrieve advanced metrics at this time.")}
                 help={
                   <Box
                     sx={{
                       fontSize: "14px",
                     }}
                   >
-                    It looks like Prometheus is not available or reachable at
-                    the moment.
+                    {t(
+                      "It looks like Prometheus is not available or reachable at the moment.",
+                    )}
                   </Box>
                 }
               />
             )}
             {panelInformation.length ? renderResourcesPanels() : null}
-            <SectionHeader>Advanced</SectionHeader>
+            <SectionHeader>{t("Advanced")}</SectionHeader>
             {panelInformation.length ? renderAdvancedResourcesPanels() : null}
           </RowPanelLayout>
         </Fragment>

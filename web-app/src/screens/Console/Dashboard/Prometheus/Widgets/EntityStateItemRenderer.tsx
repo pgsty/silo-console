@@ -21,6 +21,7 @@ import { CircleIcon, DrivesIcon, ServersIcon, Box } from "mds";
 import EntityStateStatItem from "./EntityStateStatItem";
 import DualStatCard from "./DualStatCard";
 import { IDashboardPanel } from "../types";
+import { useT } from "i18n";
 
 const StateIndicator = styled.div(({ theme }) => ({
   display: "flex",
@@ -60,6 +61,7 @@ const EntityStateItemRenderer = ({
   timeEnd: any;
   apiPrefix: string;
 }) => {
+  const t = useT();
   const { mergedPanels = [], id } = info;
   const [leftPanel, rightPanel] = mergedPanels;
 
@@ -72,7 +74,7 @@ const EntityStateItemRenderer = ({
       statLabel={
         <StateIndicator className={"online"}>
           <CircleIcon />
-          <Box className="indicatorText">Online</Box>
+          <Box className="indicatorText">{t("Online")}</Box>
         </StateIndicator>
       }
     />
@@ -86,7 +88,7 @@ const EntityStateItemRenderer = ({
       statLabel={
         <StateIndicator className={"offline"}>
           <CircleIcon />
-          <Box className="indicatorText">Offline</Box>
+          <Box className="indicatorText">{t("Offline")}</Box>
         </StateIndicator>
       }
     />
@@ -96,10 +98,10 @@ const EntityStateItemRenderer = ({
   let statLabel = "";
   if (id === 500) {
     statIcon = <ServersIcon />;
-    statLabel = "Servers";
+    statLabel = t("Servers");
   } else if (id === 501) {
     statIcon = <DrivesIcon />;
-    statLabel = "Drives";
+    statLabel = t("Drives");
   }
 
   return (

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React from "react";
+import React, { Fragment } from "react";
 import {
   ArrowRightIcon,
   Box,
@@ -46,11 +46,19 @@ import { Link } from "react-router-dom";
 import { IAM_PAGES } from "../../../../common/SecureComponent/permissions";
 import TimeStatItem from "../TimeStatItem";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
+import SimpleWidget from "../Prometheus/Widgets/SimpleWidget";
+import {
+  ErasureHealthRenderer,
+  SimpleWidgetRenderProps,
+  UsageAgeRenderer,
+} from "../Prometheus/Widgets/InfoStatRenderers";
+import { panelsConfiguration } from "../Prometheus/utils";
 import {
   AdminInfoResponse,
   ServerDrives,
   ServerProperties,
 } from "api/consoleApi";
+import { useLocalizedLink, useT } from "i18n";
 
 const BoxItem = ({ children }: { children: any }) => {
   return (
@@ -120,12 +128,17 @@ const getClusterUptime = (servers: ServerProperties[]) => {
 };
 
 const BasicDashboard = ({ usage }: IDashboardProps) => {
+  const t = useT();
+  const localize = useLocalizedLink();
   const usageValue = usage && usage.usage ? usage.usage.toString() : "0";
   const usageToRepresent = prettyUsage(usageValue);
   const serverList = getServersList(usage);
-  const lastScan = "n/a";
-  const lastHeal = "n/a";
   const upTime = getClusterUptime(serverList);
+  // Same widget definitions (and therefore the same PromQL semantics) as the
+  // Usage tab; "not configured" hides the rows, "unavailable" shows Unknown.
+  const metricsStatus = usage?.advancedMetricsStatus;
+  const erasureHealthPanel = panelsConfiguration.find((p) => p.id === 80);
+  const usageAgePanel = panelsConfiguration.find((p) => p.id === 81);
 
   let allDrivesArray: ServerDrives[] = [];
 
@@ -177,7 +190,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
           >
             <BoxItem>
               <CounterCard
-                label={"Buckets"}
+                label={t("Buckets")}
                 icon={<BucketsIcon />}
                 counterValue={usage ? representationNumber(usage.buckets) : 0}
                 actions={
@@ -185,11 +198,11 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                     to={IAM_PAGES.BUCKETS}
                     style={{ textDecoration: "none" }}
                   >
-                    <TooltipWrapper tooltip={"Browse"}>
+                    <TooltipWrapper tooltip={t("Browse")}>
                       <Button
                         id={"browse-dashboard"}
                         onClick={() => {}}
-                        label={"Browse"}
+                        label={t("Browse")}
                         icon={<ArrowRightIcon />}
                         variant={"regular"}
                         style={{
@@ -205,7 +218,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
             </BoxItem>
             <BoxItem>
               <CounterCard
-                label={"Objects"}
+                label={t("Objects")}
                 icon={<TotalObjectsIcon />}
                 counterValue={usage ? representationNumber(usage.objects) : 0}
               />
@@ -215,7 +228,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
               <StatusCountCard
                 onlineCount={onlineServers.length}
                 offlineCount={offlineServers.length}
-                label={"Servers"}
+                label={t("Servers")}
                 icon={<ServersIcon />}
               />
             </BoxItem>
@@ -227,7 +240,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                 onlineCount={
                   usage?.backend?.onlineDrives || onlineDrives.length
                 }
-                label={"Drives"}
+                label={t("Drives")}
                 icon={<DrivesIcon />}
               />
             </BoxItem>
@@ -265,47 +278,53 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                   gap: "14px",
                 }}
               >
-                <TimeStatItem
-                  icon={<HealIcon />}
-                  label={
-                    <Box>
-                      <Box
-                        sx={{
-                          display: "inline",
-                          [`@media (max-width: ${breakPoints.sm}px)`]: {
-                            display: "none",
-                          },
-                        }}
-                      >
-                        Time since last
-                      </Box>{" "}
-                      Heal Activity
-                    </Box>
-                  }
-                  value={lastHeal}
-                />
-                <TimeStatItem
-                  icon={<DiagnosticsMenuIcon />}
-                  label={
-                    <Box>
-                      <Box
-                        sx={{
-                          display: "inline",
-                          [`@media (max-width: ${breakPoints.sm}px)`]: {
-                            display: "none",
-                          },
-                        }}
-                      >
-                        Time since last
-                      </Box>{" "}
-                      Scan Activity
-                    </Box>
-                  }
-                  value={lastScan}
-                />
+                {metricsStatus === "available" &&
+                  erasureHealthPanel &&
+                  usageAgePanel && (
+                    <Fragment>
+                      <SimpleWidget
+                        title={t("Erasure Health")}
+                        panelItem={erasureHealthPanel}
+                        timeStart={null}
+                        timeEnd={null}
+                        apiPrefix={"admin"}
+                        iconWidget={<HealIcon />}
+                        renderFn={(props: SimpleWidgetRenderProps) => (
+                          <ErasureHealthRenderer {...props} />
+                        )}
+                      />
+                      <SimpleWidget
+                        title={t("Usage Data Age")}
+                        panelItem={usageAgePanel}
+                        timeStart={null}
+                        timeEnd={null}
+                        apiPrefix={"admin"}
+                        iconWidget={<DiagnosticsMenuIcon />}
+                        renderFn={(props: SimpleWidgetRenderProps) => (
+                          <UsageAgeRenderer {...props} />
+                        )}
+                      />
+                    </Fragment>
+                  )}
+                {metricsStatus === "unavailable" && (
+                  <Fragment>
+                    <TimeStatItem
+                      icon={<HealIcon />}
+                      label={t("Erasure Health")}
+                      value={t("Unknown")}
+                      status="muted"
+                    />
+                    <TimeStatItem
+                      icon={<DiagnosticsMenuIcon />}
+                      label={t("Usage Data Age")}
+                      value={t("Unknown")}
+                      status="muted"
+                    />
+                  </Fragment>
+                )}
                 <TimeStatItem
                   icon={<UptimeIcon />}
-                  label={"Uptime"}
+                  label={t("Uptime")}
                   value={upTime}
                 />
               </Box>
@@ -323,17 +342,17 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
           >
             <TimeStatItem
               icon={<StorageIcon />}
-              label={"Backend type"}
+              label={t("Backend type")}
               value={usage?.backend?.backendType ?? "Unknown"}
             />
             <TimeStatItem
               icon={<FormatDrivesIcon />}
-              label={"Standard storage class parity"}
+              label={t("Standard storage class parity")}
               value={usage?.backend?.standardSCParity?.toString() ?? "n/a"}
             />
             <TimeStatItem
               icon={<FormatDrivesIcon />}
-              label={"Reduced redundancy storage class parity"}
+              label={t("Reduced redundancy storage class parity")}
               value={usage?.backend?.rrSCParity?.toString() ?? "n/a"}
             />
           </Box>
@@ -353,7 +372,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
           <Box>
             <HelpBox
               iconComponent={<PrometheusErrorIcon />}
-              title={"We can’t retrieve advanced metrics at this time."}
+              title={t("We can’t retrieve advanced metrics at this time.")}
               help={
                 <Box>
                   <Box
@@ -361,11 +380,9 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                       fontSize: "14px",
                     }}
                   >
-                    Console Dashboard will display basic metrics as we couldn’t
-                    connect to Prometheus successfully. Please try again in a
-                    few minutes. If the problem persists, you can review your
-                    configuration and confirm that Prometheus server is up and
-                    running.
+                    {t(
+                      "Console Dashboard will display basic metrics as we couldn’t connect to Prometheus successfully. Please try again in a few minutes. If the problem persists, you can review your configuration and confirm that Prometheus server is up and running.",
+                    )}
                   </Box>
                   <Box
                     sx={{
@@ -374,11 +391,13 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
                     }}
                   >
                     <a
-                      href="https://silo.pgsty.com/operations/monitoring/collect-minio-metrics-using-prometheus/"
+                      href={localize(
+                        "https://silo.pgsty.com/operations/monitoring/collect-minio-metrics-using-prometheus/",
+                      )}
                       target="_blank"
                       rel="noopener"
                     >
-                      Read more about Prometheus on the Docs site.
+                      {t("Read more about Prometheus on the Docs site.")}
                     </a>
                   </Box>
                 </Box>

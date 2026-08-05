@@ -24,10 +24,11 @@ import SingleRepWidget from "./Widgets/SingleRepWidget";
 import SingleValueWidget from "./Widgets/SingleValueWidget";
 import CapacityItem from "./Widgets/CapacityItem";
 import DashboardItemBox from "../DashboardItemBox";
-import HealActivityRenderer, {
+import {
+  ErasureHealthRenderer,
   SimpleWidgetRenderProps,
-} from "./Widgets/HealActivityRenderer";
-import ScanActivityRenderer from "./Widgets/ScanActivityRenderer";
+  UsageAgeRenderer,
+} from "./Widgets/InfoStatRenderers";
 import UptimeActivityRenderer from "./Widgets/UptimeActivityRenderer";
 
 export const componentToUse = (
@@ -37,12 +38,15 @@ export const componentToUse = (
   loading: boolean,
   apiPrefix: string,
   zoomActivated: boolean = false,
+  // Callers are components; they pass useT()'s t so panel titles from the
+  // static panelsConfiguration render in the active language.
+  t: (text: string) => string = (text) => text,
 ) => {
   switch (value.type) {
     case widgetType.singleValue:
       return (
         <SingleValueWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}
@@ -53,9 +57,9 @@ export const componentToUse = (
       let renderFn;
       let CmpToRender: any = null;
       if (value.id === 80) {
-        CmpToRender = HealActivityRenderer;
+        CmpToRender = ErasureHealthRenderer;
       } else if (value.id === 81) {
-        CmpToRender = ScanActivityRenderer;
+        CmpToRender = UsageAgeRenderer;
       } else if (value.id === 1) {
         CmpToRender = UptimeActivityRenderer;
       }
@@ -81,7 +85,7 @@ export const componentToUse = (
       }
       return (
         <SimpleWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}
@@ -105,7 +109,7 @@ export const componentToUse = (
       }
       return (
         <PieChartWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}
@@ -116,7 +120,7 @@ export const componentToUse = (
     case widgetType.areaGraph:
       return (
         <LinearGraphWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}
@@ -131,7 +135,7 @@ export const componentToUse = (
     case widgetType.barChart:
       return (
         <BarChartWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}
@@ -143,7 +147,7 @@ export const componentToUse = (
       const fillColor = value.fillColor ? value.fillColor : value.color;
       return (
         <SingleRepWidget
-          title={value.title}
+          title={t(value.title)}
           panelItem={value}
           timeStart={timeStart}
           timeEnd={timeEnd}

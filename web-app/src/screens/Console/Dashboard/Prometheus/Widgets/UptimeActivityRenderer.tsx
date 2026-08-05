@@ -17,6 +17,7 @@
 import React from "react";
 import { Box } from "mds";
 import TimeStatItem from "../../TimeStatItem";
+import { useT } from "i18n";
 
 type SimpleWidgetRenderProps = {
   valueToRender?: any;
@@ -30,6 +31,8 @@ const UptimeActivityRenderer = ({
   loading = false,
   iconWidget = null,
 }: SimpleWidgetRenderProps) => {
+  const t = useT();
+
   return (
     <Box
       sx={{
@@ -46,8 +49,8 @@ const UptimeActivityRenderer = ({
       <TimeStatItem
         loading={loading}
         icon={iconWidget}
-        label={<Box>Uptime</Box>}
-        value={valueToRender}
+        label={<Box>{t("Uptime")}</Box>}
+        value={valueToRender === "" ? "n/a" : valueToRender}
       />
     </Box>
   );

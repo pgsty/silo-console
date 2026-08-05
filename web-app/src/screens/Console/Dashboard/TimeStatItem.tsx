@@ -57,28 +57,43 @@ const TimeStatBase = styled.div(({ theme }) => ({
       fontWeight: 500,
       color: get(theme, "mutedText", "#71717A"),
     },
+    "&.stat-warn": {
+      color: get(theme, "signalColors.warning", "#FFBD62"),
+    },
+    "&.stat-danger": {
+      color: get(theme, "signalColors.danger", "#C51B3F"),
+    },
   },
 }));
+
+export type TimeStatStatus = "ok" | "warn" | "danger" | "muted";
 
 const TimeStatItem = ({
   icon,
   label,
   value,
   loading = false,
+  status,
 }: {
   icon: any;
   label: any;
   value: string;
   loading?: boolean;
+  status?: TimeStatStatus;
 }) => {
+  const resolved: TimeStatStatus = status ?? (value === "n/a" ? "muted" : "ok");
   return (
     <TimeStatBase className="dashboard-time-stat-item">
       {loading ? <Loader style={{ width: 12, height: 12 }} /> : icon}
       <Box className={"timeStatLabel"}>{label}</Box>
-      <Box className={`timeStatValue ${value === "n/a" ? "is-na" : ""}`}>
+      <Box
+        className={`timeStatValue ${
+          resolved === "muted" ? "is-na" : ""
+        } stat-${resolved}`}
+      >
         {value}
       </Box>
-      {value !== "n/a" ? <SuccessIcon className="ok-icon" /> : null}
+      {resolved === "ok" ? <SuccessIcon className="ok-icon" /> : null}
     </TimeStatBase>
   );
 };

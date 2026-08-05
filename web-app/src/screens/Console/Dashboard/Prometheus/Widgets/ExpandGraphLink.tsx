@@ -23,10 +23,12 @@ import { IDashboardPanel } from "../types";
 
 import { openZoomPage } from "../../dashboardSlice";
 import { useAppDispatch } from "../../../../../store";
+import { useT } from "i18n";
 
 const ExpandGraphLink = ({ panelItem }: { panelItem: IDashboardPanel }) => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
+  const t = useT();
   return (
     <Box
       sx={{
@@ -59,7 +61,7 @@ const ExpandGraphLink = ({ panelItem }: { panelItem: IDashboardPanel }) => {
           dispatch(openZoomPage(panelItem));
         }}
         className={"zoom-graph-icon"}
-        aria-label={"Expand graph"}
+        aria-label={t("Expand graph")}
       >
         <ExpandIcon />
       </button>

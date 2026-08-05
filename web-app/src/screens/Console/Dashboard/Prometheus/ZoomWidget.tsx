@@ -21,6 +21,7 @@ import { IDashboardPanel } from "./types";
 import { componentToUse } from "./widgetUtils";
 import { closeZoomPage } from "../dashboardSlice";
 import { useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 
 interface IZoomWidget {
   widgetRender: number;
@@ -39,13 +40,14 @@ const ZoomWidget = ({
   apiPrefix,
 }: IZoomWidget) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   if (!value) {
     return null;
   }
 
   return (
     <ModalWrapper
-      title={value.title}
+      title={t(value.title)}
       onClose={() => {
         dispatch(closeZoomPage());
       }}
@@ -56,7 +58,7 @@ const ZoomWidget = ({
       }}
     >
       <Fragment>
-        {componentToUse(value, timeStart, timeEnd, true, apiPrefix, true)}
+        {componentToUse(value, timeStart, timeEnd, true, apiPrefix, true, t)}
       </Fragment>
     </ModalWrapper>
   );

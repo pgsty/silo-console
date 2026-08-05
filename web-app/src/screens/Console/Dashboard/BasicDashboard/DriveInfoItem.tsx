@@ -21,6 +21,7 @@ import { niceBytes } from "../../../../common/utils";
 import { Box, breakPoints, CircleIcon, SizeChart } from "mds";
 import { ServerDrives } from "api/consoleApi";
 import { STATUS_COLORS } from "./Utils";
+import { useT } from "i18n";
 
 interface ICardProps {
   drive: ServerDrives;
@@ -28,6 +29,7 @@ interface ICardProps {
 
 const DriveInfoItem = ({ drive }: ICardProps) => {
   const theme = useTheme();
+  const t = useT();
 
   const totalSpace = drive.totalSpace ?? 0;
   const usedSpace = drive.usedSpace ?? 0;
@@ -51,13 +53,13 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
   const driveStatusText = useMemo(() => {
     switch (drive.state) {
       case "offline":
-        return "Offline Drive";
+        return t("Offline Drive");
       case "ok":
-        return "Online Drive";
+        return t("Online Drive");
       default:
-        return "Unknown";
+        return t("Unknown");
     }
-  }, [drive.state]);
+  }, [drive.state, t]);
 
   return (
     <Box
@@ -110,7 +112,7 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
       }}
     >
       <SizeChart
-        chartLabel="Used Capacity"
+        chartLabel={t("Used Capacity")}
         label={true}
         usedBytes={usedSpace}
         totalBytes={totalSpace}
@@ -143,7 +145,7 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
               },
             }}
           >
-            <label className="info-label">Drive Name</label>
+            <label className="info-label">{t("Drive Name")}</label>
             <Box className="drive-endpoint">{drive.endpoint ?? ""}</Box>
           </Box>
           <Box
@@ -154,7 +156,7 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
               },
             }}
           >
-            <label className="info-label">Drive Status</label>
+            <label className="info-label">{t("Drive Status")}</label>
             <Box
               sx={{
                 display: "flex",
@@ -189,13 +191,15 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
               flexFlow: "column",
             }}
           >
-            <label className="info-label">Used Capacity</label>
+            <label className="info-label">{t("Used Capacity")}</label>
             <Box className="info-value">{niceBytes(usedSpace.toString())}</Box>
             <Box className="percentage-row">
               <Box className="percentage-value">
                 {usedPercentage.toFixed(2)}%
               </Box>
-              <Box>of {niceBytes(totalSpace.toString())}</Box>
+              <Box>
+                {t("of")} {niceBytes(totalSpace.toString())}
+              </Box>
             </Box>
           </Box>
           <Box
@@ -210,7 +214,7 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
               flexFlow: "column",
             }}
           >
-            <label className="info-label">Available Capacity</label>
+            <label className="info-label">{t("Available Capacity")}</label>
             <Box className="info-value">
               {niceBytes(availableSpace.toString())}
             </Box>

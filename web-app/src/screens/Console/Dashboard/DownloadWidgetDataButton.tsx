@@ -22,6 +22,7 @@ import { exportComponentAsPNG } from "react-component-export-image";
 import { ErrorResponseHandler } from "../../../common/types";
 import { useAppDispatch } from "../../../../src/store";
 import { setErrorSnackMessage } from "../../../../src/systemSlice";
+import { useT } from "i18n";
 
 interface IDownloadWidgetDataButton {
   title: any;
@@ -35,6 +36,7 @@ const DownloadWidgetDataButton = ({
   data,
 }: IDownloadWidgetDataButton) => {
   const theme = useTheme();
+  const t = useT();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const openDownloadMenu = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -85,8 +87,8 @@ const DownloadWidgetDataButton = ({
     } else {
       let err: ErrorResponseHandler;
       err = {
-        errorMessage: "Unable to download widget data",
-        detailedError: "Unable to download widget data - data not available",
+        errorMessage: t("Unable to download widget data"),
+        detailedError: t("Unable to download widget data - data not available"),
       };
       onDownloadError(err);
     }
@@ -145,15 +147,15 @@ const DownloadWidgetDataButton = ({
         <button
           className={"download-icon"}
           onClick={handleClick}
-          aria-label={"Download widget data"}
+          aria-label={t("Download widget data")}
         >
           <DownloadIcon />
         </button>
         <DropdownSelector
           id={"download-widget-main-menu"}
           options={[
-            { label: "Download as CSV", value: "csv" },
-            { label: "Download as PNG", value: "png" },
+            { label: t("Download as CSV"), value: "csv" },
+            { label: t("Download as PNG"), value: "png" },
           ]}
           selectedOption={""}
           onSelect={(value) => handleSelectedOption(value)}

@@ -19,8 +19,10 @@ import { Accordion, Box, breakPoints } from "mds";
 import ServerInfoItem from "./ServerInfoItem";
 import DriveInfoItem from "./DriveInfoItem";
 import { ServerProperties } from "api/consoleApi";
+import { useT } from "i18n";
 
 const ServersList = ({ data }: { data: ServerProperties[] }) => {
+  const t = useT();
   const [expanded, setExpanded] = React.useState<string>(
     data.length > 1 ? "" : data[0].endpoint + "-0",
   );
@@ -38,7 +40,7 @@ const ServersList = ({ data }: { data: ServerProperties[] }) => {
           fontWeight: 700,
         }}
       >
-        Servers ({data.length})
+        {t("Servers")} ({data.length})
       </Box>
       <Box>
         {data.map((serverInfo, index) => {
@@ -63,7 +65,7 @@ const ServersList = ({ data }: { data: ServerProperties[] }) => {
                 useBackground
                 sx={{ padding: "10px 30px", fontWeight: "bold" }}
               >
-                Drives ({serverInfo.drives?.length})
+                {t("Drives")} ({serverInfo.drives?.length})
               </Box>
               <Box
                 sx={{

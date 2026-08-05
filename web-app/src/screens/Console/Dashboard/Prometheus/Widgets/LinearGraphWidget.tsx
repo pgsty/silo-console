@@ -39,6 +39,7 @@ import api from "../../../../../common/api";
 import LineChartTooltip from "./tooltips/LineChartTooltip";
 import ExpandGraphLink from "./ExpandGraphLink";
 import DownloadWidgetDataButton from "../../DownloadWidgetDataButton";
+import { useT } from "i18n";
 
 interface ILinearGraphWidget {
   title: string;
@@ -103,6 +104,7 @@ const LinearGraphWidget = ({
   zoomActivated = false,
 }: ILinearGraphWidget) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const theme = useTheme();
   const [loading, setLoading] = useState<boolean>(false);
   const [hover, setHover] = useState<boolean>(false);
@@ -251,7 +253,9 @@ const LinearGraphWidget = ({
           >
             {loading && <Loader className={"loadingAlign"} />}
             {!loading && data.length === 0 && (
-              <Box className={"emptyStateContainer"}>No data available</Box>
+              <Box className={"emptyStateContainer"}>
+                {t("No data available")}
+              </Box>
             )}
             {!loading && data.length > 0 && (
               <Fragment>
@@ -365,7 +369,7 @@ const LinearGraphWidget = ({
                   <Fragment>
                     {zoomActivated && (
                       <Fragment>
-                        <strong>Series</strong>
+                        <strong>{t("Series")}</strong>
                         <br />
                         <br />
                       </Fragment>

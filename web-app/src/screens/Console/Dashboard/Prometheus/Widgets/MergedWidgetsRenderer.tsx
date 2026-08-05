@@ -21,6 +21,7 @@ import MergedWidgets from "../MergedWidgets";
 import EntityStateItemRenderer from "./EntityStateItemRenderer";
 import NetworkItem from "./NetworkItem";
 import DashboardItemBox from "../../DashboardItemBox";
+import { useT } from "i18n";
 
 const MergedWidgetsRenderer = ({
   info,
@@ -35,6 +36,7 @@ const MergedWidgetsRenderer = ({
   loading: boolean;
   apiPrefix: string;
 }) => {
+  const t = useT();
   const { mergedPanels = [], title = "", id } = info;
   const [leftPanel, rightPanel] = mergedPanels;
 
@@ -67,13 +69,15 @@ const MergedWidgetsRenderer = ({
 
     return (
       <MergedWidgets
-        title={title}
+        title={t(title)}
         leftComponent={componentToUse(
           leftPanel,
           timeStart,
           timeEnd,
           loading,
           apiPrefix,
+          false,
+          t,
         )}
         rightComponent={componentToUse(
           rightPanel,
@@ -81,6 +85,8 @@ const MergedWidgetsRenderer = ({
           timeEnd,
           loading,
           apiPrefix,
+          false,
+          t,
         )}
       />
     );

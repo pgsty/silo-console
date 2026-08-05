@@ -18,6 +18,7 @@ import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
 import { Box, breakPoints, CircleIcon } from "mds";
+import { useT } from "i18n";
 
 const StatusCountBase = styled.div(({ theme }) => ({
   display: "flex",
@@ -103,6 +104,8 @@ const StatusCountCard = ({
   okStatusText?: string;
   notOkStatusText?: string;
 }) => {
+  const t = useT();
+
   return (
     <StatusCountBase>
       <Box className={"cardHeader"}>
@@ -114,14 +117,14 @@ const StatusCountCard = ({
           <Box className={"stat-value"}>{onlineCount}</Box>
           <Box className={"statMeta online"}>
             <CircleIcon />
-            {okStatusText}
+            {t(okStatusText)}
           </Box>
         </Box>
         <Box className={"statGroup"}>
           <Box className={"stat-value"}>{offlineCount}</Box>
           <Box className={"statMeta offline"}>
             <CircleIcon />
-            {notOkStatusText}
+            {t(notOkStatusText)}
           </Box>
         </Box>
       </Box>

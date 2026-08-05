@@ -24,6 +24,7 @@ import {
   serverStatusColor,
 } from "./Utils";
 import { ServerProperties } from "api/consoleApi";
+import { useT } from "i18n";
 
 interface ICardProps {
   server: ServerProperties;
@@ -156,6 +157,7 @@ const ServerStatItem = ({
 
 const ServerInfoItem = ({ server }: ICardProps) => {
   const theme = useTheme();
+  const t = useT();
   const networkKeys = Object.keys(get(server, "network", {}));
   const networkTotal = networkKeys.length;
   const totalDrives = server.drives ? server.drives.length : 0;
@@ -218,19 +220,19 @@ const ServerInfoItem = ({ server }: ICardProps) => {
         >
           <ServerStatItem
             statusColor={getDriveStatusColor(activeDisks, totalDrives)}
-            label={"Drives"}
+            label={t("Drives")}
             hasStatus={true}
             value={`${activeDisks}/${totalDrives}`}
           />
           <ServerStatItem
             statusColor={getNetworkStatusColor(activeNetwork, networkTotal)}
-            label={"Network"}
+            label={t("Network")}
             hasStatus={true}
             value={`${activeNetwork}/${networkTotal}`}
           />
           <ServerStatItem
             statusColor={"good"}
-            label={"Up time"}
+            label={t("Up time")}
             value={server?.uptime ? niceDays(`${server.uptime}`) : "N/A"}
           />
         </Box>
@@ -254,7 +256,7 @@ const ServerInfoItem = ({ server }: ICardProps) => {
                 },
               }}
             >
-              <span className="label">Version:</span>
+              <span className="label">{t("Version:")}</span>
               {server.version ? server.version : "N/A"}
             </Box>
           }

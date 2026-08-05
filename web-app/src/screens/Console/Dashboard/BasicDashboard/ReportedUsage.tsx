@@ -18,6 +18,7 @@ import React, { Fragment } from "react";
 import get from "lodash/get";
 import styled, { useTheme } from "styled-components";
 import { Box, HelpTip } from "mds";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 import { Cell, Pie, PieChart } from "recharts";
 
 const ReportedUsageMain = styled.div(({ theme }) => ({
@@ -46,31 +47,58 @@ const ReportedUsageMain = styled.div(({ theme }) => ({
   },
 }));
 
-export const usageClarifyingContent = (
-  <Fragment>
-    <div>
-      <strong> Not what you expected?</strong>
-      <br />
-      This Usage value is comparable to <strong>mc du --versions</strong> which
-      represents the size of all object versions that exist in the buckets.
-      <br />
-      Running{" "}
-      <a
-        target="_blank"
-        href="https://silo.pgsty.com/reference/minio-mc/mc-du/"
-      >
-        mc du
-      </a>{" "}
-      without the <strong>--versions</strong> flag or{" "}
-      <a target="_blank" href="https://man7.org/linux/man-pages/man1/df.1.html">
-        df
-      </a>{" "}
-      will provide different values corresponding to the size of all{" "}
-      <strong>current</strong> versions and the physical disk space occupied
-      respectively.
-    </div>
-  </Fragment>
-);
+// Rendered as a component rather than a module-level constant so the copy can
+// follow the active language.
+export const UsageClarifyingContent = () => {
+  const t = useT();
+  const localizedLink = useLocalizedLink();
+
+  return (
+    <Fragment>
+      <div>
+        <strong> {t("Not what you expected?")}</strong>
+        <br />
+        {interpolate(
+          t(
+            "This Usage value is comparable to {command} which represents the size of all object versions that exist in the buckets.",
+          ),
+          { command: <strong>mc du --versions</strong> },
+        )}
+        <br />
+        {interpolate(
+          t(
+            "Running {mcDu} without the {flag} flag or {df} will provide different values corresponding to the size of all {current} versions and the physical disk space occupied respectively.",
+          ),
+          {
+            mcDu: (
+              <a
+                target="_blank"
+                href={localizedLink(
+                  "https://silo.pgsty.com/reference/minio-mc/mc-du/",
+                )}
+              >
+                mc du
+              </a>
+            ),
+            flag: <strong>--versions</strong>,
+            df: (
+              <a
+                target="_blank"
+                href="https://man7.org/linux/man-pages/man1/df.1.html"
+              >
+                df
+              </a>
+            ),
+            current: <strong>{t("current")}</strong>,
+          },
+        )}
+      </div>
+    </Fragment>
+  );
+};
+
+// Kept so existing call sites can keep passing a node straight to HelpTip.
+export const usageClarifyingContent = <UsageClarifyingContent />;
 
 const ReportedUsage = ({
   usageValue,
@@ -82,6 +110,7 @@ const ReportedUsage = ({
   unit: string;
 }) => {
   const theme = useTheme();
+  const t = useT();
 
   const plotValues = [
     {
@@ -105,9 +134,9 @@ const ReportedUsage = ({
           gap: 14,
         }}
       >
-        <div className="usage-label">Reported Usage</div>
+        <div className="usage-label">{t("Reported Usage")}</div>
 
-        <HelpTip content={usageClarifyingContent} placement="left">
+        <HelpTip content={<UsageClarifyingContent />} placement="left">
           <Box sx={{ display: "flex", alignItems: "baseline" }}>
             <label className={"unit-value"}>{total}</label>
             <label className={"unit-type"}>{unit}</label>
