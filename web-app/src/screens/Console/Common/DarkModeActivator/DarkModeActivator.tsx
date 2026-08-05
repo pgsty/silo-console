@@ -16,7 +16,6 @@
 
 import React from "react";
 import { Button, DarkModeIcon, LightModeIcon } from "mds";
-import TooltipWrapper from "../TooltipWrapper/TooltipWrapper";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../store";
 import { setDarkMode } from "../../../../systemSlice";
@@ -35,13 +34,12 @@ const DarkModeActivator = () => {
   };
 
   return (
-    <TooltipWrapper tooltip={`${darkMode ? "Light" : "Dark"} Mode`}>
-      <Button
-        id={"dark-mode-activator"}
-        icon={darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-        onClick={darkModeActivator}
-      />
-    </TooltipWrapper>
+    <Button
+      id={"dark-mode-activator"}
+      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      icon={darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+      onClick={darkModeActivator}
+    />
   );
 };
 

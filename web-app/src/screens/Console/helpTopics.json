@@ -3284,14 +3284,14 @@
       "header": null,
       "links": [
         {
-          "title": "Login help",
+          "title": "Logging in",
           "url": "https://silo.pgsty.com/administration/minio-console/#logging-in",
-          "body": "Text snippet that will be relevant to the user will go here made to look nice in the helpitem size on two-three lines"
+          "body": "Sign in with the root credentials, an IAM user access key, or temporary STS credentials via Other Authentication Methods."
         },
         {
-          "title": "Login help",
+          "title": "Console configuration",
           "url": "https://silo.pgsty.com/administration/minio-console/#configuration",
-          "body": "Text snippet that will be relevant to the user will  go here  made to look nice in the helpitem size  on two-three lines"
+          "body": "Configure identity providers, TLS, and session settings for the console on the server side."
         },
         {
           "title": "Troubleshooting",

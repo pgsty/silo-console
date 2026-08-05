@@ -10,6 +10,8 @@ import styled from "styled-components";
 import get from "lodash/get";
 import { SILO_COLORS, SiloBrand } from "../../common/SiloBrand";
 import WaveMeshCanvas from "./WaveMeshCanvas";
+import HelpMenu from "../Console/HelpMenu";
+import DarkModeActivator from "../Console/Common/DarkModeActivator/DarkModeActivator";
 
 // Chakra Petch (the wordmark typeface) is registered app-wide in index.css.
 const displayFont =
@@ -55,30 +57,12 @@ const BrandContent = styled.div({
   padding: "clamp(40px, 6vw, 88px)",
   paddingBottom: 36,
   "& .eyebrow": {
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
     fontFamily: displayFont,
     fontWeight: 500,
     fontSize: 12,
     letterSpacing: "0.22em",
     textTransform: "uppercase",
     color: SILO_COLORS.sky,
-  },
-  "& .eyebrow .bits": {
-    display: "flex",
-    gap: 5,
-    flexShrink: 0,
-  },
-  "& .eyebrow .bits span": {
-    display: "block",
-    width: 8,
-    height: 8,
-    backgroundColor: SILO_COLORS.steel,
-  },
-  "& .eyebrow .bits .bitParity": {
-    backgroundColor: "transparent",
-    border: `1px solid ${SILO_COLORS.copper}`,
   },
   "& h1": {
     margin: "26px 0 0",
@@ -144,6 +128,7 @@ const BrandContent = styled.div({
 });
 
 const FormPanel = styled.section(({ theme }) => ({
+  position: "relative",
   display: "flex",
   flexDirection: "column",
   width: "100%",
@@ -153,7 +138,51 @@ const FormPanel = styled.section(({ theme }) => ({
   "@media (max-width: 991px)": {
     maxWidth: "100%",
   },
+  "& .headerActions": {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+    display: "flex",
+    alignItems: "center",
+    gap: 2,
+    // Quiet ghost icon buttons: no chrome, low contrast until hovered.
+    // Direct children only — the help panel (a nested div) has its own buttons.
+    "& > button": {
+      border: "none",
+      background: "transparent",
+      boxShadow: "none",
+      padding: 0,
+      height: 28,
+      width: 28,
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: get(theme, "mutedText", "#9CA3AF"),
+      opacity: 0.6,
+      transition: "opacity 0.15s ease, color 0.15s ease",
+      "& svg": {
+        width: 15,
+        height: 15,
+        fill: "currentcolor",
+        color: "currentcolor",
+      },
+      "&:hover": {
+        border: "none",
+        background: "transparent",
+        color: get(theme, "fontColor", "#3F3F46"),
+        opacity: 1,
+      },
+    },
+    // The help panel is absolutely positioned; anchor it below the buttons
+    // and keep it inside the viewport (there is no sidebar on this page).
+    "& > div": {
+      top: "calc(100% + 8px)",
+      maxWidth: "min(754px, calc(100vw - 36px))",
+    },
+  },
   "& .logoBand": {
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -167,6 +196,11 @@ const FormPanel = styled.section(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 18,
+    textDecoration: "none",
+    transition: "opacity 0.15s ease",
+    "&:hover": {
+      opacity: 0.82,
+    },
     "& .emblem": {
       display: "block",
       height: 84,
@@ -210,14 +244,26 @@ const FormPanel = styled.section(({ theme }) => ({
     flexWrap: "wrap",
     borderTop: `1px solid ${get(theme, "login.footerDivider", "#F2F2F2")}`,
     padding: "35px 0",
-    fontSize: 14,
+    fontSize: 11,
     color: get(theme, "login.footerElements", "#2781B0"),
     "& a": {
+      fontFamily: displayFont,
+      fontWeight: 500,
+      fontSize: 11,
+      letterSpacing: "0.24em",
+      textTransform: "uppercase",
       color: get(theme, "login.footerElements", "#2781B0"),
       textDecoration: "none",
+      paddingBottom: 1,
+      borderBottom:
+        "1px solid color-mix(in srgb, currentcolor 30%, transparent)",
+      transition: "border-color 0.15s ease",
       "&:hover": {
-        textDecoration: "underline",
+        borderBottomColor: "currentcolor",
       },
+    },
+    "& .separator": {
+      opacity: 0.4,
     },
   },
 }));
@@ -234,11 +280,6 @@ const LoginLayout = ({ children, footer }: LoginLayoutProps) => {
         <WaveMeshCanvas />
         <BrandContent>
           <div className="eyebrow">
-            <span className="bits" aria-hidden="true">
-              <span />
-              <span />
-              <span className="bitParity" />
-            </span>
             Open-Source S3/MinIO-Compatible Object Storage
           </div>
           <h1>
@@ -281,20 +322,42 @@ const LoginLayout = ({ children, footer }: LoginLayoutProps) => {
               <a href="https://min.io" target="_blank" rel="noopener">
                 MinIO, Inc.
               </a>
+              ; SILO incorporates{" "}
+              <a
+                href="https://github.com/minio/minio"
+                target="_blank"
+                rel="noopener"
+              >
+                MinIO source code
+              </a>
+              .
             </span>
             <span>
-              SILO is an independent community project, not affiliated with or
-              endorsed by MinIO, Inc.
+              SILO is maintained by{" "}
+              <a href="https://pigsty.io" target="_blank" rel="noopener">
+                PIGSTY
+              </a>
+              , without MinIO affiliation, endorsement, or sponsorship.
             </span>
           </p>
         </BrandContent>
       </BrandPanel>
       <FormPanel>
         <div className="logoBand">
-          <div className="logoLockup">
+          <div className="headerActions">
+            <HelpMenu />
+            <DarkModeActivator />
+          </div>
+          <a
+            className="logoLockup"
+            href="https://silo.pgsty.com"
+            target="_blank"
+            rel="noopener"
+            aria-label="SILO website"
+          >
             <SiloBrand variant="emblem" className="emblem" />
             <SiloBrand variant="wordmark" className="wordmark" />
-          </div>
+          </a>
           <span className="consoleTag">Object Storage Console</span>
         </div>
         <div className="formArea">

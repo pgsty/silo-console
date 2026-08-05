@@ -235,6 +235,20 @@ code {
   }
 }
 
+/* Login-page dropdowns ("Other Authentication Methods", SSO redirect list):
+   mds DropdownBlock hardcodes 10px vertical padding, which leaves background
+   strips above/below the highlighted option. These menus portal into <body>,
+   so they are targeted by ID here instead of through the layout tree. */
+#alternativeMethods-options-selector,
+#redirect-rules {
+  padding: 0;
+}
+
+#alternativeMethods-options-selector > div,
+#redirect-rules > div {
+  padding: 10px 15px;
+}
+
 /* Chrome, Safari, Edge, Opera */
 input.removeArrows::-webkit-outer-spin-button,
 input.removeArrows::-webkit-inner-spin-button,
