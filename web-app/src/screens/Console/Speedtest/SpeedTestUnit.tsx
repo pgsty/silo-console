@@ -16,6 +16,7 @@
 import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
+import { useT } from "i18n";
 import { calculateBytes } from "../../../common/utils";
 
 const SpeedTestUnitBase = styled.table(({ theme }) => ({
@@ -67,6 +68,7 @@ const SpeedTestUnit = ({
   throughput: string;
   objects: number;
 }) => {
+  const t = useT();
   const avg = calculateBytes(throughput);
 
   let total = "0";
@@ -91,7 +93,7 @@ const SpeedTestUnit = ({
         <tr>
           <td className={`metricValContainer objectsUnitRes`}>{objects}</td>
           <td className={`metricValContainer objectsUnit`}>
-            {objects !== 0 && "Objs/S"}
+            {objects !== 0 && t("Objs/S")}
           </td>
         </tr>
       </tbody>

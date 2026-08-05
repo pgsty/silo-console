@@ -24,9 +24,11 @@ import {
   deleteFromList,
 } from "../../ObjectBrowser/objectBrowserSlice";
 import VirtualizedList from "../VirtualizedList/VirtualizedList";
+import { useT } from "i18n";
 
 const ObjectManager = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const objects = useSelector(
     (state: AppState) => state.objectBrowser.objectManager.objectsToManage,
@@ -86,9 +88,9 @@ const ObjectManager = () => {
               top: 25,
             }}
           >
-            <Tooltip tooltip={"Clean Completed Objects"} placement="bottom">
+            <Tooltip tooltip={t("Clean Completed Objects")} placement="bottom">
               <IconButton
-                aria-label={"Clear Completed List"}
+                aria-label={t("Clear Completed List")}
                 onClick={() => dispatch(cleanList())}
               >
                 <RemoveAllIcon />
@@ -105,7 +107,7 @@ const ObjectManager = () => {
               margin: "25px 30px 5px 30px",
             }}
           >
-            Downloads / Uploads
+            {t("Downloads / Uploads")}
           </Box>
           <Box
             sx={{

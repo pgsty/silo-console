@@ -21,10 +21,12 @@ import PageHeaderWrapper from "./PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import { setHelpName } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
+import { interpolate, useT } from "i18n";
 
 const ComponentsScreen = () => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const dispatch = useAppDispatch();
+  const t = useT();
 
   useEffect(() => {
     dispatch(setHelpName("components"));
@@ -38,10 +40,10 @@ const ComponentsScreen = () => {
       <PageLayout>
         <Grid container>
           <Grid item xs={12}>
-            <SectionTitle>Confirm Dialogs</SectionTitle>
+            <SectionTitle>{t("Confirm Dialogs")}</SectionTitle>
           </Grid>
           <Grid item xs={12}>
-            <p>Used to confirm a non-idempotent action.</p>
+            <p>{t("Used to confirm a non-idempotent action.")}</p>
           </Grid>
           <Grid item xs={12}>
             <Button
@@ -51,11 +53,11 @@ const ComponentsScreen = () => {
               onClick={() => {
                 setDialogOpen(true);
               }}
-              label={"Open Dialog"}
+              label={t("Open Dialog")}
             />
             <ConfirmDialog
-              title={`Delete Bucket`}
-              confirmText={"Delete"}
+              title={t("Delete Bucket")}
+              confirmText={t("Delete")}
               isOpen={dialogOpen}
               titleIcon={<ConfirmDeleteIcon />}
               isLoading={false}
@@ -67,8 +69,12 @@ const ComponentsScreen = () => {
               }}
               confirmationContent={
                 <Fragment>
-                  Are you sure you want to delete bucket <b>bucket</b>
-                  ? <br />A bucket can only be deleted if it's empty.
+                  {interpolate(
+                    t("Are you sure you want to delete bucket {bucket}?"),
+                    { bucket: <b>bucket</b> },
+                  )}
+                  <br />
+                  {t("A bucket can only be deleted if it's empty.")}
                 </Fragment>
               }
             />

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { getStoredLanguage, translate } from "../../i18n/lang";
+
 export const IAM_ROLES = {
   BUCKET_OWNER: "BUCKET_OWNER", // upload/delete objects from the bucket
   BUCKET_VIEWER: "BUCKET_VIEWER", // only view objects on the bucket
@@ -467,20 +469,21 @@ export const IAM_PAGES_PERMISSIONS = {
 export const S3_ALL_RESOURCES = "arn:aws:s3:::*";
 export const CONSOLE_UI_RESOURCE = "console-ui";
 
+// Plain function rather than a hook: it is called from render bodies all over
+// the console, so it reads the stored language directly. Callers re-render on a
+// language switch, which re-runs this.
 export const permissionTooltipHelper = (scopes: string[], name: string) => {
-  let niceScopes = scopes.join(", ").toString();
+  const niceScopes = scopes.join(", ").toString();
+  const lang = getStoredLanguage();
+  const template =
+    scopes.length > 1
+      ? "You require additional permissions in order to {name}. Please ask your SILO administrator to grant you {scopes} permissions in order to {name}."
+      : "You require additional permissions in order to {name}. Please ask your SILO administrator to grant you {scopes} permission in order to {name}.";
 
-  return (
-    "You require additional permissions in order to " +
-    name +
-    ". Please ask your SILO administrator to grant you " +
-    niceScopes +
-    " permission" +
-    (scopes.length > 1 ? "s" : "") +
-    " in order to " +
-    name +
-    "."
-  );
+  return translate(lang, template)
+    .split("{name}")
+    .join(translate(lang, name))
+    .replace("{scopes}", niceScopes);
 };
 
 export const listUsersPermissions = [IAM_SCOPES.ADMIN_LIST_USERS];

@@ -41,6 +41,7 @@ import { setErrorSnackMessage, setHelpName } from "../../../../systemSlice";
 import { selFeatures } from "../../consoleSlice";
 import { useAppDispatch } from "../../../../store";
 import { SecureComponent } from "../../../../common/SecureComponent";
+import { useLocalizedLink, useT } from "i18n";
 import api from "../../../../common/api";
 import FilterInputWrapper from "../../Common/FormComponents/FilterInputWrapper/FilterInputWrapper";
 import LogSearchFullModal from "./LogSearchFullModal";
@@ -58,6 +59,8 @@ const filtersContainer: CSSObject = {
 const LogsSearchMain = () => {
   const dispatch = useAppDispatch();
   const features = useSelector(selFeatures);
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [timeStart, setTimeStart] = useState<DateTime | null>(null);
@@ -236,7 +239,9 @@ const LogsSearchMain = () => {
           <MissingIntegration
             entity={"Audit Logs"}
             iconComponent={<SearchIcon />}
-            documentationLink="https://silo.pgsty.com/operations/monitoring/minio-logging/"
+            documentationLink={localize(
+              "https://silo.pgsty.com/operations/monitoring/minio-logging/",
+            )}
           />
         ) : (
           <Fragment>
@@ -263,7 +268,11 @@ const LogsSearchMain = () => {
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <ExpandOptionsButton
-                    label={`${filterOpen ? "Hide" : "Show"} advanced Filters`}
+                    label={
+                      filterOpen
+                        ? t("Hide advanced Filters")
+                        : t("Show advanced Filters")
+                    }
                     open={filterOpen}
                     onClick={() => {
                       setFilterOpen(!filterOpen);
@@ -288,38 +297,38 @@ const LogsSearchMain = () => {
                     color: "#9C9C9C",
                   }}
                 >
-                  Enable your preferred options to get filtered records.
+                  {t("Enable your preferred options to get filtered records.")}
                   <br />
-                  You can use '*' to match any character, '.' to signify a
-                  single character or '\' to scape an special character (E.g.
-                  mybucket-*)
+                  {t(
+                    "You can use '*' to match any character, '.' to signify a single character or '\\' to scape an special character (E.g. mybucket-*)",
+                  )}
                 </Box>
                 <Box sx={filtersContainer}>
                   <FilterInputWrapper
                     onChange={setBucket}
                     value={bucket}
-                    label={"Bucket"}
+                    label={t("Bucket")}
                     id="bucket"
                     name="bucket"
                   />
                   <FilterInputWrapper
                     onChange={setApiName}
                     value={apiName}
-                    label={"API Name"}
+                    label={t("API Name")}
                     id="api_name"
                     name="api_name"
                   />
                   <FilterInputWrapper
                     onChange={setAccessKey}
                     value={accessKey}
-                    label={"Access Key"}
+                    label={t("Access Key")}
                     id="access_key"
                     name="access_key"
                   />
                   <FilterInputWrapper
                     onChange={setUserAgent}
                     value={userAgent}
-                    label={"User Agent"}
+                    label={t("User Agent")}
                     id="user_agent"
                     name="user_agent"
                   />
@@ -328,21 +337,21 @@ const LogsSearchMain = () => {
                   <FilterInputWrapper
                     onChange={setObject}
                     value={object}
-                    label={"Object"}
+                    label={t("Object")}
                     id="object"
                     name="object"
                   />
                   <FilterInputWrapper
                     onChange={setRequestID}
                     value={requestID}
-                    label={"Request ID"}
+                    label={t("Request ID")}
                     id="request_id"
                     name="request_id"
                   />
                   <FilterInputWrapper
                     onChange={setResponseStatus}
                     value={responseStatus}
-                    label={"Response Status"}
+                    label={t("Response Status")}
                     id="response_status"
                     name="response_status"
                   />
@@ -364,7 +373,7 @@ const LogsSearchMain = () => {
                   type="button"
                   variant="callAction"
                   onClick={triggerLoad}
-                  label={"Get Information"}
+                  label={t("Get Information")}
                 />
               </Grid>
             </Box>
@@ -377,40 +386,40 @@ const LogsSearchMain = () => {
                 <DataTable
                   columns={[
                     {
-                      label: LogSearchColumnLabels.time,
+                      label: t(LogSearchColumnLabels.time),
                       elementKey: "time",
                       enableSort: true,
                     },
                     {
-                      label: LogSearchColumnLabels.api_name,
+                      label: t(LogSearchColumnLabels.api_name),
                       elementKey: "api_name",
                     },
                     {
-                      label: LogSearchColumnLabels.access_key,
+                      label: t(LogSearchColumnLabels.access_key),
                       elementKey: "access_key",
                     },
                     {
-                      label: LogSearchColumnLabels.bucket,
+                      label: t(LogSearchColumnLabels.bucket),
                       elementKey: "bucket",
                     },
                     {
-                      label: LogSearchColumnLabels.object,
+                      label: t(LogSearchColumnLabels.object),
                       elementKey: "object",
                     },
                     {
-                      label: LogSearchColumnLabels.remote_host,
+                      label: t(LogSearchColumnLabels.remote_host),
                       elementKey: "remote_host",
                     },
                     {
-                      label: LogSearchColumnLabels.request_id,
+                      label: t(LogSearchColumnLabels.request_id),
                       elementKey: "request_id",
                     },
                     {
-                      label: LogSearchColumnLabels.user_agent,
+                      label: t(LogSearchColumnLabels.user_agent),
                       elementKey: "user_agent",
                     },
                     {
-                      label: LogSearchColumnLabels.response_status,
+                      label: t(LogSearchColumnLabels.response_status),
                       elementKey: "response_status",
                       renderFunction: (element) => (
                         <Fragment>
@@ -423,17 +432,17 @@ const LogsSearchMain = () => {
                       renderFullObject: true,
                     },
                     {
-                      label: LogSearchColumnLabels.request_content_length,
+                      label: t(LogSearchColumnLabels.request_content_length),
                       elementKey: "request_content_length",
                       renderFunction: niceBytes,
                     },
                     {
-                      label: LogSearchColumnLabels.response_content_length,
+                      label: t(LogSearchColumnLabels.response_content_length),
                       elementKey: "response_content_length",
                       renderFunction: niceBytes,
                     },
                     {
-                      label: LogSearchColumnLabels.time_to_response_ns,
+                      label: t(LogSearchColumnLabels.time_to_response_ns),
                       elementKey: "time_to_response_ns",
                       renderFunction: nsToSeconds,
                       contentTextAlign: "right",
@@ -442,9 +451,9 @@ const LogsSearchMain = () => {
                   isLoading={loading}
                   records={records}
                   entityName="Logs"
-                  customEmptyMessage={
-                    "There is no information with this criteria"
-                  }
+                  customEmptyMessage={t(
+                    "There is no information with this criteria",
+                  )}
                   idField="request_id"
                   columnsSelector
                   columnsShown={columnsShown}

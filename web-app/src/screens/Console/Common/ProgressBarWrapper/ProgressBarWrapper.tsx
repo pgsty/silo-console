@@ -16,6 +16,7 @@
 
 import React from "react";
 import { ProgressBar, ProgressBarProps } from "mds";
+import { useT } from "i18n";
 
 interface IProgressBarWrapper {
   value: number;
@@ -31,12 +32,13 @@ interface IProgressBarWrapper {
 function LinearProgressWithLabel(
   props: { error: boolean; cancelled: boolean } & ProgressBarProps,
 ) {
+  const t = useT();
   let label = "";
 
   if (props.error) {
-    label = `Error: ${props.notificationLabel || ""}`;
+    label = `${t("Error:")} ${props.notificationLabel || ""}`;
   } else if (props.cancelled) {
-    label = `Cancelled`;
+    label = t("Cancelled");
   }
 
   return (

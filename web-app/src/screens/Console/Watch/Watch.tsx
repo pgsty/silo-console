@@ -33,12 +33,14 @@ import { wsProtocol } from "../../../utils/wsUtils";
 import { ErrorResponseHandler } from "../../../common/types";
 import { watchMessageReceived, watchResetMessages } from "./watchSlice";
 import { setHelpName } from "../../../systemSlice";
+import { useT } from "i18n";
 import api from "../../../common/api";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 
 const Watch = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const messages = useSelector((state: AppState) => state.watch.messages);
 
   const [start, setStart] = useState(false);
@@ -147,7 +149,7 @@ const Watch = () => {
             }}
           >
             <Box sx={{ flexGrow: 1 }}>
-              <InputLabel>Bucket</InputLabel>
+              <InputLabel>{t("Bucket")}</InputLabel>
               <Select
                 id="bucket-name"
                 name="bucket-name"
@@ -157,11 +159,11 @@ const Watch = () => {
                 }}
                 disabled={start}
                 options={optionsArray}
-                placeholder={"Select Bucket"}
+                placeholder={t("Select Bucket")}
               />
             </Box>
             <Box sx={{ flexGrow: 1 }}>
-              <InputLabel>Prefix</InputLabel>
+              <InputLabel>{t("Prefix")}</InputLabel>
               <InputBox
                 id="prefix-resource"
                 disabled={start}
@@ -171,7 +173,7 @@ const Watch = () => {
               />
             </Box>
             <Box sx={{ flexGrow: 1 }}>
-              <InputLabel>Suffix</InputLabel>
+              <InputLabel>{t("Suffix")}</InputLabel>
               <InputBox
                 id="suffix-resource"
                 disabled={start}
@@ -187,7 +189,7 @@ const Watch = () => {
                   type="submit"
                   variant="callAction"
                   onClick={() => setStart(false)}
-                  label={"Stop"}
+                  label={t("Stop")}
                 />
               ) : (
                 <Button
@@ -195,7 +197,7 @@ const Watch = () => {
                   type="submit"
                   variant="callAction"
                   onClick={() => setStart(true)}
-                  label={"Start"}
+                  label={t("Start")}
                 />
               )}
             </Box>
@@ -205,21 +207,21 @@ const Watch = () => {
             <DataTable
               columns={[
                 {
-                  label: "Time",
+                  label: t("Time"),
                   elementKey: "Time",
                   renderFunction: timeFromDate,
                 },
                 {
-                  label: "Size",
+                  label: t("Size"),
                   elementKey: "Size",
                   renderFunction: niceBytes,
                 },
-                { label: "Type", elementKey: "Type" },
-                { label: "Path", elementKey: "Path" },
+                { label: t("Type"), elementKey: "Type" },
+                { label: t("Path"), elementKey: "Path" },
               ]}
               records={messages}
               entityName={"Watch"}
-              customEmptyMessage={"No Changes at this time"}
+              customEmptyMessage={t("No Changes at this time")}
               idField={"watch_table"}
               isLoading={false}
               customPaperHeight={"calc(100vh - 270px)"}

@@ -35,6 +35,7 @@ import DistributedOnly from "../Common/DistributedOnly/DistributedOnly";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import { SecureComponent } from "../../../common/SecureComponent";
+import { useT } from "i18n";
 import { selDistSet, setHelpName } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import { wsProtocol } from "../../../utils/wsUtils";
@@ -46,6 +47,7 @@ import {
 
 const Speedtest = () => {
   const distributedSetup = useSelector(selDistSet);
+  const t = useT();
 
   const [start, setStart] = useState<boolean>(false);
   const [currStatus, setCurrStatus] = useState<SpeedTestResponse[] | null>(
@@ -144,9 +146,9 @@ const Speedtest = () => {
     setSpeedometerValue(percToDisplay);
   }, [start, currentValue, topDate, totalSeconds]);
 
-  const stoppedLabel = currStatus !== null ? "Retest" : "Start";
+  const stoppedLabel = currStatus !== null ? t("Retest") : t("Start");
 
-  const buttonLabel = start ? "Start" : stoppedLabel;
+  const buttonLabel = start ? t("Start") : stoppedLabel;
 
   const startSpeedtestButton = () => {
     setCurrStatus(null);
@@ -175,8 +177,16 @@ const Speedtest = () => {
             resource={CONSOLE_UI_RESOURCE}
           >
             <Box withBorders>
-              <Grid container>
-                <Grid item md={3} sm={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  columnGap: 24,
+                  rowGap: 14,
+                }}
+              >
+                <Box sx={{ flex: "1 1 200px", minWidth: 180, maxWidth: 300 }}>
                   <Box
                     sx={{
                       fontSize: 13,
@@ -185,15 +195,15 @@ const Speedtest = () => {
                   >
                     {start ? (
                       <Fragment>
-                        Speedtest in progress...
+                        {t("Speedtest in progress...")}
                         <Loader style={{ width: 15, height: 15 }} />
                       </Fragment>
                     ) : (
                       <Fragment>
                         {currStatus && !start ? (
-                          <b>Speed Test results:</b>
+                          <b>{t("Speed Test results:")}</b>
                         ) : (
-                          <b>Performance test</b>
+                          <b>{t("Performance test")}</b>
                         )}
                       </Fragment>
                     )}
@@ -206,63 +216,59 @@ const Speedtest = () => {
                       size={"small"}
                     />
                   </Box>
-                </Grid>
-                <Grid item md={4} sm={12}>
-                  <div style={{ marginLeft: 10, width: 300 }}>
-                    <InputBox
-                      id={"size"}
-                      name={"size"}
-                      label={"Object Size"}
-                      onChange={(e) => {
-                        setSize(e.target.value);
-                      }}
-                      noLabelMinWidth={true}
-                      value={size}
-                      disabled={start}
-                      overlayObject={
-                        <InputUnitMenu
-                          id={"size-unit"}
-                          onUnitChange={setSizeUnit}
-                          unitSelected={sizeUnit}
-                          unitsList={[
-                            { label: "KiB", value: "KiB" },
-                            { label: "MiB", value: "MiB" },
-                            { label: "GiB", value: "GiB" },
-                          ]}
-                          disabled={start}
-                        />
+                </Box>
+                <Box sx={{ flex: "1 1 240px", minWidth: 220, maxWidth: 320 }}>
+                  <InputBox
+                    id={"size"}
+                    name={"size"}
+                    label={t("Object Size")}
+                    onChange={(e) => {
+                      setSize(e.target.value);
+                    }}
+                    noLabelMinWidth={true}
+                    value={size}
+                    disabled={start}
+                    overlayObject={
+                      <InputUnitMenu
+                        id={"size-unit"}
+                        onUnitChange={setSizeUnit}
+                        unitSelected={sizeUnit}
+                        unitsList={[
+                          { label: "KiB", value: "KiB" },
+                          { label: "MiB", value: "MiB" },
+                          { label: "GiB", value: "GiB" },
+                        ]}
+                        disabled={start}
+                      />
+                    }
+                  />
+                </Box>
+                <Box sx={{ flex: "1 1 240px", minWidth: 220, maxWidth: 320 }}>
+                  <InputBox
+                    id={"duration"}
+                    name={"duration"}
+                    label={t("Duration")}
+                    onChange={(e) => {
+                      if (e.target.validity.valid) {
+                        setDuration(e.target.value);
                       }
-                    />
-                  </div>
-                </Grid>
-                <Grid item md={4} sm={12}>
-                  <div style={{ marginLeft: 10, width: 300 }}>
-                    <InputBox
-                      id={"duration"}
-                      name={"duration"}
-                      label={"Duration"}
-                      onChange={(e) => {
-                        if (e.target.validity.valid) {
-                          setDuration(e.target.value);
-                        }
-                      }}
-                      noLabelMinWidth={true}
-                      value={duration}
-                      disabled={start}
-                      overlayObject={
-                        <InputUnitMenu
-                          id={"size-unit"}
-                          onUnitChange={() => {}}
-                          unitSelected={"s"}
-                          unitsList={[{ label: "s", value: "s" }]}
-                          disabled={start}
-                        />
-                      }
-                      pattern={"[0-9]*"}
-                    />
-                  </div>
-                </Grid>
-                <Grid item md={1} sm={12} sx={{ textAlign: "center" }}>
+                    }}
+                    noLabelMinWidth={true}
+                    value={duration}
+                    disabled={start}
+                    overlayObject={
+                      <InputUnitMenu
+                        id={"size-unit"}
+                        onUnitChange={() => {}}
+                        unitSelected={"s"}
+                        unitsList={[{ label: "s", value: "s" }]}
+                        disabled={start}
+                      />
+                    }
+                    pattern={"[0-9]*"}
+                  />
+                </Box>
+                <Box sx={{ flexShrink: 0, marginLeft: "auto" }}>
                   <Button
                     onClick={startSpeedtestButton}
                     color="primary"
@@ -276,8 +282,8 @@ const Speedtest = () => {
                     }
                     label={buttonLabel}
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
               <Grid container>
                 <Grid item xs={12}>
                   <Fragment>
@@ -297,9 +303,9 @@ const Speedtest = () => {
               <Fragment>
                 <br />
                 <HelpBox
-                  title={
-                    "During the speed test all your production traffic will be temporarily suspended."
-                  }
+                  title={t(
+                    "During the speed test all your production traffic will be temporarily suspended.",
+                  )}
                   iconComponent={<WarnIcon />}
                   help={<Fragment />}
                 />

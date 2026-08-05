@@ -26,6 +26,7 @@ import {
 } from "mds";
 
 import getByKey from "lodash/get";
+import { useT } from "i18n";
 
 const timestampDisplayFmt = "HH:mm:ss ZZZZ MM/dd/yyyy"; //make this same as server logs format.
 const messageForConsoleMsg = (log: LogMessage) => {
@@ -136,6 +137,7 @@ const messageForError = (log: LogMessage) => {
 
 const LogLine = (props: { log: LogMessage }) => {
   const { log } = props;
+  const t = useT();
   const [open, setOpen] = useState<boolean>(false);
 
   const getLogLineKey = (keyPath: string) => {
@@ -278,7 +280,7 @@ const LogLine = (props: { log: LogMessage }) => {
               fontWeight: "bold",
             }}
           >
-            <Box sx={{ marginTop: 10 }}>Log Details</Box>
+            <Box sx={{ marginTop: 10 }}>{t("Log Details")}</Box>
           </TableCell>
           <TableCell sx={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
             <Box

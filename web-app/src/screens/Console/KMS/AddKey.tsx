@@ -18,6 +18,7 @@ import React, { Fragment, useEffect } from "react";
 import { BackLink, Grid } from "mds";
 import { useNavigate } from "react-router-dom";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
+import { useT } from "i18n";
 import { useAppDispatch } from "../../../store";
 import AddKeyForm from "./AddKeyForm";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
@@ -27,6 +28,7 @@ import { setHelpName } from "systemSlice";
 const AddKey = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   useEffect(() => {
     dispatch(setHelpName("add_key"));
@@ -39,7 +41,7 @@ const AddKey = () => {
         <PageHeaderWrapper
           label={
             <BackLink
-              label={"Keys"}
+              label={t("Keys")}
               onClick={() => navigate(IAM_PAGES.KMS_KEYS)}
             />
           }

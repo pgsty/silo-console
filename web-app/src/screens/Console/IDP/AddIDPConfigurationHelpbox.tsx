@@ -16,6 +16,7 @@
 
 import React, { Fragment } from "react";
 import { HelpIconFilled, Box } from "mds";
+import { useLocalizedLink, useT } from "i18n";
 
 interface IContent {
   icon: React.ReactNode;
@@ -63,6 +64,9 @@ const AddIDPConfigurationHelpBox = ({
   docText,
   contents,
 }: IAddIDPConfigurationHelpBoxProps) => {
+  const t = useT();
+  const localize = useLocalizedLink();
+
   return (
     <Box
       sx={{
@@ -91,7 +95,7 @@ const AddIDPConfigurationHelpBox = ({
         }}
       >
         <HelpIconFilled />
-        <div>{helpText}</div>
+        <div>{t(helpText)}</div>
       </Box>
       <Box sx={{ fontSize: "14px", marginBottom: "15px" }}>
         {contents.map((content, index) => (
@@ -100,16 +104,16 @@ const AddIDPConfigurationHelpBox = ({
               <Box sx={{ paddingBottom: "20px" }}>
                 <FeatureItem
                   icon={content.icon}
-                  description={content.iconDescription}
+                  description={t(content.iconDescription)}
                 />
               </Box>
             )}
-            <Box sx={{ paddingBottom: "20px" }}>{content.text}</Box>
+            <Box sx={{ paddingBottom: "20px" }}>{t(content.text)}</Box>
           </Fragment>
         ))}
         <Box sx={{ paddingBottom: "20px" }}>
-          <a href={docLink} target="_blank" rel="noopener">
-            {docText}
+          <a href={localize(docLink)} target="_blank" rel="noopener">
+            {t(docText)}
           </a>
         </Box>
       </Box>

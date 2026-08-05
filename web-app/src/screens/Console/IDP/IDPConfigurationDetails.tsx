@@ -36,6 +36,7 @@ import {
   WarnIcon,
 } from "mds";
 import { useNavigate, useParams } from "react-router-dom";
+import { useT } from "i18n";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { useAppDispatch } from "../../../store";
 import {
@@ -77,6 +78,7 @@ const IDPConfigurationDetails = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const params = useParams();
+  const t = useT();
 
   const configurationName = params.idpName;
 
@@ -239,13 +241,13 @@ const IDPConfigurationDetails = ({
       case "toggle":
         return (
           <Switch
-            indicatorLabels={["Enabled", "Disabled"]}
+            indicatorLabels={[t("Enabled"), t("Disabled")]}
             checked={fields[key] === "on"}
             value={"is-field-enabled"}
             id={"is-field-enabled"}
             name={"is-field-enabled"}
-            label={value.label}
-            tooltip={value.tooltip}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
             onChange={(e) =>
               setFields({ ...fields, [key]: e.target.checked ? "on" : "off" })
             }
@@ -259,14 +261,14 @@ const IDPConfigurationDetails = ({
             id={key}
             required={value.required}
             name={key}
-            label={value.label}
-            tooltip={value.tooltip}
-            error={value.hasError(fields[key], editMode)}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
+            error={t(value.hasError(fields[key], editMode))}
             value={fields[key] ? fields[key] : ""}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFields({ ...fields, [key]: e.target.value })
             }
-            placeholder={value.placeholder}
+            placeholder={t(value.placeholder)}
             disabled={!editMode}
             type={value.type}
           />
@@ -297,8 +299,9 @@ const IDPConfigurationDetails = ({
                         flexGrow: 1,
                       }}
                     >
-                      Client Secret must be re-entered to change OpenID
-                      configurations
+                      {t(
+                        "Client Secret must be re-entered to change OpenID configurations",
+                      )}
                     </Box>
                   }
                   iconComponent={<WarnIcon />}
@@ -317,7 +320,7 @@ const IDPConfigurationDetails = ({
                     type="button"
                     variant="regular"
                     onClick={resetForm}
-                    label={"Clear"}
+                    label={t("Clear")}
                   />
                 )}
                 {editMode && (
@@ -326,7 +329,7 @@ const IDPConfigurationDetails = ({
                     type="button"
                     variant="regular"
                     onClick={toggleEditMode}
-                    label={"Cancel"}
+                    label={t("Cancel")}
                   />
                 )}
                 {editMode && (
@@ -336,7 +339,7 @@ const IDPConfigurationDetails = ({
                     variant="callAction"
                     color="primary"
                     disabled={loadingDetails || loadingSave || !validSave()}
-                    label={"Save"}
+                    label={t("Save")}
                   />
                 )}
               </Grid>
@@ -364,14 +367,14 @@ const IDPConfigurationDetails = ({
       >
         {Object.entries(formFields).map(([key, value]) => {
           if (!value.editOnly) {
-            let label: React.ReactNode = value.label;
+            let label: React.ReactNode = t(value.label);
             let val: React.ReactNode = fields[key] ? fields[key] : "";
 
             if (value.type === "toggle" && fields[key]) {
               if (val !== "on") {
-                val = "Off";
+                val = t("Off");
               } else {
-                val = "On";
+                val = t("On");
               }
             }
 
@@ -393,9 +396,11 @@ const IDPConfigurationDetails = ({
                     },
                   }}
                 >
-                  <span>{value.label}</span>
+                  <span>{t(value.label)}</span>
                   <Tooltip
-                    tooltip={`This value is set from the ${overrideFields[key]} environment variable`}
+                    tooltip={t(
+                      "This value is set from the {name} environment variable",
+                    ).replace("{name}", overrideFields[key])}
                     placement={"right"}
                   >
                     <span className={"muted"}>
@@ -435,14 +440,16 @@ const IDPConfigurationDetails = ({
       )}
       <Grid item xs={12}>
         <PageHeaderWrapper
-          label={<BackLink onClick={() => navigate(backLink)} label={header} />}
+          label={
+            <BackLink onClick={() => navigate(backLink)} label={t(header)} />
+          }
           actions={<HelpMenu />}
         />
         <PageLayout>
           <ScreenTitle
             icon={icon}
             title={
-              configurationName === "_" ? "Default" : configurationName || ""
+              configurationName === "_" ? t("Default") : configurationName || ""
             }
             subTitle={null}
             actions={
@@ -451,7 +458,9 @@ const IDPConfigurationDetails = ({
                   <Tooltip
                     tooltip={
                       envOverride
-                        ? "This configuration cannot be deleted using this module as this was set using OpenID environment variables."
+                        ? t(
+                            "This configuration cannot be deleted using this module as this was set using OpenID environment variables.",
+                          )
                         : ""
                     }
                   >
@@ -460,7 +469,7 @@ const IDPConfigurationDetails = ({
                       onClick={() => {
                         setDeleteOpen(true);
                       }}
-                      label={"Delete Configuration"}
+                      label={t("Delete Configuration")}
                       icon={<TrashIcon />}
                       variant={"secondary"}
                       disabled={envOverride}
@@ -471,7 +480,9 @@ const IDPConfigurationDetails = ({
                   <Tooltip
                     tooltip={
                       envOverride
-                        ? "Configuration cannot be edited in this module as OpenID environment variables are set for this SILO instance."
+                        ? t(
+                            "Configuration cannot be edited in this module as OpenID environment variables are set for this SILO instance.",
+                          )
                         : ""
                     }
                   >
@@ -481,7 +492,7 @@ const IDPConfigurationDetails = ({
                       variant={"callAction"}
                       icon={<EditIcon />}
                       onClick={toggleEditMode}
-                      label={"Edit"}
+                      label={t("Edit")}
                       disabled={envOverride}
                     />
                   </Tooltip>
@@ -489,21 +500,23 @@ const IDPConfigurationDetails = ({
                 <Tooltip
                   tooltip={
                     envOverride
-                      ? "Configuration cannot be disabled / enabled in this module as OpenID environment variables are set for this SILO instance."
+                      ? t(
+                          "Configuration cannot be disabled / enabled in this module as OpenID environment variables are set for this SILO instance.",
+                        )
                       : ""
                   }
                 >
                   <Button
                     id={"is-configuration-enabled"}
                     onClick={() => toggleConfiguration(!isEnabled)}
-                    label={isEnabled ? "Disable" : "Enable"}
+                    label={isEnabled ? t("Disable") : t("Enable")}
                     disabled={loadingEnabledSave || envOverride}
                   />
                 </Tooltip>
                 <Button
                   id={"refresh-idp-config"}
                   onClick={() => setLoadingDetails(true)}
-                  label={"Refresh"}
+                  label={t("Refresh")}
                   icon={<RefreshIcon />}
                 />
               </Fragment>

@@ -19,12 +19,14 @@ import { Button, PageLayout, FormLayout, Box, Checkbox, InputLabel } from "mds";
 import { wsProtocol } from "../../../utils/wsUtils";
 import { useAppDispatch } from "../../../store";
 import { setHelpName } from "../../../systemSlice";
+import { useT } from "i18n";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 
 var socket: any = null;
 
 const Profile = () => {
+  const t = useT();
   const [profilingStarted, setProfilingStarted] = useState<boolean>(false);
   const [types, setTypes] = useState<string[]>([
     "cpu",
@@ -120,7 +122,7 @@ const Profile = () => {
               "& .inputItem:not(:last-of-type)": { marginBottom: 0 },
             }}
           >
-            <InputLabel noMinWidth>Types to profile:</InputLabel>
+            <InputLabel noMinWidth>{t("Types to profile:")}</InputLabel>
             {typesList.map((t) => (
               <Checkbox
                 checked={types.indexOf(t.value) > -1}
@@ -150,7 +152,7 @@ const Profile = () => {
               onClick={() => {
                 startProfiling();
               }}
-              label={"Start Profiling"}
+              label={t("Start Profiling")}
             />
             <Button
               id={"stop-profiling"}
@@ -161,7 +163,7 @@ const Profile = () => {
               onClick={() => {
                 stopProfiling();
               }}
-              label={"Stop Profiling"}
+              label={t("Stop Profiling")}
             />
           </Box>
         </FormLayout>

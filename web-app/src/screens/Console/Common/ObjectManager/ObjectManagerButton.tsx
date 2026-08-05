@@ -21,6 +21,7 @@ import { Button, CircleIcon, ObjectManagerIcon } from "mds";
 import { useSelector } from "react-redux";
 import { toggleList } from "../../ObjectBrowser/objectBrowserSlice";
 import { AppState, useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 
 const IndicatorContainer = styled.div(({ theme }) => ({
   position: "absolute",
@@ -50,6 +51,7 @@ const IndicatorContainer = styled.div(({ theme }) => ({
 
 const ObjectManagerButton = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const managerObjects = useSelector(
     (state: AppState) => state.objectBrowser.objectManager.objectsToManage,
   );
@@ -75,7 +77,7 @@ const ObjectManagerButton = () => {
     <Fragment>
       {managerObjects && managerObjects.length > 0 && (
         <Button
-          aria-label="Refresh List"
+          aria-label={t("Refresh List")}
           onClick={() => {
             dispatch(toggleList());
           }}

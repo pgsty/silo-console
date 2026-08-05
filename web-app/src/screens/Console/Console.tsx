@@ -49,6 +49,7 @@ import MenuWrapper from "./Menu/MenuWrapper";
 import LoadingComponent from "../../common/LoadingComponent";
 import ComponentsScreen from "./Common/ComponentsScreen";
 import AddBucketModal from "./Buckets/ListBuckets/AddBucket/AddBucketModal";
+import { useT } from "i18n";
 
 const Trace = React.lazy(() => import("./Trace/Trace"));
 const Watch = React.lazy(() => import("./Watch/Watch"));
@@ -146,6 +147,7 @@ const KMSRoutes = React.lazy(() => import("./KMS/KMSRoutes"));
 
 const Console = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const { pathname = "" } = useLocation();
   const session = useSelector(selSession);
   const features = useSelector(selFeatures);
@@ -497,19 +499,20 @@ const Console = () => {
                             left: 0,
                           }}
                         />
-                        <span>The server is restarting.</span>
+                        <span>{t("The server is restarting.")}</span>
                       </Fragment>
                     ) : (
                       <Fragment>
-                        The instance needs to be restarted for configuration
-                        changes to take effect.{" "}
+                        {t(
+                          "The instance needs to be restarted for configuration changes to take effect.",
+                        )}{" "}
                         <Button
                           id={"restart-server"}
                           variant="secondary"
                           onClick={() => {
                             restartServer();
                           }}
-                          label={"Restart"}
+                          label={t("Restart")}
                         />
                       </Fragment>
                     )}

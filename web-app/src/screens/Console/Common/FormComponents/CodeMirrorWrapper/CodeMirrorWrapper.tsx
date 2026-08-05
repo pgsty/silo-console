@@ -18,6 +18,7 @@ import React, { Fragment } from "react";
 import { Button, CodeEditor, CopyIcon } from "mds";
 import CopyToClipboard from "react-copy-to-clipboard";
 import TooltipWrapper from "../../TooltipWrapper/TooltipWrapper";
+import { useT } from "i18n";
 
 interface ICodeWrapper {
   value: string;
@@ -42,6 +43,8 @@ const CodeMirrorWrapper = ({
   readOnly = false,
   disabled = false,
 }: ICodeWrapper) => {
+  const t = useT();
+
   return (
     <CodeEditor
       value={value}
@@ -54,7 +57,7 @@ const CodeMirrorWrapper = ({
       disabled={disabled}
       helpTools={
         <Fragment>
-          <TooltipWrapper tooltip={"Copy to Clipboard"}>
+          <TooltipWrapper tooltip={t("Copy to Clipboard")}>
             <CopyToClipboard text={value}>
               <Button
                 type={"button"}

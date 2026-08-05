@@ -17,6 +17,7 @@
 import React, { useEffect, useState } from "react";
 import { AddIcon, Button, DataTable, Grid, PageLayout, RefreshIcon } from "mds";
 import { useNavigate } from "react-router-dom";
+import { useT } from "i18n";
 import api from "../../../common/api";
 import {
   hasPermission,
@@ -38,6 +39,7 @@ import HelpMenu from "../HelpMenu";
 const ListKeys = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [filter, setFilter] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -115,7 +117,7 @@ const ListKeys = () => {
             >
               <SearchBox
                 onChange={setFilter}
-                placeholder="Search Keys with pattern"
+                placeholder={t("Search Keys with pattern")}
                 value={filter}
               />
             </SecureComponent>
@@ -125,7 +127,7 @@ const ListKeys = () => {
               resource={CONSOLE_UI_RESOURCE}
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={"Refresh"}>
+              <TooltipWrapper tooltip={t("Refresh")}>
                 <Button
                   id={"refresh-keys"}
                   variant="regular"
@@ -140,10 +142,10 @@ const ListKeys = () => {
                 resource={CONSOLE_UI_RESOURCE}
                 errorProps={{ disabled: true }}
               >
-                <TooltipWrapper tooltip={"Create Key"}>
+                <TooltipWrapper tooltip={t("Create Key")}>
                   <Button
                     id={"create-key"}
-                    label={"Create Key"}
+                    label={t("Create Key")}
                     variant={"callAction"}
                     icon={<AddIcon />}
                     onClick={() => navigate(IAM_PAGES.KMS_KEYS_ADD)}
@@ -160,13 +162,14 @@ const ListKeys = () => {
             >
               <DataTable
                 columns={[
-                  { label: "Name", elementKey: "name" },
-                  { label: "Created By", elementKey: "createdBy" },
-                  { label: "Created At", elementKey: "createdAt" },
+                  { label: t("Name"), elementKey: "name" },
+                  { label: t("Created By"), elementKey: "createdBy" },
+                  { label: t("Created At"), elementKey: "createdAt" },
                 ]}
                 isLoading={loading}
                 records={records}
                 entityName="Keys"
+                customEmptyMessage={t("There are no Keys yet.")}
                 idField="name"
               />
             </SecureComponent>

@@ -31,6 +31,7 @@ import { IndvServerMetric, SpeedTestResponse, STServer } from "./types";
 import { calculateBytes, prettyNumber } from "../../../common/utils";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer } from "recharts";
 import { cleanMetrics } from "./utils";
+import { interpolate, useT } from "i18n";
 import CodeMirrorWrapper from "../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
 import SpeedTestUnit from "./SpeedTestUnit";
 import styled from "styled-components";
@@ -143,6 +144,7 @@ interface ISTResults {
 }
 
 const STResults = ({ results, start }: ISTResults) => {
+  const t = useT();
   const [jsonView, setJsonView] = useState<boolean>(false);
 
   const finalRes = results[results.length - 1] || [];
@@ -308,10 +310,10 @@ const STResults = ({ results, start }: ISTResults) => {
           <Grid container>
             <Grid item xs={12} md={6} className={"descriptorLabel"}>
               {start ? (
-                <Fragment>Preliminar Results:</Fragment>
+                <Fragment>{t("Preliminar Results:")}</Fragment>
               ) : (
                 <Fragment>
-                  {jsonView ? "JSON Results:" : "Detailed Results:"}
+                  {jsonView ? t("JSON Results:") : t("Detailed Results:")}
                 </Fragment>
               )}
             </Grid>
@@ -325,14 +327,14 @@ const STResults = ({ results, start }: ISTResults) => {
                 <Fragment>
                   <Button
                     id={"download-results"}
-                    aria-label="Download Results"
+                    aria-label={t("Download Results")}
                     onClick={downloadResults}
                     icon={<DownloadIcon />}
                   />
                   &nbsp;
                   <Button
                     id={"toggle-json"}
-                    aria-label="Toogle JSON"
+                    aria-label={t("Toogle JSON")}
                     onClick={toggleJSONView}
                     icon={<JSONIcon />}
                   />
@@ -370,7 +372,7 @@ const STResults = ({ results, start }: ISTResults) => {
                     lg={2}
                     className={"detailedItem"}
                   >
-                    Nodes:&nbsp;<strong>{finalRes.servers}</strong>
+                    {t("Nodes:")}&nbsp;<strong>{finalRes.servers}</strong>
                   </Grid>
                   <Grid
                     item
@@ -380,7 +382,7 @@ const STResults = ({ results, start }: ISTResults) => {
                     lg={2}
                     className={"detailedItem"}
                   >
-                    Drives:&nbsp;<strong>{finalRes.disks}</strong>
+                    {t("Drives:")}&nbsp;<strong>{finalRes.disks}</strong>
                   </Grid>
                   <Grid
                     item
@@ -390,7 +392,8 @@ const STResults = ({ results, start }: ISTResults) => {
                     lg={2}
                     className={"detailedItem"}
                   >
-                    Concurrent:&nbsp;<strong>{finalRes.concurrent}</strong>
+                    {t("Concurrent:")}&nbsp;
+                    <strong>{finalRes.concurrent}</strong>
                   </Grid>
                   <Grid
                     item
@@ -408,7 +411,7 @@ const STResults = ({ results, start }: ISTResults) => {
                         style={{ width: 28, height: 28, objectFit: "contain" }}
                       />
                     </span>{" "}
-                    SILO VERSION&nbsp;<strong>{finalRes.version}</strong>
+                    {t("SILO VERSION")}&nbsp;<strong>{finalRes.version}</strong>
                   </Grid>
                   <Grid item xs={12} className={"tableOverflow"}>
                     <table
@@ -418,7 +421,7 @@ const STResults = ({ results, start }: ISTResults) => {
                     >
                       <thead>
                         <tr>
-                          <th colSpan={2}>Servers</th>
+                          <th colSpan={2}>{t("Servers")}</th>
                           <th>GET</th>
                           <th>PUT</th>
                         </tr>

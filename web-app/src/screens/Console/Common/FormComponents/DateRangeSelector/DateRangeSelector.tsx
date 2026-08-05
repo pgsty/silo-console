@@ -25,6 +25,7 @@ import {
   DateTimeInput,
 } from "mds";
 import { DateTime } from "luxon";
+import { useT } from "i18n";
 
 interface IDateRangeSelector {
   timeStart: DateTime | null;
@@ -47,6 +48,8 @@ const DateRangeSelector = ({
   startLabel = "Start Time:",
   endLabel = "End Time:",
 }: IDateRangeSelector) => {
+  const t = useT();
+
   return (
     <Grid
       item
@@ -105,7 +108,7 @@ const DateRangeSelector = ({
           sx={{ fontSize: "14px", fontWeight: 500, marginRight: "5px" }}
           className={"muted"}
         >
-          {label}
+          {t(label)}
         </Box>
         <Box
           customBorderPadding={"0px"}
@@ -131,7 +134,7 @@ const DateRangeSelector = ({
             pickerStartComponent={
               <Fragment>
                 <TimeIcon />
-                <span>{startLabel}</span>
+                <span>{t(startLabel)}</span>
               </Fragment>
             }
           />
@@ -143,7 +146,7 @@ const DateRangeSelector = ({
             pickerStartComponent={
               <Fragment>
                 <TimeIcon />
-                <span>{endLabel}</span>
+                <span>{t(endLabel)}</span>
               </Fragment>
             }
           />
@@ -163,7 +166,7 @@ const DateRangeSelector = ({
               variant="callAction"
               onClick={triggerSync}
               icon={<SyncIcon />}
-              label={"Sync"}
+              label={t("Sync")}
             />
           </Box>
         )}

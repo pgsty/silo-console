@@ -19,6 +19,7 @@ import { DrivesIcon, Loader, SectionTitle, Grid } from "mds";
 import { api } from "api";
 import { ServerProperties } from "api/consoleApi";
 import { SiloBrand } from "../../../../common/SiloBrand";
+import { interpolate, useT } from "i18n";
 
 interface ITestWrapper {
   title: any;
@@ -26,6 +27,7 @@ interface ITestWrapper {
 }
 
 const TestWrapper = ({ title, children }: ITestWrapper) => {
+  const t = useT();
   const [version, setVersion] = useState<string>("N/A");
   const [totalNodes, setTotalNodes] = useState<number>(0);
   const [totalDrives, setTotalDrives] = useState<number>(0);
@@ -97,9 +99,11 @@ const TestWrapper = ({ title, children }: ITestWrapper) => {
                     },
                   }}
                 >
-                  <DrivesIcon /> <strong>{totalNodes}</strong>
-                  &nbsp;nodes,&nbsp;
-                  <strong>{totalDrives}</strong>&nbsp; drives
+                  <DrivesIcon />{" "}
+                  {interpolate(t("{nodes} nodes, {drives} drives"), {
+                    nodes: <strong>{totalNodes}</strong>,
+                    drives: <strong>{totalDrives}</strong>,
+                  })}
                 </Grid>
                 <Grid
                   item
@@ -126,7 +130,7 @@ const TestWrapper = ({ title, children }: ITestWrapper) => {
                       style={{ width: 32, height: 32, objectFit: "contain" }}
                     />
                   </span>{" "}
-                  SILO VERSION&nbsp;<strong>{version}</strong>
+                  {t("SILO VERSION")}&nbsp;<strong>{version}</strong>
                 </Grid>
               </Fragment>
             ) : (

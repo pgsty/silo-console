@@ -35,6 +35,7 @@ import {
   healthInfoMessageReceived,
   healthInfoResetMessage,
 } from "./healthInfoSlice";
+import { useT } from "i18n";
 import TestWrapper from "../Common/TestWrapper/TestWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
@@ -42,6 +43,7 @@ import HealthInfoResults from "./HealthInfoResults";
 
 const HealthInfo = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const message = useSelector((state: AppState) => state.healthInfo.message);
 
@@ -209,7 +211,7 @@ const HealthInfo = () => {
 
       <PageLayout>
         <Box withBorders>
-          <TestWrapper title={title}>
+          <TestWrapper title={t(title)}>
             <Grid
               container
               sx={{
@@ -226,7 +228,7 @@ const HealthInfo = () => {
                   marginBottom: 25,
                 }}
               >
-                <h2>{localMessage}</h2>
+                <h2>{t(localMessage)}</h2>
                 <Box
                   sx={{
                     textAlign: "center",
@@ -237,10 +239,14 @@ const HealthInfo = () => {
                   {subnetResponse !== "" &&
                     !subnetResponse.toLowerCase().includes("error") && (
                       <Grid item xs={12}>
-                        <strong>Health report generated successfully!</strong>
+                        <strong>
+                          {t("Health report generated successfully!")}
+                        </strong>
                         &nbsp;{" "}
                         <strong>
-                          You can download the the Health report JSON File.
+                          {t(
+                            "You can download the the Health report JSON File.",
+                          )}
                         </strong>
                       </Grid>
                     )}
@@ -248,10 +254,12 @@ const HealthInfo = () => {
                     subnetResponse.toLowerCase().includes("error")) &&
                     serverDiagnosticStatus === DiagStatSuccess && (
                       <Grid item xs={12}>
-                        <strong>Something went wrong.</strong>
+                        <strong>{t("Something went wrong.")}</strong>
                         &nbsp;{" "}
                         <strong>
-                          May try again or download Health report JSON File.
+                          {t(
+                            "May try again or download Health report JSON File.",
+                          )}
                         </strong>
                       </Grid>
                     )}
@@ -284,7 +292,7 @@ const HealthInfo = () => {
                               variant="callAction"
                               onClick={() => download()}
                               disabled={downloadDisabled}
-                              label={"Download"}
+                              label={t("Download")}
                             />
                           )}
                       </Box>
@@ -295,7 +303,7 @@ const HealthInfo = () => {
                           variant={"callAction"}
                           disabled={startDiagnostic}
                           onClick={startDiagnosticAction}
-                          label={buttonStartText}
+                          label={t(buttonStartText)}
                         />
                       </Box>
                     </Box>
@@ -310,13 +318,13 @@ const HealthInfo = () => {
             <br />
             {serverHealthInfo === undefined ? (
               <HelpBox
-                title={
-                  "Cluster Health Report will be generated, you will be able to download the JSON File."
-                }
+                title={t(
+                  "Cluster Health Report will be generated, you will be able to download the JSON File.",
+                )}
                 iconComponent={<InfoIcon />}
-                help={
-                  "If the Health report cannot be generated at this time, please wait a moment and try again."
-                }
+                help={t(
+                  "If the Health report cannot be generated at this time, please wait a moment and try again.",
+                )}
               />
             ) : (
               <HealthInfoResults

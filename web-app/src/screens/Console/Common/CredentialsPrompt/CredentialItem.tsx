@@ -19,6 +19,7 @@ import { Button, CopyIcon, InputLabel, ReadBox, Box } from "mds";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { setModalSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
+import { useT } from "i18n";
 
 interface ICredentialsItem {
   label?: string;
@@ -27,6 +28,7 @@ interface ICredentialsItem {
 
 const CredentialItem = ({ label = "", value = "" }: ICredentialsItem) => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   return (
     <Box sx={{ marginTop: 12 }}>
@@ -38,7 +40,11 @@ const CredentialItem = ({ label = "", value = "" }: ICredentialsItem) => {
               id={"copy-path"}
               variant="regular"
               onClick={() => {
-                dispatch(setModalSnackMessage(`${label} copied to clipboard`));
+                dispatch(
+                  setModalSnackMessage(
+                    t("{label} copied to clipboard").replace("{label}", label),
+                  ),
+                );
               }}
               style={{
                 marginRight: "5px",

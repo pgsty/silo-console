@@ -17,6 +17,7 @@
 import React, { useEffect, useState } from "react";
 import { DateTime } from "luxon";
 import { Box, InputBox, InputLabel, LinkIcon } from "mds";
+import { useLanguage, useT } from "i18n";
 
 const DAY_SECONDS = 86400;
 const HOUR_SECONDS = 3600;
@@ -46,6 +47,8 @@ const DaysSelector = ({
   entity,
   onChange,
 }: IDaysSelector) => {
+  const t = useT();
+  const language = useLanguage();
   const maxDays = Math.floor(maxSeconds / DAY_SECONDS);
   const maxHours = Math.floor((maxSeconds % DAY_SECONDS) / HOUR_SECONDS);
   const maxMinutes = Math.floor((maxSeconds % HOUR_SECONDS) / HOUR_MINUTES);
@@ -156,7 +159,7 @@ const DaysSelector = ({
           marginBottom: 5,
         }}
       >
-        <InputLabel htmlFor={id}>{label}</InputLabel>
+        <InputLabel htmlFor={id}>{t(label)}</InputLabel>
       </Box>
       <Box
         sx={{
@@ -181,7 +184,7 @@ const DaysSelector = ({
             type="number"
             min="0"
             max="7"
-            label="Days"
+            label={t("Days")}
             name={id}
             onChange={(e) => {
               setSelectedDays(parseInt(e.target.value));
@@ -198,7 +201,7 @@ const DaysSelector = ({
             type="number"
             min="0"
             max="23"
-            label="Hours"
+            label={t("Hours")}
             name={id}
             onChange={(e) => {
               setSelectedHours(parseInt(e.target.value));
@@ -215,7 +218,7 @@ const DaysSelector = ({
             type="number"
             min="0"
             max="59"
-            label="Minutes"
+            label={t("Minutes")}
             name={id}
             onChange={(e) => {
               setSelectedMinutes(parseInt(e.target.value));
@@ -265,16 +268,23 @@ const DaysSelector = ({
         {validDate && dateSelected ? (
           <div className={"validityText"}>
             <LinkIcon />
-            <div>{entity} will be available until:</div>{" "}
+            <div>
+              {t("{entity} will be available until:").replace(
+                "{entity}",
+                t(entity),
+              )}
+            </div>{" "}
             <div className={"validTill"}>
               {DateTime.fromISO(dateSelected).toFormat(
-                "MM/dd/yyyy HH:mm:ss ZZZZ",
+                language === "zh"
+                  ? "yyyy-MM-dd HH:mm:ss"
+                  : "MM/dd/yyyy HH:mm:ss ZZZZ",
               )}
             </div>
           </div>
         ) : (
           <div className={"invalidDurationText"}>
-            Please select a valid duration.
+            {t("Please select a valid duration.")}
           </div>
         )}
       </Box>

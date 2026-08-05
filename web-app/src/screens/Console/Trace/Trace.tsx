@@ -38,6 +38,7 @@ import {
   traceResetMessages,
 } from "./traceSlice";
 import { setHelpName } from "../../../systemSlice";
+import { useT } from "i18n";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
@@ -45,6 +46,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 
 const Trace = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const messages = useSelector((state: AppState) => state.trace.messages);
   const traceStarted = useSelector(
@@ -173,7 +175,7 @@ const Trace = () => {
                   padding: "20px 0px 20px 0",
                 }}
               >
-                Calls to Trace
+                {t("Calls to Trace")}
               </Box>
               <Box
                 className={`${traceStarted ? "inactive-state" : ""}`}
@@ -199,7 +201,7 @@ const Trace = () => {
                     checked={all}
                     id={"all_calls"}
                     name={"all_calls"}
-                    label={"All"}
+                    label={t("All")}
                     onChange={() => setAll(!all)}
                     value={"all"}
                     disabled={traceStarted}
@@ -217,7 +219,7 @@ const Trace = () => {
                     checked={internal || all}
                     id={"internal_calls"}
                     name={"internal_calls"}
-                    label={"Internal"}
+                    label={t("Internal")}
                     onChange={() => setInternal(!internal)}
                     value={"internal"}
                     disabled={all || traceStarted}
@@ -226,7 +228,7 @@ const Trace = () => {
                     checked={storage || all}
                     id={"storage_calls"}
                     name={"storage_calls"}
-                    label={"Storage"}
+                    label={t("Storage")}
                     onChange={() => setStorage(!storage)}
                     value={"storage"}
                     disabled={all || traceStarted}
@@ -249,11 +251,11 @@ const Trace = () => {
                     gap: "15px",
                   }}
                 >
-                  <TooltipWrapper tooltip={"More filter options"}>
+                  <TooltipWrapper tooltip={t("More filter options")}>
                     <Button
                       id={"filter-toggle"}
                       onClick={() => setToggleFilter(!toggleFilter)}
-                      label={"Filters"}
+                      label={t("Filters")}
                       icon={<FilterIcon />}
                       variant={"regular"}
                       className={"filters-toggle-button"}
@@ -267,7 +269,7 @@ const Trace = () => {
                   {!traceStarted && (
                     <Button
                       id={"start-trace"}
-                      label={"Start"}
+                      label={t("Start")}
                       data-test-id={"trace-start-button"}
                       variant="callAction"
                       onClick={() => setLogActive(true)}
@@ -279,7 +281,7 @@ const Trace = () => {
                   {traceStarted && (
                     <Button
                       id={"stop-trace"}
-                      label={"Stop Trace"}
+                      label={t("Stop Trace")}
                       data-test-id={"trace-stop-button"}
                       variant="callAction"
                       onClick={() => setLogActive(false)}
@@ -328,8 +330,8 @@ const Trace = () => {
                     className="orient-vertical"
                     id="trace-status-code"
                     name="trace-status-code"
-                    label="Status Code"
-                    placeholder="e.g. 503"
+                    label={t("Status Code")}
+                    placeholder={t("e.g. 503")}
                     value={statusCode}
                     onChange={(e) => setStatusCode(e.target.value)}
                     disabled={traceStarted}
@@ -339,8 +341,8 @@ const Trace = () => {
                     className="orient-vertical"
                     id="trace-function-name"
                     name="trace-function-name"
-                    label="Function Name"
-                    placeholder="e.g. FunctionName2055"
+                    label={t("Function Name")}
+                    placeholder={t("e.g. FunctionName2055")}
                     value={func}
                     onChange={(e) => setFunc(e.target.value)}
                     disabled={traceStarted}
@@ -350,8 +352,8 @@ const Trace = () => {
                     className="orient-vertical"
                     id="trace-method"
                     name="trace-method"
-                    label="Method"
-                    placeholder="e.g. Method 2056"
+                    label={t("Method")}
+                    placeholder={t("e.g. Method 2056")}
                     value={method}
                     onChange={(e) => setMethod(e.target.value)}
                     disabled={traceStarted}
@@ -376,8 +378,8 @@ const Trace = () => {
                       className="orient-vertical"
                       id="trace-path"
                       name="trace-path"
-                      label="Path"
-                      placeholder="e.g. my-bucket/my-prefix/*"
+                      label={t("Path")}
+                      placeholder={t("e.g. my-bucket/my-prefix/*")}
                       value={path}
                       onChange={(e) => setPath(e.target.value)}
                       disabled={traceStarted}
@@ -392,9 +394,9 @@ const Trace = () => {
                       className="orient-vertical"
                       id="trace-fthreshold"
                       name="trace-fthreshold"
-                      label="Response Threshold"
+                      label={t("Response Threshold")}
                       type="number"
-                      placeholder="e.g. website.io.3249.114.12"
+                      placeholder={t("e.g. website.io.3249.114.12")}
                       value={`${threshold}`}
                       onChange={(e) => setThreshold(parseInt(e.target.value))}
                       disabled={traceStarted}
@@ -413,7 +415,7 @@ const Trace = () => {
                     checked={errors}
                     id={"only_errors"}
                     name={"only_errors"}
-                    label={"Display only Errors"}
+                    label={t("Display only Errors")}
                     onChange={() => setErrors(!errors)}
                     value={"only_errors"}
                     disabled={traceStarted}
@@ -431,14 +433,14 @@ const Trace = () => {
                   marginTop: "30px",
                 }}
               >
-                Trace Results
+                {t("Trace Results")}
               </Box>
             </Grid>
             <Grid item xs={12}>
               <DataTable
                 columns={[
                   {
-                    label: "Time",
+                    label: t("Time"),
                     elementKey: "ptime",
                     renderFunction: (time: Date) => {
                       const timeParse = new Date(time);
@@ -446,34 +448,34 @@ const Trace = () => {
                     },
                     width: 100,
                   },
-                  { label: "Name", elementKey: "api" },
+                  { label: t("Name"), elementKey: "api" },
                   {
-                    label: "Status",
+                    label: t("Status"),
                     elementKey: "",
                     renderFunction: (fullElement: TraceMessage) =>
                       `${fullElement.statusCode} ${fullElement.statusMsg}`,
                     renderFullObject: true,
                   },
                   {
-                    label: "Location",
+                    label: t("Location"),
                     elementKey: "configuration_id",
                     renderFunction: (fullElement: TraceMessage) =>
                       `${fullElement.host} ${fullElement.client}`,
                     renderFullObject: true,
                   },
                   {
-                    label: "Load Time",
+                    label: t("Load Time"),
                     elementKey: "callStats.duration",
                     width: 150,
                   },
                   {
-                    label: "Upload",
+                    label: t("Upload"),
                     elementKey: "callStats.rx",
                     renderFunction: niceBytes,
                     width: 150,
                   },
                   {
-                    label: "Download",
+                    label: t("Download"),
                     elementKey: "callStats.tx",
                     renderFunction: niceBytes,
                     width: 150,
@@ -485,8 +487,8 @@ const Trace = () => {
                 idField="api"
                 customEmptyMessage={
                   traceStarted
-                    ? "No Traced elements received yet"
-                    : "Trace is not started yet"
+                    ? t("No Traced elements received yet")
+                    : t("Trace is not started yet")
                 }
                 customPaperHeight={"calc(100vh - 292px)"}
                 autoScrollToBottom

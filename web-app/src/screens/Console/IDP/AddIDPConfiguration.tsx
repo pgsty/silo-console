@@ -26,6 +26,7 @@ import {
   Switch,
 } from "mds";
 import { useNavigate } from "react-router-dom";
+import { useT } from "i18n";
 import { useAppDispatch } from "../../../store";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import {
@@ -73,6 +74,7 @@ const AddIDPConfiguration = ({
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [fields, setFields] = useState<any>({});
   const [loadingCreate, setLoadingCreate] = useState<boolean>(false);
@@ -125,13 +127,13 @@ const AddIDPConfiguration = ({
       case "toggle":
         return (
           <Switch
-            indicatorLabels={["Enabled", "Disabled"]}
+            indicatorLabels={[t("Enabled"), t("Disabled")]}
             checked={fields[key] === "on" ? true : false}
             value={"is-field-enabled"}
             id={"is-field-enabled"}
             name={"is-field-enabled"}
-            label={value.label}
-            tooltip={value.tooltip}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
             onChange={(e) =>
               setFields({ ...fields, [key]: e.target.checked ? "on" : "off" })
             }
@@ -144,14 +146,14 @@ const AddIDPConfiguration = ({
             id={key}
             required={value.required}
             name={key}
-            label={value.label}
-            tooltip={value.tooltip}
-            error={value.hasError(fields[key], true)}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
+            error={t(value.hasError(fields[key], true))}
             value={fields[key] ? fields[key] : ""}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFields({ ...fields, [key]: e.target.value })
             }
-            placeholder={value.placeholder}
+            placeholder={t(value.placeholder)}
             type={value.type}
           />
         );
@@ -166,12 +168,14 @@ const AddIDPConfiguration = ({
   return (
     <Grid item xs={12}>
       <PageHeaderWrapper
-        label={<BackLink onClick={() => navigate(backLink)} label={header} />}
+        label={
+          <BackLink onClick={() => navigate(backLink)} label={t(header)} />
+        }
         actions={<HelpMenu />}
       />
       <PageLayout>
         <FormLayout helpBox={helpBox}>
-          <SectionTitle icon={icon}>{title}</SectionTitle>
+          <SectionTitle icon={icon}>{t(title)}</SectionTitle>
           <form
             noValidate
             autoComplete="off"
@@ -190,7 +194,7 @@ const AddIDPConfiguration = ({
                     type="button"
                     variant="regular"
                     onClick={resetForm}
-                    label={"Clear"}
+                    label={t("Clear")}
                   />
 
                   <Button
@@ -199,7 +203,7 @@ const AddIDPConfiguration = ({
                     variant="callAction"
                     color="primary"
                     disabled={loadingCreate || !validSave()}
-                    label={"Save"}
+                    label={t("Save")}
                   />
                 </Grid>
               </Grid>

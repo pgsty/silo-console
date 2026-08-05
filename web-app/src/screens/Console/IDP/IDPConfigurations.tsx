@@ -17,6 +17,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { AddIcon, Button, PageLayout, RefreshIcon, Grid, DataTable } from "mds";
 import { useNavigate } from "react-router-dom";
+import { useT } from "i18n";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { useAppDispatch } from "../../../store";
@@ -42,6 +43,7 @@ type IDPConfigurationsProps = {
 const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [selectedIDP, setSelectedIDP] = useState<string>("");
@@ -163,7 +165,7 @@ const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
               resource={CONSOLE_UI_RESOURCE}
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={"Refresh"}>
+              <TooltipWrapper tooltip={t("Refresh")}>
                 <Button
                   id={"refresh-keys"}
                   variant="regular"
@@ -177,10 +179,15 @@ const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
               resource={CONSOLE_UI_RESOURCE}
               errorProps={{ disabled: true }}
             >
-              <TooltipWrapper tooltip={`Create ${idpType} configuration`}>
+              <TooltipWrapper
+                tooltip={t("Create {idpType} configuration").replace(
+                  "{idpType}",
+                  idpType,
+                )}
+              >
                 <Button
                   id={"create-idp"}
-                  label={"Create Configuration"}
+                  label={t("Create Configuration")}
                   variant={"callAction"}
                   icon={<AddIcon />}
                   onClick={() =>
@@ -199,13 +206,25 @@ const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
               <DataTable
                 itemActions={tableActions}
                 columns={[
-                  { label: "Name", elementKey: "name" },
-                  { label: "Type", elementKey: "type" },
-                  { label: "Enabled", elementKey: "enabled" },
+                  {
+                    label: t("Name"),
+                    elementKey: "name",
+                    // "Default" is the sentinel the backend spells "_"; every
+                    // other name is user data and stays as typed.
+                    renderFunction: (name: string) =>
+                      name === "Default" ? t("Default") : name,
+                  },
+                  { label: t("Type"), elementKey: "type" },
+                  {
+                    label: t("Enabled"),
+                    elementKey: "enabled",
+                    renderFunction: (enabled: string) => t(enabled),
+                  },
                 ]}
                 isLoading={loading}
                 records={records}
                 entityName="Keys"
+                customEmptyMessage={t("There are no Configurations yet.")}
                 idField="name"
               />
             </SecureComponent>

@@ -16,6 +16,7 @@
 
 import React from "react";
 import { HelpBox, Box, Grid, breakPoints } from "mds";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 interface IDistributedOnly {
   iconComponent: any;
@@ -23,11 +24,14 @@ interface IDistributedOnly {
 }
 
 const DistributedOnly = ({ iconComponent, entity }: IDistributedOnly) => {
+  const t = useT();
+  const localizedLink = useLocalizedLink();
+
   return (
     <Grid container>
       <Grid item xs={12}>
         <HelpBox
-          title={`${entity} not available`}
+          title={t("{entity} not available").replace("{entity}", t(entity))}
           iconComponent={iconComponent}
           help={
             <Box
@@ -40,18 +44,26 @@ const DistributedOnly = ({ iconComponent, entity }: IDistributedOnly) => {
               }}
             >
               <span>
-                This feature is not available for a single-disk setup.&nbsp;
+                {t("This feature is not available for a single-disk setup.")}
+                &nbsp;
               </span>
               <span>
-                Please deploy a server in{" "}
-                <a
-                  href="https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#create-the-minio-environment-file"
-                  target="_blank"
-                  rel="noopener"
-                >
-                  Distributed Mode
-                </a>{" "}
-                to use this feature.
+                {interpolate(
+                  t("Please deploy a server in {mode} to use this feature."),
+                  {
+                    mode: (
+                      <a
+                        href={localizedLink(
+                          "https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#create-the-minio-environment-file",
+                        )}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        {t("Distributed Mode")}
+                      </a>
+                    ),
+                  },
+                )}
               </span>
             </Box>
           }

@@ -32,6 +32,7 @@ import { DateTime } from "luxon";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { LdapEntities } from "api/consoleApi";
+import { useT } from "i18n";
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../../store";
 import LDAPResultsBlock from "./LDAPResultsBlock";
@@ -39,6 +40,7 @@ import PolicySelectors from "../../Policies/PolicySelectors";
 
 const LDAPEntitiesQuery = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [users, setUsers] = useState<string[]>([""]);
@@ -112,7 +114,7 @@ const LDAPEntitiesQuery = () => {
     <Box sx={{ marginTop: 15, paddingTop: 0 }}>
       <Grid container sx={{ marginTop: 5 }}>
         <Grid item sm={12} md={6} lg={5} sx={{ padding: 10, paddingTop: 0 }}>
-          <SectionTitle>Query Filters</SectionTitle>
+          <SectionTitle>{t("Query Filters")}</SectionTitle>
 
           <Box
             sx={{
@@ -125,7 +127,7 @@ const LDAPEntitiesQuery = () => {
             <Box sx={{ padding: "10px 26px" }} withBorders>
               <Box sx={{ display: "flex" }}>
                 <h4 style={{ margin: 0, marginBottom: 10, fontSize: 14 }}>
-                  Users
+                  {t("Users")}
                 </h4>
               </Box>
               <Box
@@ -166,7 +168,7 @@ const LDAPEntitiesQuery = () => {
             </Box>
             <Box sx={{ padding: "10px 26px" }} withBorders>
               <h4 style={{ margin: 0, marginBottom: 10, fontSize: 14 }}>
-                Groups
+                {t("Groups")}
               </h4>
               <Box
                 sx={{
@@ -206,7 +208,7 @@ const LDAPEntitiesQuery = () => {
             </Box>
             <Box sx={{ padding: "10px 26px" }} withBorders>
               <h4 style={{ margin: 0, marginBottom: 10, fontSize: 14 }}>
-                Policies
+                {t("Policies")}
               </h4>
               <Box
                 sx={{
@@ -267,7 +269,7 @@ const LDAPEntitiesQuery = () => {
                   </Box>
                 }
               >
-                Query Results
+                {t("Query Results")}
               </SectionTitle>
               {results ? (
                 <Box
@@ -280,7 +282,7 @@ const LDAPEntitiesQuery = () => {
                 >
                   {!results.groups && !results.users && !results.policies && (
                     <Box sx={{ textAlign: "center" }}>
-                      <h4>No Results Available</h4>
+                      <h4>{t("No Results Available")}</h4>
                     </Box>
                   )}
                   {!!results.groups && (
@@ -294,7 +296,9 @@ const LDAPEntitiesQuery = () => {
                   )}
                 </Box>
               ) : (
-                <Box sx={{ textAlign: "center" }}>No query results yet</Box>
+                <Box sx={{ textAlign: "center" }}>
+                  {t("No query results yet")}
+                </Box>
               )}
             </Fragment>
           )}
@@ -318,7 +322,7 @@ const LDAPEntitiesQuery = () => {
             onClick={searchEntities}
             icon={<SearchIcon />}
           >
-            Search
+            {t("Search")}
           </Button>
         </Grid>
       </Grid>

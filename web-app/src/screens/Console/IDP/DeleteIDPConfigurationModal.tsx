@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { ConfirmDeleteIcon } from "mds";
+import { interpolate, useT } from "i18n";
 import {
   setErrorSnackMessage,
   setServerNeedsRestart,
@@ -40,6 +41,7 @@ const DeleteIDPConfigurationModal = ({
   idpType,
 }: IDeleteIDPConfigurationModalProps) => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const onDelSuccess = (res: SetIDPResponse) => {
     closeDeleteModalAndRefresh(true);
     dispatch(setServerNeedsRestart(res.restart === true));
@@ -63,11 +65,11 @@ const DeleteIDPConfigurationModal = ({
       .finally(() => setDeleteLoading(false));
   };
 
-  const displayName = idp === "_" ? "Default" : idp;
+  const displayName = idp === "_" ? t("Default") : idp;
 
   return (
     <ConfirmDialog
-      title={`Delete ${displayName}`}
+      title={t("Delete {name}").replace("{name}", displayName)}
       confirmText={"Delete"}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}
@@ -77,12 +79,10 @@ const DeleteIDPConfigurationModal = ({
       confirmButtonProps={{
         disabled: deleteLoading,
       }}
-      confirmationContent={
-        <Fragment>
-          Are you sure you want to delete IDP <b>{displayName}</b>{" "}
-          configuration? <br />
-        </Fragment>
-      }
+      confirmationContent={interpolate(
+        t("Are you sure you want to delete IDP {name} configuration?"),
+        { name: <b>{displayName}</b> },
+      )}
     />
   );
 };

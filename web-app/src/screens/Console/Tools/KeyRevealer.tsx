@@ -16,8 +16,10 @@
 
 import React, { useState } from "react";
 import { Button, CopyIcon, InputBox, Box, breakPoints } from "mds";
+import { useT } from "i18n";
 
 const KeyRevealer = ({ value }: { value: string }) => {
+  const t = useT();
   const [shown, setShown] = useState<boolean>(false);
 
   return (
@@ -51,7 +53,7 @@ const KeyRevealer = ({ value }: { value: string }) => {
         }}
         variant="callAction"
         onClick={() => setShown(!shown)}
-        label={"Show/Hide"}
+        label={t("Show/Hide")}
       />
     </Box>
   );

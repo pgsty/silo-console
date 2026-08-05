@@ -16,6 +16,7 @@
 
 import React from "react";
 import { Box, Button, ModalBox } from "mds";
+import { useT } from "i18n";
 
 interface ButtonProps {
   label?: string;
@@ -60,9 +61,13 @@ const ConfirmDialog = ({
   titleIcon = null,
   confirmationButtonSimple = false,
 }: ConfirmDialogProps) => {
+  // Translating here covers every caller's title/button strings at once;
+  // strings missing from the dictionary render unchanged.
+  const t = useT();
+
   return (
     <ModalBox
-      title={title}
+      title={t(title)}
       titleIcon={titleIcon}
       onClose={onClose}
       open={isOpen}
@@ -84,13 +89,13 @@ const ConfirmDialog = ({
           {...cancelButtonProps}
           variant="regular"
           id={"confirm-cancel"}
-          label={cancelText}
+          label={t(cancelText)}
         />
 
         <Button
           id={"confirm-ok"}
           onClick={onConfirm}
-          label={confirmText}
+          label={t(confirmText)}
           disabled={isLoading}
           variant={"secondary"}
           {...confirmButtonProps}

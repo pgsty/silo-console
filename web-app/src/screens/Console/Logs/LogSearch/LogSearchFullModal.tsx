@@ -20,6 +20,7 @@ import get from "lodash/get";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import { IReqInfoSearchResults } from "./types";
 import { LogSearchColumnLabels } from "./utils";
+import { useT } from "i18n";
 
 interface ILogSearchFullModal {
   modalOpen: boolean;
@@ -32,13 +33,14 @@ const LogSearchFullModal = ({
   logSearchElement,
   onClose,
 }: ILogSearchFullModal) => {
+  const t = useT();
   const jsonItems = Object.keys(logSearchElement);
 
   return (
     <Fragment>
       <ModalWrapper
         modalOpen={modalOpen}
-        title="Full Log Information"
+        title={t("Full Log Information")}
         onClose={() => {
           onClose();
         }}
@@ -56,7 +58,7 @@ const LogSearchFullModal = ({
                         textAlign: "left",
                       }}
                     >
-                      {get(LogSearchColumnLabels, objectKey, `${objectKey}`)}
+                      {t(get(LogSearchColumnLabels, objectKey, `${objectKey}`))}
                     </th>
                     <td>{get(logSearchElement, objectKey, "")}</td>
                   </tr>
@@ -74,7 +76,7 @@ const LogSearchFullModal = ({
               variant="callAction"
               color="primary"
               onClick={onClose}
-              label={"Close"}
+              label={t("Close")}
             />
           </Grid>
         </Grid>

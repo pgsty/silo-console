@@ -32,10 +32,12 @@ import { ApiError, HttpResponse } from "api/consoleApi";
 import { setErrorSnackMessage } from "systemSlice";
 import { errorToHandler } from "api/errors";
 import { IAM_PAGES } from "common/SecureComponent/permissions";
+import { useT } from "i18n";
 
 const AddKeyForm = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const t = useT();
 
   const [keyName, setKeyName] = useState<string>("");
   const [loadingCreate, setLoadingCreate] = useState<boolean>(false);
@@ -61,7 +63,7 @@ const AddKeyForm = () => {
 
   const validateKeyName = (keyName: string) => {
     if (keyName.indexOf(" ") !== -1) {
-      return "Key name cannot contain spaces";
+      return t("Key name cannot contain spaces");
     } else return "";
   };
 
@@ -70,7 +72,7 @@ const AddKeyForm = () => {
   return (
     <PageLayout>
       <FormLayout
-        title={"Create Key"}
+        title={t("Create Key")}
         icon={<AddAccessRuleIcon />}
         helpBox={
           <KMSHelpBox
@@ -93,7 +95,7 @@ const AddKeyForm = () => {
               <InputBox
                 id="key-name"
                 name="key-name"
-                label="Key Name"
+                label={t("Key Name")}
                 autoFocus={true}
                 value={keyName}
                 error={validateKeyName(keyName)}
@@ -108,7 +110,7 @@ const AddKeyForm = () => {
                 type="button"
                 variant="regular"
                 onClick={resetForm}
-                label={"Clear"}
+                label={t("Clear")}
               />
 
               <Button
@@ -117,7 +119,7 @@ const AddKeyForm = () => {
                 variant="callAction"
                 color="primary"
                 disabled={loadingCreate || !validSave}
-                label={"Save"}
+                label={t("Save")}
               />
             </Grid>
           </Grid>

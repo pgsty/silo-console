@@ -17,6 +17,7 @@
 import React, { Fragment } from "react";
 import { Box, CollapseCaret, GroupsMenuIcon, SectionTitle } from "mds";
 import { LdapEntities } from "api/consoleApi";
+import { interpolate, useT } from "i18n";
 
 interface IResultBlock {
   entityName: "Group" | "User" | "Policy";
@@ -42,9 +43,11 @@ const EntityResultTitle = ({ name }: IEntityResultName) => {
 };
 
 const EntityResultItems = ({ blockName, results }: IEntityResultItem) => {
+  const t = useT();
+
   return (
     <Fragment>
-      <strong>{blockName}:</strong>
+      <strong>{t(blockName)}:</strong>
       <ul>
         {results.map((res, index) => (
           <li key={`policy-${blockName}-${index}`}>{res}</li>
@@ -55,6 +58,7 @@ const EntityResultItems = ({ blockName, results }: IEntityResultItem) => {
 };
 
 const LDAPResultsBlock = ({ entityName, results }: IResultBlock) => {
+  const t = useT();
   let entityLength = 0;
 
   switch (entityName) {
@@ -85,12 +89,18 @@ const LDAPResultsBlock = ({ entityName, results }: IResultBlock) => {
         icon={<GroupsMenuIcon style={{ width: 17, height: 17 }} />}
         actions={
           <Box sx={{ fontSize: 14 }}>
-            <strong>{entityLength}</strong> Entit
-            {entityLength === 1 ? "y" : "ies"} Found
+            {interpolate(
+              t(
+                entityLength === 1
+                  ? "{count} Entity Found"
+                  : "{count} Entities Found",
+              ),
+              { count: <strong>{entityLength}</strong> },
+            )}
           </Box>
         }
       >
-        {entityName} Mappings
+        {t(`${entityName} Mappings`)}
       </SectionTitle>
       <Box
         className={"resultsList"}

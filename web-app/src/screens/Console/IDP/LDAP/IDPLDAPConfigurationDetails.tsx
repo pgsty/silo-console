@@ -37,6 +37,7 @@ import {
 import { api } from "api";
 import { ConfigurationKV } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
+import { useT } from "i18n";
 import { useAppDispatch } from "../../../../store";
 import {
   setErrorSnackMessage,
@@ -60,6 +61,7 @@ const enabledConfigLDAP = [
 
 const IDPLDAPConfigurationDetails = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const formFields = ldapFormFields;
 
@@ -191,7 +193,7 @@ const IDPLDAPConfigurationDetails = () => {
         setFields({ ...fields, lookup_bind_password: "" });
 
         if (!res.data.restart) {
-          dispatch(setSnackBarMessage("Configuration saved successfully"));
+          dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
       })
       .catch((err) => {
@@ -228,7 +230,7 @@ const IDPLDAPConfigurationDetails = () => {
         setIsEnabled(!isEnabled);
         dispatch(setServerNeedsRestart(res.data.restart || false));
         if (!res.data.restart) {
-          dispatch(setSnackBarMessage("Configuration saved successfully"));
+          dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
       })
       .catch((err) => {
@@ -242,13 +244,13 @@ const IDPLDAPConfigurationDetails = () => {
         return (
           <Switch
             key={key}
-            indicatorLabels={["Enabled", "Disabled"]}
+            indicatorLabels={[t("Enabled"), t("Disabled")]}
             checked={fields[key] === "on"}
             value={"is-field-enabled"}
             id={"is-field-enabled"}
             name={"is-field-enabled"}
-            label={value.label}
-            tooltip={value.tooltip}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
             onChange={(e) =>
               setFields({ ...fields, [key]: e.target.checked ? "on" : "off" })
             }
@@ -263,14 +265,14 @@ const IDPLDAPConfigurationDetails = () => {
             id={key}
             required={value.required}
             name={key}
-            label={value.label}
-            tooltip={value.tooltip}
-            error={value.hasError(fields[key], editMode)}
+            label={t(value.label)}
+            tooltip={t(value.tooltip)}
+            error={t(value.hasError(fields[key], editMode))}
             value={fields[key] ? fields[key] : ""}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFields({ ...fields, [key]: e.target.value })
             }
-            placeholder={value.placeholder}
+            placeholder={t(value.placeholder)}
             disabled={!editMode}
             type={value.type}
           />
@@ -298,19 +300,21 @@ const IDPLDAPConfigurationDetails = () => {
           horizontal
           options={[
             {
-              tabConfig: { id: "configuration", label: "Configuration" },
+              tabConfig: { id: "configuration", label: t("Configuration") },
               content: (
                 <Fragment>
                   <ScreenTitle
                     icon={null}
-                    title={editMode ? "Edit Configuration" : ""}
+                    title={editMode ? t("Edit Configuration") : ""}
                     actions={
                       !editMode ? (
                         <Fragment>
                           <Tooltip
                             tooltip={
                               envOverride
-                                ? "Configuration cannot be edited in this module as LDAP environment variables are set for this SILO instance."
+                                ? t(
+                                    "Configuration cannot be edited in this module as LDAP environment variables are set for this SILO instance.",
+                                  )
                                 : ""
                             }
                           >
@@ -320,7 +324,7 @@ const IDPLDAPConfigurationDetails = () => {
                               variant={"callAction"}
                               icon={<EditIcon />}
                               onClick={toggleEditMode}
-                              label={"Edit Configuration"}
+                              label={t("Edit Configuration")}
                               disabled={loading || envOverride}
                             />
                           </Tooltip>
@@ -328,7 +332,9 @@ const IDPLDAPConfigurationDetails = () => {
                             <Tooltip
                               tooltip={
                                 envOverride
-                                  ? "Configuration cannot be disabled / enabled in this module as LDAP environment variables are set for this SILO instance."
+                                  ? t(
+                                      "Configuration cannot be disabled / enabled in this module as LDAP environment variables are set for this SILO instance.",
+                                    )
                                   : ""
                               }
                             >
@@ -336,7 +342,9 @@ const IDPLDAPConfigurationDetails = () => {
                                 id={"is-configuration-enabled"}
                                 onClick={() => toggleConfiguration(!isEnabled)}
                                 label={
-                                  isEnabled ? "Disable LDAP" : "Enable LDAP"
+                                  isEnabled
+                                    ? t("Disable LDAP")
+                                    : t("Enable LDAP")
                                 }
                                 variant={isEnabled ? "secondary" : "regular"}
                                 disabled={envOverride}
@@ -346,7 +354,7 @@ const IDPLDAPConfigurationDetails = () => {
                           <Button
                             id={"refresh-idp-config"}
                             onClick={() => setLoading(true)}
-                            label={"Refresh"}
+                            label={t("Refresh")}
                             icon={<RefreshIcon />}
                           />
                         </Fragment>
@@ -394,8 +402,9 @@ const IDPLDAPConfigurationDetails = () => {
                                         flexGrow: 1,
                                       }}
                                     >
-                                      Lookup Bind Password must be re-entered to
-                                      change LDAP configurations
+                                      {t(
+                                        "Lookup Bind Password must be re-entered to change LDAP configurations",
+                                      )}
                                     </Box>
                                   }
                                   iconComponent={<WarnIcon />}
@@ -421,7 +430,7 @@ const IDPLDAPConfigurationDetails = () => {
                                   type="button"
                                   variant="secondary"
                                   onClick={() => setResetOpen(true)}
-                                  label={"Reset Configuration"}
+                                  label={t("Reset Configuration")}
                                 />
                               )}
                               <Button
@@ -429,7 +438,7 @@ const IDPLDAPConfigurationDetails = () => {
                                 type="button"
                                 variant="regular"
                                 onClick={toggleEditMode}
-                                label={"Cancel"}
+                                label={t("Cancel")}
                               />
                               <Button
                                 id={"save-key"}
@@ -437,7 +446,7 @@ const IDPLDAPConfigurationDetails = () => {
                                 variant="callAction"
                                 color="primary"
                                 disabled={loading || !validSave()}
-                                label={"Save"}
+                                label={t("Save")}
                                 onClick={saveRecord}
                               />
                             </Box>
@@ -460,15 +469,17 @@ const IDPLDAPConfigurationDetails = () => {
                             }}
                           >
                             <ValuePair
-                              label={"LDAP Enabled"}
-                              value={isEnabled ? "Yes" : "No"}
+                              label={t("LDAP Enabled")}
+                              value={isEnabled ? t("Yes") : t("No")}
                             />
                             {hasConfiguration && (
                               <Fragment>
                                 {Object.entries(formFields).map(
                                   ([key, value]) => {
                                     if (!value.editOnly) {
-                                      let label: React.ReactNode = value.label;
+                                      let label: React.ReactNode = t(
+                                        value.label,
+                                      );
                                       let val: React.ReactNode = fields[key]
                                         ? fields[key]
                                         : "";
@@ -491,9 +502,14 @@ const IDPLDAPConfigurationDetails = () => {
                                               },
                                             }}
                                           >
-                                            <span>{value.label}</span>
+                                            <span>{t(value.label)}</span>
                                             <Tooltip
-                                              tooltip={`This value is set from the ${overrideFields[key]} environment variable`}
+                                              tooltip={t(
+                                                "This value is set from the {name} environment variable",
+                                              ).replace(
+                                                "{name}",
+                                                overrideFields[key],
+                                              )}
                                               placement={"right"}
                                             >
                                               <span className={"muted"}>
@@ -535,7 +551,7 @@ const IDPLDAPConfigurationDetails = () => {
             {
               tabConfig: {
                 id: "entities",
-                label: "Entities",
+                label: t("Entities"),
                 disabled: !hasConfiguration || !isEnabled,
               },
               content: (

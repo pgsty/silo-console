@@ -27,6 +27,7 @@ import {
   IAM_SCOPES,
 } from "../../../common/SecureComponent/permissions";
 import { SILO_COLORS, SiloBrand } from "../../../common/SiloBrand";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 const SILO_SITE_URL = "https://silo.pgsty.com/";
 const SILO_SOURCE_URL = "https://github.com/pgsty/silo";
@@ -180,6 +181,8 @@ const LicenseRecord = styled.dl(({ theme }) => ({
 }));
 
 const License = () => {
+  const localize = useLocalizedLink();
+  const t = useT();
   const consoleVersion = version.startsWith("v") ? version : `v${version}`;
 
   // Server release comes from the same admin-info API the dashboard uses.
@@ -222,10 +225,10 @@ const License = () => {
       >
         <LicenseSheet>
           <BrandLockup
-            href={SILO_SITE_URL}
+            href={localize(SILO_SITE_URL)}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Visit the SILO website"
+            aria-label={t("Visit the SILO website")}
           >
             <SiloBrand
               variant="emblem"
@@ -245,56 +248,86 @@ const License = () => {
           </Tagline>
 
           <Statement>
-            <a href={SILO_SITE_URL} target="_blank" rel="noopener noreferrer">
-              SILO
-            </a>{" "}
-            is an independently maintained continuation of the{" "}
-            <a href={MINIO_SITE_URL} target="_blank" rel="noopener noreferrer">
-              MinIO
-            </a>{" "}
-            object storage project, carried forward by the{" "}
-            <a href={PIGSTY_SITE_URL} target="_blank" rel="noopener noreferrer">
-              Pigsty
-            </a>{" "}
-            community since 2026. Its{" "}
-            <a href={SILO_SOURCE_URL} target="_blank" rel="noopener noreferrer">
-              code
-            </a>{" "}
-            <strong>incorporates and modifies</strong>{" "}
-            <a
-              href={MINIO_SOURCE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              upstream MinIO code
-            </a>
-            , and the complete work remains licensed under the{" "}
-            <a
-              href={AGPL_URL}
-              target="_blank"
-              rel="license noopener noreferrer"
-            >
-              GNU Affero General Public License, version 3
-            </a>
-            .
+            {interpolate(
+              t(
+                "{silo} is an independently maintained continuation of the {minio} object storage project, carried forward by the {pigsty} community since 2026. Its {code} {incorporates} {upstream}, and the complete work remains licensed under the {agpl}.",
+              ),
+              {
+                silo: (
+                  <a
+                    href={localize(SILO_SITE_URL)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    SILO
+                  </a>
+                ),
+                minio: (
+                  <a
+                    href={MINIO_SITE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    MinIO
+                  </a>
+                ),
+                pigsty: (
+                  <a
+                    href={localize(PIGSTY_SITE_URL)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Pigsty
+                  </a>
+                ),
+                code: (
+                  <a
+                    href={SILO_SOURCE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("code")}
+                  </a>
+                ),
+                incorporates: <strong>{t("incorporates and modifies")}</strong>,
+                upstream: (
+                  <a
+                    href={MINIO_SOURCE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("upstream MinIO code")}
+                  </a>
+                ),
+                agpl: (
+                  <a
+                    href={AGPL_URL}
+                    target="_blank"
+                    rel="license noopener noreferrer"
+                  >
+                    {t("GNU Affero General Public License, version 3")}
+                  </a>
+                ),
+              },
+            )}
           </Statement>
 
           <LicenseRecord>
-            <dt>Version</dt>
+            <dt>{t("Version")}</dt>
             <dd>
               {serverVersion !== "" && (
                 <div className="line">
                   <span className="chip">{serverVersion}</span>
-                  <span className="what">connected server</span>
+                  <span className="what">{t("connected server")}</span>
                 </div>
               )}
               <div className="line">
                 <span className="chip">{consoleVersion}</span>
-                <span className="what">this Console</span>
+                <span className="what">{t("this Console")}</span>
               </div>
             </dd>
 
-            <dt>License</dt>
+            <dt>{t("License")}</dt>
             <dd>
               <span className="chip">AGPL-3.0-or-later</span>
               <div className="line">
@@ -303,7 +336,7 @@ const License = () => {
                   target="_blank"
                   rel="license noopener noreferrer"
                 >
-                  GNU AGPL v3 full text
+                  {t("GNU AGPL v3 full text")}
                 </a>
               </div>
               <div className="line">
@@ -312,24 +345,30 @@ const License = () => {
                   target="_blank"
                   rel="license noopener noreferrer"
                 >
-                  Console LICENSE
+                  {t("Console LICENSE")}
                 </a>
               </div>
               <p className="note">
-                Server, client and Console are all AGPLv3. SILO&apos;s
-                documentation is CC BY 4.0 —{" "}
-                <a
-                  href="https://silo.pgsty.com/about/license/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  licensing in full
-                </a>
-                .
+                {interpolate(
+                  t(
+                    "Server, client and Console are all AGPLv3. SILO's documentation is CC BY 4.0 — {licensing}.",
+                  ),
+                  {
+                    licensing: (
+                      <a
+                        href={localize("https://silo.pgsty.com/about/license/")}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t("licensing in full")}
+                      </a>
+                    ),
+                  },
+                )}
               </p>
             </dd>
 
-            <dt>Source</dt>
+            <dt>{t("Source")}</dt>
             <dd>
               <div className="line">
                 <a
@@ -339,7 +378,7 @@ const License = () => {
                 >
                   pgsty/silo
                 </a>
-                <span className="what">server</span>
+                <span className="what">{t("server")}</span>
               </div>
               <div className="line">
                 <a
@@ -349,7 +388,7 @@ const License = () => {
                 >
                   pgsty/mc
                 </a>
-                <span className="what">client</span>
+                <span className="what">{t("client")}</span>
               </div>
               <div className="line">
                 <a
@@ -359,7 +398,7 @@ const License = () => {
                 >
                   pgsty/silo-console
                 </a>
-                <span className="what">this Console</span>
+                <span className="what">{t("this Console")}</span>
               </div>
               <div className="line">
                 <a
@@ -369,86 +408,112 @@ const License = () => {
                 >
                   georgmangold/console
                 </a>
-                <span className="what">Console predecessor</span>
+                <span className="what">{t("Console predecessor")}</span>
               </div>
               <p className="note">
-                Under section 13 of the AGPL, the corresponding source for this
-                running version is offered to every user who interacts with it
-                over a network, at no charge.
+                {t(
+                  "Under section 13 of the AGPL, the corresponding source for this running version is offered to every user who interacts with it over a network, at no charge.",
+                )}
               </p>
             </dd>
 
-            <dt>Copyright</dt>
+            <dt>{t("Copyright")}</dt>
             <dd>
               <p className="prose">
-                © 2026 Ruohang Feng / PGSTY and the SILO contributors.
+                {t("© 2026 Ruohang Feng / PGSTY and the SILO contributors.")}
                 <br />
-                Portions © 2015–2026 MinIO, Inc.
+                {t("Portions © 2015–2026 MinIO, Inc.")}
                 <br />
-                Console portions © Georg Mangold and contributors.
+                {t("Console portions © Georg Mangold and contributors.")}
               </p>
               <p className="note">
-                Upstream copyright, authorship and license notices are retained
-                in the repository&apos;s{" "}
-                <a
-                  href="https://github.com/pgsty/silo-console/blob/main/CREDITS"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  CREDITS
-                </a>{" "}
-                and{" "}
-                <a
-                  href="https://github.com/pgsty/silo-console/blob/main/NOTICE"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  NOTICE
-                </a>
-                . See the{" "}
-                <a
-                  href="https://silo.pgsty.com/about/attribution/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  full attribution stack
-                </a>
-                .
+                {interpolate(
+                  t(
+                    "Upstream copyright, authorship and license notices are retained in the repository's {credits} and {notice}. See the {attribution}.",
+                  ),
+                  {
+                    credits: (
+                      <a
+                        href="https://github.com/pgsty/silo-console/blob/main/CREDITS"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        CREDITS
+                      </a>
+                    ),
+                    notice: (
+                      <a
+                        href="https://github.com/pgsty/silo-console/blob/main/NOTICE"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        NOTICE
+                      </a>
+                    ),
+                    attribution: (
+                      <a
+                        href={localize(
+                          "https://silo.pgsty.com/about/attribution/",
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t("full attribution stack")}
+                      </a>
+                    ),
+                  },
+                )}
               </p>
             </dd>
 
-            <dt>Trademark</dt>
+            <dt>{t("Trademark")}</dt>
             <dd>
               <p className="prose">
-                <a
-                  href={MINIO_SITE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  MINIO®
-                </a>{" "}
-                is a registered trademark of MinIO, Inc.{" "}
-                <a
-                  href={SILO_SITE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  SILO
-                </a>{" "}
-                is not a MinIO, Inc. product, and is not affiliated with,
-                sponsored by, or endorsed by MinIO, Inc.
+                {interpolate(
+                  t(
+                    "{minio} is a registered trademark of MinIO, Inc. {silo} is not a MinIO, Inc. product, and is not affiliated with, sponsored by, or endorsed by MinIO, Inc.",
+                  ),
+                  {
+                    minio: (
+                      <a
+                        href={MINIO_SITE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        MINIO®
+                      </a>
+                    ),
+                    silo: (
+                      <a
+                        href={localize(SILO_SITE_URL)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        SILO
+                      </a>
+                    ),
+                  },
+                )}
               </p>
               <p className="note">
-                The MinIO name is used here solely to identify the origin of the
-                source code and to describe compatibility —{" "}
-                <a
-                  href="https://silo.pgsty.com/about/trademark/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  trademark notice
-                </a>
-                .
+                {interpolate(
+                  t(
+                    "The MinIO name is used here solely to identify the origin of the source code and to describe compatibility — {notice}.",
+                  ),
+                  {
+                    notice: (
+                      <a
+                        href={localize(
+                          "https://silo.pgsty.com/about/trademark/",
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t("trademark notice")}
+                      </a>
+                    ),
+                  },
+                )}
               </p>
             </dd>
           </LicenseRecord>

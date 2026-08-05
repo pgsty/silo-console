@@ -30,6 +30,7 @@ import clsx from "clsx";
 import { callForObjectID } from "../../ObjectBrowser/transferManager";
 import styled from "styled-components";
 import get from "lodash/get";
+import { useT } from "i18n";
 
 interface IObjectHandled {
   objectToDisplay: IFileItem;
@@ -109,6 +110,7 @@ const ObjectInformation = styled.div(({ theme }) => ({
 }));
 
 const ObjectHandled = ({ objectToDisplay, deleteFromList }: IObjectHandled) => {
+  const t = useT();
   const prefix = `${objectToDisplay.prefix}`;
   return (
     <Fragment>
@@ -222,7 +224,7 @@ const ObjectHandled = ({ objectToDisplay, deleteFromList }: IObjectHandled) => {
               </ObjectInformation>
             </Tooltip>
             <Box className={"muted bucketName"}>
-              <strong>Bucket: </strong>
+              <strong>{t("Bucket: ")}</strong>
               {objectToDisplay.bucketName}
             </Box>
           </Box>

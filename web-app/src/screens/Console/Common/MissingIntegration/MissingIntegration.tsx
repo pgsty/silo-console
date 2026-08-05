@@ -16,6 +16,7 @@
 
 import React, { Fragment } from "react";
 import { HelpBox, Grid } from "mds";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 
 interface IMissingIntegration {
   iconComponent: any;
@@ -28,6 +29,9 @@ const MissingIntegration = ({
   entity,
   documentationLink,
 }: IMissingIntegration) => {
+  const t = useT();
+  const localizedLink = useLocalizedLink();
+
   return (
     <Grid
       container
@@ -39,17 +43,26 @@ const MissingIntegration = ({
     >
       <Grid item xs={8}>
         <HelpBox
-          title={`${entity} not available`}
+          title={t("{entity} not available").replace("{entity}", t(entity))}
           iconComponent={iconComponent}
           help={
             <Fragment>
-              This feature is not available.
+              {t("This feature is not available.")}
               <br />
-              Please configure{" "}
-              <a href={documentationLink} target="_blank" rel="noopener">
-                {entity}
-              </a>{" "}
-              first to use this feature.
+              {interpolate(
+                t("Please configure {entity} first to use this feature."),
+                {
+                  entity: (
+                    <a
+                      href={localizedLink(documentationLink)}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {t(entity)}
+                    </a>
+                  ),
+                },
+              )}
             </Fragment>
           }
         />

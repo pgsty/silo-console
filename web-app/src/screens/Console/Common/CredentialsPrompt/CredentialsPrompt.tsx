@@ -30,6 +30,7 @@ import ModalWrapper from "../ModalWrapper/ModalWrapper";
 import CredentialItem from "./CredentialItem";
 import TooltipWrapper from "../TooltipWrapper/TooltipWrapper";
 import { modalStyleUtils } from "../FormComponents/common/styleLibrary";
+import { useT } from "i18n";
 
 const WarningBlock = styled.div(({ theme }) => ({
   color: get(theme, "signalColors.danger", "#C51B3F"),
@@ -69,6 +70,8 @@ const CredentialsPrompt = ({
   closeModal,
   entity,
 }: ICredentialsPromptProps) => {
+  const t = useT();
+
   if (!newServiceAccount) {
     return null;
   }
@@ -146,12 +149,14 @@ const CredentialsPrompt = ({
       onClose={() => {
         closeModal();
       }}
-      title={`New ${entity} Created`}
+      title={t("New {entity} Created").replace("{entity}", t(entity))}
       titleIcon={<ServiceAccountCredentialsIcon />}
     >
       <Grid container>
         <Grid item xs={12}>
-          A new {entity} has been created with the following details:
+          {t(
+            "A new {entity} has been created with the following details:",
+          ).replace("{entity}", t(entity))}
           {!idp && consoleCreds && (
             <Fragment>
               <Grid
@@ -169,18 +174,18 @@ const CredentialsPrompt = ({
                     fontSize: ".9rem",
                   }}
                 >
-                  Console Credentials
+                  {t("Console Credentials")}
                 </Box>
                 {Array.isArray(consoleCreds) &&
                   consoleCreds.map((credentialsPair, index) => {
                     return (
                       <Fragment>
                         <CredentialItem
-                          label="Access Key"
+                          label={t("Access Key")}
                           value={credentialsPair.accessKey}
                         />
                         <CredentialItem
-                          label="Secret Key"
+                          label={t("Secret Key")}
                           value={credentialsPair.secretKey}
                         />
                       </Fragment>
@@ -189,11 +194,11 @@ const CredentialsPrompt = ({
                 {!Array.isArray(consoleCreds) && (
                   <Fragment>
                     <CredentialItem
-                      label="Access Key"
+                      label={t("Access Key")}
                       value={consoleCreds.accessKey}
                     />
                     <CredentialItem
-                      label="Secret Key"
+                      label={t("Secret Key")}
                       value={consoleCreds.secretKey}
                     />
                   </Fragment>
@@ -204,25 +209,26 @@ const CredentialsPrompt = ({
           {(consoleCreds === null || consoleCreds === undefined) && (
             <>
               <CredentialItem
-                label="Access Key"
+                label={t("Access Key")}
                 value={newServiceAccount.accessKey || ""}
               />
               <CredentialItem
-                label="Secret Key"
+                label={t("Secret Key")}
                 value={newServiceAccount.secretKey || ""}
               />
             </>
           )}
           {idp ? (
             <WarningBlock>
-              Please Login via the configured external identity provider.
+              {t("Please Login via the configured external identity provider.")}
             </WarningBlock>
           ) : (
             <WarningBlock>
               <WarnIcon />
               <span>
-                Write these down, as this is the only time the secret will be
-                displayed.
+                {t(
+                  "Write these down, as this is the only time the secret will be displayed.",
+                )}
               </span>
             </WarningBlock>
           )}
@@ -231,13 +237,13 @@ const CredentialsPrompt = ({
           {!idp && (
             <Fragment>
               <TooltipWrapper
-                tooltip={
-                  "Download credentials in a JSON file formatted for import using mc alias import. This will only include the default login credentials."
-                }
+                tooltip={t(
+                  "Download credentials in a JSON file formatted for import using mc alias import. This will only include the default login credentials.",
+                )}
               >
                 <Button
                   id={"download-button"}
-                  label={"Download for import"}
+                  label={t("Download for import")}
                   onClick={downloadImport}
                   icon={<DownloadIcon />}
                   variant="callAction"
@@ -246,13 +252,13 @@ const CredentialsPrompt = ({
 
               {Array.isArray(consoleCreds) && consoleCreds.length > 1 && (
                 <TooltipWrapper
-                  tooltip={
-                    "Download all access credentials to a JSON file. NOTE: This file is not formatted for import using mc alias import. If you plan to import this alias from the file, please use the Download for Import button. "
-                  }
+                  tooltip={t(
+                    "Download all access credentials to a JSON file. NOTE: This file is not formatted for import using mc alias import. If you plan to import this alias from the file, please use the Download for Import button. ",
+                  )}
                 >
                   <Button
                     id={"download-all-button"}
-                    label={"Download all access credentials"}
+                    label={t("Download all access credentials")}
                     onClick={downloaddAllCredentials}
                     icon={<DownloadIcon />}
                     variant="callAction"

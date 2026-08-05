@@ -26,6 +26,7 @@ import {
   setLogsStarted,
 } from "../logsSlice";
 import { setHelpName } from "../../../../systemSlice";
+import { useT } from "i18n";
 import SearchBox from "../../Common/SearchBox";
 import api from "../../../../../src/common/api";
 import LogLine from "./LogLine";
@@ -36,6 +37,7 @@ var socket: any = null;
 
 const ErrorLogs = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
 
   const messages = useSelector((state: AppState) => state.logs.logMessages);
   const logsStarted = useSelector((state: AppState) => state.logs.logsStarted);
@@ -192,12 +194,12 @@ const ErrorLogs = () => {
                 }}
                 disabled={loadingNodes || logsStarted}
                 options={[
-                  { label: "All Nodes", value: "all" },
+                  { label: t("All Nodes"), value: "all" },
                   ...nodes.map((aNode) => ({ label: aNode, value: aNode })),
                 ]}
               />
             ) : (
-              <h3> Loading nodes</h3>
+              <h3> {t("Loading nodes")}</h3>
             )}
           </Grid>
 
@@ -212,12 +214,12 @@ const ErrorLogs = () => {
               }}
               disabled={loadingNodes || logsStarted}
               options={[
-                { value: "all", label: "All Log Types" },
+                { value: "all", label: t("All Log Types") },
                 {
                   value: "minio",
                   label: "SILO",
                 },
-                { value: "application", label: "Application" },
+                { value: "application", label: t("Application") },
               ]}
             />
           </Grid>
@@ -233,7 +235,9 @@ const ErrorLogs = () => {
                 }}
                 disabled={userAgents.length < 1 || logsStarted}
                 options={userAgents.map((anAgent) => ({
-                  label: anAgent,
+                  // Only the synthetic "All User Agents" entry is in the
+                  // dictionary; real agent strings fall through untouched.
+                  label: t(anAgent),
                   value: anAgent,
                 }))}
               />
@@ -251,7 +255,7 @@ const ErrorLogs = () => {
                 variant="callAction"
                 disabled={false}
                 onClick={startLogs}
-                label={"Start Logs"}
+                label={t("Start Logs")}
               />
             )}
             {logsStarted && (
@@ -260,7 +264,7 @@ const ErrorLogs = () => {
                 type="button"
                 variant="callAction"
                 onClick={stopLogs}
-                label={"Stop Logs"}
+                label={t("Stop Logs")}
               />
             )}
           </Grid>
@@ -280,7 +284,7 @@ const ErrorLogs = () => {
             }}
           >
             <SearchBox
-              placeholder="Filter"
+              placeholder={t("Filter")}
               onChange={(e) => {
                 setFilter(e);
               }}
@@ -309,7 +313,7 @@ const ErrorLogs = () => {
                 </Table>
                 {filteredMessages.length === 0 && (
                   <Box sx={{ padding: 20, textAlign: "center" }}>
-                    No logs to display
+                    {t("No logs to display")}
                   </Box>
                 )}
               </Box>

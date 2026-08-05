@@ -22,6 +22,7 @@ import React, {
 } from "react";
 import { Box, HelpIcon, InputLabel, Select, Tooltip } from "mds";
 import { days, months, validDate, years } from "./utils";
+import { useT } from "i18n";
 
 interface IDateSelectorProps {
   id: string;
@@ -46,6 +47,8 @@ const DateSelector = forwardRef(
     }: IDateSelectorProps,
     ref: any,
   ) => {
+    const t = useT();
+
     useImperativeHandle(ref, () => ({ resetDate }));
 
     const [month, setMonth] = useState<string>("");
@@ -84,9 +87,12 @@ const DateSelector = forwardRef(
       }
     };
 
-    const monthForDropDown = [{ value: "", label: "<Month>" }, ...months];
-    const daysForDrop = [{ value: "", label: "<Day>" }, ...days];
-    const yearsForDrop = [{ value: "", label: "<Year>" }, ...years];
+    const monthForDropDown = [
+      { value: "", label: t("<Month>") },
+      ...months.map((month) => ({ ...month, label: t(month.label) })),
+    ];
+    const daysForDrop = [{ value: "", label: t("<Day>") }, ...days];
+    const yearsForDrop = [{ value: "", label: t("<Year>") }, ...years];
 
     return (
       <Box className={"inputItem"}>

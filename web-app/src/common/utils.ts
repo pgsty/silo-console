@@ -17,6 +17,7 @@
 import { IBytesCalc } from "./types";
 
 import get from "lodash/get";
+import { getStoredLanguage, translate } from "../i18n/lang";
 
 export const units = [
   "B",
@@ -124,24 +125,29 @@ export const niceTimeFromSeconds = (seconds: number): string => {
   const parts = [];
 
   if (days > 0) {
-    parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    parts.push(countWithUnit(days, days !== 1, "day", "days"));
   }
 
   if (hours > 0) {
-    parts.push(`${hours} hour${hours !== 1 ? "s" : ""}`);
+    parts.push(countWithUnit(hours, hours !== 1, "hour", "hours"));
   }
 
   if (minutes > 0) {
-    parts.push(`${minutes} minute${minutes !== 1 ? "s" : ""}`);
+    parts.push(countWithUnit(minutes, minutes !== 1, "minute", "minutes"));
   }
 
   if (remainingSeconds > 0) {
     parts.push(
-      `${remainingSeconds} second${remainingSeconds !== 1 ? "s" : ""}`,
+      countWithUnit(
+        remainingSeconds,
+        remainingSeconds !== 1,
+        "second",
+        "seconds",
+      ),
     );
   }
 
-  return parts.join(" and ");
+  return parts.join(translate(getStoredLanguage(), " and "));
 };
 
 // seconds / minutes /hours / Days / Years calculator
@@ -150,6 +156,17 @@ export const niceDays = (secondsValue: string, timeVariant: string = "s") => {
 
   return niceDaysInt(seconds, timeVariant);
 };
+
+// Joins a count with its unit word. The caller decides singular vs plural so the
+// English output keeps the exact wording each branch had before; other languages
+// take whichever form the dictionary carries.
+const countWithUnit = (
+  value: number,
+  plural: boolean,
+  singular: string,
+  pluralForm: string,
+) =>
+  `${value} ${translate(getStoredLanguage(), plural ? pluralForm : singular)}`;
 
 // niceDaysInt returns the string in the max unit found e.g. 92400 seconds -> 1 day
 export const niceDaysInt = (seconds: number, timeVariant: string = "s") => {
@@ -173,35 +190,40 @@ export const niceDaysInt = (seconds: number, timeVariant: string = "s") => {
 
   if (days > 365) {
     const years = days / 365;
-    return `${years} year${Math.floor(years) === 1 ? "" : "s"}`;
+    return countWithUnit(years, Math.floor(years) !== 1, "year", "years");
   }
 
   if (days > 30) {
     const months = Math.floor(days / 30);
     const diffDays = days - months * 30;
 
-    return `${months} month${Math.floor(months) === 1 ? "" : "s"} ${
-      diffDays > 0 ? `${diffDays} day${diffDays > 1 ? "s" : ""}` : ""
+    return `${countWithUnit(
+      months,
+      Math.floor(months) !== 1,
+      "month",
+      "months",
+    )} ${
+      diffDays > 0 ? countWithUnit(diffDays, diffDays > 1, "day", "days") : ""
     }`;
   }
 
   if (days >= 7 && days <= 30) {
     const weeks = Math.floor(days / 7);
 
-    return `${Math.floor(weeks)} week${weeks === 1 ? "" : "s"}`;
+    return countWithUnit(weeks, weeks !== 1, "week", "weeks");
   }
 
   if (days >= 1 && days <= 6) {
-    return `${days} day${days > 1 ? "s" : ""}`;
+    return countWithUnit(days, days > 1, "day", "days");
   }
 
-  return `${hours >= 1 ? `${hours} hour${hours > 1 ? "s" : ""}` : ""} ${
+  return `${hours >= 1 ? countWithUnit(hours, hours > 1, "hour", "hours") : ""} ${
     minutes >= 1 && hours === 0
-      ? `${minutes} minute${minutes > 1 ? "s" : ""}`
+      ? countWithUnit(minutes, minutes > 1, "minute", "minutes")
       : ""
   } ${
     seconds >= 1 && minutes === 0 && hours === 0
-      ? `${seconds} second${seconds > 1 ? "s" : ""}`
+      ? countWithUnit(seconds, seconds > 1, "second", "seconds")
       : ""
   }`;
 };

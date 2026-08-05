@@ -16,6 +16,7 @@
 
 import React, { Fragment } from "react";
 import { HelpBox, HelpIconFilled, Box } from "mds";
+import { useT } from "i18n";
 
 interface IKMSHelpBoxProps {
   helpText: string;
@@ -23,14 +24,16 @@ interface IKMSHelpBoxProps {
 }
 
 const KMSHelpBox = ({ helpText, contents }: IKMSHelpBoxProps) => {
+  const t = useT();
+
   return (
     <HelpBox
       iconComponent={<HelpIconFilled />}
-      title={helpText}
+      title={t(helpText)}
       help={
         <Fragment>
           {contents.map((content) => (
-            <Box sx={{ paddingBottom: "20px" }}>{content}</Box>
+            <Box sx={{ paddingBottom: "20px" }}>{t(content)}</Box>
           ))}
         </Fragment>
       }

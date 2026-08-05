@@ -38,6 +38,7 @@ import {
   YAxis,
 } from "recharts";
 import { hasPermission } from "../../../common/SecureComponent";
+import { useT } from "i18n";
 import {
   CONSOLE_UI_RESOURCE,
   IAM_SCOPES,
@@ -53,6 +54,7 @@ import { errorToHandler } from "api/errors";
 
 const Status = () => {
   const dispatch = useAppDispatch();
+  const t = useT();
   const [curTab, setCurTab] = useState<string>("simple-tab-0");
 
   const [isKMSSecretKey, setIsKMSSecretKey] = useState<boolean>(true);
@@ -162,7 +164,7 @@ const Status = () => {
 
   const statusPanel = (
     <Fragment>
-      <SectionTitle>Status</SectionTitle>
+      <SectionTitle>{t("Status")}</SectionTitle>
       <br />
       {status && (
         <Grid container>
@@ -191,16 +193,16 @@ const Status = () => {
                   },
                 }}
               >
-                <ValuePair label={"Name:"} value={status.name} />
+                <ValuePair label={t("Name:")} value={status.name} />
                 {version && (
-                  <ValuePair label={"Version:"} value={version.version} />
+                  <ValuePair label={t("Version:")} value={version.version} />
                 )}
                 <ValuePair
-                  label={"Default Key ID:"}
+                  label={t("Default Key ID:")}
                   value={status.defaultKeyID}
                 />
                 <ValuePair
-                  label={"Key Management Service Endpoints:"}
+                  label={t("Key Management Service Endpoints:")}
                   value={
                     <Fragment>
                       {status.endpoints &&
@@ -230,7 +232,7 @@ const Status = () => {
 
   const apisPanel = (
     <Fragment>
-      <SectionTitle>Supported API endpoints</SectionTitle>
+      <SectionTitle>{t("Supported API endpoints")}</SectionTitle>
       <br />
       {apis && (
         <Grid container>
@@ -268,17 +270,17 @@ const Status = () => {
 
   const getAPIRequestsData = () => {
     return [
-      { label: "Success", success: metrics.requestOK },
-      { label: "Failures", failures: metrics.requestFail },
-      { label: "Errors", errors: metrics.requestErr },
-      { label: "Active", active: metrics.requestActive },
+      { label: t("Success"), success: metrics.requestOK },
+      { label: t("Failures"), failures: metrics.requestFail },
+      { label: t("Errors"), errors: metrics.requestErr },
+      { label: t("Active"), active: metrics.requestActive },
     ];
   };
 
   const getEventsData = () => {
     return [
-      { label: "Audit", audit: metrics.auditEvents },
-      { label: "Errors", errors: metrics.errorEvents },
+      { label: t("Audit"), audit: metrics.auditEvents },
+      { label: t("Errors"), errors: metrics.errorEvents },
     ];
   };
 
@@ -295,30 +297,30 @@ const Status = () => {
     <Fragment>
       {metrics && (
         <Fragment>
-          <h3>API Requests</h3>
+          <h3>{t("API Requests")}</h3>
           <BarChart width={730} height={250} data={getAPIRequestsData()}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="label" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="success" fill="green" />
-            <Bar dataKey="failures" fill="red" />
-            <Bar dataKey="errors" fill="black" />
-            <Bar dataKey="active" fill="#8884d8" />
+            <Bar dataKey="success" fill="green" name={t("Success")} />
+            <Bar dataKey="failures" fill="red" name={t("Failures")} />
+            <Bar dataKey="errors" fill="black" name={t("Errors")} />
+            <Bar dataKey="active" fill="#8884d8" name={t("Active")} />
           </BarChart>
 
-          <h3>Events</h3>
+          <h3>{t("Events")}</h3>
           <BarChart width={730} height={250} data={getEventsData()}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="label" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="audit" fill="green" />
-            <Bar dataKey="errors" fill="black" />
+            <Bar dataKey="audit" fill="green" name={t("Audit")} />
+            <Bar dataKey="errors" fill="black" name={t("Errors")} />
           </BarChart>
-          <h3>Latency Histogram</h3>
+          <h3>{t("Latency Histogram")}</h3>
           {metrics.latencyHistogram && (
             <LineChart
               width={730}
@@ -335,7 +337,7 @@ const Status = () => {
                 type="monotone"
                 dataKey="total"
                 stroke="#8884d8"
-                name={"Requests that took T ms or less"}
+                name={t("Requests that took T ms or less")}
               />
             </LineChart>
           )}
@@ -362,7 +364,7 @@ const Status = () => {
           onTabClick={(newValue) => setCurTab(newValue)}
           options={[
             {
-              tabConfig: { label: "Status", id: "simple-tab-0" },
+              tabConfig: { label: t("Status"), id: "simple-tab-0" },
               content: (
                 <Box
                   withBorders
@@ -397,7 +399,7 @@ const Status = () => {
             },
             {
               tabConfig: {
-                label: "Metrics",
+                label: t("Metrics"),
                 id: "simple-tab-2",
                 disabled: !displayMetrics,
               },

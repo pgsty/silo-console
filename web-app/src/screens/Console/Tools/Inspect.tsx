@@ -39,6 +39,7 @@ import {
   setHelpName,
 } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
+import { interpolate, useLocalizedLink, useT } from "i18n";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import DistributedOnly from "../Common/DistributedOnly/DistributedOnly";
 import KeyRevealer from "./KeyRevealer";
@@ -52,6 +53,8 @@ const ExampleBlock = ({
   volumeVal: string;
   pathVal: string;
 }) => {
+  const t = useT();
+
   return (
     <Box className="code-block-container">
       <Box className="example-code-block">
@@ -65,7 +68,7 @@ const ExampleBlock = ({
             },
           }}
         >
-          <label>Volume/bucket Name :</label> <code>{volumeVal}</code>
+          <label>{t("Volume/bucket Name :")}</label> <code>{volumeVal}</code>
         </Box>
         <Box
           sx={{
@@ -76,7 +79,7 @@ const ExampleBlock = ({
             },
           }}
         >
-          <label>Path : </label>
+          <label>{t("Path : ")}</label>
           <code>{pathVal}</code>
         </Box>
       </Box>
@@ -87,6 +90,8 @@ const ExampleBlock = ({
 const Inspect = () => {
   const dispatch = useAppDispatch();
   const distributedSetup = useSelector(selDistSet);
+  const t = useT();
+  const localize = useLocalizedLink();
 
   const [volumeName, setVolumeName] = useState<string>("");
   const [inspectPath, setInspectPath] = useState<string>("");
@@ -108,17 +113,17 @@ const Inspect = () => {
 
     isVolValid = volumeName.trim().length > 0;
     if (!isVolValid) {
-      setVolumeError("This field is required");
+      setVolumeError(t("This field is required"));
     } else if (volumeName.slice(0, 1) === "/") {
       isVolValid = false;
-      setVolumeError("Volume/Bucket name cannot start with /");
+      setVolumeError(t("Volume/Bucket name cannot start with /"));
     }
     isPathValid = inspectPath.trim().length > 0;
     if (!inspectPath) {
-      setPathError("This field is required");
+      setPathError(t("This field is required"));
     } else if (inspectPath.slice(0, 1) === "/") {
       isPathValid = false;
-      setPathError("Path cannot start with /");
+      setPathError(t("Path cannot start with /"));
     }
     const isValid = isVolValid && isPathValid;
 
@@ -130,7 +135,7 @@ const Inspect = () => {
     }
 
     setIsFormValid(isValid);
-  }, [volumeName, inspectPath]);
+  }, [volumeName, inspectPath, t]);
 
   const makeRequest = async (url: string) => {
     return await fetch(url, { method: "GET" });
@@ -198,7 +203,7 @@ const Inspect = () => {
           <FormLayout
             helpBox={
               <HelpBox
-                title={"Learn more about the Inspect feature"}
+                title={t("Learn more about the Inspect feature")}
                 iconComponent={<InspectMenuIcon />}
                 help={
                   <Fragment>
@@ -210,7 +215,7 @@ const Inspect = () => {
                         fontSize: "14px",
                       }}
                     >
-                      Examples:
+                      {t("Examples:")}
                     </Box>
 
                     <Box
@@ -283,8 +288,9 @@ const Inspect = () => {
                       <Box>
                         <Box className="step-row">
                           <div className="step-text">
-                            To Download 'xl.meta' for a specific object from all
-                            the drives in a zip file:
+                            {t(
+                              "To Download 'xl.meta' for a specific object from all the drives in a zip file:",
+                            )}
                           </div>
                         </Box>
 
@@ -297,8 +303,9 @@ const Inspect = () => {
                       <Box>
                         <Box className="step-row">
                           <div className="step-text">
-                            To Download all constituent parts for a specific
-                            object, and optionally encrypt the downloaded zip:
+                            {t(
+                              "To Download all constituent parts for a specific object, and optionally encrypt the downloaded zip:",
+                            )}
                           </div>
                         </Box>
 
@@ -310,10 +317,13 @@ const Inspect = () => {
                       <Box>
                         <Box className="step-row">
                           <div className="step-text">
-                            To Download recursively all objects at a prefix.
+                            {t(
+                              "To Download recursively all objects at a prefix.",
+                            )}
                             <br />
-                            NOTE: This can be an expensive operation use it with
-                            caution.
+                            {t(
+                              "NOTE: This can be an expensive operation use it with caution.",
+                            )}
                           </div>
                         </Box>
                         <ExampleBlock
@@ -330,15 +340,19 @@ const Inspect = () => {
                         fontSize: "14px",
                       }}
                     >
-                      You can learn more at the{" "}
-                      <a
-                        href="https://silo.pgsty.com/operations/troubleshooting/"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        documentation
-                      </a>
-                      .
+                      {interpolate(t("You can learn more at the {link}."), {
+                        link: (
+                          <a
+                            href={localize(
+                              "https://silo.pgsty.com/operations/troubleshooting/",
+                            )}
+                            target="_blank"
+                            rel="noopener"
+                          >
+                            {t("documentation")}
+                          </a>
+                        ),
+                      })}
                     </Box>
                   </Fragment>
                 }
@@ -359,7 +373,7 @@ const Inspect = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setVolumeName(e.target.value);
                 }}
-                label="Volume or Bucket Name"
+                label={t("Volume or Bucket Name")}
                 value={volumeName}
                 error={volumeError}
                 required
@@ -372,14 +386,14 @@ const Inspect = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setInspectPath(e.target.value);
                 }}
-                label="File or Path to inspect"
+                label={t("File or Path to inspect")}
                 value={inspectPath}
                 required
                 placeholder={"test*/xl.meta"}
               />
               <Switch
-                label="Encrypt"
-                indicatorLabels={["True", "False"]}
+                label={t("Encrypt")}
+                indicatorLabels={[t("True"), t("False")]}
                 checked={isEncrypt}
                 value={"true"}
                 id="inspect_encrypt"
@@ -405,7 +419,7 @@ const Inspect = () => {
                   variant="regular"
                   data-test-id="inspect-clear-button"
                   onClick={resetForm}
-                  label={"Clear"}
+                  label={t("Clear")}
                 />
                 <Button
                   id={"inspect-start"}
@@ -413,7 +427,7 @@ const Inspect = () => {
                   variant={"callAction"}
                   data-test-id="inspect-submit-button"
                   disabled={!isFormValid}
-                  label={"Inspect"}
+                  label={t("Inspect")}
                 />
               </Box>
             </form>
@@ -422,15 +436,15 @@ const Inspect = () => {
         {decryptionKey ? (
           <ModalWrapper
             modalOpen={true}
-            title="Inspect Decryption Key"
+            title={t("Inspect Decryption Key")}
             onClose={onCloseDecKeyModal}
             titleIcon={<PasswordKeyIcon />}
           >
             <Fragment>
               <Box>
-                This will be displayed only once. It cannot be recovered.
+                {t("This will be displayed only once. It cannot be recovered.")}
                 <br />
-                Use secure medium to share this key.
+                {t("Use secure medium to share this key.")}
               </Box>
               <form
                 noValidate

@@ -10,12 +10,14 @@ import {
 } from "mds";
 import CodeMirrorWrapper from "../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
 import { HealthInfoMessage } from "./types";
+import { useT } from "i18n";
 
 interface IHealthInfoResults {
   serverHealthInfo: HealthInfoMessage;
 }
 
 const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
+  const t = useT();
   const [curTab, setCurTab] = useState<string>("tab-details");
   const [systemHealhExpanded, setSystemHealhExpanded] =
     useState<boolean>(false);
@@ -88,12 +90,12 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
             tabConfig: {
               icon: <CollapseIcon />,
               id: "tab-details",
-              label: "Health Info (Preview)",
+              label: t("Health Info (Preview)"),
             },
             content: (
               <>
                 <Accordion
-                  title={"System Health Info"}
+                  title={t("System Health Info")}
                   id={"system-health-info"}
                   expanded={systemHealhExpanded}
                   onTitleClick={() =>
@@ -102,7 +104,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                   sx={{ marginTop: 0 }}
                 >
                   <Accordion
-                    title={"CPU Info"}
+                    title={t("CPU Info")}
                     id={"cpu-info"}
                     expanded={systemHealhCPUExpanded}
                     onTitleClick={() =>
@@ -119,7 +121,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Drives Partitions Info"}
+                    title={t("Drives Partitions Info")}
                     id={"drives-partitions-info"}
                     expanded={systemHealhPartitionsExpanded}
                     onTitleClick={() =>
@@ -142,7 +144,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"OS Info"}
+                    title={t("OS Info")}
                     id={"os-info"}
                     expanded={systemHealhOSInfoExpanded}
                     onTitleClick={() =>
@@ -163,7 +165,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Memory Info"}
+                    title={t("Memory Info")}
                     id={"memory-info"}
                     expanded={systemHealhMeminfoExpanded}
                     onTitleClick={() =>
@@ -184,7 +186,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Process Info"}
+                    title={t("Process Info")}
                     id={"process-info"}
                     expanded={systemHealhProcinfoExpanded}
                     onTitleClick={() =>
@@ -207,7 +209,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Network Info"}
+                    title={t("Network Info")}
                     id={"network-info"}
                     expanded={systemHealhNetinfoExpanded}
                     onTitleClick={() =>
@@ -228,7 +230,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Erros"}
+                    title={t("Erros")}
                     id={"errors-info"}
                     expanded={systemHealhErrorsExpanded}
                     onTitleClick={() =>
@@ -249,7 +251,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Services"}
+                    title={t("Services")}
                     id={"services-info"}
                     expanded={systemHealhServicesExpanded}
                     onTitleClick={() =>
@@ -272,7 +274,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     />
                   </Accordion>
                   <Accordion
-                    title={"Server Config"}
+                    title={t("Server Config")}
                     id={"config-info"}
                     expanded={systemHealhConfigExpanded}
                     onTitleClick={() =>
@@ -294,7 +296,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                   </Accordion>
                 </Accordion>
                 <Accordion
-                  title={"SILO Health Info"}
+                  title={t("SILO Health Info")}
                   id={"minio-health"}
                   expanded={minioHealhExpanded}
                   onTitleClick={() =>
@@ -303,7 +305,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                   sx={{ marginTop: 10 }}
                 >
                   <Accordion
-                    title={"Info"}
+                    title={t("Info")}
                     id={"minio-health-info"}
                     expanded={minioHealhInfoExpanded}
                     onTitleClick={() =>
@@ -315,17 +317,20 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                       useBackground
                       sx={{ margin: "10px 0px", padding: "5px" }}
                     >
-                      Mode: {serverHealthInfo.minio.info.mode}
+                      {t("Mode:")} {serverHealthInfo.minio.info.mode}
                       <br></br>
                       deploymentID: {serverHealthInfo.minio.info.deploymentID}
                       <br></br>
-                      Buckets: {serverHealthInfo.minio.info.buckets.count}&emsp;
-                      Objects: {serverHealthInfo.minio.info.objects.count}&emsp;
-                      Usage: {serverHealthInfo.minio.info.usage.size} Bytes
+                      {t("Buckets:")}{" "}
+                      {serverHealthInfo.minio.info.buckets.count}&emsp;
+                      {t("Objects:")}{" "}
+                      {serverHealthInfo.minio.info.objects.count}&emsp;
+                      {t("Usage:")} {serverHealthInfo.minio.info.usage.size}{" "}
+                      {t("Bytes")}
                       <br></br>
                     </Box>
                     <Accordion
-                      title={"Backend"}
+                      title={t("Backend")}
                       id={"minio-backend-info"}
                       expanded={minioHealhInfoBackendExpanded}
                       onTitleClick={() =>
@@ -348,7 +353,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                       />
                     </Accordion>
                     <Accordion
-                      title={"Servers"}
+                      title={t("Servers")}
                       id={"minio-info-servers"}
                       expanded={minioHealhInfoServersExpanded}
                       onTitleClick={() =>
@@ -371,7 +376,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                       />
                     </Accordion>
                     <Accordion
-                      title={"Metrics"}
+                      title={t("Metrics")}
                       id={"minio-info-metrics"}
                       expanded={minioHealhInfoMetricsExpanded}
                       onTitleClick={() =>
@@ -395,7 +400,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     </Accordion>
                   </Accordion>
                   <Accordion
-                    title={"Config"}
+                    title={t("Config")}
                     id={"minio-health-config"}
                     expanded={minioHealhConfigExpanded}
                     onTitleClick={() =>
@@ -423,20 +428,20 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
             tabConfig: {
               icon: <CodeIcon />,
               id: "tab-raw",
-              label: "RAW JSON",
+              label: t("RAW JSON"),
             },
             content: (
               <Box>
                 <Button
-                  label="Download JSON"
+                  label={t("Download JSON")}
                   id={"download-results"}
-                  aria-label="Download JSON"
+                  aria-label={t("Download JSON")}
                   onClick={downloadJSON}
                   icon={<DownloadIcon />}
                   variant="callAction"
                 />
                 <CodeMirrorWrapper
-                  label={`Server Health Info`}
+                  label={t("Server Health Info")}
                   value={JSON.stringify(serverHealthInfo, null, 4)}
                   editorHeight={"850px"}
                   onChange={() => {}}
