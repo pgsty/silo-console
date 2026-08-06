@@ -488,10 +488,17 @@ const constructLabelNames = (metrics: any, legendFormat: string) => {
     countVarsClose !== 0
   ) {
     keysToReplace.forEach((element) => {
-      replacedLegend = replacedLegend.replace(element, metricsMap[element]);
+      // function replacement: a label value containing `$&`, `$'` or `$1`
+      // would otherwise be read as a substitution directive
+      replacedLegend = replacedLegend.replace(
+        element,
+        () => metricsMap[element],
+      );
     });
 
-    cleanLegend = replacedLegend;
+    // a placeholder this branch could not resolve must not survive as literal
+    // `{{name}}` text, which is what leaked braces into the Traffic legends
+    cleanLegend = replacedLegend.replace(/{{(.*?)}}/g, "");
   }
 
   // In case not all the legends were replaced, we remove the placeholders.
