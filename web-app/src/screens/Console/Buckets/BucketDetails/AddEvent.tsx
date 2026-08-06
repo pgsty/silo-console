@@ -222,13 +222,14 @@ const AddEvent = ({
                 idField={"value"}
                 records={events}
                 onSelect={handleClick}
-                onSelectAll={() =>
+                onSelectAll={() => {
+                  const allSelected =
+                    events.length > 0 &&
+                    events.every((ev) => selectedEvents.includes(ev.value));
                   setSelectedEvents(
-                    selectedEvents.length === events.length
-                      ? []
-                      : events.map((ev) => ev.value),
-                  )
-                }
+                    allSelected ? [] : events.map((ev) => ev.value),
+                  );
+                }}
                 selectedItems={selectedEvents}
                 noBackground
                 customPaperHeight={"260px"}

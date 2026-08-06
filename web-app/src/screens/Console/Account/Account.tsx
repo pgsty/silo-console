@@ -287,13 +287,19 @@ const Account = () => {
               customEmptyMessage={t("There are no Access Keys yet.")}
               columns={accountTableColumns(t)}
               onSelect={(e) => selectSAs(e, setSelectedSAs, selectedSAs)}
-              onSelectAll={() =>
+              onSelectAll={() => {
+                // Toggle the visible rows only; selections hidden by the
+                // current filter are preserved.
+                const visible = filteredRecords.map((r) => `${r.accessKey}`);
+                const allVisible =
+                  visible.length > 0 &&
+                  visible.every((v) => selectedSAs.includes(v));
                 setSelectedSAs(
-                  selectedSAs.length === filteredRecords.length
-                    ? []
-                    : filteredRecords.map((r) => `${r.accessKey}`),
-                )
-              }
+                  allVisible
+                    ? selectedSAs.filter((v) => !visible.includes(v))
+                    : Array.from(new Set([...selectedSAs, ...visible])),
+                );
+              }}
               selectedItems={selectedSAs}
               isLoading={loading}
               records={filteredRecords}

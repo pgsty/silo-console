@@ -325,13 +325,25 @@ const Groups = () => {
                         }
                         onSelectAll={
                           deleteGroup || getGroup
-                            ? () =>
+                            ? () => {
+                                const allVisible =
+                                  filteredRecords.length > 0 &&
+                                  filteredRecords.every((g) =>
+                                    checkedGroups.includes(g),
+                                  );
                                 setCheckedGroups(
-                                  checkedGroups.length ===
-                                    filteredRecords.length
-                                    ? []
-                                    : [...filteredRecords],
-                                )
+                                  allVisible
+                                    ? checkedGroups.filter(
+                                        (g) => !filteredRecords.includes(g),
+                                      )
+                                    : Array.from(
+                                        new Set([
+                                          ...checkedGroups,
+                                          ...filteredRecords,
+                                        ]),
+                                      ),
+                                );
+                              }
                             : undefined
                         }
                         records={filteredRecords}

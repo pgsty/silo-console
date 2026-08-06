@@ -350,14 +350,25 @@ const ListUsers = () => {
                         }
                         onSelectAll={
                           addUserToGroup || deleteUser
-                            ? () =>
+                            ? () => {
+                                const visible = filteredRecords.map(
+                                  (r) => `${r.accessKey}`,
+                                );
+                                const allVisible =
+                                  visible.length > 0 &&
+                                  visible.every((v) =>
+                                    checkedUsers.includes(v),
+                                  );
                                 setCheckedUsers(
-                                  checkedUsers.length === filteredRecords.length
-                                    ? []
-                                    : filteredRecords.map(
-                                        (r) => `${r.accessKey}`,
+                                  allVisible
+                                    ? checkedUsers.filter(
+                                        (v) => !visible.includes(v),
+                                      )
+                                    : Array.from(
+                                        new Set([...checkedUsers, ...visible]),
                                       ),
-                                )
+                                );
+                              }
                             : undefined
                         }
                         selectedItems={checkedUsers}

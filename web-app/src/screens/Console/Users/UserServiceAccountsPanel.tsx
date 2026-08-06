@@ -256,13 +256,16 @@ const UserServiceAccountsPanel = ({
         customEmptyMessage={t("There are no Access Keys yet.")}
         columns={accountTableColumns(t)}
         onSelect={(e) => selectSAs(e, setSelectedSAs, selectedSAs)}
-        onSelectAll={() =>
+        onSelectAll={() => {
+          const visible = records.map((r) => `${r.accessKey}`);
+          const allVisible =
+            visible.length > 0 && visible.every((v) => selectedSAs.includes(v));
           setSelectedSAs(
-            selectedSAs.length === records.length
-              ? []
-              : records.map((r) => `${r.accessKey}`),
-          )
-        }
+            allVisible
+              ? selectedSAs.filter((v) => !visible.includes(v))
+              : Array.from(new Set([...selectedSAs, ...visible])),
+          );
+        }}
         selectedItems={selectedSAs}
         isLoading={loading}
         records={records}

@@ -117,13 +117,17 @@ const UsersSelectors = ({
             <DataTable
               columns={[{ label: t("Access Key"), elementKey: "accessKey" }]}
               onSelect={selectionChanged}
-              onSelectAll={() =>
+              onSelectAll={() => {
+                const visible = filteredRecords.map((r) => `${r.accessKey}`);
+                const allVisible =
+                  visible.length > 0 &&
+                  visible.every((v) => selUsers.includes(v));
                 setSelectedUsers(
-                  selUsers.length === filteredRecords.length
-                    ? []
-                    : filteredRecords.map((r) => `${r.accessKey}`),
-                )
-              }
+                  allVisible
+                    ? selUsers.filter((v) => !visible.includes(v))
+                    : Array.from(new Set([...selUsers, ...visible])),
+                );
+              }}
               selectedItems={selUsers}
               isLoading={loading}
               records={filteredRecords}

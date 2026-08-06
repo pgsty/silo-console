@@ -114,15 +114,19 @@ const PolicySelectors = ({ noTitle = false }: ISelectPolicyProps) => {
           <DataTable
             columns={[{ label: t("Policy"), elementKey: "name" }]}
             onSelect={selectionChanged}
-            onSelectAll={() =>
+            onSelectAll={() => {
+              const visible = filteredRecords.map((r) => `${r.name}`);
+              const allVisible =
+                visible.length > 0 &&
+                visible.every((v) => currentPolicies.includes(v));
               dispatch(
                 setSelectedPolicies(
-                  currentPolicies.length === filteredRecords.length
-                    ? []
-                    : filteredRecords.map((r) => `${r.name}`),
+                  allVisible
+                    ? currentPolicies.filter((v) => !visible.includes(v))
+                    : Array.from(new Set([...currentPolicies, ...visible])),
                 ),
-              )
-            }
+              );
+            }}
             selectedItems={currentPolicies}
             isLoading={loading}
             records={filteredRecords}
