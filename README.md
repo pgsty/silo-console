@@ -18,11 +18,9 @@
 
 <p align="center">
   <a href="https://github.com/pgsty/silo-console/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/pgsty/silo-console?logo=github&label=release&color=007FA8"></a>
-  <a href="https://github.com/pgsty/silo-console/actions/workflows/jobs.yaml"><img alt="Build status" src="https://github.com/pgsty/silo-console/actions/workflows/jobs.yaml/badge.svg"></a>
   <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/pgsty/silo-console?logo=go"></a>
   <a href="https://github.com/pgsty/silo-console/pkgs/container/silo-console"><img alt="Container image" src="https://img.shields.io/badge/ghcr.io-pgsty%2Fsilo--console-2496ED?logo=docker&logoColor=white"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPLv3-blue"></a>
-  <a href="#a-bilingual-console"><img alt="Languages" src="https://img.shields.io/badge/i18n-English%20%7C%20%E4%B8%AD%E6%96%87-007FA8"></a>
 </p>
 
 > [!IMPORTANT]
@@ -55,62 +53,45 @@ The Console provides:
 
 ## Highlights
 
-What this console adds on top of the inherited codebase.
+### The full administration console
 
-### A bilingual console
-
-The entire interface — every screen, help topic, confirmation dialog, and
-documentation link — renders in **English or Chinese**, behind a 文/A toggle
-present on every page including sign-in.
-
-The implementation is hand-rolled and carries **zero new runtime dependencies**,
-because everything here ships inside a Go binary. English source strings are the
-dictionary keys, so an untranslated string falls back to English instead of
-leaking a raw identifier, and coverage can grow incrementally. Documentation
-links localize alongside the text, and the command palette matches in both
-languages — searching either `桶` or `buckets` finds the same entry. The whole
-feature costs about 61 KB of the embedded payload; with the default language,
-rendering is byte-identical to before.
-
-### A dashboard on Metrics V3
-
-The dashboard queries the **MinIO Metrics V3** endpoint that modern deployments
-actually scrape, with no V2 fallback. That migration is more than renaming
-series: V3 skips zero-valued metrics entirely and exports cluster gauges
-identically from every node, so a naive port silently shows blank panels and
-multiplies cluster totals by the node count.
-
-Every query therefore carries an explicit guard, and the panels distinguish
-*zero* from *no data* from *not yet scanned* — a full cluster reads `0 free`
-rather than vanishing, and a cluster that has not finished its first scan reads
-no-data rather than a fabricated `0`. Two cards with defensible semantics,
-**Erasure Health** and **Usage Data Age**, replace the old in-memory heal/scan
-counters that reset on restart. The mapping is documented in
-[`docs/metrics-v3.md`](docs/metrics-v3.md); point your scrape at
-`/minio/metrics/v3`, since the V2 names are no longer queried.
-
-![SILO Console metrics dashboard](images/silo-console-metrics.webp)
-
-### A redesigned interface
-
-The sign-in page, theme system, and console chrome were rebuilt under one design
-language, in matched light and dark themes, down to the details: consistent
-radii and transitions, keyboard focus rings, centered empty states, tabular
-numerals in stat cards, and timestamps that carry their timezone instead of
-using a 12-hour clock without AM/PM. Tables get a select-all that operates on
-visible rows while preserving filter-hidden selections, so the header checkbox
-can never imply a different set than a bulk action would touch.
+Upstream reduced its community console to an object browser. This project keeps
+the complete administrative interface described above — not only object
+browsing, but identity, policy, tiering, replication, and observability
+management.
 
 ![SILO Console object browser](images/silo-console-objects.webp)
 
-### Lean, embedded, and quiet
+### Metrics V3 dashboard
 
-The frontend ships inside the binary via `go:embed`, precompressed at build time
-with a deterministic gzip pass — about **2.9 MB** embedded, reproducible byte
-for byte, and enforced by a release gate. There is **no telemetry**: no
+The dashboard is built on **MinIO Metrics V3**, the metric set current
+deployments actually scrape. All widget queries target the V3 catalog, with
+guards for its zero-value and per-node export semantics, so panels distinguish a
+real zero from missing data. See [`docs/metrics-v3.md`](docs/metrics-v3.md) for
+the mapping.
+
+![SILO Console metrics dashboard](images/silo-console-metrics.webp)
+
+### A refreshed interface
+
+The sign-in page, theme system, and console chrome were reworked to current
+frontend practice — one design language across matched light and dark themes,
+consistent spacing and motion, and accessible focus states.
+
+### Small, clean, and quiet
+
+The frontend ships inside the binary via `go:embed`, precompressed at build time:
+the embedded payload went from roughly 10 MB to **under 3 MB**, reproducible byte
+for byte and enforced by a release gate. There is **no telemetry** — no
 analytics, no beacons, no external scripts or fonts, and no call-home. Automatic
-self-update is disabled, and the release catalog is contacted only when a host
-is explicitly configured.
+self-update is disabled, and a release catalog is contacted only when one is
+explicitly configured.
+
+### Bilingual
+
+The entire interface, including help content and documentation links, is
+available in English and Chinese behind a per-page toggle, with no added runtime
+dependencies.
 
 ## Status and Compatibility
 
