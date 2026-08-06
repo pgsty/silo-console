@@ -400,7 +400,7 @@ const IDPConfigurationDetails = ({
                   <Tooltip
                     tooltip={t(
                       "This value is set from the {name} environment variable",
-                    ).replace("{name}", overrideFields[key])}
+                    ).replace("{name}", () => overrideFields[key])}
                     placement={"right"}
                   >
                     <span className={"muted"}>

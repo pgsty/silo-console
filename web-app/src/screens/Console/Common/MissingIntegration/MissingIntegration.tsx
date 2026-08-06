@@ -43,7 +43,9 @@ const MissingIntegration = ({
     >
       <Grid item xs={8}>
         <HelpBox
-          title={t("{entity} not available").replace("{entity}", t(entity))}
+          title={t("{entity} not available").replace("{entity}", () =>
+            t(entity),
+          )}
           iconComponent={iconComponent}
           help={
             <Fragment>

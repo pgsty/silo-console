@@ -42,7 +42,10 @@ const CredentialItem = ({ label = "", value = "" }: ICredentialsItem) => {
               onClick={() => {
                 dispatch(
                   setModalSnackMessage(
-                    t("{label} copied to clipboard").replace("{label}", label),
+                    t("{label} copied to clipboard").replace(
+                      "{label}",
+                      () => label,
+                    ),
                   ),
                 );
               }}

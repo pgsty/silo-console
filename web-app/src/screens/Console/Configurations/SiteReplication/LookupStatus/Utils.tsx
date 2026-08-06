@@ -42,7 +42,7 @@ export const EntityNotFound = ({
       }}
     >
       {interpolate(
-        t("{type}: {name} not found.").replace("{type}", t(entityType)),
+        t("{type}: {name} not found.").replace("{type}", () => t(entityType)),
         {
           name: (
             <Box

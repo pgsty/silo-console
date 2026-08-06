@@ -50,7 +50,7 @@ const BucketQuotaSize = ({ quota }: { quota: any }) => {
             textTransform: "capitalize",
           }}
         >
-          {t("{type} Quota").replace("{type}", t(quota?.type ?? ""))}
+          {t("{type} Quota").replace("{type}", () => t(quota?.type ?? ""))}
         </label>
         <label> {niceBytes(`${quota?.quota}`, true)}</label>
       </Box>

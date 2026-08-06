@@ -69,7 +69,7 @@ const AddPolicyScreen = () => {
             errorMessage: t("There was an error creating a Policy "),
             detailedError: t(
               "There was an error creating a Policy: {details}. Please check Policy syntax.",
-            ).replace("{details}", err.error.detailedMessage || ""),
+            ).replace("{details}", () => err.error.detailedMessage || ""),
           }),
         );
       });

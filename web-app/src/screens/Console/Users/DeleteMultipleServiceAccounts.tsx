@@ -70,7 +70,7 @@ const DeleteMultipleSAs = ({
         <Fragment>
           {t(
             "Are you sure you want to delete the selected {count} Access Keys?",
-          ).replace("{count}", `${selectedSAs.length}`)}
+          ).replace("{count}", () => `${selectedSAs.length}`)}
         </Fragment>
       }
     />

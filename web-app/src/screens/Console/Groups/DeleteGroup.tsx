@@ -80,7 +80,7 @@ const DeleteGroup = ({
           {selectedGroups.length > 1
             ? t(
                 "Are you sure you want to delete the following {count} groups?",
-              ).replace("{count}", `${selectedGroups.length}`)
+              ).replace("{count}", () => `${selectedGroups.length}`)
             : t("Are you sure you want to delete the following group?")}
           {renderGroups}
         </Fragment>

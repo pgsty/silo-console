@@ -170,7 +170,10 @@ const AddServiceAccount = () => {
               onClick={() =>
                 navigate(`${IAM_PAGES.USERS}/${encodeURIComponent(userName)}`)
               }
-              label={t("User Details - {user}").replace("{user}", userName)}
+              label={t("User Details - {user}").replace(
+                "{user}",
+                () => userName,
+              )}
             />
           }
           actions={<HelpMenu />}

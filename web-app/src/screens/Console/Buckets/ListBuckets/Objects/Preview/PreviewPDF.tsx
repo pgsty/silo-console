@@ -84,7 +84,7 @@ const PreviewPDF = ({
             <Fragment>
               {t(
                 "This is a File Preview for the first {count} pages of the document, if you wish to work with the full document please download instead.",
-              ).replace("{count}", String(arrayCreate.length))}
+              ).replace("{count}", () => String(arrayCreate.length))}
               <Box
                 sx={{
                   display: "flex",

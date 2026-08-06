@@ -98,7 +98,7 @@ const DeleteUser = ({
             errorMessage: t("Cannot delete currently logged in user"),
             detailedError: t(
               "Cannot delete currently logged in user {user}",
-            ).replace("{user}", userLoggedIn),
+            ).replace("{user}", () => userLoggedIn),
           }),
         );
         closeDeleteModalAndRefresh(true);
@@ -118,7 +118,7 @@ const DeleteUser = ({
     selectedUsers.length > 1
       ? t(
           "Are you sure you want to delete the following {count} users?",
-        ).replace("{count}", `${selectedUsers.length}`)
+        ).replace("{count}", () => `${selectedUsers.length}`)
       : t("Are you sure you want to delete the following user?");
 
   return (

@@ -119,8 +119,8 @@ const UpdateTierCredentialsModal = ({
         closeModalAndRefresh(false);
       }}
       title={t("Update Credentials - {type} / {name}")
-        .replace("{type}", type)
-        .replace("{name}", name)}
+        .replace("{type}", () => type)
+        .replace("{name}", () => name)}
     >
       <form
         noValidate

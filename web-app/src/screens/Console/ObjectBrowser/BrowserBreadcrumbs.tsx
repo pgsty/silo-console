@@ -184,7 +184,7 @@ const BrowserBreadcrumbs = ({
       <Fragment key={`breadcrumbs-versionedItem`}>
         <span>
           <span className={"slashSpacingStyle"}>/</span>
-          {t("{file} - Versions").replace("{file}", versionedFile)}
+          {t("{file} - Versions").replace("{file}", () => versionedFile)}
         </span>
       </Fragment>,
     ];

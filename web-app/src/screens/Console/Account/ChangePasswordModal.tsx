@@ -109,7 +109,10 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
 
   return open ? (
     <ModalWrapper
-      title={t("Change Password for {user}").replace("{user}", userLoggedIn)}
+      title={t("Change Password for {user}").replace(
+        "{user}",
+        () => userLoggedIn,
+      )}
       modalOpen={open}
       onClose={() => {
         setNewPassword("");

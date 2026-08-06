@@ -144,7 +144,7 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
                       ? t("Configure Bucket")
                       : t(
                           "You do not have the required permissions to configure this bucket. Please contact your SILO administrator to request {role} permisions.",
-                        ).replace("{role}", IAM_ROLES.BUCKET_ADMIN)
+                        ).replace("{role}", () => IAM_ROLES.BUCKET_ADMIN)
                   }
                 >
                   <Button

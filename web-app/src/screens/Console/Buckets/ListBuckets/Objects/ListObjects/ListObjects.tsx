@@ -125,7 +125,7 @@ import ListObjectsTable from "./ListObjectsTable";
 import FilterObjectsSB from "../../../../ObjectBrowser/FilterObjectsSB";
 import AddAccessRule from "../../../BucketDetails/AddAccessRule";
 import { sanitizeFilePath } from "./utils";
-import { useLanguage, useT } from "i18n";
+import { useT } from "i18n";
 
 const DeleteMultipleObjects = withSuspense(
   React.lazy(() => import("./DeleteMultipleObjects")),
@@ -154,7 +154,6 @@ const acceptDnDStyle = {
 const ListObjects = () => {
   const dispatch = useAppDispatch();
   const t = useT();
-  const language = useLanguage();
   const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -688,8 +687,8 @@ const ListObjects = () => {
             const err: ErrorResponseHandler = {
               errorMessage: t("There were some errors during file upload"),
               detailedError: t("Uploaded files {done}/{total}")
-                .replace("{done}", String(successUploadedFiles))
-                .replace("{total}", String(totalFiles)),
+                .replace("{done}", () => String(successUploadedFiles))
+                .replace("{total}", () => String(totalFiles)),
             };
             dispatch(setErrorSnackMessage(err));
           }
@@ -1022,11 +1021,7 @@ const ListObjects = () => {
                     {t("Created on:")}&nbsp;
                     <strong>
                       {bucketInfo?.creation_date
-                        ? createdTime.toFormat(
-                            language === "zh"
-                              ? "yyyy-MM-dd HH:mm:ss"
-                              : "ccc, LLL dd yyyy HH:mm:ss (ZZZZ)",
-                          )
+                        ? createdTime.toFormat("yyyy-MM-dd HH:mm:ss (ZZZZ)")
                         : ""}
                     </strong>
                   </span>
@@ -1052,7 +1047,9 @@ const ListObjects = () => {
                             {(bucketInfo.objects === 1
                               ? t("{count} Object")
                               : t("{count} Objects")
-                            ).replace("{count}", String(bucketInfo.objects))}
+                            ).replace("{count}", () =>
+                              String(bucketInfo.objects),
+                            )}
                           </Fragment>
                         )}
                       </span>

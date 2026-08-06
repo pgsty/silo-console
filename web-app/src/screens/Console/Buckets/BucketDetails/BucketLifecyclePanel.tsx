@@ -224,7 +224,7 @@ const BucketLifecyclePanel = () => {
           return <Fragment />;
         }
         const days = (value: number | string) => (
-          <span>{t("{count} days").replace("{count}", `${value}`)}</span>
+          <span>{t("{count} days").replace("{count}", () => `${value}`)}</span>
         );
         if (el.transition) {
           if (el.transition.days > 0) {

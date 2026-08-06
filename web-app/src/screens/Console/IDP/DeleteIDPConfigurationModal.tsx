@@ -69,7 +69,7 @@ const DeleteIDPConfigurationModal = ({
 
   return (
     <ConfirmDialog
-      title={t("Delete {name}").replace("{name}", displayName)}
+      title={t("Delete {name}").replace("{name}", () => displayName)}
       confirmText={"Delete"}
       isOpen={deleteOpen}
       titleIcon={<ConfirmDeleteIcon />}

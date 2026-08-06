@@ -483,7 +483,7 @@ export const permissionTooltipHelper = (scopes: string[], name: string) => {
   return translate(lang, template)
     .split("{name}")
     .join(translate(lang, name))
-    .replace("{scopes}", niceScopes);
+    .replace("{scopes}", () => niceScopes);
 };
 
 export const listUsersPermissions = [IAM_SCOPES.ADMIN_LIST_USERS];

@@ -149,14 +149,14 @@ const CredentialsPrompt = ({
       onClose={() => {
         closeModal();
       }}
-      title={t("New {entity} Created").replace("{entity}", t(entity))}
+      title={t("New {entity} Created").replace("{entity}", () => t(entity))}
       titleIcon={<ServiceAccountCredentialsIcon />}
     >
       <Grid container>
         <Grid item xs={12}>
           {t(
             "A new {entity} has been created with the following details:",
-          ).replace("{entity}", t(entity))}
+          ).replace("{entity}", () => t(entity))}
           {!idp && consoleCreds && (
             <Fragment>
               <Grid

@@ -95,7 +95,7 @@ const RewindEnable = ({
       onClose={() => {
         closeModalAndRefresh();
       }}
-      title={t("Rewind - {bucket}").replace("{bucket}", bucketName)}
+      title={t("Rewind - {bucket}").replace("{bucket}", () => bucketName)}
     >
       <FormLayout withBorders={false} containerPadding={false}>
         <DateTimeInput

@@ -143,7 +143,7 @@ const DeleteObject = ({
         <Fragment>
           {t(
             "Are you sure you want to delete the selected {count} objects?",
-          ).replace("{count}", String(selectedObjects.length))}{" "}
+          ).replace("{count}", () => String(selectedObjects.length))}{" "}
           {isVersionedDelete && (
             <Fragment>
               <br />

@@ -170,7 +170,7 @@ const PolicyDetails = () => {
               errorMessage: t("There was an error updating the Policy "),
               detailedError: t(
                 "There was an error updating the Policy: {details}. Please check Policy syntax.",
-              ).replace("{details}", err.error.detailedMessage || ""),
+              ).replace("{details}", () => err.error.detailedMessage || ""),
             }),
           );
         });

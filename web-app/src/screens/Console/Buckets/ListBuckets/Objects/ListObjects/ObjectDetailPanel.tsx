@@ -545,7 +545,7 @@ const ObjectDetailPanel = ({
     const formatTime = niceDaysInt(difTime, "ms");
 
     return formatTime.trim() !== ""
-      ? t("{time} ago").replace("{time}", formatTime)
+      ? t("{time} ago").replace("{time}", () => formatTime)
       : t("Just now");
   };
 

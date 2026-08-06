@@ -120,7 +120,7 @@ const ConfTargetGeneric = ({
                 <Tooltip
                   tooltip={t(
                     "This value is set from the {env} environment variable",
-                  ).replace("{env}", override.overrideEnv)}
+                  ).replace("{env}", () => override.overrideEnv)}
                   placement={"left"}
                 >
                   <ConsoleIcon style={{ width: 20 }} />

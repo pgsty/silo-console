@@ -338,7 +338,10 @@ const ListTiersConfiguration = () => {
                       ? ""
                       : t(
                           "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you {permission} permission in order to create a Tier.",
-                        ).replace("{permission}", IAM_SCOPES.ADMIN_SET_TIER)
+                        ).replace(
+                          "{permission}",
+                          () => IAM_SCOPES.ADMIN_SET_TIER,
+                        )
                   }
                 >
                   <SecureComponent

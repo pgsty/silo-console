@@ -115,7 +115,7 @@ const DeleteObject = ({
           {interpolate(
             t(
               "Are you sure you want to delete the selected {count} versions for {object}?",
-            ).replace("{count}", String(selectedVersions.length)),
+            ).replace("{count}", () => String(selectedVersions.length)),
             { object: <strong>{selectedObject}</strong> },
           )}
           {canBypass && (

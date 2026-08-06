@@ -71,7 +71,9 @@ const TargetTitle = ({ logoSrc, title }: ITargetTitle) => {
       </Box>
 
       <Box className={"titleBox"}>
-        <b>{t("{target} Event Destination").replace("{target}", title)}</b>
+        <b>
+          {t("{target} Event Destination").replace("{target}", () => title)}
+        </b>
       </Box>
     </TargetBase>
   );
