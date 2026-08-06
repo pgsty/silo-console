@@ -19,7 +19,6 @@
 <p align="center">
   <a href="https://github.com/pgsty/silo-console/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/pgsty/silo-console?logo=github&label=release&color=007FA8"></a>
   <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/pgsty/silo-console?logo=go"></a>
-  <a href="https://github.com/pgsty/silo-console/pkgs/container/silo-console"><img alt="Container image" src="https://img.shields.io/badge/ghcr.io-pgsty%2Fsilo--console-2496ED?logo=docker&logoColor=white"></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPLv3-blue"></a>
 </p>
 
@@ -105,18 +104,16 @@ names are retained where changing them would break existing integrations:
 | Go module | `github.com/minio/console` |
 | Server endpoint | `CONSOLE_MINIO_SERVER` |
 | Server region | `CONSOLE_MINIO_REGION` |
-| Container image | `ghcr.io/pgsty/silo-console` |
 
 The retained Go module, import paths, environment variables, API fields, and
 protocol identifiers are compatibility interfaces, not product branding. Any
 future rename of those interfaces will require aliases and a migration period.
 
 Release binaries and packages are published on the
-[release page](https://github.com/pgsty/silo-console/releases). Official
-multi-architecture container images are published as
-`ghcr.io/pgsty/silo-console`. Automatic updates remain disabled until signed
-release artifacts and a tested rollback path are available; upgrade explicitly
-through a pinned binary, package, or container version.
+[release page](https://github.com/pgsty/silo-console/releases). Automatic
+updates remain disabled until signed release artifacts and a tested rollback
+path are available; upgrade explicitly through a pinned binary or package
+version.
 
 ## Quick Start
 

@@ -42,9 +42,6 @@ ErrorWithContext:The authorization header is malformed; the region is wrong; exp
 ```
 Set `CONSOLE_MINIO_REGION` to the same region configured on the object-storage server:
 ``` bash
-docker run -p 9090:9090 -e CONSOLE_MINIO_SERVER=http://127.0.0.1:9000 -e CONSOLE_MINIO_REGION=your.region.here ghcr.io/pgsty/silo-console
-```
-``` bash
 export CONSOLE_MINIO_REGION=eu-central-1
 export CONSOLE_MINIO_SERVER=http://localhost:9000
 ./console server
