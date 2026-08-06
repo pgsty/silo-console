@@ -80,8 +80,7 @@ consistent spacing and motion, and accessible focus states.
 
 ### Small, clean, and quiet
 
-The frontend ships inside the binary via `go:embed`, precompressed at build time:
-the embedded payload went from roughly 10 MB to **under 3 MB**, reproducible byte
+The embedded payload went from roughly 10 MB to **under 3 MB**, reproducible byte
 for byte and enforced by a release gate. There is **no telemetry** — no
 analytics, no beacons, no external scripts or fonts, and no call-home. Automatic
 self-update is disabled, and a release catalog is contacted only when one is
