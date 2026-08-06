@@ -28,7 +28,7 @@ export const accountTableColumns = (t: (text: string) => string) => [
       if (expTime !== "1970-01-01T00:00:00Z") {
         const fmtDate = DateTime.fromISO(expTime)
           .toUTC()
-          .toFormat("y/M/d hh:mm:ss z");
+          .toFormat("yyyy-MM-dd HH:mm:ss (ZZZZ)");
 
         return <span title={fmtDate}>{fmtDate}</span>;
       } else {

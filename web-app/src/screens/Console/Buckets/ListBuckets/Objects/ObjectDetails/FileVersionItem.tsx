@@ -32,7 +32,7 @@ import {
 import { niceBytes } from "../../../../../../common/utils";
 import SpecificVersionPill from "./SpecificVersionPill";
 import { BucketObject } from "api/consoleApi";
-import { useLanguage, useT } from "i18n";
+import { useT } from "i18n";
 
 interface IFileVersionItem {
   fileName: string;
@@ -176,7 +176,6 @@ const FileVersionItem = ({
   style,
 }: IFileVersionItem) => {
   const t = useT();
-  const language = useLanguage();
   const disableButtons = versionInfo.is_delete_marker;
 
   const versionItemButtons = [
@@ -329,11 +328,7 @@ const FileVersionItem = ({
             <Grid item xs={12} className={"collapsableInfo"}>
               <span className={"versionData"}>
                 <strong>{t("Last modified:")}</strong>{" "}
-                {lastModified.toFormat(
-                  language === "zh"
-                    ? "yyyy-MM-dd HH:mm:ss"
-                    : "ccc, LLL dd yyyy HH:mm:ss (ZZZZ)",
-                )}
+                {lastModified.toFormat("yyyy-MM-dd HH:mm:ss (ZZZZ)")}
               </span>
               <span className={"versionData"}>
                 <strong>{t("Size:")}</strong>{" "}

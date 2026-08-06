@@ -18,7 +18,6 @@ import { DateTime } from "luxon";
 import { BucketObjectItem } from "./types";
 import { niceBytes } from "../../../../../../common/utils";
 import { displayFileIconName } from "./utils";
-import { getStoredLanguage } from "i18n";
 
 // The table definitions below are built by callers that already hold a
 // translator, so this module stays free of store/react imports.
@@ -40,15 +39,13 @@ const displayParsedDate = (t: Translator) => (object: BucketObjectItem) => {
     currTime.hasSame(objectTime, "year");
 
   if (isToday) {
-    return t("Today, {time}").replace("{time}", objectTime.toFormat("HH:mm"));
+    return t("Today, {time}").replace("{time}", () =>
+      objectTime.toFormat("HH:mm"),
+    );
   }
 
-  // zh keeps a compact ISO-like stamp; the verbose English form stays as-is.
-  return objectTime.toFormat(
-    getStoredLanguage() === "zh"
-      ? "yyyy-MM-dd HH:mm"
-      : "ccc, LLL dd yyyy HH:mm (ZZZZ)",
-  );
+  // Standard timezone-carrying stamp, shared by both languages.
+  return objectTime.toFormat("yyyy-MM-dd HH:mm (ZZZZ)");
 };
 
 const displayNiceBytes = (object: BucketObjectItem) => {

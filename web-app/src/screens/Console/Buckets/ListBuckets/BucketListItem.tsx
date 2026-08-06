@@ -40,7 +40,7 @@ import {
 import { hasPermission } from "../../../../common/SecureComponent";
 import { Bucket } from "../../../../api/consoleApi";
 import { usageClarifyingContent } from "screens/Console/Dashboard/BasicDashboard/ReportedUsage";
-import { useLanguage, useT } from "i18n";
+import { useT } from "i18n";
 
 const BucketItemMain = styled.div(({ theme }) => ({
   border: `${get(theme, "borderColor", "#eaeaea")} 1px solid`,
@@ -134,7 +134,6 @@ const BucketListItem = ({
 }: IBucketListItem) => {
   const navigate = useNavigate();
   const t = useT();
-  const language = useLanguage();
 
   const [clickOverride, setClickOverride] = useState<boolean>(false);
 
@@ -197,9 +196,7 @@ const BucketListItem = ({
           <strong>{t("Created:")}</strong>{" "}
           {bucket.creation_date
             ? DateTime.fromISO(bucket.creation_date).toFormat(
-                language === "zh"
-                  ? "yyyy-MM-dd HH:mm"
-                  : "ccc, LLL dd yyyy HH:mm (ZZZZ)",
+                "yyyy-MM-dd HH:mm (ZZZZ)",
               )
             : "n/a"}
         </span>
