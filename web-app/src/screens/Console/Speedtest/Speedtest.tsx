@@ -54,8 +54,9 @@ const Speedtest = () => {
     null,
   );
   const [size, setSize] = useState<string>("64");
-  const [sizeUnit, setSizeUnit] = useState<string>("MB");
+  const [sizeUnit, setSizeUnit] = useState<string>("MiB");
   const [duration, setDuration] = useState<string>("10");
+  const [durationUnit, setDurationUnit] = useState<string>("s");
   const [topDate, setTopDate] = useState<number>(0);
   const [currentValue, setCurrentValue] = useState<number>(0);
   const [totalSeconds, setTotalSeconds] = useState<number>(0);
@@ -73,8 +74,11 @@ const Speedtest = () => {
       const baseUrl = baseLocation.pathname;
 
       const wsProt = wsProtocol(url.protocol);
+      // Minutes are a display convenience; the backend always takes seconds.
+      const durationSeconds =
+        durationUnit === "m" ? String(Number(duration) * 60) : duration;
       const socket = new WebSocket(
-        `${wsProt}://${url.hostname}:${port}${baseUrl}ws/speedtest?&size=${size}${sizeUnit}&duration=${duration}s`,
+        `${wsProt}://${url.hostname}:${port}${baseUrl}ws/speedtest?&size=${size}${sizeUnit}&duration=${durationSeconds}s`,
       );
 
       const baseDate = DateTime.now();
@@ -132,7 +136,7 @@ const Speedtest = () => {
       // reset start status
       setStart(false);
     }
-  }, [size, sizeUnit, start, duration]);
+  }, [size, sizeUnit, start, duration, durationUnit]);
 
   useEffect(() => {
     const actualSeconds = (topDate - currentValue) / 1000;
@@ -180,44 +184,54 @@ const Speedtest = () => {
               <Box
                 sx={{
                   display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                  marginBottom: 18,
+                }}
+              >
+                <Box
+                  sx={{
+                    fontSize: 13,
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  {start ? (
+                    <Fragment>
+                      {t("Speedtest in progress...")}
+                      <Loader style={{ width: 15, height: 15 }} />
+                    </Fragment>
+                  ) : (
+                    <Fragment>
+                      {currStatus && !start ? (
+                        <b>{t("Speed Test results:")}</b>
+                      ) : (
+                        <b>{t("Performance test")}</b>
+                      )}
+                    </Fragment>
+                  )}
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 120 }}>
+                  <ProgressBarWrapper
+                    value={speedometerValue}
+                    ready={currStatus !== null && !start}
+                    indeterminate={start}
+                    size={"small"}
+                  />
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
                   flexWrap: "wrap",
                   alignItems: "center",
                   columnGap: 24,
                   rowGap: 14,
                 }}
               >
-                <Box sx={{ flex: "1 1 200px", minWidth: 180, maxWidth: 300 }}>
-                  <Box
-                    sx={{
-                      fontSize: 13,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {start ? (
-                      <Fragment>
-                        {t("Speedtest in progress...")}
-                        <Loader style={{ width: 15, height: 15 }} />
-                      </Fragment>
-                    ) : (
-                      <Fragment>
-                        {currStatus && !start ? (
-                          <b>{t("Speed Test results:")}</b>
-                        ) : (
-                          <b>{t("Performance test")}</b>
-                        )}
-                      </Fragment>
-                    )}
-                  </Box>
-                  <Box>
-                    <ProgressBarWrapper
-                      value={speedometerValue}
-                      ready={currStatus !== null && !start}
-                      indeterminate={start}
-                      size={"small"}
-                    />
-                  </Box>
-                </Box>
-                <Box sx={{ flex: "1 1 240px", minWidth: 220, maxWidth: 320 }}>
+                <Box sx={{ flex: "1 1 260px", minWidth: 240, maxWidth: 360 }}>
                   <InputBox
                     id={"size"}
                     name={"size"}
@@ -243,7 +257,7 @@ const Speedtest = () => {
                     }
                   />
                 </Box>
-                <Box sx={{ flex: "1 1 240px", minWidth: 220, maxWidth: 320 }}>
+                <Box sx={{ flex: "1 1 260px", minWidth: 240, maxWidth: 360 }}>
                   <InputBox
                     id={"duration"}
                     name={"duration"}
@@ -258,10 +272,13 @@ const Speedtest = () => {
                     disabled={start}
                     overlayObject={
                       <InputUnitMenu
-                        id={"size-unit"}
-                        onUnitChange={() => {}}
-                        unitSelected={"s"}
-                        unitsList={[{ label: "s", value: "s" }]}
+                        id={"duration-unit"}
+                        onUnitChange={setDurationUnit}
+                        unitSelected={durationUnit}
+                        unitsList={[
+                          { label: t("s"), value: "s" },
+                          { label: t("min"), value: "m" },
+                        ]}
                         disabled={start}
                       />
                     }

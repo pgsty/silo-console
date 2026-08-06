@@ -65,10 +65,11 @@ const InputUnitMenu = ({
         disabled={disabled}
         type={"button"}
       >
-        {unitSelected}
+        {unitsList.find((unit) => unit.value === unitSelected)?.label ??
+          unitSelected}
       </UnitMenuButton>
       <DropdownSelector
-        id={"upload-main-menu"}
+        id={`${id}-menu`}
         options={unitsList}
         selectedOption={""}
         onSelect={(value) => handleClose(value)}

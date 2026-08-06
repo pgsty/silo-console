@@ -208,6 +208,9 @@ const HelpMenu = () => {
       setHelpItemsBlog(cached);
       return;
     }
+    // Nothing cached for this language yet: drop the other language's items
+    // right away so a failed fetch can't leave them on screen.
+    setHelpItemsBlog(SILO_BLOG_FALLBACK);
 
     const abortController = new AbortController();
 

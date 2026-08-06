@@ -28,6 +28,7 @@ import BucketListItem from "./BucketListItem";
 import VirtualizedList from "../../Common/VirtualizedList/VirtualizedList";
 import get from "lodash/get";
 import { useTheme } from "styled-components";
+import { useT } from "i18n";
 import BucketFiltering from "./BucketFiltering";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -35,6 +36,7 @@ import { useLocation } from "react-router-dom";
 const ListBuckets = () => {
   const dispatch = useAppDispatch();
   const theme = useTheme();
+  const t = useT();
   const { pathname = "" } = useLocation();
 
   const filterBuckets = useSelector(
@@ -100,7 +102,7 @@ const ListBuckets = () => {
             color: get(theme, "menu.vertical.sectionLabelColor", "#8093AC"),
           }}
         >
-          No buckets yet.
+          {t("No buckets yet.")}
         </Box>
       )}
       {!loadingBuckets && records.length !== 0 && (
@@ -145,7 +147,7 @@ const ListBuckets = () => {
                 <VirtualizedList
                   rowRenderFunction={renderItemLine}
                   totalItems={filteredRecords.length}
-                  defaultHeight={35}
+                  defaultHeight={44}
                 />
               </Box>
             )}
@@ -164,7 +166,7 @@ const ListBuckets = () => {
                     ),
                   }}
                 >
-                  No buckets match this filter.
+                  {t("No buckets match this filter.")}
                 </Box>
               )}
           </Box>

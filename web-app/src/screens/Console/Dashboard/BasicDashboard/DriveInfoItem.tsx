@@ -222,7 +222,9 @@ const DriveInfoItem = ({ drive }: ICardProps) => {
               <Box className="percentage-value">
                 {availablePercentage.toFixed(2)}%
               </Box>
-              <Box>of {niceBytes(totalSpace.toString())}</Box>
+              <Box>
+                {t("of")} {niceBytes(totalSpace.toString())}
+              </Box>
             </Box>
           </Box>
         </Box>

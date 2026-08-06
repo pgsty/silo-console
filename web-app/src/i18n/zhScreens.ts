@@ -812,7 +812,7 @@ export const zhScreens: Record<string, string> = {
   "Last modified:": "最后修改：",
   "Last Modified:": "最后修改：",
   "Latency Histogram": "延迟直方图",
-  "LDAP Enabled": "LDAP 已启用",
+  "LDAP Enabled": "LDAP 是否启用",
   "Learn more about {link}.": "了解更多关于{link}的内容。",
   "Learn more about Access Keys": "了解访问密钥",
   "Learn more about ACCESS KEYS": "了解访问密钥",
@@ -1679,6 +1679,9 @@ export const zhScreens: Record<string, string> = {
     "你需要额外的权限才能{name}。请联系 SILO 管理员为你授予 {scopes} 权限，以便{name}。",
   "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you {permission} permission in order to create a Tier.":
     "你需要额外权限才能创建新的存储层。请联系 SILO 管理员为你授予 {permission} 权限。",
+  "No buckets yet.": "暂无存储桶。",
+  "No buckets match this filter.": "没有符合筛选条件的存储桶。",
+  Trademark: "商标",
 };
 
 export default zhScreens;

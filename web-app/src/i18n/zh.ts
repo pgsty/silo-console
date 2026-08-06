@@ -67,12 +67,12 @@ export const zh: Record<string, string> = {
   Watch: "监视",
   Encryption: "加密",
   Events: "事件",
-  Tiering: "分层",
+  Tiering: "存储分层",
   "Site Replication": "站点复制",
   Configuration: "配置",
   Tools: "工具",
   Health: "健康报告",
-  Performance: "吞吐测试",
+  Performance: "性能测试",
   Profile: "性能剖析",
   Inspect: "对象检查",
   "Create Bucket": "创建存储桶",
@@ -109,7 +109,7 @@ export const zh: Record<string, string> = {
   "IAM Policies": "IAM 策略",
   "Key Management Service": "密钥管理服务",
   "Key Management Service Keys": "密钥管理服务密钥",
-  Tiers: "存储层",
+  Tiers: "分层存储",
   "OPENID Configurations": "OPENID 配置",
   "LDAP Configurations": "LDAP 配置",
 
@@ -175,6 +175,28 @@ export const zh: Record<string, string> = {
   "Drive Used Capacity": "磁盘已用容量",
   "Drives Free Inodes": "磁盘空闲 Inode",
   Upload: "上传",
+
+  // ---- Dashboard: chart legends (instance suffixes like "[server]" are
+  // preserved by translateLegend; only these static prefixes translate) ------
+  "Data Received": "数据接收",
+  "Data Sent": "数据发送",
+  "Internode Bytes Received": "节点间接收字节",
+  "Internode Bytes Sent": "节点间发送字节",
+  "CPU Usage Rate": "CPU 使用率",
+  "Memory Used": "内存使用",
+  "Open FDs": "打开文件描述符",
+  "Read Syscalls": "读系统调用",
+  "Write Syscalls": "写系统调用",
+  "Node RChar": "节点读取字节",
+  "Node WChar": "节点写入字节",
+  "Free Inodes": "空闲 Inode",
+  "Total Usable": "总可用",
+  "Usable Free": "可用空闲",
+  "Used Space": "已用空间",
+
+  // ---- Duration units (speedtest) -----------------------------------------
+  s: "秒",
+  min: "分钟",
 
   // ---- Common buttons and dialogs -----------------------------------------
   Cancel: "取消",

@@ -24,6 +24,7 @@ import { resetSystem } from "../../systemSlice";
 import LoadingComponent from "../../common/LoadingComponent";
 import ObjectManagerButton from "../Console/Common/ObjectManager/ObjectManagerButton";
 import { SiloBrand } from "../../common/SiloBrand";
+import { useT } from "i18n";
 
 const ObjectBrowser = React.lazy(
   () => import("../Console/ObjectBrowser/ObjectBrowser"),
@@ -33,6 +34,7 @@ const ObjectManager = React.lazy(
 );
 
 const AnonymousAccess = () => {
+  const t = useT();
   const dispatch = useAppDispatch();
 
   return (
@@ -63,7 +65,7 @@ const AnonymousAccess = () => {
             }}
             sx={{ color: "white", textTransform: "initial" }}
           >
-            Login
+            {t("Login")}
           </Button>
           <ObjectManagerButton />
         </div>
