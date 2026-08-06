@@ -1,5 +1,11 @@
 # Changelog
 
+## Release v2.1.1
+
+- Fixed the metrics legend builder so a `{{label}}` placeholder it cannot resolve is removed instead of leaking literal braces into the Traffic legends
+- Escape-proofed the remaining legend substitution branch, so label values containing `$&` or `$1` no longer corrupt legend text
+- Corrected the version reported on the License page, which still read 2.0.0
+
 ## Release v2.1.0
 
 Internationalization:
@@ -29,6 +35,7 @@ Additional Changes:
 - Fixed the speedtest control row overflow and accepted seconds or minutes for the test duration
 - Removed the last SUBNET remnants from health reporting; no health or diagnostic data leaves the deployment
 - Regenerated the embedded frontend payload, which had still carried the v2.0.0 build
+- Closed every issue filed against v2.0.0: #1 through #8
 
 ## Release v2.0.0
 
