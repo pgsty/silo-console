@@ -1,5 +1,35 @@
 # Changelog
 
+## Release v2.1.0
+
+Internationalization:
+
+- Added a zero-dependency English/Chinese interface covering every console screen, with a 文/A toggle on every page
+- Kept English source strings as the dictionary keys, so an untranslated string falls back to English instead of breaking
+- Localized help topics, documentation deep links, and the blog feed per language; the command palette matches both languages
+- Unified timestamps on `yyyy-MM-dd HH:mm[:ss] (ZZZZ)` in both languages, replacing a 12-hour clock without AM/PM
+- Persisted the language preference in `localStorage` with no browser-locale detection and English as the default
+
+Metrics:
+
+- Migrated all 26 dashboard widgets from Metrics V2 to Metrics V3 query names
+- Aggregated per-node duplicated cluster gauges with `max()`/`min()` instead of summing them
+- Added explicit zero-guards so the server's zero-value skip reads as 0 or "no data" rather than a missing panel
+- Replaced the V2-only heal/scan activity rows with Erasure Health and Usage Data Age cards
+- Removed the unused Prometheus label-values prefetch that delayed every widget request by up to a second
+- Added a regression suite pinning widget queries to the V3 catalog, plus a V2 to V3 mapping document
+
+Additional Changes:
+
+- Fixed a redirect loop when an expired session opened a deep link
+- Escape-proofed all placeholder substitutions, so bucket and object names containing `$&` or `$'` no longer corrupt rendered text
+- Replaced the untranslatable vendor "Select" header with a select-all checkbox that preserves filter-hidden selections
+- Named collapsed sidebar controls for screen readers and declared autocomplete intent on Access Key fields
+- Made mobile metrics and bucket panels scroll instead of clipping, and reflowed the dense Traffic and Resources panels
+- Fixed the speedtest control row overflow and accepted seconds or minutes for the test duration
+- Removed the last SUBNET remnants from health reporting; no health or diagnostic data leaves the deployment
+- Regenerated the embedded frontend payload, which had still carried the v2.0.0 build
+
 ## Release v2.0.0
 
 Distribution Changes:
