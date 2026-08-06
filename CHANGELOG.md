@@ -37,7 +37,6 @@ Distribution Changes:
 - Rebranded the project and user interface as SILO Console
 - Moved the public source and release project to `pgsty/silo-console`
 - Renamed release binaries, packages, checksums, and container images to `silo-console`
-- Published container images as `ghcr.io/pgsty/silo-console`
 
 Compatibility:
 
