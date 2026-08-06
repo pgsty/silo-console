@@ -46,16 +46,19 @@ func startHealthInfo(ctx context.Context, conn WSConn, client MinioAdmin, deadli
 		return err
 	}
 	encodedDiag := b64.StdEncoding.EncodeToString(compressedDiag)
+	// ReportStatus is a sentinel telling the browser the report was assembled
+	// successfully and is ready for local download. SILO Console never uploads
+	// the health report anywhere.
 	type messageReport struct {
 		Encoded          string      `json:"encoded"`
 		ServerHealthInfo interface{} `json:"serverHealthInfo"`
-		SubnetResponse   string      `json:"subnetResponse"`
+		ReportStatus     string      `json:"reportStatus"`
 	}
 
 	report := messageReport{
 		Encoded:          encodedDiag,
 		ServerHealthInfo: healthInfo,
-		SubnetResponse:   "/health",
+		ReportStatus:     "ok",
 	}
 
 	message, err := json.Marshal(report)

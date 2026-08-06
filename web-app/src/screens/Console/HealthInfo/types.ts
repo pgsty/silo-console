@@ -29,7 +29,7 @@ export interface HealthInfoMessage {
 export interface ReportMessage {
   encoded: string;
   serverHealthInfo: HealthInfoMessage;
-  subnetResponse: string;
+  reportStatus: string;
 }
 
 interface perfInfo {

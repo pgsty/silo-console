@@ -59,7 +59,7 @@ const HealthInfo = () => {
   );
   const [title, setTitle] = useState<string>("Health Report");
   const [diagFileContent, setDiagFileContent] = useState<string>("");
-  const [subnetResponse, setSubnetResponse] = useState<string>("");
+  const [reportStatus, setReportStatus] = useState<string>("");
   const [serverHealthInfo, setServerHealthInfo] = useState<HealthInfoMessage>();
 
   const download = () => {
@@ -160,8 +160,8 @@ const HealthInfo = () => {
           if (m.encoded !== "") {
             setDiagFileContent(m.encoded);
           }
-          if (m.subnetResponse) {
-            setSubnetResponse(m.subnetResponse);
+          if (m.reportStatus) {
+            setReportStatus(m.reportStatus);
           }
         };
         socket.onerror = (error) => {
@@ -236,8 +236,8 @@ const HealthInfo = () => {
                   }}
                 >
                   {" "}
-                  {subnetResponse !== "" &&
-                    !subnetResponse.toLowerCase().includes("error") && (
+                  {reportStatus !== "" &&
+                    !reportStatus.toLowerCase().includes("error") && (
                       <Grid item xs={12}>
                         <strong>
                           {t("Health report generated successfully!")}
@@ -250,8 +250,8 @@ const HealthInfo = () => {
                         </strong>
                       </Grid>
                     )}
-                  {(subnetResponse === "" ||
-                    subnetResponse.toLowerCase().includes("error")) &&
+                  {(reportStatus === "" ||
+                    reportStatus.toLowerCase().includes("error")) &&
                     serverDiagnosticStatus === DiagStatSuccess && (
                       <Grid item xs={12}>
                         <strong>{t("Something went wrong.")}</strong>

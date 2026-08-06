@@ -1221,7 +1221,7 @@
         {
           "title": "Health",
           "url": "https://silo.pgsty.com/operations/monitoring/healthcheck-probe/",
-          "body": "The health section provides an interface for running a health diagnostic for the SILO Deployment. For clusters connected to the Internet, the report uploads automatically to SUBNET."
+          "body": "The health section provides an interface for running a health diagnostic for the SILO Deployment. The report is generated on the deployment and downloaded directly to your browser."
         },
         {
           "title": "Healing",
@@ -2312,7 +2312,7 @@
         {
           "title": "Encrypt Inspect Output",
           "url": "https://silo.pgsty.com/operations/troubleshooting/encrypting-files/",
-          "body": "You can encrypt the output of the mc support inspect command for enhanced security when transmitting the files to SILO SUBNET."
+          "body": "You can encrypt the output of the mc support inspect command for enhanced security when transferring the files off the deployment."
         },
         {
           "title": "Troubleshooting",

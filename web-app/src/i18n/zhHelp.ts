@@ -274,8 +274,8 @@ export const zhHelp: Record<string, string> = {
   "In this video, we will provide an overview of site-wide replication.":
     "本视频概览站点级复制。",
   Health: "健康",
-  "The health section provides an interface for running a health diagnostic for the SILO Deployment. For clusters connected to the Internet, the report uploads automatically to SUBNET.":
-    "健康板块提供为 SILO 部署运行健康诊断的界面。对于已连接互联网的集群，诊断报告会自动上传到 SUBNET。",
+  "The health section provides an interface for running a health diagnostic for the SILO Deployment. The report is generated on the deployment and downloaded directly to your browser.":
+    "健康板块提供为 SILO 部署运行健康诊断的界面。诊断报告在部署端生成，并直接下载到你的浏览器。",
   "IDP Docs": "IDP 文档",
   "SILO supports multiple external identity managers through OpenID Connect-Compatible Active Directory / LDAP":
     "SILO 通过 OpenID Connect 兼容的 Active Directory / LDAP 支持多种外部身份管理系统",
@@ -346,8 +346,8 @@ export const zhHelp: Record<string, string> = {
   "The inspect section provides an interface for capturing the erasure-coded metadata associated to an object or objects.":
     "检查板块提供采集对象所关联的纠删码元数据的界面。",
   "Encrypt Inspect Output": "加密检查输出",
-  "You can encrypt the output of the mc support inspect command for enhanced security when transmitting the files to SILO SUBNET.":
-    "你可以加密 mc support inspect 命令的输出，在把文件传输到 SILO SUBNET 时提升安全性。",
+  "You can encrypt the output of the mc support inspect command for enhanced security when transferring the files off the deployment.":
+    "你可以加密 mc support inspect 命令的输出，在把文件传出部署时提升安全性。",
   "What is Trace?": "什么是跟踪？",
   "The trace section provides HTTP trace functionality for a bucket or buckets on the deployment.":
     "跟踪板块为部署中的一个或多个存储桶提供 HTTP 跟踪功能。",

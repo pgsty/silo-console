@@ -20,7 +20,6 @@ package api
 const (
 	// Constants for common configuration
 	ConsoleMinIOServer = "CONSOLE_MINIO_SERVER"
-	ConsoleSubnetProxy = "CONSOLE_SUBNET_PROXY"
 	ConsoleMinIORegion = "CONSOLE_MINIO_REGION"
 	ConsoleHostname    = "CONSOLE_HOSTNAME"
 	ConsolePort        = "CONSOLE_PORT"
