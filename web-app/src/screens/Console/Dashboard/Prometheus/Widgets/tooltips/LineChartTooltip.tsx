@@ -18,6 +18,7 @@ import React from "react";
 import { Box } from "mds";
 import { getTimeFromTimestamp } from "../../../../../../common/utils";
 import { tooltipCommon } from "../../../../Common/FormComponents/common/styleLibrary";
+import { useLegendT } from "i18n";
 
 const LineChartTooltip = ({
   active,
@@ -26,6 +27,8 @@ const LineChartTooltip = ({
   linearConfiguration,
   yAxisFormatter,
 }: any) => {
+  const lt = useLegendT();
+
   if (active) {
     return (
       <Box sx={tooltipCommon.customTooltip}>
@@ -54,7 +57,7 @@ const LineChartTooltip = ({
                   }}
                 >
                   <span className={"valueContainer"}>
-                    {linearConfiguration[index].keyLabel}:{" "}
+                    {lt(linearConfiguration[index].keyLabel)}:{" "}
                     {yAxisFormatter(pl.value)}
                   </span>
                 </Box>

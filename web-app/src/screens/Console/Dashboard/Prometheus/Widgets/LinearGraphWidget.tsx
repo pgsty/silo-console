@@ -28,6 +28,7 @@ import {
   YAxis,
 } from "recharts";
 import { Box, breakPoints, Loader } from "mds";
+import { useLegendT } from "i18n";
 import { ILinearGraphConfiguration } from "./types";
 import { widgetCommon } from "../../../Common/FormComponents/common/styleLibrary";
 import { IDashboardPanel } from "../types";
@@ -103,6 +104,7 @@ const LinearGraphWidget = ({
   xAxisFormatter = (item: string, var1: boolean, var2: boolean) => item,
   zoomActivated = false,
 }: ILinearGraphWidget) => {
+  const lt = useLegendT();
   const dispatch = useAppDispatch();
   const t = useT();
   const theme = useTheme();
@@ -390,9 +392,9 @@ const LinearGraphWidget = ({
                             />
                             <Box
                               className={"legendLabel"}
-                              title={section.keyLabel}
+                              title={lt(section.keyLabel)}
                             >
-                              {section.keyLabel}
+                              {lt(section.keyLabel)}
                             </Box>
                           </Box>
                         );

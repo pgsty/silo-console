@@ -11,7 +11,7 @@
 import React, { Fragment, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../store";
-import { Lang, localizeUrl, translate } from "./lang";
+import { Lang, localizeUrl, translate, translateLegend } from "./lang";
 
 export const useLanguage = (): Lang =>
   useSelector((state: AppState) => state.system.language);
@@ -24,6 +24,11 @@ export const useT = (): ((text: string) => string) => {
 export const useLocalizedLink = (): ((url: string) => string) => {
   const lang = useLanguage();
   return useMemo(() => (url: string) => localizeUrl(url, lang), [lang]);
+};
+
+export const useLegendT = (): ((text: string) => string) => {
+  const lang = useLanguage();
+  return useMemo(() => (text: string) => translateLegend(lang, text), [lang]);
 };
 
 // Renders a translated template with React nodes in {slot} positions, so

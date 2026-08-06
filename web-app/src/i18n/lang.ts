@@ -34,22 +34,31 @@ const dictionaries: Record<Lang, Record<string, string> | null> = {
   zh: { ...zhHelp, ...zhScreens, ...zh },
 };
 
-// Escape hatch for the rare case where one English string needs two different
-// translations: call t("Word@context") and add that exact key to the
-// dictionary. The suffix is stripped before falling back, so English UI never
-// shows it. Only bare lowercase suffixes are treated as context markers —
-// emails and the like are left untouched.
-const CONTEXT_SUFFIX = /@[a-z]+$/;
-
+// A miss returns the input unchanged, unconditionally — t() also receives
+// live data (user agents, RSS titles, object names), so no suffix stripping
+// or other rewriting is allowed here. The own-property check keeps inherited
+// Object.prototype members ("constructor", "toString", …) from leaking out
+// of the dictionary for hostile inputs.
 export const translate = (lang: Lang, text: string): string => {
   const dictionary = dictionaries[lang];
-  if (dictionary) {
-    const hit = dictionary[text];
-    if (hit !== undefined) {
-      return hit;
-    }
+  if (dictionary && Object.prototype.hasOwnProperty.call(dictionary, text)) {
+    return dictionary[text];
   }
-  return text.includes("@") ? text.replace(CONTEXT_SUFFIX, "") : text;
+  return text;
+};
+
+// Chart legends arrive as "Prefix [server:drive]" strings — the prefix comes
+// from a Go-side legendFormat template and the bracket suffix from label
+// substitution. Translate only the static prefix so instance suffixes (and
+// the data-layer matching that relies on raw legends) stay untouched.
+const LEGEND_SUFFIX = /^(.*?)( \[[^\]]*\])$/;
+
+export const translateLegend = (lang: Lang, text: string): string => {
+  const match = LEGEND_SUFFIX.exec(text);
+  if (match) {
+    return translate(lang, match[1]) + match[2];
+  }
+  return translate(lang, text);
 };
 
 // Site link localization rules (confirmed against the live sites):
