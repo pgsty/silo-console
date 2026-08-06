@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1500" height="570" viewBox="0 0 1500 570"
+     preserveAspectRatio="xMidYMid meet"
+     role="img" aria-labelledby="silo-logo-title silo-logo-desc"
+     shape-rendering="geometricPrecision">
+  <title id="silo-logo-title">SILO logo</title>
+  <desc id="silo-logo-desc">The SILO horizontal lockup: the circular silo emblem on the left, the SILO wordmark on the right.</desc>
+
+  <defs>
+    <!-- Emblem gradient, in the emblem's local coordinates; the group transform maps it. -->
+    <linearGradient id="silo-logo-mark-color" x1="276" y1="720" x2="742" y2="286" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#064A83"/>
+      <stop offset="0.5" stop-color="#007FA8"/>
+      <stop offset="1" stop-color="#22C7C9"/>
+    </linearGradient>
+    <!-- Wordmark gradient, in the wordmark's local coordinates. -->
+    <linearGradient id="silo-logo-word-color" x1="44.0" y1="-94.4" x2="1950.0" y2="794.4" gradientUnits="userSpaceOnUse">
+      <stop class="silo-logo-wm-a" offset="0.06" stop-color="#1d588c"/>
+      <stop class="silo-logo-wm-b" offset="0.94" stop-color="#b4762e"/>
+    </linearGradient>
+    <style>
+      /* Light theme values of --pg-strong / --copper; dark theme swaps in its own pair. */
+      @media (prefers-color-scheme: dark) {
+        .silo-logo-wm-a { stop-color: #7fb8e8; }
+        .silo-logo-wm-b { stop-color: #e0a35c; }
+      }
+    </style>
+  </defs>
+
+  <!-- Circular emblem, shifted from its native viewBox (230 213 570 570) to the 0..570 square. -->
+  <g id="silo-logo-mark" transform="translate(-230 -213)" fill="url(#silo-logo-mark-color)">
+    <!-- Outer circular band, intentionally opened at the lower-right plinth. -->
+    <path d="
+      M 734 676
+      A 283.5 278.5 0 1 0 310 692
+      L 359 692
+      A 247 248.5 0 1 1 688 676
+      Z"/>
+
+    <!-- Flowing left wall; its upper tangent matches the inner ellipse. -->
+    <path d="
+      M 300.57 375
+      C 292 390 300 430 328 450
+      C 343 461 357 472 374 481
+      C 410 501 426 517 426 544
+      L 426 676
+      L 336 676
+      C 308 647 286 608 274 565
+      C 262 522 263 479 272 439
+      C 278 413 286 389 300.57 375
+      Z"/>
+
+    <!-- Right column with tangent-continuous upper shoulder. -->
+    <path d="
+      M 602 373
+      Q 602 368 607 370
+      C 619 374 634 381 634 389
+      L 634 647
+      Q 634 649 636 649
+      L 708 649
+      L 734 676
+      L 602 676
+      Z"/>
+
+    <!-- Lower circular cap. -->
+    <path d="
+      M 310 692
+      L 714 692
+      C 668 743 596 774 512 774
+      C 428 774 355 743 310 692
+      Z"/>
+
+    <!-- Main silo body, with a tangent-continuous right shoulder. -->
+    <path d="
+      M 389 389
+      C 389 374 447 351 512 351
+      C 540 351 565 354 580 359
+      Q 583 360 583 364
+      L 583 676
+      L 443 676
+      L 443 541
+      C 443 509 426 490 389 470
+      Z"/>
+
+    <!-- Peaked roof with softly tapered, burr-free tips. -->
+    <path d="
+      M 512 274
+      L 647 365
+      Q 649 370 647 376
+      C 609 350 563 337 512 337
+      C 460 337 414 350 377 376
+      Q 375 370 377 365
+      Z"/>
+  </g>
+
+  <!-- Wordmark, scaled 3/7 to a 300-unit cap height and centered on the emblem's axis. -->
+  <g id="silo-logo-word" transform="translate(645.429 135) scale(0.428571)"
+     fill="url(#silo-logo-word-color)" fill-rule="nonzero">
+    <path id="silo-logo-s" d="M0 592V492H134V551L167 584H374L408 550V434L375 401H110L2 293V108L110 0H426L534 108V209H400V149L367 116H169L136 149V252L169 285H434L542 393V590L432 700H108Z"/>
+    <path id="silo-logo-i" d="M637 0H773V700H637Z"/>
+    <path id="silo-logo-l" d="M888 0H1024V585H1374V700H888Z"/>
+    <path id="silo-logo-o" d="M1404 585V115L1519 0H1879L1994 115V585L1879 700H1519ZM1807 584 1858 533V167L1807 116H1591L1540 167V533L1591 584Z"/>
+  </g>
+</svg>
