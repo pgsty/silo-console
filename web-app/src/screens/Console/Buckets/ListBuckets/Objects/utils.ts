@@ -22,6 +22,7 @@ import { api } from "../../../../../api";
 import { setErrorSnackMessage } from "../../../../../systemSlice";
 import { StatusCodes } from "http-status-codes";
 import { translate } from "i18n";
+import { calculateDownloadPercent } from "./downloadProgress";
 
 // This module is not a component, so it reads the active language off the
 // store the same way it already reads anonymousMode.
@@ -116,8 +117,8 @@ export const download = (
   req.addEventListener(
     "progress",
     function (evt) {
-      let percentComplete = Math.round((evt.loaded / fileSize) * 100);
-      if (progressCallback) {
+      const percentComplete = calculateDownloadPercent(evt, fileSize);
+      if (percentComplete !== null && progressCallback) {
         progressCallback(percentComplete);
       }
     },
@@ -127,6 +128,12 @@ export const download = (
   req.responseType = "blob";
   req.onreadystatechange = () => {
     if (req.readyState === XMLHttpRequest.DONE) {
+      // Abort and network failures complete with status 0. Their dedicated
+      // handlers own the terminal state and must not be overwritten here.
+      if (req.status === 0) {
+        return;
+      }
+
       // Ensure object was downloaded fully, if it's a folder we don't get the fileSize
       let completeDownload =
         isFolder(objectPath) || req.response.size === fileSize;
@@ -170,6 +177,7 @@ export const download = (
     if (abortCallback) {
       abortCallback();
     }
+    removeTrace(id);
   };
 
   return req;

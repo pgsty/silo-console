@@ -205,6 +205,8 @@ const objectBrowserSlice = createSlice({
       state.objectManager.objectsToManage[objectToCancel].cancelled = true;
       state.objectManager.objectsToManage[objectToCancel].done = true;
       state.objectManager.objectsToManage[objectToCancel].percentage = 0;
+      state.objectManager.objectsToManage[objectToCancel].waitingForFile =
+        false;
 
       // We cancel from in-progress lists
       const type = state.objectManager.objectsToManage[objectToCancel].type;

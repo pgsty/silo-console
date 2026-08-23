@@ -56,7 +56,7 @@ export const downloadSelected = createAsyncThunk(
         bucketName,
         object.name,
         object.version_id,
-        object.size,
+        object.size || 0,
         null,
         ID,
         (progress) => {
