@@ -10,6 +10,7 @@ MINIO_VERSION ?= "quay.io/minio/minio:latest"
 
 TARGET_BUCKET ?= "target"
 NODE_VERSION := $(shell cat .nvmrc)
+GOLANGCI_VERSION := 2.13.1
 
 default: console
 
@@ -20,7 +21,11 @@ console:
 
 getdeps:
 	@mkdir -p ${GOPATH}/bin
-	@echo "Installing golangci-lint" && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin
+	@if ! ${GOPATH}/bin/golangci-lint --version 2>/dev/null | grep -qF " $(GOLANGCI_VERSION) "; then \
+		echo "Installing golangci-lint v$(GOLANGCI_VERSION)"; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v$(GOLANGCI_VERSION)/install.sh | \
+			sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION); \
+	fi
 
 verifiers: getdeps fmt lint
 
