@@ -46,6 +46,7 @@ interface IFileVersionItem {
   onDownload: (versionInfo: BucketObject) => void;
   onRestore: (versionInfo: BucketObject) => void;
   onPreview: (versionInfo: BucketObject) => void;
+  canPreview: boolean;
   globalClick: (versionInfo: BucketObject) => void;
   key: any;
   style: any;
@@ -170,38 +171,43 @@ const FileVersionItem = ({
   onDownload,
   onRestore,
   onPreview,
+  canPreview,
   globalClick,
   index,
   key,
   style,
 }: IFileVersionItem) => {
   const t = useT();
-  const disableButtons = versionInfo.is_delete_marker;
+  const disableButtons = !!versionInfo.is_delete_marker;
 
   const versionItemButtons = [
     {
       icon: <PreviewIcon />,
       action: onPreview,
       name: "preview",
-      tooltip: t("Preview"),
+      tooltip: canPreview ? t("Preview") : t("Preview unavailable"),
+      disabled: disableButtons || !canPreview,
     },
     {
       icon: <DownloadIcon />,
       action: onDownload,
       name: "download",
       tooltip: t("Download this version"),
+      disabled: disableButtons,
     },
     {
       icon: <ShareIcon />,
       action: onShare,
       name: "share",
       tooltip: t("Share this version"),
+      disabled: disableButtons,
     },
     {
       icon: <RecoverIcon />,
       action: onRestore,
       name: "restore",
       tooltip: t("Restore this version"),
+      disabled: disableButtons,
     },
   ];
 
@@ -291,12 +297,12 @@ const FileVersionItem = ({
                             button.name
                           }-${index.toString()}`}
                           className={`${"spacing"} ${
-                            disableButtons ? "buttonDisabled" : ""
+                            button.disabled ? "buttonDisabled" : ""
                           }`}
-                          disabled={disableButtons}
+                          disabled={button.disabled}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!disableButtons) {
+                            if (!button.disabled) {
                               button.action(versionInfo);
                             } else {
                               e.preventDefault();

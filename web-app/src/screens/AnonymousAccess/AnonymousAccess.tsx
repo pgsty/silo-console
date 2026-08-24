@@ -25,6 +25,8 @@ import LoadingComponent from "../../common/LoadingComponent";
 import ObjectManagerButton from "../Console/Common/ObjectManager/ObjectManagerButton";
 import { SiloBrand } from "../../common/SiloBrand";
 import { useT } from "i18n";
+import DarkModeActivator from "../Console/Common/DarkModeActivator/DarkModeActivator";
+import LanguageActivator from "../Console/Common/LanguageActivator/LanguageActivator";
 
 const ObjectBrowser = React.lazy(
   () => import("../Console/ObjectBrowser/ObjectBrowser"),
@@ -55,7 +57,15 @@ const AnonymousAccess = () => {
           <SiloBrand style={{ display: "block", width: "100%", height: 70 }} />
         </div>
         <div style={{ flexGrow: 1 }}></div>
-        <div style={{ flexShrink: 1, display: "flex", flexDirection: "row" }}>
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            flexDirection: "row",
+            flexShrink: 0,
+            gap: 4,
+          }}
+        >
           <Button
             id={"go-to-login"}
             variant={"text"}
@@ -67,6 +77,8 @@ const AnonymousAccess = () => {
           >
             {t("Login")}
           </Button>
+          <LanguageActivator />
+          <DarkModeActivator />
           <ObjectManagerButton />
         </div>
       </div>

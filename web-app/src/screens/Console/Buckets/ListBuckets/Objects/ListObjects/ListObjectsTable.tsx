@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { listModeColumns, rewindModeColumns } from "./ListObjectsHelpers";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../../../store";
@@ -22,13 +22,17 @@ import { selFeatures } from "../../../../consoleSlice";
 import {
   setLoadingVersions,
   setObjectDetailsView,
+  setPreviewOpen,
   setReloadObjectsList,
   setSelectedObjects,
   setSelectedObjectView,
+  setSelectedPreview,
 } from "../../../../ObjectBrowser/objectBrowserSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import get from "lodash/get";
 import { sortListObjects } from "../utils";
+import { resolveAnonymousOpen } from "../Preview/anonymousPreview";
+import { PreviewRequestGeneration } from "../Preview/textPreview";
 import { BucketObjectItem } from "./types";
 import {
   IAM_SCOPES,
@@ -39,6 +43,7 @@ import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { DataTable, ItemActions } from "mds";
 import { BucketObject } from "api/consoleApi";
 import { useT } from "i18n";
+import { api } from "api";
 
 const ListObjectsTable = () => {
   const dispatch = useAppDispatch();
@@ -50,6 +55,16 @@ const ListObjectsTable = () => {
     "ASC" | "DESC" | undefined
   >("ASC");
   const [currentSortField, setCurrentSortField] = useState<string>("name");
+  const anonymousOpenGeneration = useRef(new PreviewRequestGeneration());
+  const anonymousMetadataController = useRef<AbortController | null>(null);
+
+  useEffect(
+    () => () => {
+      anonymousMetadataController.current?.abort();
+      anonymousOpenGeneration.current.invalidate();
+    },
+    [],
+  );
 
   const bucketName = params.bucketName || "";
 
@@ -104,7 +119,10 @@ const ListObjectsTable = () => {
     payload = sortASC.reverse();
   }
 
-  const openPath = (object: BucketObject) => {
+  const openPath = async (object: BucketObject) => {
+    anonymousMetadataController.current?.abort();
+    anonymousMetadataController.current = null;
+    const generation = anonymousOpenGeneration.current.begin();
     const idElement = object.name || "";
     const newPath = `/browser/${encodeURIComponent(bucketName)}${
       idElement ? `/${encodeURIComponent(idElement)}` : ``
@@ -112,6 +130,39 @@ const ListObjectsTable = () => {
 
     // for anonymous start download
     if (anonymousMode && !object.name?.endsWith("/")) {
+      const controller = new AbortController();
+      anonymousMetadataController.current = controller;
+      const decision = await resolveAnonymousOpen({
+        object,
+        isCurrent: () =>
+          !controller.signal.aborted &&
+          anonymousOpenGeneration.current.isCurrent(generation),
+        loadMetadata: async () => {
+          const response = await api.buckets.getObjectMetadata(
+            bucketName,
+            {
+              prefix: idElement,
+              ...(object.version_id ? { versionID: object.version_id } : {}),
+            },
+            {
+              headers: { "X-Anonymous": "1" },
+              signal: controller.signal,
+            },
+          );
+          return get(response.data, "objectMetadata", {});
+        },
+      });
+
+      if (decision === "stale") {
+        return;
+      }
+
+      if (decision === "preview") {
+        dispatch(setSelectedPreview(object as BucketObjectItem));
+        dispatch(setPreviewOpen(true));
+        return;
+      }
+
       downloadObject(dispatch, bucketName, idElement, object);
       return;
     }

@@ -39,6 +39,7 @@ import {
 import { setSnackBarMessage } from "../../../systemSlice";
 import { DateTime } from "luxon";
 import { api } from "api";
+import { translate } from "i18n/lang";
 
 export const downloadSelected = createAsyncThunk(
   "objectBrowser/downloadSelected",
@@ -79,7 +80,10 @@ export const downloadSelected = createAsyncThunk(
         () => {
           dispatch(
             setSnackBarMessage(
-              "File download will be handled directly by the browser.",
+              translate(
+                state.system.language,
+                "File download will be handled directly by the browser.",
+              ),
             ),
           );
         },

@@ -50,7 +50,7 @@ type WSResponse struct {
 type ObjectResponse struct {
 	Name         string `json:"name,omitempty"`
 	LastModified string `json:"last_modified,omitempty"`
-	Size         int64  `json:"size,omitempty"`
+	Size         int64  `json:"size"`
 	VersionID    string `json:"version_id,omitempty"`
 	DeleteMarker bool   `json:"delete_flag,omitempty"`
 	IsLatest     bool   `json:"is_latest,omitempty"`

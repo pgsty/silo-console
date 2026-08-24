@@ -19,7 +19,7 @@ import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
 import PreviewFileContent from "./PreviewFileContent";
 import { ObjectPreviewIcon } from "mds";
 import { BucketObject } from "../../../../../../api/consoleApi";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 interface IPreviewFileProps {
   open: boolean;
@@ -39,10 +39,9 @@ const PreviewFileModal = ({
     <Fragment>
       <ModalWrapper
         modalOpen={open}
-        title={t("Preview - {object}").replace(
-          "{object}",
-          actualInfo?.name || "",
-        )}
+        title={formatText(t("Preview - {object}"), {
+          object: actualInfo?.name || "",
+        })}
         onClose={onClosePreview}
         wideLimit={false}
         titleIcon={<ObjectPreviewIcon />}

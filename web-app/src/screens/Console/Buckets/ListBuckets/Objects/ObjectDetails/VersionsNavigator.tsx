@@ -57,7 +57,11 @@ import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { BucketObject } from "api/consoleApi";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
+import { hasPermission } from "../../../../../../common/SecureComponent";
+import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions";
+import { isPreviewAvailable } from "../utils";
+import { exactObjectVersions } from "./objectVersions";
 
 interface IVersionsNavigatorProps {
   internalPaths: string;
@@ -98,6 +102,15 @@ const VersionsNavigator = ({
   );
 
   const distributedSetup = useSelector(selDistSet);
+  const objectResources = [
+    bucketName,
+    internalPaths,
+    [bucketName, internalPaths].join("/"),
+  ];
+  const canGetObjectVersion = hasPermission(objectResources, [
+    IAM_SCOPES.S3_GET_OBJECT_VERSION,
+    IAM_SCOPES.S3_GET_ACTIONS,
+  ]);
   const [shareFileModalOpen, setShareFileModalOpen] = useState<boolean>(false);
   const [actualInfo, setActualInfo] = useState<BucketObject | null>(null);
   const [objectToShare, setObjectToShare] = useState<BucketObject | null>(null);
@@ -137,24 +150,22 @@ const VersionsNavigator = ({
           limit: versionsLimit + 1,
         })
         .then((res) => {
-          const result = get(res.data, "objects", []);
+          const result = exactObjectVersions<BucketObject>(
+            get(res.data, "objects", []),
+            internalPaths,
+          );
 
           setMoreVersionsThanLimit(result.length > versionsLimit);
-          result.splice(versionsLimit);
-
-          // Filter the results prefixes as API can return more files than expected.
-          const filteredPrefixes = result.filter(
-            (item: BucketObject) => item.name === internalPaths,
-          );
+          const visibleVersions = result.slice(0, versionsLimit);
 
           if (distributedSetup) {
             setActualInfo(
-              filteredPrefixes.find((el: BucketObject) => el.is_latest) ||
+              visibleVersions.find((el: BucketObject) => el.is_latest) ||
                 emptyFile,
             );
-            setVersions(filteredPrefixes);
+            setVersions(visibleVersions);
           } else {
-            setActualInfo(filteredPrefixes[0]);
+            setActualInfo(visibleVersions[0]);
             setVersions([]);
           }
 
@@ -315,6 +326,15 @@ const VersionsNavigator = ({
         onRestore={onRestoreItem}
         onShare={onShareItem}
         onPreview={onPreviewItem}
+        canPreview={isPreviewAvailable({
+          metaData: filteredRecords[index].content_type
+            ? { "Content-Type": filteredRecords[index].content_type }
+            : null,
+          objectName: actualInfo?.name || "",
+          canGetObject: canGetObjectVersion,
+          isDeleteMarker: !!filteredRecords[index].is_delete_marker,
+          isPrefix: !!actualInfo?.name?.endsWith("/"),
+        })}
         globalClick={onGlobalClick}
         isSelected={selectedVersion === filteredRecords[index].version_id}
         checkable={selectEnabled}
@@ -352,15 +372,16 @@ const VersionsNavigator = ({
           actualInfo={{
             name: actualInfo.name || "",
             version_id:
-              objectToShare && objectToShare.version_id
+              objectToShare?.version_id !== undefined
                 ? objectToShare.version_id
                 : "null",
-            size: objectToShare && objectToShare.size ? objectToShare.size : 0,
-            content_type: "",
+            size: objectToShare?.size,
+            content_type: objectToShare?.content_type,
             last_modified: actualInfo.last_modified || "",
           }}
           onClosePreview={() => {
             setPreviewOpen(false);
+            setObjectToShare(null);
           }}
         />
       )}
@@ -435,24 +456,25 @@ const VersionsNavigator = ({
                     <VersionsIcon style={{ width: 20, height: 20 }} />
                   </span>
                 }
-                title={t("{object} Versions").replace(
-                  "{object}",
-                  objectNameArray.length > 0
-                    ? objectNameArray[objectNameArray.length - 1]
-                    : actualInfo.name || "",
-                )}
+                title={formatText(t("{object} Versions"), {
+                  object:
+                    objectNameArray.length > 0
+                      ? objectNameArray[objectNameArray.length - 1]
+                      : actualInfo.name || "",
+                })}
                 subTitle={
                   <Fragment>
                     <span className={"detailsSpacer"}>
                       <strong>
-                        {(versions.length === 1
-                          ? t("{count} Version")
-                          : t("{count} Versions")
-                        ).replace(
-                          "{count}",
-                          `${versions.length}${
-                            moreVersionsThanLimit ? "+" : ""
-                          }`,
+                        {formatText(
+                          versions.length === 1
+                            ? t("{count} Version")
+                            : t("{count} Versions"),
+                          {
+                            count: `${versions.length}${
+                              moreVersionsThanLimit ? "+" : ""
+                            }`,
+                          },
                         )}
                         &nbsp;&nbsp;&nbsp;
                       </strong>
@@ -552,7 +574,7 @@ const VersionsNavigator = ({
                 },
               }}
             >
-              {actualInfo.version_id && actualInfo.version_id !== "null" && (
+              {actualInfo.version_id && (
                 // @ts-ignore
                 <List
                   style={{

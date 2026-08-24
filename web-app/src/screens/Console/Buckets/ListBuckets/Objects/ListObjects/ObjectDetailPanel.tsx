@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import get from "lodash/get";
 import { useSelector } from "react-redux";
 import {
@@ -39,7 +39,7 @@ import {
 import { api } from "api";
 import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { BucketObject, BucketVersioningResponse } from "api/consoleApi";
-import { AllowedPreviews, previewObjectType } from "../utils";
+import { isPreviewAvailable } from "../utils";
 import {
   niceBytes,
   niceBytesInt,
@@ -72,7 +72,11 @@ import TagsModal from "../ObjectDetails/TagsModal";
 import InspectObject from "./InspectObject";
 import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
 import TooltipWrapper from "../../../../Common/TooltipWrapper/TooltipWrapper";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
+import {
+  canDisplayObjectVersions,
+  exactObjectVersions,
+} from "../ObjectDetails/objectVersions";
 
 const emptyFile: BucketObject = {
   is_latest: true,
@@ -134,12 +138,21 @@ const ObjectDetailPanel = ({
   const [moreVersionsThanLimit, setMoreVersionsThanLimit] =
     useState<boolean>(false);
   const [longFileOpen, setLongFileOpen] = useState<boolean>(false);
-  const [metaData, setMetaData] = useState<any | null>(null);
+  const metadataGeneration = useRef(0);
+  const [metadataState, setMetadataState] = useState<{
+    identity: string;
+    data: Record<string, unknown> | null;
+  }>({ identity: "", data: null });
   const [loadMetadata, setLoadingMetadata] = useState<boolean>(false);
 
   const internalPathsDecoded = internalPaths || "";
   const allPathData = internalPathsDecoded.split("/");
   const currentItem = allPathData.pop() || "";
+  const metadataIdentity = `${bucketName}\u0001${internalPaths}\u0001${
+    actualInfo?.version_id || ""
+  }`;
+  const metaData =
+    metadataState.identity === metadataIdentity ? metadataState.data : null;
 
   // calculate object name to display
   let objectNameArray: string[] = [];
@@ -176,15 +189,18 @@ const ObjectDetailPanel = ({
           limit: versionsLimit + 1,
         })
         .then((res) => {
-          const result: BucketObject[] = res.data.objects || [];
+          const result = exactObjectVersions(
+            res.data.objects || [],
+            internalPaths,
+          );
           if (distributedSetup) {
             setMoreVersionsThanLimit(result.length > versionsLimit);
-            result.splice(versionsLimit);
+            const visibleVersions = result.slice(0, versionsLimit);
 
-            setAllInfoElements(result);
-            setVersions(result);
+            setAllInfoElements(visibleVersions);
+            setVersions(visibleVersions);
 
-            const tVersionSize = result.reduce(
+            const tVersionSize = visibleVersions.reduce(
               (acc: number, currValue: BucketObject): number => {
                 if (currValue?.size) {
                   return acc + currValue.size;
@@ -198,10 +214,10 @@ const ObjectDetailPanel = ({
           } else {
             const resInfo = result[0];
 
-            setActualInfo(resInfo);
+            setActualInfo(resInfo || null);
             setVersions([]);
 
-            if (!resInfo.is_delete_marker) {
+            if (resInfo && !resInfo.is_delete_marker) {
               setLoadingMetadata(true);
             }
           }
@@ -225,23 +241,59 @@ const ObjectDetailPanel = ({
 
   useEffect(() => {
     if (loadMetadata && internalPaths !== "") {
-      api.buckets
-        .getObjectMetadata(bucketName, {
-          prefix: internalPaths,
-          versionID: actualInfo?.version_id || "",
-        })
-        .then((res) => {
-          let metadata = get(res.data, "objectMetadata", {});
+      const controller = new AbortController();
+      const generation = metadataGeneration.current + 1;
+      metadataGeneration.current = generation;
 
-          setMetaData(metadata);
-          setLoadingMetadata(false);
+      setMetadataState({ identity: metadataIdentity, data: null });
+
+      api.buckets
+        .getObjectMetadata(
+          bucketName,
+          {
+            prefix: internalPaths,
+            ...(actualInfo?.version_id
+              ? { versionID: actualInfo.version_id }
+              : {}),
+          },
+          { signal: controller.signal },
+        )
+        .then((res) => {
+          if (
+            !controller.signal.aborted &&
+            metadataGeneration.current === generation
+          ) {
+            setMetadataState({
+              identity: metadataIdentity,
+              data: get(res.data, "objectMetadata", {}),
+            });
+            setLoadingMetadata(false);
+          }
         })
-        .catch((err) => {
-          console.error("Error Getting Metadata Status: ", err.detailedError);
-          setLoadingMetadata(false);
+        .catch(() => {
+          if (
+            !controller.signal.aborted &&
+            metadataGeneration.current === generation
+          ) {
+            setMetadataState({ identity: metadataIdentity, data: null });
+            setLoadingMetadata(false);
+          }
         });
+
+      return () => {
+        controller.abort();
+        if (metadataGeneration.current === generation) {
+          metadataGeneration.current += 1;
+        }
+      };
     }
-  }, [bucketName, internalPaths, loadMetadata, actualInfo?.version_id]);
+  }, [
+    bucketName,
+    internalPaths,
+    loadMetadata,
+    actualInfo?.version_id,
+    metadataIdentity,
+  ]);
 
   let tagKeys: string[] = [];
 
@@ -363,12 +415,32 @@ const ObjectDetailPanel = ({
     IAM_SCOPES.S3_GET_OBJECT,
     IAM_SCOPES.S3_GET_ACTIONS,
   ]);
+  const previewPermissionScopes =
+    selectedVersion !== ""
+      ? [IAM_SCOPES.S3_GET_OBJECT_VERSION, IAM_SCOPES.S3_GET_ACTIONS]
+      : [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS];
+  const canReadPreviewObject =
+    selectedVersion === ""
+      ? canGetObject
+      : hasPermission(objectResources, previewPermissionScopes);
   const canDelete = hasPermission(
     [bucketName, currentItem, [bucketName, actualInfo.name].join("/")],
     [IAM_SCOPES.S3_DELETE_OBJECT, IAM_SCOPES.S3_DELETE_ACTIONS],
   );
+  const versionsAvailable = canDisplayObjectVersions({
+    currentVersionID: actualInfo.version_id,
+    distributedSetup,
+    exactVersionCount: versions.length,
+    versioningStatus: versioningInfo.status,
+  });
 
-  let objectType: AllowedPreviews = previewObjectType(metaData, currentItem);
+  const previewAvailable = isPreviewAvailable({
+    metaData,
+    objectName: currentItem,
+    canGetObject: canReadPreviewObject,
+    isDeleteMarker: !!actualInfo.is_delete_marker,
+    isPrefix: !!actualInfo.name?.endsWith("/"),
+  });
 
   const multiActionButtons = [
     {
@@ -404,16 +476,16 @@ const ObjectDetailPanel = ({
         setPreviewOpen(true);
       },
       label: t("Preview"),
-      disabled:
-        !!actualInfo.is_delete_marker ||
-        (objectType === "none" && !canGetObject),
+      disabled: !previewAvailable,
       icon: <PreviewIcon />,
-      tooltip: canGetObject
+      tooltip: previewAvailable
         ? t("Preview this File")
-        : permissionTooltipHelper(
-            [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS],
-            t("preview this object"),
-          ),
+        : !canReadPreviewObject
+          ? permissionTooltipHelper(
+              previewPermissionScopes,
+              t("preview this object"),
+            )
+          : t("Preview unavailable"),
     },
     {
       action: () => {
@@ -515,14 +587,11 @@ const ObjectDetailPanel = ({
         ? t("Hide Object Versions")
         : t("Display Object Versions"),
       icon: <VersionsIcon />,
-      disabled:
-        !distributedSetup ||
-        !(actualInfo.version_id && actualInfo.version_id !== "null") ||
-        !canChangeVersioning,
+      disabled: !versionsAvailable || !canChangeVersioning,
       tooltip: canChangeVersioning
-        ? actualInfo.version_id && actualInfo.version_id !== "null"
+        ? versionsAvailable
           ? t("Display Versions for this file")
-          : ""
+          : t("No object versions are available")
         : permissionTooltipHelper(
             [
               IAM_SCOPES.S3_GET_BUCKET_VERSIONING,
@@ -733,28 +802,25 @@ const ObjectDetailPanel = ({
             <br />
             {niceBytes(`${actualInfo.size || "0"}`)}
           </Box>
-          {actualInfo.version_id &&
-            actualInfo.version_id !== "null" &&
-            selectedVersion === "" && (
-              <Box className={"detailContainer"}>
-                <strong>{t("Versions:")}</strong>
-                <br />
-                {(versions.length === 1
+          {versionsAvailable && selectedVersion === "" && (
+            <Box className={"detailContainer"}>
+              <strong>{t("Versions:")}</strong>
+              <br />
+              {formatText(
+                versions.length === 1
                   ? t("{count} version, {size}")
-                  : t("{count} versions, {size}")
-                )
-                  .replace(
-                    "{count}",
-                    `${versions.length}${moreVersionsThanLimit ? "+" : ""}`,
-                  )
-                  .replace(
-                    "{size}",
-                    `${niceBytesInt(totalVersionsSize)}${
-                      moreVersionsThanLimit ? "+" : ""
-                    }`,
-                  )}
-              </Box>
-            )}
+                  : t("{count} versions, {size}"),
+                {
+                  count: `${versions.length}${
+                    moreVersionsThanLimit ? "+" : ""
+                  }`,
+                  size: `${niceBytesInt(totalVersionsSize)}${
+                    moreVersionsThanLimit ? "+" : ""
+                  }`,
+                },
+              )}
+            </Box>
+          )}
           {selectedVersion === "" && (
             <Box className={"detailContainer"}>
               <strong>{t("Last Modified:")}</strong>

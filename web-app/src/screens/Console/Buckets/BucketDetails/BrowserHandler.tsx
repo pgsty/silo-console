@@ -210,7 +210,7 @@ const BrowserHandler = () => {
   ]);
 
   useEffect(() => {
-    if (loadingLocking) {
+    if (loadingLocking && !anonymousMode) {
       if (displayListObjects) {
         api.buckets
           .getBucketObjectLockingStatus(bucketName)
@@ -229,8 +229,11 @@ const BrowserHandler = () => {
         dispatch(resetMessages());
         dispatch(setLoadingLocking(false));
       }
+    } else if (loadingLocking) {
+      dispatch(setLockingEnabled(false));
+      dispatch(setLoadingLocking(false));
     }
-  }, [bucketName, loadingLocking, dispatch, displayListObjects]);
+  }, [anonymousMode, bucketName, loadingLocking, dispatch, displayListObjects]);
 
   return (
     <Fragment>

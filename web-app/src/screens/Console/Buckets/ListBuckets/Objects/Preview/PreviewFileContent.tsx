@@ -14,16 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { ProgressBar, Grid, Box, InformativeMessage } from "mds";
 import get from "lodash/get";
 import { AllowedPreviews, previewObjectType } from "../utils";
 import { api } from "../../../../../../api";
 import PreviewPDF from "./PreviewPDF";
+import PreviewText from "./PreviewText";
 import { downloadObject } from "../../../../ObjectBrowser/utils";
-import { useAppDispatch } from "../../../../../../store";
+import { AppState, useAppDispatch } from "../../../../../../store";
 import { BucketObject } from "../../../../../../api/consoleApi";
 import { useT } from "i18n";
+import { useSelector } from "react-redux";
 
 interface IPreviewFileProps {
   bucketName: string;
@@ -38,42 +40,108 @@ const PreviewFile = ({
 }: IPreviewFileProps) => {
   const dispatch = useAppDispatch();
   const t = useT();
+  const anonymousMode = useSelector(
+    (state: AppState) => state.system.anonymousMode,
+  );
 
   const [loading, setLoading] = useState<boolean>(true);
-
-  const [metaData, setMetaData] = useState<any>(null);
-  const [isMetaDataLoaded, setIsMetaDataLoaded] = useState(false);
-
   const objectName = actualInfo?.name || "";
-
-  const fetchMetadata = useCallback(() => {
-    if (!isMetaDataLoaded) {
-      api.buckets
-        .getObjectMetadata(bucketName, {
-          prefix: objectName,
-          versionID: actualInfo.version_id || "",
-        })
-        .then((res) => {
-          let metadata = get(res.data, "objectMetadata", {});
-          setIsMetaDataLoaded(true);
-          setMetaData(metadata);
-        })
-        .catch((err) => {
-          console.error(
-            "Error Getting Metadata Status: ",
-            err,
-            err?.detailedError,
-          );
-          setIsMetaDataLoaded(true);
-        });
-    }
-  }, [bucketName, objectName, isMetaDataLoaded, actualInfo.version_id]);
+  const versionID = actualInfo.version_id || undefined;
+  const metadataIdentity = `${bucketName}\u0001${objectName}\u0001${
+    versionID || ""
+  }`;
+  const metadataGeneration = useRef(0);
+  const fallbackMetadata = actualInfo.content_type
+    ? { "Content-Type": actualInfo.content_type }
+    : {};
+  const [metadataState, setMetadataState] = useState<{
+    identity: string;
+    data: Record<string, unknown>;
+    loaded: boolean;
+  }>({ identity: metadataIdentity, data: fallbackMetadata, loaded: false });
 
   useEffect(() => {
-    if (bucketName && objectName) {
-      fetchMetadata();
+    const controller = new AbortController();
+    const generation = metadataGeneration.current + 1;
+    metadataGeneration.current = generation;
+
+    setLoading(true);
+    setMetadataState({
+      identity: metadataIdentity,
+      data: fallbackMetadata,
+      loaded: false,
+    });
+
+    if (!bucketName || !objectName) {
+      setMetadataState({
+        identity: metadataIdentity,
+        data: fallbackMetadata,
+        loaded: true,
+      });
+      return () => {
+        controller.abort();
+        metadataGeneration.current += 1;
+      };
     }
-  }, [bucketName, objectName, fetchMetadata]);
+
+    api.buckets
+      .getObjectMetadata(
+        bucketName,
+        {
+          prefix: objectName,
+          ...(versionID ? { versionID } : {}),
+        },
+        {
+          headers: anonymousMode ? { "X-Anonymous": "1" } : undefined,
+          signal: controller.signal,
+        },
+      )
+      .then((res) => {
+        if (
+          !controller.signal.aborted &&
+          metadataGeneration.current === generation
+        ) {
+          setMetadataState({
+            identity: metadataIdentity,
+            data: get(res.data, "objectMetadata", {}),
+            loaded: true,
+          });
+        }
+      })
+      .catch(() => {
+        if (
+          !controller.signal.aborted &&
+          metadataGeneration.current === generation
+        ) {
+          setMetadataState({
+            identity: metadataIdentity,
+            data: fallbackMetadata,
+            loaded: true,
+          });
+        }
+      });
+
+    return () => {
+      controller.abort();
+      if (metadataGeneration.current === generation) {
+        metadataGeneration.current += 1;
+      }
+    };
+  }, [
+    actualInfo.content_type,
+    anonymousMode,
+    bucketName,
+    metadataIdentity,
+    objectName,
+    versionID,
+  ]);
+
+  const metaData =
+    metadataState.identity === metadataIdentity
+      ? metadataState.data
+      : fallbackMetadata;
+  const isMetaDataLoaded =
+    metadataState.identity === metadataIdentity && metadataState.loaded;
 
   let path = "";
 
@@ -87,13 +155,13 @@ const PreviewFile = ({
 
   let objectType: AllowedPreviews = previewObjectType(metaData, objectName);
 
-  const iframeLoaded = () => {
+  const previewLoaded = () => {
     setLoading(false);
   };
 
   return (
     <Fragment>
-      {objectType !== "none" && loading && (
+      {objectType !== "none" && objectType !== "text" && loading && (
         <Grid item xs={12}>
           <ProgressBar />
         </Grid>
@@ -102,33 +170,6 @@ const PreviewFile = ({
         <Box
           sx={{
             textAlign: "center",
-            "& .iframeContainer": {
-              border: "0px",
-              flex: "1 1 auto",
-              width: "100%",
-              height: 250,
-              backgroundColor: "transparent",
-              borderRadius: 5,
-
-              "&.image": {
-                height: 500,
-              },
-              "&.audio": {
-                height: 150,
-              },
-              "&.video": {
-                height: 350,
-              },
-              "&.fullHeight": {
-                height: "calc(100vh - 185px)",
-              },
-            },
-            "& .iframeBase": {
-              backgroundColor: "#fff",
-            },
-            "& .iframeHidden": {
-              display: "none",
-            },
           }}
         >
           {objectType === "video" && (
@@ -143,7 +184,7 @@ const PreviewFile = ({
               controls={true}
               muted={false}
               playsInline={true}
-              onPlay={iframeLoaded}
+              onPlay={previewLoaded}
             >
               <source src={path} type="video/mp4" />
             </video>
@@ -158,7 +199,7 @@ const PreviewFile = ({
               controls={true}
               muted={false}
               playsInline={true}
-              onPlay={iframeLoaded}
+              onPlay={previewLoaded}
             >
               <source src={path} type="audio/mpeg" />
             </audio>
@@ -173,20 +214,28 @@ const PreviewFile = ({
               }}
               src={path}
               alt={t("preview")}
-              onLoad={iframeLoaded}
+              onLoad={previewLoaded}
             />
           )}
           {objectType === "pdf" && (
             <Fragment>
               <PreviewPDF
                 path={path}
-                onLoad={iframeLoaded}
+                onLoad={previewLoaded}
                 loading={loading}
                 downloadFile={() => {
                   downloadObject(dispatch, bucketName, objectName, actualInfo);
                 }}
               />
             </Fragment>
+          )}
+          {objectType === "text" && (
+            <PreviewText
+              key={metadataIdentity}
+              actualInfo={actualInfo}
+              bucketName={bucketName}
+              isFullscreen={isFullscreen}
+            />
           )}
           {objectType === "none" && (
             <div>
@@ -199,25 +248,6 @@ const PreviewFile = ({
               />
             </div>
           )}
-          {objectType !== "none" &&
-            objectType !== "video" &&
-            objectType !== "audio" &&
-            objectType !== "image" &&
-            objectType !== "pdf" && (
-              <div className={`iframeBase ${loading ? "iframeHidden" : ""}`}>
-                <iframe
-                  src={path}
-                  title={t("File Preview")}
-                  allowTransparency
-                  className={`iframeContainer ${
-                    isFullscreen ? "fullHeight" : objectType
-                  }`}
-                  onLoad={iframeLoaded}
-                >
-                  {t("File couldn't be loaded. Please try Download instead")}
-                </iframe>
-              </div>
-            )}
         </Box>
       ) : null}
     </Fragment>

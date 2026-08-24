@@ -16,7 +16,7 @@
 
 import { IBytesCalc } from "./types";
 
-import get from "lodash/get";
+import get from "lodash/get.js";
 import { getStoredLanguage, translate } from "../i18n/lang";
 
 export const units = [
@@ -40,6 +40,10 @@ export const niceBytes = (x: string, showK8sUnits: boolean = false) => {
 };
 
 export const niceBytesInt = (n: number, showK8sUnits: boolean = false) => {
+  if (n === 0) {
+    return "0 B";
+  }
+
   let l = 0;
 
   while (n >= 1024 && ++l) {

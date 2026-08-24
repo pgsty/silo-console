@@ -96,27 +96,25 @@ test.afterAll(async () => {
   await minioClient.removeBucket(bucketName).catch(() => {});
 });
 
-test("folder download stays indeterminate and can be cancelled", async ({
+test("folder download is handed off without invalid progress", async ({
   page,
 }) => {
-  const session = await emulateDownloadRate(page, 64 * 1024);
+  const downloadPromise = page.waitForEvent("download");
+  await visitBucket(page);
+  await startDownload(page, "folder/");
+  const download = await downloadPromise;
+
   try {
-    await visitBucket(page);
-    await startDownload(page, "folder/");
     await openObjectManager(page);
     await expect(
       page.getByText("folder/", { exact: true }).last(),
     ).toBeVisible();
-    await page.waitForTimeout(500);
 
-    await expect(page.locator(".progressPercentage")).toHaveCount(0);
+    await expect(page.locator(".progressPercentage")).toHaveText("100%");
     await expect(page.getByText(/(?:NaN|Infinity)%/)).toHaveCount(0);
-
-    await page.locator(".closeButton").click({ force: true });
-    await expect(page.getByText("Cancelled", { exact: true })).toBeVisible();
     await expect(page.getByText(/Unexpected response/)).toHaveCount(0);
   } finally {
-    await restoreNetwork(session);
+    await download.delete();
   }
 });
 

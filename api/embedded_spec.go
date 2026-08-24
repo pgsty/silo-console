@@ -5325,7 +5325,8 @@ func init() {
         },
         "size": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-omitempty": false
         },
         "tags": {
           "type": "object",
@@ -13892,7 +13893,8 @@ func init() {
         },
         "size": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-omitempty": false
         },
         "tags": {
           "type": "object",

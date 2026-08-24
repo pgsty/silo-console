@@ -20,9 +20,10 @@ import { store } from "../../../../../store";
 import { ContentType, PermissionResource } from "api/consoleApi";
 import { api } from "../../../../../api";
 import { setErrorSnackMessage } from "../../../../../systemSlice";
-import { StatusCodes } from "http-status-codes";
 import { translate } from "i18n";
-import { calculateDownloadPercent } from "./downloadProgress";
+import { attachDownloadRequestHandlers } from "./downloadRequest";
+export { isPreviewAvailable, previewObjectType } from "./Preview/previewType";
+export type { AllowedPreviews } from "./Preview/previewType";
 
 // This module is not a component, so it reads the active language off the
 // store the same way it already reads anonymousMode.
@@ -34,6 +35,12 @@ const downloadWithLink = (href: string, downloadFileName: string) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+const downloadBlob = (blob: Blob, downloadFileName: string) => {
+  const href = window.URL.createObjectURL(blob);
+  downloadWithLink(href, downloadFileName);
+  window.setTimeout(() => window.URL.revokeObjectURL(href), 1000);
 };
 
 export const downloadSelectedAsZip = async (
@@ -58,14 +65,16 @@ export const downloadSelectedAsZip = async (
       },
     );
     const blob = await resp.blob();
-    const href = window.URL.createObjectURL(blob);
-    downloadWithLink(href, resultFileName);
+    downloadBlob(blob, resultFileName);
   } catch (err: any) {
+    const detail =
+      err?.error?.detailedMessage ||
+      err?.detailedError ||
+      err?.statusText ||
+      t("Unexpected response, download incomplete.");
     store.dispatch(
       setErrorSnackMessage({
-        errorMessage: `${t("Download of multiple files failed.")} ${
-          err.statusText
-        }`,
+        errorMessage: `${t("Download of multiple files failed.")} ${detail}`,
         detailedError: "",
       }),
     );
@@ -104,9 +113,46 @@ export const download = (
     path = path.concat(`&version_id=${versionID}`);
   }
 
-  // If file is greater than 5GiB then we force browser download, if not then we use HTTP Request for Object Manager
-  if (fileSize > 5368709120) {
-    return new BrowserDownload(path, id, completeCallback, toastCallback);
+  // Prefix ZIPs have no usable total and can be arbitrarily large. Let the
+  // browser stream them to disk instead of retaining the full archive in XHR.
+  if (isFolder(objectPath) || fileSize > 5368709120) {
+    const preflight = async (signal: AbortSignal) => {
+      const requestParams = {
+        headers: anonymousMode ? { "X-Anonymous": "1" } : undefined,
+        signal,
+      };
+
+      if (isFolder(objectPath)) {
+        const response = await api.buckets.listObjects(
+          bucketName,
+          { limit: 1, prefix: objectPath },
+          requestParams,
+        );
+        if (!response.data.objects?.length) {
+          throw new Error(t("Unexpected response, download incomplete."));
+        }
+        return;
+      }
+
+      await api.buckets.getObjectMetadata(
+        bucketName,
+        {
+          prefix: objectPath,
+          ...(versionID ? { versionID } : {}),
+        },
+        requestParams,
+      );
+    };
+
+    return new BrowserDownload(
+      path,
+      id,
+      completeCallback,
+      errorCallback,
+      abortCallback,
+      toastCallback,
+      preflight,
+    );
   }
 
   let req = new XMLHttpRequest();
@@ -114,71 +160,20 @@ export const download = (
   if (anonymousMode) {
     req.setRequestHeader("X-Anonymous", "1");
   }
-  req.addEventListener(
-    "progress",
-    function (evt) {
-      const percentComplete = calculateDownloadPercent(evt, fileSize);
-      if (percentComplete !== null && progressCallback) {
-        progressCallback(percentComplete);
-      }
-    },
-    false,
-  );
-
   req.responseType = "blob";
-  req.onreadystatechange = () => {
-    if (req.readyState === XMLHttpRequest.DONE) {
-      // Abort and network failures complete with status 0. Their dedicated
-      // handlers own the terminal state and must not be overwritten here.
-      if (req.status === 0) {
-        return;
-      }
-
-      // Ensure object was downloaded fully, if it's a folder we don't get the fileSize
-      let completeDownload =
-        isFolder(objectPath) || req.response.size === fileSize;
-
-      if (req.status === StatusCodes.OK && completeDownload) {
-        const rspHeader = req.getResponseHeader("Content-Disposition");
-
-        let filename = "download";
-        if (rspHeader) {
-          let rspHeaderDecoded = decodeURIComponent(rspHeader);
-          filename = rspHeaderDecoded.split('"')[1];
-        }
-
-        if (completeCallback) {
-          completeCallback();
-        }
-
-        removeTrace(id);
-
-        downloadWithLink(window.URL.createObjectURL(req.response), filename);
-      } else {
-        if (req.getResponseHeader("Content-Type") === "application/json") {
-          const rspBody: { detailedMessage?: string } = JSON.parse(
-            req.response,
-          );
-          if (rspBody.detailedMessage) {
-            errorCallback(rspBody.detailedMessage);
-            return;
-          }
-        }
-        errorCallback(t("Unexpected response, download incomplete."));
-      }
-    }
-  };
-  req.onerror = () => {
-    if (errorCallback) {
-      errorCallback(t("A network error occurred."));
-    }
-  };
-  req.onabort = () => {
-    if (abortCallback) {
-      abortCallback();
-    }
-    removeTrace(id);
-  };
+  attachDownloadRequestHandlers(req, {
+    expectedSize: fileSize,
+    fallbackError: t("Unexpected response, download incomplete."),
+    networkError: t("A network error occurred."),
+    handlers: {
+      abort: abortCallback,
+      cleanup: () => removeTrace(id),
+      complete: completeCallback,
+      fail: errorCallback,
+      progress: progressCallback,
+      save: downloadBlob,
+    },
+  });
 
   return req;
 };
@@ -187,138 +182,88 @@ class BrowserDownload {
   path: string;
   id: string;
   completeCallback: () => void;
+  errorCallback: (message: string) => void;
+  abortCallback: () => void;
   toastCallback: () => void;
+  preflight: (signal: AbortSignal) => Promise<void>;
+  controller = new AbortController();
+  settled = false;
 
   constructor(
     path: string,
     id: string,
     completeCallback: () => void,
+    errorCallback: (message: string) => void,
+    abortCallback: () => void,
     toastCallback: () => void,
+    preflight: (signal: AbortSignal) => Promise<void>,
   ) {
     this.path = path;
     this.id = id;
     this.completeCallback = completeCallback;
+    this.errorCallback = errorCallback;
+    this.abortCallback = abortCallback;
     this.toastCallback = toastCallback;
+    this.preflight = preflight;
   }
 
-  send(): void {
+  private finalize(kind: "abort" | "complete" | "error", message = "") {
+    if (this.settled) {
+      return;
+    }
+    this.settled = true;
+    removeTrace(this.id);
+    if (kind === "complete") {
+      this.completeCallback();
+    } else if (kind === "abort") {
+      this.abortCallback();
+    } else {
+      this.errorCallback(
+        message || t("Unexpected response, download incomplete."),
+      );
+    }
+  }
+
+  async send(): Promise<void> {
+    try {
+      await this.preflight(this.controller.signal);
+    } catch (error: any) {
+      if (this.controller.signal.aborted || error?.name === "AbortError") {
+        this.finalize("abort");
+      } else {
+        this.finalize(
+          "error",
+          error?.error?.detailedMessage ||
+            error?.detailedError ||
+            error?.message ||
+            t("Unexpected response, download incomplete."),
+        );
+      }
+      return;
+    }
+
+    if (this.controller.signal.aborted || this.settled) {
+      return;
+    }
     this.toastCallback();
     const link = document.createElement("a");
     link.href = this.path;
+    link.download = "";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.completeCallback();
-    removeTrace(this.id);
+    this.finalize("complete");
+  }
+
+  abort(): void {
+    if (this.settled) {
+      return;
+    }
+    this.controller.abort();
+    this.finalize("abort");
   }
 }
 
-export type AllowedPreviews = "image" | "pdf" | "audio" | "video" | "none";
-const contentTypePreview = (contentType: string): AllowedPreviews => {
-  if (contentType) {
-    const mimeObjectType = (contentType || "").toLowerCase();
-
-    if (mimeObjectType.includes("image")) {
-      return "image";
-    }
-    if (mimeObjectType.includes("pdf")) {
-      return "pdf";
-    }
-    if (mimeObjectType.includes("audio")) {
-      return "audio";
-    }
-    if (mimeObjectType.includes("video")) {
-      return "video";
-    }
-  }
-
-  return "none";
-};
-
-// Review file extension by name & returns the type of preview browser that can be used
-const extensionPreview = (fileName: string): AllowedPreviews => {
-  const imageExtensions = [
-    "jif",
-    "jfif",
-    "apng",
-    "avif",
-    "svg",
-    "webp",
-    "bmp",
-    "ico",
-    "jpg",
-    "jpe",
-    "jpeg",
-    "gif",
-    "png",
-    "heic",
-  ];
-  const pdfExtensions = ["pdf"];
-  const audioExtensions = ["wav", "mp3", "alac", "aiff", "dsd", "pcm"];
-  const videoExtensions = [
-    "mp4",
-    "avi",
-    "mpg",
-    "webm",
-    "mov",
-    "flv",
-    "mkv",
-    "wmv",
-    "avchd",
-    "mpeg-4",
-  ];
-
-  let fileExtension = fileName.split(".").pop();
-
-  if (!fileExtension) {
-    return "none";
-  }
-
-  fileExtension = fileExtension.toLowerCase();
-
-  if (imageExtensions.includes(fileExtension)) {
-    return "image";
-  }
-
-  if (pdfExtensions.includes(fileExtension)) {
-    return "pdf";
-  }
-
-  if (audioExtensions.includes(fileExtension)) {
-    return "audio";
-  }
-
-  if (videoExtensions.includes(fileExtension)) {
-    return "video";
-  }
-
-  return "none";
-};
-
-export const previewObjectType = (
-  metaData: Record<any, any>,
-  objectName: string,
-) => {
-  const metaContentType = (
-    (metaData && metaData["Content-Type"]) ||
-    ""
-  ).toString();
-
-  const extensionType = extensionPreview(objectName || "");
-  const contentType = contentTypePreview(metaContentType);
-
-  let objectType: AllowedPreviews = extensionType;
-
-  if (extensionType === contentType) {
-    objectType = extensionType;
-  } else if (extensionType === "none" && contentType !== "none") {
-    objectType = contentType;
-  } else if (contentType === "none" && extensionType !== "none") {
-    objectType = extensionType;
-  }
-
-  return objectType;
-};
 export const sortListObjects = (fieldSort: string) => {
   switch (fieldSort) {
     case "name":
@@ -330,7 +275,7 @@ export const sortListObjects = (fieldSort: string) => {
         new Date(b.last_modified).getTime();
     case "size":
       return (a: BucketObjectItem, b: BucketObjectItem) =>
-        (a.size || -1) - (b.size || -1);
+        (a.size ?? -1) - (b.size ?? -1);
   }
 };
 

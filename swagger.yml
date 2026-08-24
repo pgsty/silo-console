@@ -3354,6 +3354,7 @@ definitions:
       size:
         type: integer
         format: int64
+        x-omitempty: false
       content_type:
         type: string
       last_modified:

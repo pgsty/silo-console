@@ -49,7 +49,7 @@ const displayParsedDate = (t: Translator) => (object: BucketObjectItem) => {
 };
 
 const displayNiceBytes = (object: BucketObjectItem) => {
-  if (object.name.endsWith("/") || !object.size) {
+  if (object.name.endsWith("/") || object.size === undefined) {
     return "-";
   }
   return niceBytes(String(object.size));

@@ -67,7 +67,7 @@ type BucketObject struct {
 	RetentionUntilDate string `json:"retention_until_date,omitempty"`
 
 	// size
-	Size int64 `json:"size,omitempty"`
+	Size int64 `json:"size"`
 
 	// tags
 	Tags map[string]string `json:"tags,omitempty"`

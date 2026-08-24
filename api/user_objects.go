@@ -335,6 +335,18 @@ func getRange(start, end, total int64) string {
 	return fmt.Sprintf("bytes %d-%d/%d", start, end, total)
 }
 
+func parseRangeNumber(value string) (int64, error) {
+	if value == "" {
+		return 0, errors.New("invalid range")
+	}
+	for _, digit := range value {
+		if digit < '0' || digit > '9' {
+			return 0, errors.New("invalid range")
+		}
+	}
+	return strconv.ParseInt(value, 10, 64)
+}
+
 // Example:
 //
 //	"Range": "bytes=100-200"
@@ -353,7 +365,7 @@ func parseRange(s string, size int64) ([]httpRange, error) {
 	for _, ra := range strings.Split(s[len(b):], ",") {
 		ra = strings.TrimSpace(ra)
 		if ra == "" {
-			continue
+			return nil, errors.New("invalid range")
 		}
 		i := strings.Index(ra, "-")
 		if i < 0 {
@@ -364,8 +376,8 @@ func parseRange(s string, size int64) ([]httpRange, error) {
 		if start == "" {
 			// If no start is specified, end specifies the
 			// range start relative to the end of the file.
-			i, err := strconv.ParseInt(end, 10, 64)
-			if err != nil {
+			i, err := parseRangeNumber(end)
+			if err != nil || i <= 0 {
 				return nil, errors.New("invalid range")
 			}
 			if i > size {
@@ -374,7 +386,7 @@ func parseRange(s string, size int64) ([]httpRange, error) {
 			r.Start = size - i
 			r.Length = size - r.Start
 		} else {
-			i, err := strconv.ParseInt(start, 10, 64)
+			i, err := parseRangeNumber(start)
 			if err != nil || i >= size || i < 0 {
 				return nil, errors.New("invalid range")
 			}
@@ -383,7 +395,7 @@ func parseRange(s string, size int64) ([]httpRange, error) {
 				// If no end is specified, range extends to end of the file.
 				r.Length = size - r.Start
 			} else {
-				i, err := strconv.ParseInt(end, 10, 64)
+				i, err := parseRangeNumber(end)
 				if err != nil || r.Start > i {
 					return nil, errors.New("invalid range")
 				}
@@ -395,7 +407,115 @@ func parseRange(s string, size int64) ([]httpRange, error) {
 		}
 		ranges = append(ranges, r)
 	}
+	if len(ranges) == 0 {
+		return nil, errors.New("invalid range")
+	}
 	return ranges, nil
+}
+
+type downloadableObject interface {
+	io.Reader
+	io.Seeker
+	Stat() (minio.ObjectInfo, error)
+}
+
+func writeDownloadObjectResponse(ctx context.Context, rw http.ResponseWriter, req *http.Request, resp downloadableObject, prefix, versionID, overrideName string, isPreview bool) {
+	// indicate it's a download / inline content to the browser, and the size of the object
+	var filename string
+	prefixElements := strings.Split(prefix, "/")
+	if len(prefixElements) > 0 && overrideName == "" {
+		if prefixElements[len(prefixElements)-1] == "" {
+			filename = prefixElements[len(prefixElements)-2]
+		} else {
+			filename = prefixElements[len(prefixElements)-1]
+		}
+	} else if overrideName != "" {
+		filename = overrideName
+	}
+
+	escapedName := url.PathEscape(filename)
+
+	// GetObject is lazy: Stat is where S3 errors such as 403 and 404 are
+	// normally reported. Preserve those statuses instead of rewriting them to
+	// a generic 500.
+	stat, err := resp.Stat()
+	if err != nil {
+		minErr := minio.ToErrorResponse(err)
+		fmtError := ErrorWithContext(ctx, fmt.Errorf("failed to get Stat() response from server for %s (version %s): %v", prefix, versionID, err))
+		statusCode := fmtError.Code
+		if minErr.StatusCode >= http.StatusMultipleChoices && minErr.StatusCode <= 599 {
+			statusCode = minErr.StatusCode
+		}
+		http.Error(rw, fmtError.APIError.DetailedMessage, statusCode)
+		return
+	}
+
+	// A Range header on an empty representation has no useful byte range. The
+	// Console uses these requests for bounded previews, so serve an empty 200
+	// response rather than turning a valid empty object into an error.
+	var ranges []httpRange
+	if stat.Size > 0 {
+		ranges, err = parseRange(req.Header.Get("Range"), stat.Size)
+		if err != nil {
+			rw.Header().Set("Accept-Ranges", "bytes")
+			rw.Header().Set("Content-Range", fmt.Sprintf("bytes */%d", stat.Size))
+			http.Error(rw, http.StatusText(http.StatusRequestedRangeNotSatisfiable), http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+	}
+
+	contentType := stat.ContentType
+	rw.Header().Set("X-XSS-Protection", "1; mode=block")
+
+	if isPreview && isSafeToPreview(contentType) {
+		rw.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", escapedName))
+		rw.Header().Set("X-Frame-Options", "SAMEORIGIN")
+	} else {
+		rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", escapedName))
+	}
+
+	rw.Header().Set("Last-Modified", stat.LastModified.UTC().Format(http.TimeFormat))
+
+	if isPreview {
+		// In case content type was uploaded as octet-stream, we double verify content type
+		if stat.ContentType == "application/octet-stream" {
+			contentType = mimedb.TypeByExtension(filepath.Ext(escapedName))
+		}
+	}
+	rw.Header().Set("Content-Type", contentType)
+
+	length := stat.Size
+	statusCode := http.StatusOK
+	if len(ranges) > 0 {
+		start := ranges[0].Start
+		length = ranges[0].Length
+
+		_, err = resp.Seek(start, io.SeekStart)
+		if err != nil {
+			fmtError := ErrorWithContext(ctx, fmt.Errorf("unable to seek at offset %d: %v", start, err))
+			http.Error(rw, fmtError.APIError.DetailedMessage, http.StatusInternalServerError)
+			return
+		}
+
+		rw.Header().Set("Accept-Ranges", "bytes")
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Range", getRange(start, start+length-1, stat.Size))
+		statusCode = http.StatusPartialContent
+	}
+
+	// Set Content-Length before WriteHeader; headers set afterwards are ignored
+	// by net/http and previously made 206 responses depend on implicit framing.
+	rw.Header().Set("Content-Length", strconv.FormatInt(length, 10))
+	if statusCode != http.StatusOK {
+		rw.WriteHeader(statusCode)
+	}
+
+	_, err = io.Copy(rw, io.LimitReader(resp, length))
+	if err != nil && !errors.Is(err, context.Canceled) && ctx.Err() == nil {
+		ErrorWithContext(ctx, fmt.Errorf("unable to write all data to client: %v", err))
+		// You can't change headers after you already started writing the body.
+		// Handle incomplete write in client.
+	}
 }
 
 func getDownloadObjectResponse(session *models.Principal, params objectApi.DownloadObjectParams) (middleware.Responder, *CodedAPIError) {
@@ -421,84 +541,165 @@ func getDownloadObjectResponse(session *models.Principal, params objectApi.Downl
 
 		isPreview := params.Preview != nil && *params.Preview
 		overrideName := *params.OverrideFileName
-
-		// indicate it's a download / inline content to the browser, and the size of the object
-		var filename string
-		prefixElements := strings.Split(params.Prefix, "/")
-		if len(prefixElements) > 0 && overrideName == "" {
-			if prefixElements[len(prefixElements)-1] == "" {
-				filename = prefixElements[len(prefixElements)-2]
-			} else {
-				filename = prefixElements[len(prefixElements)-1]
-			}
-		} else if overrideName != "" {
-			filename = overrideName
-		}
-
-		escapedName := url.PathEscape(filename)
-
-		// indicate object size & content type
-		stat, err := resp.Stat()
-		if err != nil {
-			minErr := minio.ToErrorResponse(err)
-			fmtError := ErrorWithContext(ctx, fmt.Errorf("failed to get Stat() response from server for %s (version %s): %v", params.Prefix, opts.VersionID, minErr.Error()))
-			http.Error(rw, fmtError.APIError.DetailedMessage, http.StatusInternalServerError)
-			return
-		}
-
-		// if we are getting a Range Request (video) handle that specially
-		ranges, err := parseRange(params.HTTPRequest.Header.Get("Range"), stat.Size)
-		if err != nil {
-			fmtError := ErrorWithContext(ctx, fmt.Errorf("unable to parse range header input %s: %v", params.HTTPRequest.Header.Get("Range"), err))
-			http.Error(rw, fmtError.APIError.DetailedMessage, http.StatusInternalServerError)
-			return
-		}
-		contentType := stat.ContentType
-		rw.Header().Set("X-XSS-Protection", "1; mode=block")
-
-		if isPreview && isSafeToPreview(contentType) {
-			rw.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", escapedName))
-			rw.Header().Set("X-Frame-Options", "SAMEORIGIN")
-		} else {
-			rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", escapedName))
-		}
-
-		rw.Header().Set("Last-Modified", stat.LastModified.UTC().Format(http.TimeFormat))
-
-		if isPreview {
-			// In case content type was uploaded as octet-stream, we double verify content type
-			if stat.ContentType == "application/octet-stream" {
-				contentType = mimedb.TypeByExtension(filepath.Ext(escapedName))
-			}
-		}
-		rw.Header().Set("Content-Type", contentType)
-		length := stat.Size
-		if len(ranges) > 0 {
-			start := ranges[0].Start
-			length = ranges[0].Length
-
-			_, err = resp.Seek(start, io.SeekStart)
-			if err != nil {
-				fmtError := ErrorWithContext(ctx, fmt.Errorf("unable to seek at offset %d: %v", start, err))
-				http.Error(rw, fmtError.APIError.DetailedMessage, http.StatusInternalServerError)
-				return
-			}
-
-			rw.Header().Set("Accept-Ranges", "bytes")
-			rw.Header().Set("Access-Control-Allow-Origin", "*")
-			rw.Header().Set("Content-Range", getRange(start, start+length-1, stat.Size))
-			rw.WriteHeader(http.StatusPartialContent)
-		}
-
-		rw.Header().Set("Content-Length", fmt.Sprintf("%d", length))
-		_, err = io.Copy(rw, io.LimitReader(resp, length))
-		if err != nil {
-			ErrorWithContext(ctx, fmt.Errorf("unable to write all data to client: %v", err))
-			// You can't change headers after you already started writing the body.
-			// Handle incomplete write in client.
-			return
-		}
+		writeDownloadObjectResponse(ctx, rw, params.HTTPRequest, resp, params.Prefix, opts.VersionID, overrideName, isPreview)
 	}), nil
+}
+
+type zipSourceObject interface {
+	io.Reader
+	io.Closer
+	Stat() (minio.ObjectInfo, error)
+}
+
+type zipObjectGetter func(objectName string) (zipSourceObject, error)
+
+type zipObjectEntry struct {
+	objectName  string
+	archiveName string
+	modified    time.Time
+	stat        bool
+}
+
+type zipStreamError struct {
+	err error
+}
+
+func (e *zipStreamError) Error() string {
+	return e.err.Error()
+}
+
+func (e *zipStreamError) Unwrap() error {
+	return e.err
+}
+
+func closeZipSource(object zipSourceObject, operationErr error) error {
+	closeErr := object.Close()
+	if operationErr == nil {
+		return closeErr
+	}
+	if closeErr == nil {
+		return operationErr
+	}
+	return errors.Join(operationErr, closeErr)
+}
+
+func writeZipEntries(ctx context.Context, zipw *zip.Writer, entries []zipObjectEntry, getObject zipObjectGetter) error {
+	for _, entry := range entries {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		object, err := getObject(entry.objectName)
+		if err != nil {
+			return fmt.Errorf("get object %q: %w", entry.objectName, err)
+		}
+		if object == nil {
+			return fmt.Errorf("get object %q: returned a nil object", entry.objectName)
+		}
+
+		modified := entry.modified
+		if entry.stat {
+			objectData, statErr := object.Stat()
+			if statErr != nil {
+				return closeZipSource(object, fmt.Errorf("stat object %q: %w", entry.objectName, statErr))
+			}
+			modified = objectData.LastModified
+		}
+
+		file, createErr := zipw.CreateHeader(&zip.FileHeader{
+			Name:     entry.archiveName,
+			NonUTF8:  false,
+			Method:   zip.Deflate,
+			Modified: modified,
+		})
+		if createErr != nil {
+			return closeZipSource(object, fmt.Errorf("create ZIP entry %q: %w", entry.archiveName, createErr))
+		}
+
+		_, copyErr := io.Copy(file, object)
+		if err := closeZipSource(object, copyErr); err != nil {
+			return fmt.Errorf("copy object %q into ZIP: %w", entry.objectName, err)
+		}
+	}
+
+	return nil
+}
+
+func listedZipEntries(objects []*models.BucketObject, prefix, folder string) ([]zipObjectEntry, error) {
+	entries := make([]zipObjectEntry, 0, len(objects))
+	basePrefix := strings.TrimSuffix(prefix, "/")
+	for _, object := range objects {
+		if !strings.HasPrefix(object.Name, basePrefix) {
+			return nil, fmt.Errorf("listed object %q is outside prefix %q", object.Name, prefix)
+		}
+		modified, err := time.Parse(time.RFC3339, object.LastModified)
+		if err != nil {
+			return nil, fmt.Errorf("parse modification time for object %q: %w", object.Name, err)
+		}
+		entries = append(entries, zipObjectEntry{
+			objectName:  object.Name,
+			archiveName: folder + strings.TrimPrefix(object.Name, basePrefix),
+			modified:    modified,
+		})
+	}
+	return entries, nil
+}
+
+func newZipStream(build func(*zip.Writer) error) *io.PipeReader {
+	resp, pw := io.Pipe()
+	go func() {
+		zipw := zip.NewWriter(pw)
+		if err := build(zipw); err != nil {
+			_ = pw.CloseWithError(&zipStreamError{err: err})
+			return
+		}
+		if err := zipw.Close(); err != nil {
+			_ = pw.CloseWithError(&zipStreamError{err: fmt.Errorf("close ZIP writer: %w", err)})
+			return
+		}
+		_ = pw.Close()
+	}()
+	return resp
+}
+
+func zipDownloadResponder(ctx context.Context, resp *io.PipeReader, filename string) middleware.Responder {
+	return middleware.ResponderFunc(func(rw http.ResponseWriter, _ runtime.Producer) {
+		defer resp.Close()
+
+		rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+		rw.Header().Set("Content-Type", "application/zip")
+
+		written, err := io.Copy(rw, resp)
+		if err == nil {
+			return
+		}
+		if ctx.Err() != nil || errors.Is(err, context.Canceled) {
+			// The request went away; aborting the producer is expected and should
+			// not be reported as an archive integrity failure.
+			return
+		}
+
+		var streamErr *zipStreamError
+		if !errors.As(err, &streamErr) {
+			// An error from ResponseWriter is normally a client disconnect. It is
+			// not safe or useful to try to write another response at this point.
+			ErrorWithContext(ctx, fmt.Errorf("unable to write all the requested data: %v", err))
+			return
+		}
+
+		ErrorWithContext(ctx, fmt.Errorf("unable to build complete ZIP archive: %w", streamErr))
+		if written == 0 {
+			rw.Header().Del("Content-Disposition")
+			rw.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			http.Error(rw, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		// Headers and part of the archive are already on the wire. Abruptly end
+		// the HTTP response so clients cannot mistake a truncated ZIP for a
+		// successful download.
+		panic(http.ErrAbortHandler)
+	})
 }
 
 func getDownloadFolderResponse(session *models.Principal, params objectApi.DownloadObjectParams) (middleware.Responder, *CodedAPIError) {
@@ -524,74 +725,22 @@ func getDownloadFolderResponse(session *models.Principal, params objectApi.Downl
 		return nil, ErrorWithContext(ctx, err)
 	}
 
-	resp, pw := io.Pipe()
-	// Create file async
-	go func() {
-		defer pw.Close()
-		zipw := zip.NewWriter(pw)
-		var folder string
-		if len(folders) > 1 {
-			folder = folders[len(folders)-2]
-		}
-		defer zipw.Close()
+	var folder string
+	if len(folders) > 1 {
+		folder = folders[len(folders)-2]
+	}
+	entries, err := listedZipEntries(objects, params.Prefix, folder)
+	if err != nil {
+		return nil, ErrorWithContext(ctx, err)
+	}
+	getObject := func(objectName string) (zipSourceObject, error) {
+		return mClient.GetObject(ctx, params.BucketName, objectName, minio.GetObjectOptions{})
+	}
+	resp := newZipStream(func(zipw *zip.Writer) error {
+		return writeZipEntries(ctx, zipw, entries, getObject)
+	})
 
-		for i, obj := range objects {
-			name := folder + objects[i].Name[len(params.Prefix)-1:]
-			object, err := mClient.GetObject(ctx, params.BucketName, obj.Name, minio.GetObjectOptions{})
-			if err != nil {
-				// Ignore errors, move to next
-				continue
-			}
-			modified, _ := time.Parse(time.RFC3339, obj.LastModified)
-			f, err := zipw.CreateHeader(&zip.FileHeader{
-				Name:     name,
-				NonUTF8:  false,
-				Method:   zip.Deflate,
-				Modified: modified,
-			})
-			if err != nil {
-				object.Close()
-				// Ignore errors, move to next
-				continue
-			}
-
-			_, err = io.Copy(f, object)
-			object.Close()
-			if err != nil {
-				// We have a partial object, report error.
-				pw.CloseWithError(err)
-				return
-			}
-		}
-	}()
-
-	return middleware.ResponderFunc(func(rw http.ResponseWriter, _ runtime.Producer) {
-		defer resp.Close()
-
-		// indicate it's a download / inline content to the browser, and the size of the object
-		var filename string
-		prefixElements := strings.Split(params.Prefix, "/")
-		if len(prefixElements) > 0 {
-			if prefixElements[len(prefixElements)-1] == "" {
-				filename = prefixElements[len(prefixElements)-2]
-			} else {
-				filename = prefixElements[len(prefixElements)-1]
-			}
-		}
-		escapedName := url.PathEscape(filename)
-
-		rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", escapedName))
-		rw.Header().Set("Content-Type", "application/zip")
-
-		// Copy the stream
-		_, err := io.Copy(rw, resp)
-		if err != nil {
-			ErrorWithContext(ctx, fmt.Errorf("unable to write all the requested data: %v", err))
-			// You can't change headers after you already started writing the body.
-			// Handle incomplete write in client.
-			return
-		}
-	}), nil
+	return zipDownloadResponder(ctx, resp, url.PathEscape(folder)+".zip"), nil
 }
 
 func getMultipleFilesDownloadResponse(session *models.Principal, params objectApi.DownloadMultipleObjectsParams) (middleware.Responder, *CodedAPIError) {
@@ -601,24 +750,10 @@ func getMultipleFilesDownloadResponse(session *models.Principal, params objectAp
 		return nil, ErrorWithContext(ctx, err)
 	}
 	minioClient := minioClient{client: mClient}
-
-	resp, pw := io.Pipe()
-	// Create file async
-	go func() {
-		defer pw.Close()
-		zipw := zip.NewWriter(pw)
-		defer zipw.Close()
-
-		addToZip := func(name string, modified time.Time) (io.Writer, error) {
-			f, err := zipw.CreateHeader(&zip.FileHeader{
-				Name:     name,
-				NonUTF8:  false,
-				Method:   zip.Deflate,
-				Modified: modified,
-			})
-			return f, err
-		}
-
+	getObject := func(objectName string) (zipSourceObject, error) {
+		return mClient.GetObject(ctx, params.BucketName, objectName, minio.GetObjectOptions{})
+	}
+	resp := newZipStream(func(zipw *zip.Writer) error {
 		for _, dObj := range params.ObjectList {
 			// if a prefix is selected, list and add objects recursively
 			// the prefixes are not base64 encoded.
@@ -642,88 +777,31 @@ func getMultipleFilesDownloadResponse(session *models.Principal, params objectAp
 					withMetadata: false,
 				})
 				if err != nil {
-					pw.CloseWithError(err)
+					return fmt.Errorf("list objects under prefix %q: %w", prefix, err)
 				}
 
-				for i, obj := range objects {
-					name := folder + objects[i].Name[len(prefix)-1:]
-
-					object, err := mClient.GetObject(ctx, params.BucketName, obj.Name, minio.GetObjectOptions{})
-					if err != nil {
-						// Ignore errors, move to next
-						continue
-					}
-
-					modified, _ := time.Parse(time.RFC3339, obj.LastModified)
-					f, err := addToZip(name, modified)
-					if err != nil {
-						object.Close()
-						// Ignore errors, move to next
-						continue
-					}
-
-					_, err = io.Copy(f, object)
-					object.Close()
-					if err != nil {
-						// We have a partial object, report error.
-						pw.CloseWithError(err)
-						return
-					}
+				entries, err := listedZipEntries(objects, prefix, folder)
+				if err != nil {
+					return err
 				}
-
+				if err := writeZipEntries(ctx, zipw, entries, getObject); err != nil {
+					return err
+				}
 			} else {
-				object, err := mClient.GetObject(ctx, params.BucketName, dObj, minio.GetObjectOptions{})
-				if err != nil {
-					// Ignore errors, move to next
-					continue
-				}
-
-				// add selected individual object
-				objectData, err := object.Stat()
-				if err != nil {
-					// Ignore errors, move to next
-					continue
-				}
-
 				prefixes := strings.Split(dObj, "/")
 				// truncate upper level prefixes to make the download as flat at the current level.
 				objectName := prefixes[len(prefixes)-1]
-				f, err := addToZip(objectName, objectData.LastModified)
-				if err != nil {
-					object.Close()
-					// Ignore errors, move to next
-					continue
-				}
-
-				_, err = io.Copy(f, object)
-				object.Close()
-				if err != nil {
-					// We have a partial object, report error.
-					pw.CloseWithError(err)
-					return
+				entry := zipObjectEntry{objectName: dObj, archiveName: objectName, stat: true}
+				if err := writeZipEntries(ctx, zipw, []zipObjectEntry{entry}, getObject); err != nil {
+					return err
 				}
 			}
 		}
-	}()
+		return nil
+	})
 
-	return middleware.ResponderFunc(func(rw http.ResponseWriter, _ runtime.Producer) {
-		defer resp.Close()
-
-		// indicate it's a download / inline content to the browser, and the size of the object
-		fileName := "selected_files_" + strings.ReplaceAll(strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339), ":", ""), "-", "")
-
-		rw.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", fileName))
-		rw.Header().Set("Content-Type", "application/zip")
-
-		// Copy the stream
-		_, err := io.Copy(rw, resp)
-		if err != nil {
-			ErrorWithContext(ctx, fmt.Errorf("unable to write all the requested data: %v", err))
-			// You can't change headers after you already started writing the body.
-			// Handle incomplete write in client.
-			return
-		}
-	}), nil
+	fileName := "selected_files_" + strings.ReplaceAll(strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339), ":", ""), "-", "")
+	return zipDownloadResponder(ctx, resp, fileName+".zip"), nil
 }
 
 // getDeleteObjectResponse returns whether there was an error on deletion of object

@@ -42,7 +42,7 @@ import { errorToHandler } from "api/errors";
 import { getMaxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserThunks";
 import { maxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserSlice";
 import debounce from "lodash/debounce";
-import { interpolate, useT } from "i18n";
+import { formatText, interpolate, useT } from "i18n";
 
 interface IShareFileProps {
   open: boolean;
@@ -218,11 +218,11 @@ const ShareFile = ({
                     "The following URL lets you share this object without requiring a login.",
                   )}{" "}
                   <br />
-                  {t(
-                    "The URL expires automatically at the earlier of your configured time ({time}) or the expiration of your current web session.",
-                  ).replace(
-                    "{time}",
-                    niceTimeFromSeconds(maxShareLinkExpTimeVal),
+                  {formatText(
+                    t(
+                      "The URL expires automatically at the earlier of your configured time ({time}) or the expiration of your current web session.",
+                    ),
+                    { time: niceTimeFromSeconds(maxShareLinkExpTimeVal) },
                   )}
                 </span>
               </Tooltip>

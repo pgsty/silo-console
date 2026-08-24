@@ -50,7 +50,7 @@ import { useDropzone } from "react-dropzone";
 import { DateTime } from "luxon";
 import { niceBytesInt } from "../../../../../../common/utils";
 import BrowserBreadcrumbs from "../../../../ObjectBrowser/BrowserBreadcrumbs";
-import { AllowedPreviews, previewObjectType } from "../utils";
+import { isPreviewAvailable } from "../utils";
 import { ErrorResponseHandler } from "../../../../../../common/types";
 import { AppState, useAppDispatch } from "../../../../../../store";
 import {
@@ -221,10 +221,12 @@ const ListObjects = () => {
   const [rewindSelect, setRewindSelect] = useState<boolean>(false);
   const [iniLoad, setIniLoad] = useState<boolean>(false);
   const [canShareFile, setCanShareFile] = useState<boolean>(false);
-  const [canPreviewFile, setCanPreviewFile] = useState<boolean>(false);
   const [quota, setQuota] = useState<BucketQuota | null>(null);
-  const [metaData, setMetaData] = useState<any>(null);
-  const [isMetaDataLoaded, setIsMetaDataLoaded] = useState(false);
+  const metadataGeneration = useRef(0);
+  const [metadataState, setMetadataState] = useState<{
+    identity: string;
+    data: Record<string, unknown> | null;
+  }>({ identity: "", data: null });
 
   const isVersioningApplied = isVersionedMode(versioningConfig.status);
 
@@ -308,36 +310,77 @@ const ListObjects = () => {
   };
 
   const isSelObjectDelMarker = checkForDelMarker();
-
-  const fetchMetadata = useCallback(() => {
-    const objectName = selectedObjects[0];
-
-    if (!isMetaDataLoaded && objectName) {
-      api.buckets
-        .getObjectMetadata(bucketName, {
-          prefix: objectName,
-        })
-        .then((res) => {
-          let metadata = get(res.data, "objectMetadata", {});
-          setIsMetaDataLoaded(true);
-          setMetaData(metadata);
-        })
-        .catch((err) => {
-          console.error(
-            "Error Getting Metadata Status: ",
-            err,
-            err?.detailedError,
-          );
-          setIsMetaDataLoaded(true);
-        });
-    }
-  }, [bucketName, selectedObjects, isMetaDataLoaded]);
+  const selectedObjectName =
+    selectedObjects.length === 1 ? selectedObjects[0] : "";
+  const metadataIdentity = `${bucketName}\u0001${selectedObjectName}`;
+  const metaData =
+    metadataState.identity === metadataIdentity ? metadataState.data : null;
+  const canPreviewFile =
+    selectedObjects.length === 1 &&
+    isPreviewAvailable({
+      metaData,
+      objectName: selectedObjectName,
+      canGetObject: canDownload,
+      isDeleteMarker: isSelObjectDelMarker,
+      isPrefix: selectedObjectName.endsWith("/"),
+    });
 
   useEffect(() => {
-    if (bucketName && !isSelObjectDelMarker) {
-      fetchMetadata();
+    const generation = metadataGeneration.current + 1;
+    metadataGeneration.current = generation;
+    const controller = new AbortController();
+
+    setMetadataState({ identity: metadataIdentity, data: null });
+
+    if (!bucketName || !selectedObjectName || isSelObjectDelMarker) {
+      return () => {
+        controller.abort();
+        metadataGeneration.current += 1;
+      };
     }
-  }, [bucketName, selectedObjects, fetchMetadata, isSelObjectDelMarker]);
+
+    api.buckets
+      .getObjectMetadata(
+        bucketName,
+        { prefix: selectedObjectName },
+        {
+          headers: anonymousMode ? { "X-Anonymous": "1" } : undefined,
+          signal: controller.signal,
+        },
+      )
+      .then((res) => {
+        if (
+          !controller.signal.aborted &&
+          metadataGeneration.current === generation
+        ) {
+          setMetadataState({
+            identity: metadataIdentity,
+            data: get(res.data, "objectMetadata", {}),
+          });
+        }
+      })
+      .catch(() => {
+        if (
+          !controller.signal.aborted &&
+          metadataGeneration.current === generation
+        ) {
+          setMetadataState({ identity: metadataIdentity, data: null });
+        }
+      });
+
+    return () => {
+      controller.abort();
+      if (metadataGeneration.current === generation) {
+        metadataGeneration.current += 1;
+      }
+    };
+  }, [
+    anonymousMode,
+    bucketName,
+    isSelObjectDelMarker,
+    metadataIdentity,
+    selectedObjectName,
+  ]);
 
   useEffect(() => {
     if (rewindEnabled) {
@@ -360,14 +403,6 @@ const ListObjects = () => {
       const objectName = selectedObjects[0];
       const isPrefix = objectName.endsWith("/");
 
-      let objectType: AllowedPreviews = previewObjectType(metaData, objectName);
-
-      if (objectType !== "none" && canDownload) {
-        setCanPreviewFile(true);
-      } else {
-        setCanPreviewFile(false);
-      }
-
       if (canDownload && !isPrefix) {
         setCanShareFile(true);
       } else {
@@ -375,9 +410,8 @@ const ListObjects = () => {
       }
     } else {
       setCanShareFile(false);
-      setCanPreviewFile(false);
     }
-  }, [selectedObjects, canDownload, metaData]);
+  }, [selectedObjects, canDownload]);
 
   useEffect(() => {
     if (!quota && !anonymousMode) {
@@ -443,7 +477,7 @@ const ListObjects = () => {
   // Load retention Config
 
   useEffect(() => {
-    if (selectedBucket !== "") {
+    if (selectedBucket !== "" && !anonymousMode) {
       api.buckets
         .getBucketRetentionConfig(selectedBucket)
         .then((res) => {
@@ -452,8 +486,10 @@ const ListObjects = () => {
         .catch(() => {
           dispatch(setRetentionConfig(null));
         });
+    } else if (anonymousMode) {
+      dispatch(setRetentionConfig(null));
     }
-  }, [selectedBucket, dispatch]);
+  }, [anonymousMode, selectedBucket, dispatch]);
 
   const closeDeleteMultipleModalAndRefresh = (refresh: boolean) => {
     setDeleteMultipleOpen(false);
@@ -962,7 +998,8 @@ const ListObjects = () => {
             name: selectedPreview.name || "",
             last_modified: "",
             version_id: selectedPreview.version_id || "",
-            size: selectedPreview.size || 0,
+            size: selectedPreview.size,
+            content_type: selectedPreview.content_type,
           }}
           onClosePreview={closePreviewWindow}
         />
