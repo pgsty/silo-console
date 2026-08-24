@@ -37,7 +37,7 @@ import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import ObjectManagerButton from "../Common/ObjectManager/ObjectManagerButton";
 import HelpMenu from "../HelpMenu";
 import { setHelpName } from "../../../systemSlice";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 interface IOBHeader {
   bucketName: string;
@@ -100,9 +100,9 @@ const OBHeader = ({ bucketName }: IOBHeader) => {
       ) : (
         <Fragment>
           <SearchBox
-            placeholder={t("Start typing to filter versions of {file}").replace(
-              "{file}",
-              versionedFile,
+            placeholder={formatText(
+              t("Start typing to filter versions of {file}"),
+              { file: versionedFile },
             )}
             onChange={(value) => {
               dispatch(setSearchVersions(value));

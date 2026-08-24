@@ -213,5 +213,3 @@ export const zh: Record<string, string> = {
   "Switch to light mode": "切换到亮色模式",
   "Switch to dark mode": "切换到暗色模式",
 };
-
-export default zh;

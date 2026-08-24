@@ -34,7 +34,7 @@ import { api } from "api";
 import { ApiError, ChangeUserPasswordRequest } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
-import { interpolate, useT } from "i18n";
+import { formatText, interpolate, useT } from "i18n";
 
 interface IChangeUserPasswordProps {
   open: boolean;
@@ -85,9 +85,9 @@ const ChangeUserPassword = ({
         setReNewPassword("");
         dispatch(
           setSnackBarMessage(
-            t("Successfully updated the password for the user {user}.").replace(
-              "{user}",
-              userName,
+            formatText(
+              t("Successfully updated the password for the user {user}."),
+              { user: userName },
             ),
           ),
         );

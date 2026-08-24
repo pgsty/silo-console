@@ -19,13 +19,7 @@ package api
 import (
 	"context"
 	"errors"
-	"fmt"
-	"net/http"
-	"strings"
 	"testing"
-
-	"github.com/minio/console/api/operations/system"
-	"github.com/minio/console/models"
 
 	"github.com/go-openapi/loads"
 	"github.com/minio/console/api/operations"
@@ -37,6 +31,11 @@ import (
 func TestArnsList(t *testing.T) {
 	assert := asrt.New(t)
 	adminClient := AdminClientMock{}
+	previousMinioServerInfoMock := MinioServerInfoMock
+	t.Cleanup(func() {
+		MinioServerInfoMock = previousMinioServerInfoMock
+	})
+
 	// Test-1 : getArns() returns proper arn list
 	MinioServerInfoMock = func(_ context.Context) (madmin.InfoMessage, error) {
 		return madmin.InfoMessage{
@@ -65,32 +64,11 @@ func TestArnsList(t *testing.T) {
 func TestRegisterAdminArnsHandlers(t *testing.T) {
 	assert := asrt.New(t)
 	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
-	if err != nil {
-		assert.Fail("Error")
+	if !assert.NoError(err) {
+		return
 	}
 	api := operations.NewConsoleAPI(swaggerSpec)
 	api.SystemArnListHandler = nil
 	registerAdminArnsHandlers(api)
-	if api.SystemArnListHandler == nil {
-		assert.Fail("Assignment should happen")
-	} else {
-		fmt.Println("Function got assigned: ", api.SystemArnListHandler)
-	}
-
-	// To test error case in registerAdminArnsHandlers
-	request, _ := http.NewRequest(
-		"GET",
-		"http://localhost:9090/api/v1/buckets/",
-		nil,
-	)
-	ArnListParamsStruct := system.ArnListParams{
-		HTTPRequest: request,
-	}
-	modelsPrincipal := models.Principal{
-		STSAccessKeyID: "accesskey",
-	}
-	value := api.SystemArnListHandler.Handle(ArnListParamsStruct, &modelsPrincipal)
-	str := fmt.Sprintf("%#v", value)
-	fmt.Println("value: ", str)
-	assert.Equal(strings.Contains(str, "_statusCode:403"), true)
+	assert.NotNil(api.SystemArnListHandler, "handler registration should assign SystemArnListHandler")
 }

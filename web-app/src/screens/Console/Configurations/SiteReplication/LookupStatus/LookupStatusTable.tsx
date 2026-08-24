@@ -18,7 +18,7 @@ import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
 import { Box, CircleIcon } from "mds";
-import { interpolate, useT } from "i18n";
+import { formatText, interpolate, useT } from "i18n";
 
 const LookupTableBase = styled.div(({ theme }) => ({
   marginTop: 15,
@@ -131,10 +131,9 @@ const LookupStatusTable = ({
     <LookupTableBase>
       <Box sx={{ marginTop: 15, marginBottom: 15 }}>
         {interpolate(
-          t("Replication status for {type}: {name}.").replace(
-            "{type}",
-            t(entityType),
-          ),
+          formatText(t("Replication status for {type}: {name}."), {
+            type: t(entityType),
+          }),
           { name: <strong>{entityName}</strong> },
         )}
       </Box>

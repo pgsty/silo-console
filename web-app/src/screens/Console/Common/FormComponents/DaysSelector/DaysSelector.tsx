@@ -17,7 +17,7 @@
 import React, { useEffect, useState } from "react";
 import { DateTime } from "luxon";
 import { Box, InputBox, InputLabel, LinkIcon } from "mds";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 const DAY_SECONDS = 86400;
 const HOUR_SECONDS = 3600;
@@ -268,10 +268,9 @@ const DaysSelector = ({
           <div className={"validityText"}>
             <LinkIcon />
             <div>
-              {t("{entity} will be available until:").replace(
-                "{entity}",
-                t(entity),
-              )}
+              {formatText(t("{entity} will be available until:"), {
+                entity: t(entity),
+              })}
             </div>{" "}
             <div className={"validTill"}>
               {DateTime.fromISO(dateSelected).toFormat(

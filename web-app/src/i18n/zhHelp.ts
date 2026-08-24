@@ -400,5 +400,3 @@ export const zhHelp: Record<string, string> = {
   "Guidance on configuring two-way (active-active) Bucket replication using SILO Console.":
     "使用 SILO 控制台配置双向（双活）存储桶复制的指引。",
 };
-
-export default zhHelp;

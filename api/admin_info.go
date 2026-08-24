@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -892,6 +893,26 @@ func getUsageWidgetsForDeployment(ctx context.Context, prometheusURL string, adm
 	return sessionResp, nil
 }
 
+func applyPrometheusAuth(req *http.Request) {
+	if prometheusBearer := getPrometheusAuthToken(); prometheusBearer != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", prometheusBearer))
+		return
+	}
+
+	if username, password, ok := getPrometheusAuthUserPass(); ok {
+		req.SetBasicAuth(username, password)
+	}
+}
+
+func drainAndCloseResponse(resp *http.Response) {
+	if resp == nil || resp.Body == nil {
+		return
+	}
+
+	_, _ = io.Copy(io.Discard, resp.Body)
+	_ = resp.Body.Close()
+}
+
 func unmarshalPrometheus(ctx context.Context, httpClnt *http.Client, endpoint string, data interface{}) bool {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -899,19 +920,16 @@ func unmarshalPrometheus(ctx context.Context, httpClnt *http.Client, endpoint st
 		return true
 	}
 
-	if prometheusBearer := getPrometheusAuthToken(); prometheusBearer != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", prometheusBearer))
-	} else if username, password, ok := getPrometheusAuthUserPass(); ok {
-		req.SetBasicAuth(username, password)
-	}
+	applyPrometheusAuth(req)
 
 	resp, err := httpClnt.Do(req)
 	if err != nil {
+		drainAndCloseResponse(resp)
 		ErrorWithContext(ctx, fmt.Errorf("unable to fetch labels from prometheus: %w", err))
 		return true
 	}
 
-	defer resp.Body.Close()
+	defer drainAndCloseResponse(resp)
 
 	if resp.StatusCode != http.StatusOK {
 		ErrorWithContext(ctx, fmt.Errorf("unexpected status code from prometheus (%s)", resp.Status))
@@ -933,16 +951,14 @@ func testPrometheusURL(ctx context.Context, url string) bool {
 		return false
 	}
 
-	prometheusBearer := getPrometheusAuthToken()
-	if prometheusBearer != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", prometheusBearer))
-	}
+	applyPrometheusAuth(req)
 
 	clientIP := utils.ClientIPFromContext(ctx)
 	httpClnt := GetConsoleHTTPClient(clientIP)
 
 	response, err := httpClnt.Do(req)
 	if err != nil {
+		drainAndCloseResponse(response)
 		ErrorWithContext(ctx, fmt.Errorf("default Prometheus URL not reachable, trying root testing: (%v)", err))
 		newTestURL := req.URL.Scheme + "://" + req.URL.Host + "/-/healthy"
 		req2, err := http.NewRequestWithContext(ctx, http.MethodGet, newTestURL, nil)
@@ -950,14 +966,18 @@ func testPrometheusURL(ctx context.Context, url string) bool {
 			ErrorWithContext(ctx, fmt.Errorf("error Building Root Request: (%v)", err))
 			return false
 		}
+		applyPrometheusAuth(req2)
 		rootResponse, err := httpClnt.Do(req2)
 		if err != nil {
+			drainAndCloseResponse(rootResponse)
 			// URL & Root tests didn't work. Prometheus not reachable
 			ErrorWithContext(ctx, fmt.Errorf("root Prometheus URL not reachable: (%v)", err))
 			return false
 		}
+		defer drainAndCloseResponse(rootResponse)
 		return rootResponse.StatusCode == http.StatusOK
 	}
+	defer drainAndCloseResponse(response)
 	return response.StatusCode == http.StatusOK
 }
 

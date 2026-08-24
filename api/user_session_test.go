@@ -54,6 +54,15 @@ func Test_getSessionResponse(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "anonymous principal",
+			args: args{
+				ctx:     ctx,
+				session: &models.Principal{},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name: "malformed session",
 			args: args{
 				ctx: ctx,

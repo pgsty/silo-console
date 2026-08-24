@@ -33,7 +33,7 @@ import { setErrorSnackMessage, setModalErrorSnackMessage } from "systemSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { DateTime } from "luxon";
-import { useLocalizedLink, useT } from "i18n";
+import { formatText, useLocalizedLink, useT } from "i18n";
 
 interface IServiceAccountPolicyProps {
   open: boolean;
@@ -106,10 +106,9 @@ const EditServiceAccount = ({
 
   return (
     <ModalWrapper
-      title={t("Edit details of - {name}").replace(
-        "{name}",
-        selectedAccessKey || "",
-      )}
+      title={formatText(t("Edit details of - {name}"), {
+        name: selectedAccessKey || "",
+      })}
       modalOpen={open}
       onClose={() => {
         closeModalAndRefresh();

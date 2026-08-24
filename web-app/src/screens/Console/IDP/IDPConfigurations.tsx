@@ -17,7 +17,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { AddIcon, Button, PageLayout, RefreshIcon, Grid, DataTable } from "mds";
 import { useNavigate } from "react-router-dom";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { useAppDispatch } from "../../../store";
@@ -180,10 +180,9 @@ const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
               errorProps={{ disabled: true }}
             >
               <TooltipWrapper
-                tooltip={t("Create {idpType} configuration").replace(
-                  "{idpType}",
+                tooltip={formatText(t("Create {idpType} configuration"), {
                   idpType,
-                )}
+                })}
               >
                 <Button
                   id={"create-idp"}

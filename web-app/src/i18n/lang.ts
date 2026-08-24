@@ -34,6 +34,21 @@ const dictionaries: Record<Lang, Record<string, string> | null> = {
   zh: { ...zhHelp, ...zhScreens, ...zh },
 };
 
+// Keep placeholder matching shared by plain-text and React-node formatting.
+// Values are inserted by a callback so replacement metacharacters such as
+// "$&" stay literal, and the single pass does not rescan braces in values.
+export const PLACEHOLDER_PATTERN = /\{(\w+)\}/g;
+
+export const formatText = (
+  template: string,
+  variables: Readonly<Record<string, unknown>>,
+): string =>
+  template.replace(PLACEHOLDER_PATTERN, (placeholder, name: string) =>
+    Object.prototype.hasOwnProperty.call(variables, name)
+      ? String(variables[name])
+      : placeholder,
+  );
+
 // A miss returns the input unchanged, unconditionally — t() also receives
 // live data (user agents, RSS titles, object names), so no suffix stripping
 // or other rewriting is allowed here. The own-property check keeps inherited

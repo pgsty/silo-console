@@ -35,17 +35,19 @@ import (
 
 type AdminInfoTestSuite struct {
 	suite.Suite
-	assert              *assert.Assertions
-	currentServer       string
-	isServerSet         bool
-	isPrometheusRequest bool
-	server              *httptest.Server
-	adminClient         AdminClientMock
+	assert                      *assert.Assertions
+	currentServer               string
+	isServerSet                 bool
+	isPrometheusRequest         bool
+	server                      *httptest.Server
+	adminClient                 AdminClientMock
+	previousMinioServerInfoMock func(context.Context) (madmin.InfoMessage, error)
 }
 
 func (suite *AdminInfoTestSuite) SetupSuite() {
 	suite.assert = assert.New(suite.T())
 	suite.adminClient = AdminClientMock{}
+	suite.previousMinioServerInfoMock = MinioServerInfoMock
 	MinioServerInfoMock = func(_ context.Context) (madmin.InfoMessage, error) {
 		return madmin.InfoMessage{
 			Servers: []madmin.ServerProperties{{
@@ -71,9 +73,11 @@ func (suite *AdminInfoTestSuite) serverHandler(w http.ResponseWriter, _ *http.Re
 }
 
 func (suite *AdminInfoTestSuite) TearDownSuite() {
+	MinioServerInfoMock = suite.previousMinioServerInfoMock
 }
 
 func (suite *AdminInfoTestSuite) TearDownTest() {
+	suite.server.Close()
 	if suite.isServerSet {
 		os.Setenv(ConsoleMinIOServer, suite.currentServer)
 	} else {
@@ -149,4 +153,126 @@ func (suite *AdminInfoTestSuite) TestGetWidgetDetailsWithoutError() {
 
 func TestAdminInfo(t *testing.T) {
 	suite.Run(t, new(AdminInfoTestSuite))
+}
+
+func setPrometheusAuthEnv(t *testing.T, token, username, password string) {
+	t.Helper()
+	t.Setenv(PrometheusAuthToken, token)
+	t.Setenv(PrometheusAuthUsername, username)
+	t.Setenv(PrometheusAuthPassword, password)
+}
+
+func useIsolatedPrometheusTransport(t *testing.T) {
+	t.Helper()
+	previousTransport := GlobalTransport
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	GlobalTransport = transport
+	t.Cleanup(func() {
+		transport.CloseIdleConnections()
+		GlobalTransport = previousTransport
+	})
+}
+
+func TestUnmarshalPrometheusUsesBasicAuth(t *testing.T) {
+	setPrometheusAuthEnv(t, "", "prom-user", "prom-password")
+
+	authorization := make(chan string, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorization <- r.Header.Get("Authorization")
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"success"}`))
+	}))
+	t.Cleanup(server.Close)
+
+	var response map[string]string
+	failed := unmarshalPrometheus(context.Background(), server.Client(), server.URL, &response)
+
+	assert.False(t, failed)
+	assert.Equal(t, "Basic cHJvbS11c2VyOnByb20tcGFzc3dvcmQ=", <-authorization)
+	assert.Equal(t, "success", response["status"])
+}
+
+func TestPrometheusHealthAuthentication(t *testing.T) {
+	tests := []struct {
+		name                  string
+		token                 string
+		username              string
+		password              string
+		expectedAuthorization string
+	}{
+		{
+			name:                  "basic authentication",
+			username:              "prom-user",
+			password:              "prom-password",
+			expectedAuthorization: "Basic cHJvbS11c2VyOnByb20tcGFzc3dvcmQ=",
+		},
+		{
+			name:                  "bearer token takes precedence",
+			token:                 "prom-token",
+			username:              "ignored-user",
+			password:              "ignored-password",
+			expectedAuthorization: "Bearer prom-token",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			setPrometheusAuthEnv(t, test.token, test.username, test.password)
+			useIsolatedPrometheusTransport(t)
+
+			authorization := make(chan string, 1)
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				authorization <- r.Header.Get("Authorization")
+				w.WriteHeader(http.StatusOK)
+			}))
+			t.Cleanup(server.Close)
+
+			assert.True(t, testPrometheusURL(context.Background(), server.URL))
+			assert.Equal(t, test.expectedAuthorization, <-authorization)
+		})
+	}
+}
+
+func TestPrometheusRootFallbackUsesAuthentication(t *testing.T) {
+	setPrometheusAuthEnv(t, "", "prom-user", "prom-password")
+	useIsolatedPrometheusTransport(t)
+
+	authorizations := make(chan string, 2)
+	paths := make(chan string, 2)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorizations <- r.Header.Get("Authorization")
+		paths <- r.URL.Path
+		if r.URL.Path == "/prometheus/-/healthy" {
+			connection, _, err := w.(http.Hijacker).Hijack()
+			if err == nil {
+				_ = connection.Close()
+			}
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	assert.True(t, testPrometheusURL(context.Background(), server.URL+"/prometheus"))
+	assert.Equal(t, "/prometheus/-/healthy", <-paths)
+	assert.Equal(t, "/-/healthy", <-paths)
+	assert.Equal(t, "Basic cHJvbS11c2VyOnByb20tcGFzc3dvcmQ=", <-authorizations)
+	assert.Equal(t, "Basic cHJvbS11c2VyOnByb20tcGFzc3dvcmQ=", <-authorizations)
+}
+
+func TestPrometheusHealthCheckReusesConnection(t *testing.T) {
+	setPrometheusAuthEnv(t, "", "", "")
+	useIsolatedPrometheusTransport(t)
+
+	remoteAddresses := make(chan string, 2)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		remoteAddresses <- r.RemoteAddr
+		w.Header().Set("Content-Length", "4096")
+		_, _ = w.Write(make([]byte, 4096))
+	}))
+	t.Cleanup(server.Close)
+
+	assert.True(t, testPrometheusURL(context.Background(), server.URL))
+	assert.True(t, testPrometheusURL(context.Background(), server.URL))
+	assert.Equal(t, <-remoteAddresses, <-remoteAddresses, "health responses should be drained so the connection can be reused")
 }

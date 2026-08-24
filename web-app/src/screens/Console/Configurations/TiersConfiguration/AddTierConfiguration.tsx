@@ -45,7 +45,7 @@ import { useAppDispatch } from "../../../../store";
 import RegionSelectWrapper from "./RegionSelectWrapper";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../../HelpMenu";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 const AddTierConfiguration = () => {
   const dispatch = useAppDispatch();
@@ -316,10 +316,9 @@ const AddTierConfiguration = () => {
           <form noValidate onSubmit={submitForm}>
             {type !== "" && targetElement ? (
               <SectionTitle icon={targetElement.logo} sx={{ marginBottom: 20 }}>
-                {t("{provider} - Add Tier Configuration").replace(
-                  "{provider}",
-                  titleSelection ? titleSelection : "",
-                )}
+                {formatText(t("{provider} - Add Tier Configuration"), {
+                  provider: titleSelection ? titleSelection : "",
+                })}
               </SectionTitle>
             ) : null}
             <Grid

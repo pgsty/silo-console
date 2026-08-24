@@ -43,7 +43,7 @@ import DeleteBucketLifecycleRule from "./DeleteBucketLifecycleRule";
 import EditLifecycleConfiguration from "./EditLifecycleConfiguration";
 import AddLifecycleModal from "./AddLifecycleModal";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
-import { interpolate, useLocalizedLink, useT } from "i18n";
+import { formatText, interpolate, useLocalizedLink, useT } from "i18n";
 
 const BucketLifecyclePanel = () => {
   const loadingBucket = useSelector(selBucketDetailsLoading);
@@ -241,10 +241,9 @@ const BucketLifecyclePanel = () => {
           } else {
             return (
               <span>
-                {t("{count} versions").replace(
-                  "{count}",
-                  `${el.expiration.newer_noncurrent_expiration_versions}`,
-                )}
+                {formatText(t("{count} versions"), {
+                  count: `${el.expiration.newer_noncurrent_expiration_versions}`,
+                })}
               </span>
             );
           }

@@ -490,6 +490,7 @@ export const zhScreens: Record<string, string> = {
   "Display Object Versions": "显示对象版本",
   "Display only Errors": "仅显示错误",
   "Display Versions for this file": "显示此文件的版本",
+  "No object versions are available": "没有可用的对象版本",
   "Distributed Mode": "分布式模式",
   "DN (Distinguished Name) for LDAP read-only service account used to perform DN and group lookups":
     "用于执行 DN 与用户组查询的 LDAP 只读服务账号的 DN（可分辨名称）",
@@ -1679,9 +1680,27 @@ export const zhScreens: Record<string, string> = {
     "你需要额外的权限才能{name}。请联系 SILO 管理员为你授予 {scopes} 权限，以便{name}。",
   "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you {permission} permission in order to create a Tier.":
     "你需要额外权限才能创建新的存储层。请联系 SILO 管理员为你授予 {permission} 权限。",
+  "File is empty": "文件为空",
+  "Invalid UTF-8 or binary content": "UTF-8 无效或包含二进制内容",
+  "Loading text preview…": "正在加载文本预览……",
+  "Object is too large to preview": "对象过大，无法预览",
+  "Object not found or changed": "对象不存在或已发生变化",
+  "Text preview content": "文本预览内容",
+  "Text preview failed": "文本预览失败",
+  "Text preview forbidden": "无权预览文本",
+  "Text previews are limited to 1 MiB (1,048,576 bytes). This object is {size} ({bytes} bytes).":
+    "文本预览上限为 1 MiB（1,048,576 bytes），此对象大小为 {size}（{bytes} bytes）。",
+  "The object could not be found or changed while the preview was loading.":
+    "加载预览时未找到该对象，或对象已发生变化。",
+  "The object is larger than the 1 MiB text preview limit.":
+    "该对象超过 1 MiB 文本预览上限。",
+  "The text preview could not be loaded because of a network or server error.":
+    "由于网络或服务端错误，无法加载文本预览。",
+  "This object is not valid UTF-8 text or contains binary data. Download it to inspect the original bytes.":
+    "该对象不是有效的 UTF-8 文本，或包含二进制内容。请下载后检查原始字节。",
+  "You do not have permission to preview this object.":
+    "你没有预览此对象的权限。",
   "No buckets yet.": "暂无存储桶。",
   "No buckets match this filter.": "没有符合筛选条件的存储桶。",
   Trademark: "商标",
 };
-
-export default zhScreens;

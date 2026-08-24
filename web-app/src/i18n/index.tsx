@@ -11,7 +11,13 @@
 import React, { Fragment, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { AppState } from "../store";
-import { Lang, localizeUrl, translate, translateLegend } from "./lang";
+import {
+  Lang,
+  localizeUrl,
+  PLACEHOLDER_PATTERN,
+  translate,
+  translateLegend,
+} from "./lang";
 
 export const useLanguage = (): Lang =>
   useSelector((state: AppState) => state.system.language);
@@ -37,14 +43,29 @@ export const useLegendT = (): ((text: string) => string) => {
 export const interpolate = (
   template: string,
   slots: Record<string, React.ReactNode>,
-): React.ReactNode[] =>
-  template.split(/(\{\w+\})/g).map((part, index) => {
-    const match = /^\{(\w+)\}$/.exec(part);
-    return (
-      <Fragment key={index}>
-        {match ? (slots[match[1]] ?? part) : part}
-      </Fragment>
+): React.ReactNode[] => {
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+
+  for (const match of template.matchAll(new RegExp(PLACEHOLDER_PATTERN))) {
+    const index = match.index;
+    if (index > cursor) {
+      parts.push(template.slice(cursor, index));
+    }
+    parts.push(
+      Object.prototype.hasOwnProperty.call(slots, match[1]) &&
+        slots[match[1]] != null
+        ? slots[match[1]]
+        : match[0],
     );
-  });
+    cursor = index + match[0].length;
+  }
+
+  if (cursor < template.length) {
+    parts.push(template.slice(cursor));
+  }
+
+  return parts.map((part, index) => <Fragment key={index}>{part}</Fragment>);
+};
 
 export * from "./lang";

@@ -40,7 +40,7 @@ import QueryMultiSelector from "screens/Console/Common/FormComponents/QueryMulti
 import { getBytes, k8sScalarUnitsExcluding } from "common/utils";
 import get from "lodash/get";
 import InputUnitMenu from "screens/Console/Common/FormComponents/InputUnitMenu/InputUnitMenu";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 const AddBucketReplication = () => {
   const dispatch = useAppDispatch();
@@ -176,10 +176,9 @@ const AddBucketReplication = () => {
       <PageHeaderWrapper
         label={
           <BackLink
-            label={t("Add Bucket Replication Rule - {bucket}").replace(
-              "{bucket}",
-              bucketName,
-            )}
+            label={formatText(t("Add Bucket Replication Rule - {bucket}"), {
+              bucket: bucketName,
+            })}
             onClick={() => navigate(backLink)}
           />
         }

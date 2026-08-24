@@ -37,7 +37,7 @@ import {
 import { api } from "api";
 import { ConfigurationKV } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 import { useAppDispatch } from "../../../../store";
 import {
   setErrorSnackMessage,
@@ -504,11 +504,13 @@ const IDPLDAPConfigurationDetails = () => {
                                           >
                                             <span>{t(value.label)}</span>
                                             <Tooltip
-                                              tooltip={t(
-                                                "This value is set from the {name} environment variable",
-                                              ).replace(
-                                                "{name}",
-                                                overrideFields[key],
+                                              tooltip={formatText(
+                                                t(
+                                                  "This value is set from the {name} environment variable",
+                                                ),
+                                                {
+                                                  name: overrideFields[key],
+                                                },
                                               )}
                                               placement={"right"}
                                             >

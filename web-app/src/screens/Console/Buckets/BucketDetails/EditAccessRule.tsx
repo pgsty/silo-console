@@ -22,7 +22,7 @@ import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary
 import { setErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 interface IEditAccessRule {
   modalOpen: boolean;
@@ -72,10 +72,9 @@ const EditAccessRule = ({
     <Fragment>
       <ModalWrapper
         modalOpen={modalOpen}
-        title={t("Edit Anonymous Access Rule for {target}").replace(
-          "{target}",
-          `/`,
-        )}
+        title={formatText(t("Edit Anonymous Access Rule for {target}"), {
+          target: `/`,
+        })}
         onClose={onClose}
         titleIcon={<AddAccessRuleIcon />}
       >

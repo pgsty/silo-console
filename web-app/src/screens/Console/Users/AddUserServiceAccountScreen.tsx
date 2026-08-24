@@ -45,7 +45,7 @@ import AddUserServiceAccountHelpBox from "./AddUserServiceAccountHelpBox";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import PanelTitle from "../Common/PanelTitle/PanelTitle";
-import { useLocalizedLink, useT } from "i18n";
+import { formatText, useLocalizedLink, useT } from "i18n";
 
 const AddServiceAccount = () => {
   const dispatch = useAppDispatch();
@@ -182,10 +182,9 @@ const AddServiceAccount = () => {
           <FormLayout
             helpBox={<AddUserServiceAccountHelpBox />}
             icon={<ServiceAccountCredentialsIcon />}
-            title={t("Create Access Key for {user}").replace(
-              "{user}",
-              userName,
-            )}
+            title={formatText(t("Create Access Key for {user}"), {
+              user: userName,
+            })}
           >
             <form
               noValidate

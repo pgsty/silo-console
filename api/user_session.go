@@ -70,7 +70,7 @@ func getSessionResponse(ctx context.Context, session *models.Principal) (*models
 	defer cancel()
 
 	// serialize output
-	if session == nil {
+	if session == nil || session.STSAccessKeyID == "" {
 		return nil, ErrorWithContext(ctx, ErrInvalidSession)
 	}
 	tokenClaims, _ := getClaimsFromToken(session.STSSessionToken)

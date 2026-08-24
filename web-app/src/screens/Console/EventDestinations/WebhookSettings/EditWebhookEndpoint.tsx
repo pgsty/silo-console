@@ -42,7 +42,7 @@ import { IConfigurationSys } from "../../Configurations/types";
 import { overrideFields } from "../../Configurations/utils";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
-import { useT } from "i18n";
+import { formatText, useT } from "i18n";
 
 interface IEndpointModal {
   open: boolean;
@@ -230,11 +230,14 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? t(
-                              "This value is set from the {env} environment variable",
-                            ).replace(
-                              "{env}",
-                              overrideValues.enable?.overrideEnv || "N/A",
+                          ? formatText(
+                              t(
+                                "This value is set from the {env} environment variable",
+                              ),
+                              {
+                                env:
+                                  overrideValues.enable?.overrideEnv || "N/A",
+                              },
                             )
                           : ""
                       }
@@ -262,11 +265,14 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? t(
-                              "This value is set from the {env} environment variable",
-                            ).replace(
-                              "{env}",
-                              overrideValues.endpoint?.overrideEnv || "N/A",
+                          ? formatText(
+                              t(
+                                "This value is set from the {env} environment variable",
+                              ),
+                              {
+                                env:
+                                  overrideValues.endpoint?.overrideEnv || "N/A",
+                              },
                             )
                           : ""
                       }
@@ -294,11 +300,15 @@ const EditEndpointModal = ({
                     <Tooltip
                       tooltip={
                         overrideValues.enable
-                          ? t(
-                              "This value is set from the {env} environment variable",
-                            ).replace(
-                              "{env}",
-                              overrideValues.auth_token?.overrideEnv || "N/A",
+                          ? formatText(
+                              t(
+                                "This value is set from the {env} environment variable",
+                              ),
+                              {
+                                env:
+                                  overrideValues.auth_token?.overrideEnv ||
+                                  "N/A",
+                              },
                             )
                           : ""
                       }
