@@ -16,7 +16,7 @@
 import { expect } from "@playwright/test";
 import { generateUUID, test } from "./fixtures/baseFixture";
 import { minioadminFile } from "./consts";
-import { BUCKET_LIST_PAGE } from "./consts";
+import { BUCKET_LIST_PAGE, SERVER_ENDPOINT } from "./consts";
 
 test.use({ storageState: minioadminFile });
 
@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Can create a policy", async ({ page }) => {
-  await page.getByRole("button", { name: "Policies" }).click();
+  await page.goto(`${SERVER_ENDPOINT}/policies`);
   await page.getByRole("button", { name: "Create Policy" }).click();
   await page.getByLabel("Policy Name").click();
 

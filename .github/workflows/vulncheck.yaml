@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
@@ -33,21 +37,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: [ 1.27.x ]
-        os: [ ubuntu-latest ]
+        go-version: [1.27.x]
+        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@v6
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NVMRC }}
-      - name: Checks for known security issues with the installed packages
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install locked frontend dependencies
+        working-directory: ./web-app
+        run: yarn install --immutable
+      - name: Check production dependencies for known security issues
         working-directory: ./web-app
         continue-on-error: false
-        run: |
-          yarn npm audit --recursive --environment production --no-deprecations
+        run: yarn npm audit --recursive --environment production --no-deprecations
+      - name: Block high-severity issues in all dependency groups
+        working-directory: ./web-app
+        continue-on-error: false
+        run: yarn npm audit --recursive --severity high --no-deprecations

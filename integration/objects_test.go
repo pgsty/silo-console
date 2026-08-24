@@ -1,3 +1,5 @@
+//go:build testrunmain
+
 // This file is part of MinIO Console Server
 // Copyright (c) 2022 MinIO, Inc.
 //

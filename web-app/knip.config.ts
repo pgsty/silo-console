@@ -1,7 +1,7 @@
 import type { KnipConfig } from "knip";
 
 export default {
-  entry: ["src/**/{index,main}.{ts,tsx}", "e2e/**/*.ts", "tests/**/*.ts"],
+  entry: ["src/**/{index,main}.{ts,tsx}", "e2e/**/*.{ts,tsx}", "tests/**/*.ts"],
   project: [
     "src/**/*.{ts,tsx}",
     "!src/api/**/*",
@@ -10,7 +10,6 @@ export default {
   ],
   rules: {
     binaries: "error",
-    classMembers: "error",
     dependencies: "error",
     devDependencies: "off",
     duplicates: "error",

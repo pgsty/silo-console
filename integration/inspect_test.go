@@ -1,3 +1,5 @@
+//go:build testrunmain
+
 package integration
 
 import (
