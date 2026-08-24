@@ -17,6 +17,14 @@ Downloads and API behavior:
 - Made download requests settle and clean up exactly once, parse JSON error blobs safely, and revoke generated object URLs
 - Multi-selection still uses the existing POST response and therefore remains a browser-memory `Blob`; changing that contract requires a separate API decision
 
+Notifications and configuration:
+
+- Made PostgreSQL and MySQL destination forms emit only their canonical DSN, propagate cleared values, preserve manually entered strings across mode switches, and require both a DSN and table before saving
+- Added IPv6-aware MySQL and quote-aware PostgreSQL structured DSN handling, while masking credentials in generated previews
+- Rejected database DSNs that SILO's current configuration grammar would split or mutate, before sending them to the Admin API and without returning the submitted secret
+- Rendered generic passwords and authentication tokens as password fields, including environment-overridden values
+- Added a non-blocking warning that browser uploads larger than 5 GiB use one non-resumable request and recommends `mcli` for multipart uploads
+
 Reliability, localization, and security:
 
 - Replaced unsafe translated placeholder substitutions with one-pass literal formatting, including values containing `$&`, `$1`, `$'`, backticks, braces, or repeated placeholders
