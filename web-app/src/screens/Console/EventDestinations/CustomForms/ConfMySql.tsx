@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IElementValue } from "../../Configurations/types";
 import {
   Box,
@@ -27,21 +27,29 @@ import {
   Switch,
 } from "mds";
 import { useT } from "i18n";
+import {
+  buildMySqlDsn,
+  databaseNotificationValues,
+  emptyMySqlDsnFields,
+  isDatabaseNotificationValid,
+  maskMySqlDsn,
+  mySqlDsnStateFromRaw,
+  MySqlDsnFields,
+} from "./dsnUtils";
 
 interface IConfMySqlProps {
   onChange: (newValue: IElementValue[]) => void;
+  onValidityChange: (valid: boolean) => void;
 }
 
-const ConfMySql = ({ onChange }: IConfMySqlProps) => {
+const ConfMySql = ({ onChange, onValidityChange }: IConfMySqlProps) => {
   const t = useT();
   //Local States
   const [useDsnString, setUseDsnString] = useState<boolean>(false);
-  const [dsnString, setDsnString] = useState<string>("");
-  const [host, setHostname] = useState<string>("");
-  const [dbName, setDbName] = useState<string>("");
-  const [port, setPort] = useState<string>("");
-  const [user, setUser] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [connection, setConnection] = useState({
+    raw: "",
+    fields: emptyMySqlDsnFields(),
+  });
 
   const [table, setTable] = useState<string>("");
   const [format, setFormat] = useState<string>("namespace");
@@ -49,89 +57,52 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
   const [queueLimit, setQueueLimit] = useState<string>("");
   const [comment, setComment] = useState<string>("");
 
-  // dsn_string*  (string)             MySQL data-source-name connection string e.g. "<user>:<password>@tcp(<host>:<port>)/<database>"
-  // table*       (string)             DB table name to store/update events, table is auto-created
-  // format*      (namespace*|access)  'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'
-  // queue_dir    (path)               staging dir for undelivered messages e.g. '/home/events'
-  // queue_limit  (number)             maximum limit for undelivered messages, defaults to '100000'
-  // comment      (sentence)           optionally add a comment to this setting
+  useEffect(() => {
+    onChange(
+      databaseNotificationValues("dsn_string", connection.raw, {
+        table,
+        format,
+        queueDir,
+        queueLimit,
+        comment,
+      }),
+    );
+    onValidityChange(isDatabaseNotificationValid(connection.raw, table));
+  }, [
+    connection.raw,
+    table,
+    format,
+    queueDir,
+    queueLimit,
+    comment,
+    onChange,
+    onValidityChange,
+  ]);
 
-  const parseDsnString = (
-    input: string,
-    keys: string[],
-  ): Map<string, string> => {
-    let kvFields: Map<string, string> = new Map();
-    const regex = /(.*?):(.*?)@tcp\((.*?):(.*?)\)\/(.*?)$/gm;
-    let m;
-
-    while ((m = regex.exec(input)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-
-      kvFields.set("user", m[1]);
-      kvFields.set("password", m[2]);
-      kvFields.set("host", m[3]);
-      kvFields.set("port", m[4]);
-      kvFields.set("dbname", m[5]);
-    }
-
-    return kvFields;
+  const setStructuredField = <Field extends keyof MySqlDsnFields>(
+    field: Field,
+    value: MySqlDsnFields[Field],
+  ) => {
+    setConnection((current) => {
+      const fields = { ...current.fields, [field]: value };
+      return { fields, raw: buildMySqlDsn(fields) };
+    });
   };
 
-  const configToDsnString = useCallback((): string => {
-    return `${user}:${password}@tcp(${host}:${port})/${dbName}`;
-  }, [user, password, host, port, dbName]);
-
-  useEffect(() => {
-    if (dsnString !== "") {
-      const formValues = [
-        { key: "dsn_string", value: dsnString },
-        { key: "table", value: table },
-        { key: "format", value: format },
-        { key: "queue_dir", value: queueDir },
-        { key: "queue_limit", value: queueLimit },
-        { key: "comment", value: comment },
-      ];
-
-      onChange(formValues);
-    }
-  }, [dsnString, table, format, queueDir, queueLimit, comment, onChange]);
-
-  useEffect(() => {
-    const cs = configToDsnString();
-    setDsnString(cs);
-  }, [user, dbName, password, port, host, setDsnString, configToDsnString]);
-
   const switcherChangeEvt = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      // build dsn_string
-      const cs = configToDsnString();
-      setDsnString(cs);
-    } else {
-      // parse dsn_string
-      const kv = parseDsnString(dsnString, [
-        "host",
-        "port",
-        "dbname",
-        "user",
-        "password",
-      ]);
-      setHostname(kv.get("host") ? kv.get("host") + "" : "");
-      setPort(kv.get("port") ? kv.get("port") + "" : "");
-      setDbName(kv.get("dbname") ? kv.get("dbname") + "" : "");
-      setUser(kv.get("user") ? kv.get("user") + "" : "");
-      setPassword(kv.get("password") ? kv.get("password") + "" : "");
+    const manual = event.target.checked;
+    if (!manual) {
+      // Parsing only populates the structured controls. The raw value stays
+      // authoritative until the user explicitly edits a field.
+      setConnection((current) => mySqlDsnStateFromRaw(current.raw));
     }
-
-    setUseDsnString(event.target.checked);
+    setUseDsnString(manual);
   };
 
   return (
     <FormLayout withBorders={false} containerPadding={false}>
       <Switch
-        label={t("Enter DNS String")}
+        label={t("Enter DSN String")}
         checked={useDsnString}
         id="checkedB"
         name="checkedB"
@@ -145,9 +116,12 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
               id="dsn-string"
               name="dsn_string"
               label={t("DSN String")}
-              value={dsnString}
+              value={connection.raw}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setDsnString(e.target.value);
+                setConnection((current) => ({
+                  ...current,
+                  raw: e.target.value,
+                }));
               }}
             />
           </Box>
@@ -169,9 +143,9 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 name="host"
                 label=""
                 placeholder={t("Enter Host")}
-                value={host}
+                value={connection.fields.host}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setHostname(e.target.value);
+                  setStructuredField("host", e.target.value);
                 }}
               />
               <InputBox
@@ -179,9 +153,9 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 name="db-name"
                 label=""
                 placeholder={t("Enter DB Name")}
-                value={dbName}
+                value={connection.fields.dbName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setDbName(e.target.value);
+                  setStructuredField("dbName", e.target.value);
                 }}
               />
               <InputBox
@@ -189,9 +163,9 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 name="port"
                 label=""
                 placeholder={t("Enter Port")}
-                value={port}
+                value={connection.fields.port}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setPort(e.target.value);
+                  setStructuredField("port", e.target.value);
                 }}
               />
               <InputBox
@@ -199,9 +173,9 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 name="user"
                 label=""
                 placeholder={t("Enter User")}
-                value={user}
+                value={connection.fields.user}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setUser(e.target.value);
+                  setStructuredField("user", e.target.value);
                 }}
               />
               <InputBox
@@ -210,16 +184,16 @@ const ConfMySql = ({ onChange }: IConfMySqlProps) => {
                 label=""
                 placeholder={t("Enter Password")}
                 type="password"
-                value={password}
+                value={connection.fields.password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setPassword(e.target.value);
+                  setStructuredField("password", e.target.value);
                 }}
               />
             </Box>
           </Box>
           <Grid item xs={12} sx={{ margin: "12px 0" }}>
             <ReadBox label={t("Connection String")} multiLine>
-              {dsnString}
+              {maskMySqlDsn(connection.raw)}
             </ReadBox>
           </Grid>
         </React.Fragment>

@@ -70,7 +70,15 @@ const AddEventDestination = ({
   const [valuesArr, setValueArr] = useState<IElementValue[]>([]);
   const [identifier, setIdentifier] = useState<string>("");
   const [saving, setSaving] = useState<boolean>(false);
+  const [databaseTargetValid, setDatabaseTargetValid] =
+    useState<boolean>(false);
   const service = params.service || "";
+  const isDatabaseTarget =
+    service === notifyPostgres || service === notifyMysql;
+
+  useEffect(() => {
+    setDatabaseTargetValid(false);
+  }, [service]);
 
   //Effects
   useEffect(() => {
@@ -114,14 +122,28 @@ const AddEventDestination = ({
     [setValueArr],
   );
 
+  const onDatabaseValidityChange = useCallback((valid: boolean) => {
+    setDatabaseTargetValid(valid);
+  }, []);
+
   let srvComponent;
   switch (service) {
     case notifyPostgres: {
-      srvComponent = <ConfPostgres onChange={onValueChange} />;
+      srvComponent = (
+        <ConfPostgres
+          onChange={onValueChange}
+          onValidityChange={onDatabaseValidityChange}
+        />
+      );
       break;
     }
     case notifyMysql: {
-      srvComponent = <ConfMySql onChange={onValueChange} />;
+      srvComponent = (
+        <ConfMySql
+          onChange={onValueChange}
+          onValidityChange={onDatabaseValidityChange}
+        />
+      );
       break;
     }
     default: {
@@ -195,7 +217,11 @@ const AddEventDestination = ({
                     id={"save-notification-target"}
                     type="submit"
                     variant="callAction"
-                    disabled={saving || identifier.trim() === ""}
+                    disabled={
+                      saving ||
+                      identifier.trim() === "" ||
+                      (isDatabaseTarget && !databaseTargetValid)
+                    }
                     label={t("Save Event Destination")}
                   />
                 </Grid>

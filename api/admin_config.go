@@ -19,6 +19,7 @@ package api
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -30,6 +31,24 @@ import (
 
 	cfgApi "github.com/minio/console/api/operations/configuration"
 )
+
+var errUnsafeDatabaseNotificationConfig = errors.New("invalid database notification configuration")
+
+type databaseNotificationConfigSpec struct {
+	connectionKey string
+	keys          []string
+}
+
+var databaseNotificationConfigSpecs = map[string]databaseNotificationConfigSpec{
+	"notify_postgres": {
+		connectionKey: "connection_string",
+		keys:          []string{"enable", "format", "connection_string", "table", "queue_dir", "queue_limit", "max_open_connections", "comment"},
+	},
+	"notify_mysql": {
+		connectionKey: "dsn_string",
+		keys:          []string{"enable", "format", "dsn_string", "table", "queue_dir", "queue_limit", "max_open_connections", "comment"},
+	},
+}
 
 func registerConfigHandlers(api *operations.ConsoleAPI) {
 	// List Configurations
@@ -191,12 +210,54 @@ func getConfigResponse(session *models.Principal, params cfgApi.ConfigInfoParams
 
 // setConfig sets a configuration with the defined key values
 func setConfig(ctx context.Context, client MinioAdmin, configName *string, kvs []*models.ConfigurationKV) (restart bool, err error) {
+	if err := validateDatabaseNotificationConfig(*configName, kvs); err != nil {
+		return false, err
+	}
 	config := buildConfig(configName, kvs)
 	restart, err = client.setConfigKV(ctx, *config)
 	if err != nil {
 		return false, err
 	}
 	return restart, nil
+}
+
+// validateDatabaseNotificationConfig rejects canonical database connection
+// strings that the server's quote-unaware key/value grammar would mutate or
+// split into sibling configuration fields. The generic serializer remains
+// unchanged because other subsystems have their own established value rules.
+func validateDatabaseNotificationConfig(configName string, kvs []*models.ConfigurationKV) error {
+	subsystem := strings.SplitN(configName, madmin.SubSystemSeparator, 2)[0]
+	spec, ok := databaseNotificationConfigSpecs[subsystem]
+	if !ok {
+		return nil
+	}
+
+	for _, kv := range kvs {
+		if strings.TrimSpace(kv.Key) != spec.connectionKey {
+			continue
+		}
+
+		if strings.ContainsAny(kv.Value, "\r\n") {
+			return unsafeDatabaseNotificationConfigError(subsystem, spec.connectionKey)
+		}
+		for _, key := range spec.keys {
+			if key != spec.connectionKey && strings.Contains(kv.Value, key+madmin.KvSeparator) {
+				return unsafeDatabaseNotificationConfigError(subsystem, spec.connectionKey)
+			}
+		}
+
+		serialized := strings.TrimSpace(fmt.Sprintf("\"%s\"", kv.Value))
+		serialized = strings.ReplaceAll(serialized, madmin.KvNewline, ",")
+		if madmin.SanitizeValue(serialized) != kv.Value {
+			return unsafeDatabaseNotificationConfigError(subsystem, spec.connectionKey)
+		}
+	}
+
+	return nil
+}
+
+func unsafeDatabaseNotificationConfigError(subsystem, key string) error {
+	return fmt.Errorf("%w: %s %s contains characters that cannot be stored safely", errUnsafeDatabaseNotificationConfig, subsystem, key)
 }
 
 func setConfigWithARNAccountID(ctx context.Context, client MinioAdmin, configName *string, kvs []*models.ConfigurationKV, arnAccountID string) (restart bool, err error) {
@@ -245,6 +306,15 @@ func setConfigResponse(session *models.Principal, params cfgApi.SetConfigParams)
 
 	needsRestart, err := setConfigWithARNAccountID(ctx, adminClient, &configName, params.Body.KeyValues, params.Body.ArnResourceID)
 	if err != nil {
+		if errors.Is(err, errUnsafeDatabaseNotificationConfig) {
+			return nil, &CodedAPIError{
+				Code: 400,
+				APIError: &models.APIError{
+					Message:         errUnsafeDatabaseNotificationConfig.Error(),
+					DetailedMessage: err.Error(),
+				},
+			}
+		}
 		return nil, ErrorWithContext(ctx, err)
 	}
 	return &models.SetConfigResponse{Restart: needsRestart}, nil

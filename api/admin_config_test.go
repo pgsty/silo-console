@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/go-openapi/swag"
@@ -226,6 +227,111 @@ func Test_buildConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestValidateDatabaseNotificationConfig(t *testing.T) {
+	tests := []struct {
+		name       string
+		configName string
+		key        string
+		value      string
+		wantErr    bool
+	}{
+		{
+			name:       "safe PostgreSQL target",
+			configName: "notify_postgres:primary",
+			key:        "connection_string",
+			value:      "host=db.internal dbname=events user=writer password=secret port=5432 sslmode=require",
+		},
+		{
+			name:       "safe MySQL IPv6 target with query",
+			configName: "notify_mysql:primary",
+			key:        "dsn_string",
+			value:      "writer:secret@tcp([2001:db8::1]:3306)/events?parseTime=true",
+		},
+		{
+			name:       "unrelated subsystem keeps generic behavior",
+			configName: "notify_webhook:primary",
+			key:        "endpoint",
+			value:      "https://example.com/path\nnext",
+		},
+		{
+			name:       "newline would be rewritten",
+			configName: "notify_postgres:primary",
+			key:        "connection_string",
+			value:      "host=db\nuser=writer",
+			wantErr:    true,
+		},
+		{
+			name:       "carriage return is unsupported",
+			configName: "notify_mysql:primary",
+			key:        "dsn_string",
+			value:      "writer:secret@tcp(db:3306)/events\r",
+			wantErr:    true,
+		},
+		{
+			name:       "sibling key would split PostgreSQL DSN",
+			configName: "notify_postgres:primary",
+			key:        "connection_string",
+			value:      "host=db password=secret-comment=hidden",
+			wantErr:    true,
+		},
+		{
+			name:       "sibling key would split MySQL DSN",
+			configName: "notify_mysql:primary",
+			key:        "dsn_string",
+			value:      "writer:queue_limit=secret@tcp(db:3306)/events",
+			wantErr:    true,
+		},
+		{
+			name:       "leading single quote would be stripped",
+			configName: "notify_mysql:primary",
+			key:        "dsn_string",
+			value:      "'writer:secret@tcp(db:3306)/events",
+			wantErr:    true,
+		},
+		{
+			name:       "trailing single quote would be stripped",
+			configName: "notify_postgres:primary",
+			key:        "connection_string",
+			value:      "host=db password='secret'",
+			wantErr:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateDatabaseNotificationConfig(tt.configName, []*models.ConfigurationKV{{
+				Key:   tt.key,
+				Value: tt.value,
+			}})
+			if tt.wantErr {
+				assert.ErrorIs(t, err, errUnsafeDatabaseNotificationConfig)
+				assert.NotContains(t, err.Error(), tt.value)
+				return
+			}
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestSetConfigRejectsUnsafeDatabaseDSNBeforeAdminCall(t *testing.T) {
+	called := false
+	minioSetConfigKVMock = func(_ string) (bool, error) {
+		called = true
+		return false, nil
+	}
+
+	configName := "notify_mysql:primary"
+	secret := "writer:super-secret-table=events@tcp(db:3306)/events"
+	_, err := setConfig(context.Background(), AdminClientMock{}, &configName, []*models.ConfigurationKV{{
+		Key:   "dsn_string",
+		Value: secret,
+	}})
+
+	assert.ErrorIs(t, err, errUnsafeDatabaseNotificationConfig)
+	assert.False(t, called)
+	assert.False(t, strings.Contains(err.Error(), secret))
 }
 
 func Test_setConfigWithARN(t *testing.T) {

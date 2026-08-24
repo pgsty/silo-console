@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useCallback, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   Box,
   CommentBox,
@@ -28,23 +28,30 @@ import {
 } from "mds";
 import { IElementValue } from "../../Configurations/types";
 import { useT } from "i18n";
+import {
+  buildPostgresDsn,
+  databaseNotificationValues,
+  emptyPostgresDsnFields,
+  isDatabaseNotificationValid,
+  maskPostgresDsn,
+  postgresDsnStateFromRaw,
+  PostgresDsnFields,
+} from "./dsnUtils";
 
 interface IConfPostgresProps {
   onChange: (newValue: IElementValue[]) => void;
+  onValidityChange: (valid: boolean) => void;
 }
 
-const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
+const ConfPostgres = ({ onChange, onValidityChange }: IConfPostgresProps) => {
   const t = useT();
   //Local States
   const [useConnectionString, setUseConnectionString] =
     useState<boolean>(false);
-  const [connectionString, setConnectionString] = useState<string>("");
-  const [host, setHostname] = useState<string>("");
-  const [dbName, setDbName] = useState<string>("");
-  const [port, setPort] = useState<string>("");
-  const [user, setUser] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [sslMode, setSslMode] = useState<string>(" ");
+  const [connection, setConnection] = useState({
+    raw: "",
+    fields: emptyPostgresDsnFields(),
+  });
 
   const [table, setTable] = useState<string>("");
   const [format, setFormat] = useState<string>("namespace");
@@ -52,148 +59,37 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
   const [queueLimit, setQueueLimit] = useState<string>("");
   const [comment, setComment] = useState<string>("");
 
-  // connection_string*  (string)             Postgres server connection-string e.g. "host=localhost port=5432 dbname=minio_events user=postgres password=password sslmode=disable"
-
-  //  "host=localhost
-  // port=5432
-  //dbname=minio_events
-  //user=postgres
-  //password=password
-  //sslmode=disable"
-
-  // table*              (string)             DB table name to store/update events, table is auto-created
-  // format*             (namespace*|access)  'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'
-  // queue_dir           (path)               staging dir for undelivered messages e.g. '/home/events'
-  // queue_limit         (number)             maximum limit for undelivered messages, defaults to '10000'
-  // comment             (sentence)           optionally add a comment to this setting
-
-  const KvSeparator = "=";
-  const parseConnectionString = (
-    input: string,
-    keys: string[],
-  ): Map<string, string> => {
-    let valueIndexes: number[] = [];
-
-    for (const key of keys) {
-      const i = input.indexOf(key + KvSeparator);
-      if (i === -1) {
-        continue;
-      }
-      valueIndexes.push(i);
-    }
-    valueIndexes.sort((n1, n2) => n1 - n2);
-
-    let kvFields = new Map<string, string>();
-    let fields: string[] = new Array<string>(valueIndexes.length);
-    for (let i = 0; i < valueIndexes.length; i++) {
-      const j = i + 1;
-      if (j < valueIndexes.length) {
-        fields[i] = input.slice(valueIndexes[i], valueIndexes[j]);
-      } else {
-        fields[i] = input.slice(valueIndexes[i]);
-      }
-    }
-
-    for (let field of fields) {
-      if (field === undefined) {
-        continue;
-      }
-      const key = field.slice(0, field.indexOf("="));
-      const value = field.slice(field.indexOf("=") + 1).trim();
-      kvFields.set(key, value);
-    }
-    return kvFields;
-  };
-
-  const configToString = useCallback((): string => {
-    let strValue = "";
-    if (host !== "") {
-      strValue = `${strValue} host=${host}`;
-    }
-    if (dbName !== "") {
-      strValue = `${strValue} dbname=${dbName}`;
-    }
-    if (user !== "") {
-      strValue = `${strValue} user=${user}`;
-    }
-    if (password !== "") {
-      strValue = `${strValue} password=${password}`;
-    }
-    if (port !== "") {
-      strValue = `${strValue} port=${port}`;
-    }
-    if (sslMode !== " ") {
-      strValue = `${strValue} sslmode=${sslMode}`;
-    }
-
-    strValue = `${strValue} `;
-
-    return strValue.trim();
-  }, [host, dbName, user, password, port, sslMode]);
-
   useEffect(() => {
-    if (connectionString !== "") {
-      const formValues = [
-        { key: "connection_string", value: connectionString },
-        { key: "table", value: table },
-        { key: "format", value: format },
-        { key: "queue_dir", value: queueDir },
-        { key: "queue_limit", value: queueLimit },
-        { key: "comment", value: comment },
-      ];
-
-      onChange(formValues);
-    }
+    onChange(
+      databaseNotificationValues("connection_string", connection.raw, {
+        table,
+        format,
+        queueDir,
+        queueLimit,
+        comment,
+      }),
+    );
+    onValidityChange(isDatabaseNotificationValid(connection.raw, table));
   }, [
-    connectionString,
+    connection.raw,
     table,
     format,
     queueDir,
     queueLimit,
     comment,
     onChange,
+    onValidityChange,
   ]);
 
-  useEffect(() => {
-    const cs = configToString();
-    setConnectionString(cs);
-  }, [
-    user,
-    dbName,
-    password,
-    port,
-    sslMode,
-    host,
-    setConnectionString,
-    configToString,
-  ]);
-
-  useEffect(() => {
-    if (useConnectionString) {
-      // build connection_string
-      const cs = configToString();
-      setConnectionString(cs);
-
-      return;
-    }
-    // parse connection_string
-    const kv = parseConnectionString(connectionString, [
-      "host",
-      "port",
-      "dbname",
-      "user",
-      "password",
-      "sslmode",
-    ]);
-    setHostname(kv.get("host") ? kv.get("host") + "" : "");
-    setPort(kv.get("port") ? kv.get("port") + "" : "");
-    setDbName(kv.get("dbname") ? kv.get("dbname") + "" : "");
-    setUser(kv.get("user") ? kv.get("user") + "" : "");
-    setPassword(kv.get("password") ? kv.get("password") + "" : "");
-    setSslMode(kv.get("sslmode") ? kv.get("sslmode") + "" : " ");
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useConnectionString]);
+  const setStructuredField = <Field extends keyof PostgresDsnFields>(
+    field: Field,
+    value: PostgresDsnFields[Field],
+  ) => {
+    setConnection((current) => {
+      const fields = { ...current.fields, [field]: value };
+      return { fields, raw: buildPostgresDsn(fields) };
+    });
+  };
 
   return (
     <FormLayout containerPadding={false} withBorders={false}>
@@ -203,7 +99,13 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
         id="manualString"
         name="manualString"
         onChange={(e) => {
-          setUseConnectionString(e.target.checked);
+          const manual = e.target.checked;
+          if (!manual) {
+            // Parsing only populates the structured controls. The raw value
+            // stays authoritative until the user explicitly edits a field.
+            setConnection((current) => postgresDsnStateFromRaw(current.raw));
+          }
+          setUseConnectionString(manual);
         }}
         value={"manualString"}
       />
@@ -213,9 +115,12 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
             id="connection-string"
             name="connection_string"
             label={t("Connection String")}
-            value={connectionString}
+            value={connection.raw}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setConnectionString(e.target.value);
+              setConnection((current) => ({
+                ...current,
+                raw: e.target.value,
+              }));
             }}
           />
         </Fragment>
@@ -236,9 +141,9 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 name="host"
                 label=""
                 placeholder={t("Enter Host")}
-                value={host}
+                value={connection.fields.host}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setHostname(e.target.value);
+                  setStructuredField("host", e.target.value);
                 }}
               />
               <InputBox
@@ -246,9 +151,9 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 name="db-name"
                 label=""
                 placeholder={t("Enter DB Name")}
-                value={dbName}
+                value={connection.fields.dbName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setDbName(e.target.value);
+                  setStructuredField("dbName", e.target.value);
                 }}
               />
               <InputBox
@@ -256,19 +161,22 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 name="port"
                 label=""
                 placeholder={t("Enter Port")}
-                value={port}
+                value={connection.fields.port}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setPort(e.target.value);
+                  setStructuredField("port", e.target.value);
                 }}
               />
               <Select
-                value={sslMode}
+                value={connection.fields.sslMode || " "}
                 label=""
                 id="sslmode"
                 name="sslmode"
                 onChange={(value): void => {
                   if (value) {
-                    setSslMode(value + "");
+                    setStructuredField(
+                      "sslMode",
+                      value === " " ? "" : value + "",
+                    );
                   }
                 }}
                 options={[
@@ -284,9 +192,9 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 name="user"
                 label=""
                 placeholder={t("Enter User")}
-                value={user}
+                value={connection.fields.user}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setUser(e.target.value);
+                  setStructuredField("user", e.target.value);
                 }}
               />
               <InputBox
@@ -295,15 +203,15 @@ const ConfPostgres = ({ onChange }: IConfPostgresProps) => {
                 label=""
                 type="password"
                 placeholder={t("Enter Password")}
-                value={password}
+                value={connection.fields.password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setPassword(e.target.value);
+                  setStructuredField("password", e.target.value);
                 }}
               />
             </Box>
           </Grid>
           <ReadBox label={t("Connection String")} multiLine>
-            {connectionString}
+            {maskPostgresDsn(connection.raw)}
           </ReadBox>
         </Fragment>
       )}
