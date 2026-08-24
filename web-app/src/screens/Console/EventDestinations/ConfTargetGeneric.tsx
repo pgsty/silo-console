@@ -129,7 +129,9 @@ const ConfTargetGeneric = ({
             }
             sx={{ width: "100%" }}
           >
-            {override.value}
+            {field.type === "password" && override.value !== ""
+              ? "••••••"
+              : override.value}
           </ReadBox>
         );
       }
@@ -195,6 +197,7 @@ const ConfTargetGeneric = ({
             label={tr(field.label)}
             tooltip={tr(field.tooltip)}
             value={holderItem ? holderItem.value : ""}
+            type={field.type === "password" ? "password" : undefined}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setValueElement(field.name, e.target.value, item)
             }

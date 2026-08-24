@@ -609,7 +609,7 @@ export const zhScreens: Record<string, string> = {
   "Enter Delivery Mode": "输入投递模式",
   "Enter Destination Identifier": "输入目标标识符",
   "Enter Display Name": "输入显示名称",
-  "Enter DNS String": "输入 DSN 字符串",
+  "Enter DSN String": "输入 DSN 字符串",
   "Enter Endpoint": "输入端点",
   "Enter Exchange": "输入交换机",
   "Enter Exchange Type": "输入交换机类型",
@@ -708,6 +708,8 @@ export const zhScreens: Record<string, string> = {
     "无法根据文件扩展名或 MIME 类型预览该文件，请改用下载",
   "File download will be handled directly by the browser.":
     "文件下载将由浏览器直接处理。",
+  "Files larger than 5 GiB use a single, non-resumable browser request. Use mcli for multipart uploads.":
+    "大于 5 GiB 的文件会通过单个、不可续传的浏览器请求上传。请使用 mcli 进行分片上传。",
   "File or Path to inspect": "要检查的文件或路径",
   "File Preview": "文件预览",
   "File preview couldn't be displayed, Please try Download instead.":

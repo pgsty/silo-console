@@ -125,6 +125,7 @@ import ListObjectsTable from "./ListObjectsTable";
 import FilterObjectsSB from "../../../../ObjectBrowser/FilterObjectsSB";
 import AddAccessRule from "../../../BucketDetails/AddAccessRule";
 import { sanitizeFilePath } from "./utils";
+import { shouldRecommendMultipartUpload } from "./uploadAdvisory";
 import { useT } from "i18n";
 
 const DeleteMultipleObjects = withSuspense(
@@ -523,6 +524,16 @@ const ListObjects = () => {
 
   const uploadObject = useCallback(
     (files: File[], folderPath: string): void => {
+      if (shouldRecommendMultipartUpload(files)) {
+        dispatch(
+          setSnackBarMessage(
+            t(
+              "Files larger than 5 GiB use a single, non-resumable browser request. Use mcli for multipart uploads.",
+            ),
+          ),
+        );
+      }
+
       let pathPrefix = "";
       if (simplePath) {
         pathPrefix = simplePath.endsWith("/") ? simplePath : simplePath + "/";
@@ -735,7 +746,7 @@ const ListObjects = () => {
 
       upload(files, bucketName, pathPrefix, folderPath);
     },
-    [bucketName, dispatch, simplePath, anonymousMode],
+    [bucketName, dispatch, simplePath, anonymousMode, t],
   );
 
   const onDrop = useCallback(
