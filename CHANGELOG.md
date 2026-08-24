@@ -1,5 +1,33 @@
 # Changelog
 
+## Release v2.2.0
+
+Object previews and version history:
+
+- Added a bounded, literal text preview for `.log`, `.txt`, `.json`, and `.xml` objects, with strict UTF-8 validation, a 1 MiB limit, cancellation, retry, anonymous access, and no active-document rendering
+- Corrected empty-object previews, stale list-size handling, appended-log previews, and metadata races when switching quickly between objects
+- Preserved zero-byte object sizes across REST and WebSocket responses and display them as `0 B`
+- Kept S3's valid `null` version ID visible, filtered prefix matches to the exact object before counting versions, and retained history after bucket versioning is suspended or disabled
+
+Downloads and API behavior:
+
+- Made single-folder downloads use the browser's streaming download path instead of retaining the complete ZIP in JavaScript memory
+- Made ZIP creation fail fast on list, stat, object-read, entry, close, or copy failures; a partial archive now aborts the HTTP response instead of appearing successful
+- Fixed empty and partial byte-range responses, returned `416` with the representation length for malformed or unsatisfiable non-empty ranges, and preserved S3 status codes from lazy object `Stat` failures
+- Made download requests settle and clean up exactly once, parse JSON error blobs safely, and revoke generated object URLs
+- Multi-selection still uses the existing POST response and therefore remains a browser-memory `Blob`; changing that contract requires a separate API decision
+
+Reliability, localization, and security:
+
+- Replaced unsafe translated placeholder substitutions with one-pass literal formatting, including values containing `$&`, `$1`, `$'`, backticks, braces, or repeated placeholders
+- Applied Prometheus Basic authentication to health checks and root fallback requests, retained Bearer-token precedence, and drained every response so HTTP connections can be reused
+- Made anonymous/empty sessions fail fast instead of hanging on an empty-credential Admin request, accepted canonical `401` and legacy `403` invalid-session responses, and fixed redirects below a URL subpath
+- Added language and dark-mode controls to anonymous object-browser pages
+- Stopped anonymous pages from issuing protected Object Lock and retention requests that could only produce noisy `Access Denied` errors
+- Removed dead frontend exports and dependencies, refreshed vulnerable transitive dependency resolutions, and expanded vulnerability checks to pushes, manual runs, development dependencies, and immutable installs
+- Replaced the ARN handler test's live localhost dependency with deterministic registration coverage
+- Restored the intended `testrunmain` build-tag boundary for the Docker-backed integration, replication, and SSO suites, so ordinary `go test ./...` runs no longer start an incomplete external environment
+
 ## Release v2.1.1
 
 - Fixed the metrics legend builder so a `{{label}}` placeholder it cannot resolve is removed instead of leaking literal braces into the Traffic legends
