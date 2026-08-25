@@ -25,8 +25,8 @@ import (
 	"strings"
 )
 
-// UpdateUserInfoURL generates an URL for the update user info operation
-type UpdateUserInfoURL struct {
+// UpdateUserInfoLegacyURL generates an URL for the update user info legacy operation
+type UpdateUserInfoLegacyURL struct {
 	Name string
 
 	_basePath string
@@ -37,7 +37,7 @@ type UpdateUserInfoURL struct {
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UpdateUserInfoURL) WithBasePath(bp string) *UpdateUserInfoURL {
+func (o *UpdateUserInfoLegacyURL) WithBasePath(bp string) *UpdateUserInfoLegacyURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -45,21 +45,21 @@ func (o *UpdateUserInfoURL) WithBasePath(bp string) *UpdateUserInfoURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *UpdateUserInfoURL) SetBasePath(bp string) {
+func (o *UpdateUserInfoLegacyURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *UpdateUserInfoURL) Build() (*url.URL, error) {
+func (o *UpdateUserInfoLegacyURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/user/{name}/status"
+	var _path = "/user/{name}"
 
 	name := o.Name
 	if name != "" {
 		_path = strings.ReplaceAll(_path, "{name}", name)
 	} else {
-		return nil, errors.New("name is required on UpdateUserInfoURL")
+		return nil, errors.New("name is required on UpdateUserInfoLegacyURL")
 	}
 
 	_basePath := o._basePath
@@ -72,7 +72,7 @@ func (o *UpdateUserInfoURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *UpdateUserInfoURL) Must(u *url.URL, err error) *url.URL {
+func (o *UpdateUserInfoLegacyURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -83,17 +83,17 @@ func (o *UpdateUserInfoURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *UpdateUserInfoURL) String() string {
+func (o *UpdateUserInfoLegacyURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *UpdateUserInfoURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *UpdateUserInfoLegacyURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on UpdateUserInfoURL")
+		return nil, errors.New("scheme is required for a full url on UpdateUserInfoLegacyURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on UpdateUserInfoURL")
+		return nil, errors.New("host is required for a full url on UpdateUserInfoLegacyURL")
 	}
 
 	base, err := o.Build()
@@ -107,6 +107,6 @@ func (o *UpdateUserInfoURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *UpdateUserInfoURL) StringFull(scheme, host string) string {
+func (o *UpdateUserInfoLegacyURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

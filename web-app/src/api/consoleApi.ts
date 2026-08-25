@@ -149,7 +149,7 @@ export interface ListObjectsResponse {
 export interface BucketObject {
   name?: string;
   /** @format int64 */
-  size?: number;
+  size: number;
   content_type?: string;
   last_modified?: string;
   is_latest?: boolean;
@@ -741,6 +741,10 @@ export interface SiteReplicationStatusResponse {
 }
 
 export interface UpdateUser {
+  status: "enabled" | "disabled";
+}
+
+export interface LegacyUpdateUser {
   status: string;
   groups: string[];
 }
@@ -1465,10 +1469,8 @@ export interface ApiConfig<SecurityDataType = unknown> {
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<
-  D extends unknown,
-  E extends unknown = unknown,
-> extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown>
+  extends Response {
   data: D;
   error: E;
 }
@@ -3184,17 +3186,18 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description Deprecated compatibility endpoint. Use /user/{name}/status and /user/{name}/groups for independent updates.
      *
      * @tags User
-     * @name UpdateUserInfo
-     * @summary Update User Info
+     * @name UpdateUserInfoLegacy
+     * @summary Update User Info (Deprecated)
      * @request PUT:/user/{name}
+     * @deprecated
      * @secure
      */
-    updateUserInfo: (
+    updateUserInfoLegacy: (
       name: string,
-      body: UpdateUser,
+      body: LegacyUpdateUser,
       params: RequestParams = {},
     ) =>
       this.request<User, ApiError>({
@@ -3221,6 +3224,30 @@ export class Api<
         path: `/user/${encodeURIComponent(name)}`,
         method: "DELETE",
         secure: true,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags User
+     * @name UpdateUserInfo
+     * @summary Update User Status
+     * @request PUT:/user/{name}/status
+     * @secure
+     */
+    updateUserInfo: (
+      name: string,
+      body: UpdateUser,
+      params: RequestParams = {},
+    ) =>
+      this.request<User, ApiError>({
+        path: `/user/${encodeURIComponent(name)}/status`,
+        method: "PUT",
+        body: body,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

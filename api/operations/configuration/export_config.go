@@ -47,7 +47,7 @@ func NewExportConfig(ctx *middleware.Context, handler ExportConfigHandler) *Expo
 /*
 	ExportConfig swagger:route GET /configs/export Configuration exportConfig
 
-Export the current config from MinIO server
+Export the current config from SILO server
 */
 type ExportConfig struct {
 	Context *middleware.Context

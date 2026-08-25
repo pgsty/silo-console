@@ -78,7 +78,6 @@ const UserDetails = () => {
   const [policyOpen, setPolicyOpen] = useState<boolean>(false);
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [enabled, setEnabled] = useState<boolean>(false);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [currentGroups, setCurrentGroups] = useState<IGroupItem[]>([]);
   const [currentPolicies, setCurrentPolicies] = useState<IPolicyItem[]>([]);
   const [changeUserPasswordModalOpen, setChangeUserPasswordModalOpen] =
@@ -87,12 +86,17 @@ const UserDetails = () => {
   const [hasPolicy, setHasPolicy] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("groups");
 
-  const enableEnabled =
-    hasPermission(CONSOLE_UI_RESOURCE, enableUserPermissions) && !enabled;
-  const disableEnabled =
-    hasPermission(CONSOLE_UI_RESOURCE, disableUserPermissions) && enabled;
-
   const userName = params.userName || "";
+  const userLoggedIn = localStorage.getItem("userLoggedIn") || "";
+  const isCurrentUser = userLoggedIn === userName;
+  const enableEnabled =
+    hasPermission(CONSOLE_UI_RESOURCE, enableUserPermissions) &&
+    !enabled &&
+    !isCurrentUser;
+  const disableEnabled =
+    hasPermission(CONSOLE_UI_RESOURCE, disableUserPermissions) &&
+    enabled &&
+    !isCurrentUser;
 
   const changeUserPassword = () => {
     setChangeUserPasswordModalOpen(true);
@@ -102,7 +106,6 @@ const UserDetails = () => {
     setDeleteOpen(true);
   };
 
-  const userLoggedIn = localStorage.getItem("userLoggedIn") || "";
   const canAssignPolicy = hasPermission(
     CONSOLE_UI_RESOURCE,
     assignIAMPolicyPermissions,
@@ -126,8 +129,6 @@ const UserDetails = () => {
       .then((res) => {
         setAddLoading(false);
         const memberOf = res.memberOf || [];
-        setSelectedGroups(memberOf);
-
         const currentGroups: IGroupItem[] = memberOf.map((group: string) => {
           return {
             group: group,
@@ -163,11 +164,11 @@ const UserDetails = () => {
     }
     setAddLoading(true);
     api
-      .invoke("PUT", `/api/v1/user/${encodeURIComponent(userName)}`, {
+      .invoke("PUT", `/api/v1/user/${encodeURIComponent(userName)}/status`, {
         status: isEnabled ? "enabled" : "disabled",
-        groups: selectedGroups,
       })
-      .then((_) => {
+      .then((res) => {
+        setEnabled(res.status === "enabled");
         setAddLoading(false);
       })
       .catch((err: ErrorResponseHandler) => {
@@ -200,7 +201,7 @@ const UserDetails = () => {
     {
       type: "view",
       onClick: groupViewAction,
-      disableButtonFunction: () => !viewGroup,
+      isDisabled: () => !viewGroup,
     },
   ];
 
@@ -282,28 +283,32 @@ const UserDetails = () => {
                   </span>
                   <TooltipWrapper
                     tooltip={
-                      enableEnabled || disableEnabled
-                        ? ""
-                        : hasPermission(
-                              CONSOLE_UI_RESOURCE,
-                              enableUserPermissions,
-                            )
-                          ? permissionTooltipHelper(
-                              disableUserPermissions,
-                              "disable users",
-                            )
+                      isCurrentUser
+                        ? t(
+                            "You cannot enable or disable the currently logged in User",
+                          )
+                        : enableEnabled || disableEnabled
+                          ? ""
                           : hasPermission(
                                 CONSOLE_UI_RESOURCE,
-                                disableUserPermissions,
+                                enableUserPermissions,
                               )
                             ? permissionTooltipHelper(
-                                enableUserPermissions,
-                                "enable users",
+                                disableUserPermissions,
+                                "disable users",
                               )
-                            : permissionTooltipHelper(
-                                enableDisableUserPermissions,
-                                "enable or disable users",
-                              )
+                            : hasPermission(
+                                  CONSOLE_UI_RESOURCE,
+                                  disableUserPermissions,
+                                )
+                              ? permissionTooltipHelper(
+                                  enableUserPermissions,
+                                  "enable users",
+                                )
+                              : permissionTooltipHelper(
+                                  enableDisableUserPermissions,
+                                  "enable or disable users",
+                                )
                     }
                   >
                     <Switch
@@ -313,11 +318,12 @@ const UserDetails = () => {
                       id="group-status"
                       name="group-status"
                       onChange={() => {
-                        setEnabled(!enabled);
                         saveRecord(!enabled);
                       }}
                       switchOnly
-                      disabled={!enableEnabled && !disableEnabled}
+                      disabled={
+                        addLoading || (!enableEnabled && !disableEnabled)
+                      }
                     />
                   </TooltipWrapper>
                   <TooltipWrapper

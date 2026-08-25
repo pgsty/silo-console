@@ -49,7 +49,6 @@ const ChangeUserGroups = ({
   const [addLoading, setAddLoading] = useState<boolean>(false);
   const [accessKey, setAccessKey] = useState<string>("");
   const [secretKey, setSecretKey] = useState<string>("");
-  const [enabled, setEnabled] = useState<boolean>(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
   const getUserInformation = useCallback(() => {
@@ -63,7 +62,6 @@ const ChangeUserGroups = ({
         setAddLoading(false);
         setAccessKey(res.accessKey);
         setSelectedGroups(res.memberOf || []);
-        setEnabled(res.status === "enabled");
       })
       .catch((err: ErrorResponseHandler) => {
         setAddLoading(false);
@@ -90,10 +88,11 @@ const ChangeUserGroups = ({
     setAddLoading(true);
     if (selectedUser !== null) {
       api
-        .invoke("PUT", `/api/v1/user/${encodeURIComponent(selectedUser)}`, {
-          status: enabled ? "enabled" : "disabled",
-          groups: selectedGroups,
-        })
+        .invoke(
+          "PUT",
+          `/api/v1/user/${encodeURIComponent(selectedUser)}/groups`,
+          { groups: selectedGroups },
+        )
         .then((_) => {
           setAddLoading(false);
           closeModalAndRefresh();

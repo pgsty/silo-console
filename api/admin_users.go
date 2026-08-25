@@ -92,6 +92,15 @@ func registerUsersHandlers(api *operations.ConsoleAPI) {
 
 		return userApi.NewUpdateUserInfoOK().WithPayload(userUpdateResponse)
 	})
+	// Update User (deprecated compatibility endpoint)
+	api.UserUpdateUserInfoLegacyHandler = userApi.UpdateUserInfoLegacyHandlerFunc(func(params userApi.UpdateUserInfoLegacyParams, session *models.Principal) middleware.Responder {
+		userUpdateResponse, err := getUpdateUserInfoLegacyResponse(session, params)
+		if err != nil {
+			return userApi.NewUpdateUserInfoLegacyDefault(err.Code).WithPayload(err.APIError)
+		}
+
+		return userApi.NewUpdateUserInfoLegacyOK().WithPayload(userUpdateResponse)
+	})
 	// Update User-Groups Bulk
 	api.UserBulkUpdateUsersGroupsHandler = userApi.BulkUpdateUsersGroupsHandlerFunc(func(params userApi.BulkUpdateUsersGroupsParams, session *models.Principal) middleware.Responder {
 		err := getAddUsersListToGroupsResponse(session, params)
@@ -447,10 +456,31 @@ func setUserStatus(ctx context.Context, client MinioAdmin, user string, status s
 	case "disabled":
 		setStatus = madmin.AccountDisabled
 	default:
-		return errors.New(500, "status not valid")
+		// Only the deprecated PUT /user/{name} route can reach this: the
+		// status-only route rejects anything outside the enum at the spec layer.
+		return ErrInvalidUserStatus
 	}
 
 	return client.setUserStatus(ctx, user, setStatus)
+}
+
+func updateUserStatus(ctx context.Context, client MinioAdmin, user, status string) (*models.User, error) {
+	if err := setUserStatus(ctx, client, user, status); err != nil {
+		return nil, err
+	}
+
+	return &models.User{
+		AccessKey: user,
+		Status:    status,
+	}, nil
+}
+
+func updateUserInfoLegacy(ctx context.Context, client MinioAdmin, user, status string, groups []string) (*models.User, error) {
+	if err := setUserStatus(ctx, client, user, status); err != nil {
+		return nil, err
+	}
+
+	return updateUserGroups(ctx, client, user, groups)
 }
 
 func getUpdateUserResponse(session *models.Principal, params userApi.UpdateUserInfoParams) (*models.User, *CodedAPIError) {
@@ -465,19 +495,35 @@ func getUpdateUserResponse(session *models.Principal, params userApi.UpdateUserI
 	// create a minioClient interface implementation
 	// defining the client to be used
 	adminClient := AdminClient{Client: mAdmin}
-	status := *params.Body.Status
-	groups := params.Body.Groups
-
-	if err := setUserStatus(ctx, adminClient, params.Name, status); err != nil {
+	user, err := updateUserStatus(ctx, adminClient, params.Name, *params.Body.Status)
+	if err != nil {
 		return nil, ErrorWithContext(ctx, err)
 	}
 
-	userElem, errUG := updateUserGroups(ctx, adminClient, params.Name, groups)
+	return user, nil
+}
 
-	if errUG != nil {
-		return nil, ErrorWithContext(ctx, errUG)
+func getUpdateUserInfoLegacyResponse(session *models.Principal, params userApi.UpdateUserInfoLegacyParams) (*models.User, *CodedAPIError) {
+	ctx, cancel := context.WithCancel(params.HTTPRequest.Context())
+	defer cancel()
+
+	mAdmin, err := NewMinioAdminClient(params.HTTPRequest.Context(), session)
+	if err != nil {
+		return nil, ErrorWithContext(ctx, err)
 	}
-	return userElem, nil
+
+	user, err := updateUserInfoLegacy(
+		ctx,
+		AdminClient{Client: mAdmin},
+		params.Name,
+		*params.Body.Status,
+		params.Body.Groups,
+	)
+	if err != nil {
+		return nil, ErrorWithContext(ctx, err)
+	}
+
+	return user, nil
 }
 
 // addUsersListToGroups iterates over the user list & assigns the requested groups to each user.

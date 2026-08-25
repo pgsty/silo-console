@@ -1584,8 +1584,10 @@ paths:
       tags:
         - User
     put:
-      summary: Update User Info
-      operationId: UpdateUserInfo
+      summary: Update User Info (Deprecated)
+      description: Deprecated compatibility endpoint. Use /user/{name}/status and /user/{name}/groups for independent updates.
+      deprecated: true
+      operationId: UpdateUserInfoLegacy
       parameters:
         - name: name
           in: path
@@ -1595,7 +1597,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/updateUser"
+            $ref: "#/definitions/legacyUpdateUser"
       responses:
         200:
           description: A successful response.
@@ -1618,6 +1620,32 @@ paths:
       responses:
         204:
           description: A successful response.
+        default:
+          description: Generic error response.
+          schema:
+            $ref: "#/definitions/ApiError"
+      tags:
+        - User
+
+  /user/{name}/status:
+    put:
+      summary: Update User Status
+      operationId: UpdateUserInfo
+      parameters:
+        - name: name
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/updateUser"
+      responses:
+        200:
+          description: A successful response.
+          schema:
+            $ref: "#/definitions/user"
         default:
           description: Generic error response.
           schema:
@@ -2246,7 +2274,7 @@ paths:
 
   /configs/export:
     get:
-      summary: Export the current config from MinIO server
+      summary: Export the current config from SILO server
       operationId: ExportConfig
       responses:
         200:
@@ -2261,7 +2289,7 @@ paths:
         - Configuration
   /configs/import:
     post:
-      summary: Uploads a file to import MinIO server config.
+      summary: Uploads a file to import SILO server config.
       consumes:
         - multipart/form-data
       parameters:
@@ -4468,6 +4496,16 @@ definitions:
         type: object
 
   updateUser:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        type: string
+        enum:
+          - enabled
+          - disabled
+  legacyUpdateUser:
     type: object
     required:
       - status

@@ -86,6 +86,7 @@ export const zhScreens: Record<string, string> = {
   "Access Key and Secret Key should be same on the new site/endpoint.":
     "新站点／端点上的访问密钥 ID 与私有访问密钥必须保持一致。",
   "Access Key Policy": "访问密钥策略",
+  "Access Key details - {name}": "访问密钥详情 - {name}",
   "Access keys deleted successfully.": "访问密钥删除成功。",
   "Access Keys deleted successfully.": "访问密钥删除成功。",
   "Access Keys inherit the policies explicitly attached to the parent user, and the policies attached to each group in which the parent user has membership.":
@@ -1663,6 +1664,8 @@ export const zhScreens: Record<string, string> = {
   "You can use {mcShare} as an alternative to this UI, where the session length does not limit the URL validity.":
     "你也可以用 {mcShare} 代替此界面，那种方式下会话时长不会限制 URL 的有效期。",
   "You cannot delete the currently logged in User": "无法删除当前登录的用户",
+  "You cannot enable or disable the currently logged in User":
+    "无法启用或禁用当前登录的用户",
   "You cannot modify the optional Access Key IAM policy after saving.":
     "访问密钥的可选 IAM 策略在保存后无法修改。",
   "You do not have the required permissions to configure this bucket. Please contact your SILO administrator to request {role} permisions.":

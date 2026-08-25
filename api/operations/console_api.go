@@ -1055,6 +1055,13 @@ func NewConsoleAPI(spec *loads.Document) *ConsoleAPI {
 			return middleware.NotImplemented("operation user.UpdateUserInfo has not yet been implemented")
 		}),
 
+		UserUpdateUserInfoLegacyHandler: user.UpdateUserInfoLegacyHandlerFunc(func(params user.UpdateUserInfoLegacyParams, principal *models.Principal) middleware.Responder {
+			_ = params
+			_ = principal
+
+			return middleware.NotImplemented("operation user.UpdateUserInfoLegacy has not yet been implemented")
+		}),
+
 		// Applies when the "X-Anonymous" header is set
 		AnonymousAuth: func(token string) (*models.Principal, error) {
 			_ = token
@@ -1403,6 +1410,8 @@ type ConsoleAPI struct {
 	UserUpdateUserGroupsHandler user.UpdateUserGroupsHandler
 	// UserUpdateUserInfoHandler sets the operation handler for the update user info operation
 	UserUpdateUserInfoHandler user.UpdateUserInfoHandler
+	// UserUpdateUserInfoLegacyHandler sets the operation handler for the update user info legacy operation
+	UserUpdateUserInfoLegacyHandler user.UpdateUserInfoLegacyHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -1912,6 +1921,9 @@ func (o *ConsoleAPI) Validate() error {
 	}
 	if o.UserUpdateUserInfoHandler == nil {
 		unregistered = append(unregistered, "user.UpdateUserInfoHandler")
+	}
+	if o.UserUpdateUserInfoLegacyHandler == nil {
+		unregistered = append(unregistered, "user.UpdateUserInfoLegacyHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -2583,7 +2595,11 @@ func (o *ConsoleAPI) initHandlerCache() {
 	if o.handlers["PUT"] == nil {
 		o.handlers["PUT"] = make(map[string]http.Handler)
 	}
-	o.handlers["PUT"]["/user/{name}"] = user.NewUpdateUserInfo(o.context, o.UserUpdateUserInfoHandler)
+	o.handlers["PUT"]["/user/{name}/status"] = user.NewUpdateUserInfo(o.context, o.UserUpdateUserInfoHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/user/{name}"] = user.NewUpdateUserInfoLegacy(o.context, o.UserUpdateUserInfoLegacyHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

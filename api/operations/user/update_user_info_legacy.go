@@ -26,40 +26,42 @@ import (
 	"github.com/minio/console/models"
 )
 
-// UpdateUserInfoHandlerFunc turns a function with the right signature into a update user info handler
-type UpdateUserInfoHandlerFunc func(UpdateUserInfoParams, *models.Principal) middleware.Responder
+// UpdateUserInfoLegacyHandlerFunc turns a function with the right signature into a update user info legacy handler
+type UpdateUserInfoLegacyHandlerFunc func(UpdateUserInfoLegacyParams, *models.Principal) middleware.Responder
 
 // Handle executing the request and returning a response
-func (fn UpdateUserInfoHandlerFunc) Handle(params UpdateUserInfoParams, principal *models.Principal) middleware.Responder {
+func (fn UpdateUserInfoLegacyHandlerFunc) Handle(params UpdateUserInfoLegacyParams, principal *models.Principal) middleware.Responder {
 	return fn(params, principal)
 }
 
-// UpdateUserInfoHandler interface for that can handle valid update user info params
-type UpdateUserInfoHandler interface {
-	Handle(UpdateUserInfoParams, *models.Principal) middleware.Responder
+// UpdateUserInfoLegacyHandler interface for that can handle valid update user info legacy params
+type UpdateUserInfoLegacyHandler interface {
+	Handle(UpdateUserInfoLegacyParams, *models.Principal) middleware.Responder
 }
 
-// NewUpdateUserInfo creates a new http.Handler for the update user info operation
-func NewUpdateUserInfo(ctx *middleware.Context, handler UpdateUserInfoHandler) *UpdateUserInfo {
-	return &UpdateUserInfo{Context: ctx, Handler: handler}
+// NewUpdateUserInfoLegacy creates a new http.Handler for the update user info legacy operation
+func NewUpdateUserInfoLegacy(ctx *middleware.Context, handler UpdateUserInfoLegacyHandler) *UpdateUserInfoLegacy {
+	return &UpdateUserInfoLegacy{Context: ctx, Handler: handler}
 }
 
 /*
-	UpdateUserInfo swagger:route PUT /user/{name}/status User updateUserInfo
+	UpdateUserInfoLegacy swagger:route PUT /user/{name} User updateUserInfoLegacy
 
-Update User Status
+Update User Info (Deprecated)
+
+Deprecated compatibility endpoint. Use /user/{name}/status and /user/{name}/groups for independent updates.
 */
-type UpdateUserInfo struct {
+type UpdateUserInfoLegacy struct {
 	Context *middleware.Context
-	Handler UpdateUserInfoHandler
+	Handler UpdateUserInfoLegacyHandler
 }
 
-func (o *UpdateUserInfo) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (o *UpdateUserInfoLegacy) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	route, rCtx, _ := o.Context.RouteInfo(r)
 	if rCtx != nil {
 		*r = *rCtx
 	}
-	var Params = NewUpdateUserInfoParams()
+	var Params = NewUpdateUserInfoLegacyParams()
 	uprinc, aCtx, err := o.Context.Authorize(r, route)
 	if err != nil {
 		o.Context.Respond(rw, r, route.Produces, route, err)

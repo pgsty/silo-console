@@ -2650,7 +2650,7 @@ func init() {
         "tags": [
           "Configuration"
         ],
-        "summary": "Export the current config from MinIO server",
+        "summary": "Export the current config from SILO server",
         "operationId": "ExportConfig",
         "responses": {
           "200": {
@@ -2676,7 +2676,7 @@ func init() {
         "tags": [
           "Configuration"
         ],
-        "summary": "Uploads a file to import MinIO server config.",
+        "summary": "Uploads a file to import SILO server config.",
         "parameters": [
           {
             "type": "file",
@@ -4428,11 +4428,13 @@ func init() {
         }
       },
       "put": {
+        "description": "Deprecated compatibility endpoint. Use /user/{name}/status and /user/{name}/groups for independent updates.",
         "tags": [
           "User"
         ],
-        "summary": "Update User Info",
-        "operationId": "UpdateUserInfo",
+        "summary": "Update User Info (Deprecated)",
+        "operationId": "UpdateUserInfoLegacy",
+        "deprecated": true,
         "parameters": [
           {
             "type": "string",
@@ -4445,7 +4447,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/updateUser"
+              "$ref": "#/definitions/legacyUpdateUser"
             }
           }
         ],
@@ -4657,6 +4659,45 @@ func init() {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/serviceAccountCreds"
+            }
+          },
+          "default": {
+            "description": "Generic error response.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/user/{name}/status": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update User Status",
+        "operationId": "UpdateUserInfo",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/updateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/user"
             }
           },
           "default": {
@@ -6085,6 +6126,24 @@ func init() {
           }
         },
         "user": {
+          "type": "string"
+        }
+      }
+    },
+    "legacyUpdateUser": {
+      "type": "object",
+      "required": [
+        "status",
+        "groups"
+      ],
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
           "type": "string"
         }
       }
@@ -8147,18 +8206,15 @@ func init() {
     "updateUser": {
       "type": "object",
       "required": [
-        "status",
-        "groups"
+        "status"
       ],
       "properties": {
-        "groups": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "status": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled"
+          ]
         }
       }
     },
@@ -11032,7 +11088,7 @@ func init() {
         "tags": [
           "Configuration"
         ],
-        "summary": "Export the current config from MinIO server",
+        "summary": "Export the current config from SILO server",
         "operationId": "ExportConfig",
         "responses": {
           "200": {
@@ -11058,7 +11114,7 @@ func init() {
         "tags": [
           "Configuration"
         ],
-        "summary": "Uploads a file to import MinIO server config.",
+        "summary": "Uploads a file to import SILO server config.",
         "parameters": [
           {
             "type": "file",
@@ -12834,11 +12890,13 @@ func init() {
         }
       },
       "put": {
+        "description": "Deprecated compatibility endpoint. Use /user/{name}/status and /user/{name}/groups for independent updates.",
         "tags": [
           "User"
         ],
-        "summary": "Update User Info",
-        "operationId": "UpdateUserInfo",
+        "summary": "Update User Info (Deprecated)",
+        "operationId": "UpdateUserInfoLegacy",
+        "deprecated": true,
         "parameters": [
           {
             "type": "string",
@@ -12851,7 +12909,7 @@ func init() {
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/updateUser"
+              "$ref": "#/definitions/legacyUpdateUser"
             }
           }
         ],
@@ -13063,6 +13121,45 @@ func init() {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/serviceAccountCreds"
+            }
+          },
+          "default": {
+            "description": "Generic error response.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/user/{name}/status": {
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update User Status",
+        "operationId": "UpdateUserInfo",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/updateUser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/user"
             }
           },
           "default": {
@@ -14648,6 +14745,24 @@ func init() {
           }
         },
         "user": {
+          "type": "string"
+        }
+      }
+    },
+    "legacyUpdateUser": {
+      "type": "object",
+      "required": [
+        "status",
+        "groups"
+      ],
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
           "type": "string"
         }
       }
@@ -16693,18 +16808,15 @@ func init() {
     "updateUser": {
       "type": "object",
       "required": [
-        "status",
-        "groups"
+        "status"
       ],
       "properties": {
-        "groups": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "status": {
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "enabled",
+            "disabled"
+          ]
         }
       }
     },

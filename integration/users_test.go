@@ -125,30 +125,23 @@ func GetUserInformation(userName string) (*http.Response, error) {
 	return response, err
 }
 
-func UpdateUserInformation(name, status string, groups []string) (*http.Response, error) {
+func UpdateUserInformation(name, status string) (*http.Response, error) {
 	/*
 		Helper function to update user information:
-		PUT: {{baseUrl}}/user?name=proident velit
+			PUT: {{baseUrl}}/user/{name}/status
 		Body:
-		{
-			"status": "nisi voluptate amet ea",
-			"groups": [
-				"ipsum eu cupidatat",
-				"aliquip non nulla"
-			]
-		}
+		{"status": "nisi voluptate amet ea"}
 	*/
 	client := &http.Client{
 		Timeout: 3 * time.Second,
 	}
 	requestDataAdd := map[string]interface{}{
 		"status": status,
-		"groups": groups,
 	}
 	requestDataJSON, _ := json.Marshal(requestDataAdd)
 	requestDataBody := bytes.NewReader(requestDataJSON)
 	request, err := http.NewRequest(
-		"PUT", "http://localhost:9090/api/v1/user/"+url.PathEscape(name), requestDataBody)
+		"PUT", "http://localhost:9090/api/v1/user/"+url.PathEscape(name)+"/status", requestDataBody)
 	if err != nil {
 		log.Println(err)
 	}
@@ -156,6 +149,30 @@ func UpdateUserInformation(name, status string, groups []string) (*http.Response
 	request.Header.Add("Content-Type", "application/json")
 	response, err := client.Do(request)
 	return response, err
+}
+
+func UpdateUserInformationLegacy(name, status string, groups []string) (*http.Response, error) {
+	client := &http.Client{
+		Timeout: 3 * time.Second,
+	}
+	requestDataJSON, err := json.Marshal(map[string]interface{}{
+		"status": status,
+		"groups": groups,
+	})
+	if err != nil {
+		return nil, err
+	}
+	request, err := http.NewRequest(
+		"PUT",
+		"http://localhost:9090/api/v1/user/"+url.PathEscape(name),
+		bytes.NewReader(requestDataJSON),
+	)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add("Cookie", fmt.Sprintf("token=%s", token))
+	request.Header.Add("Content-Type", "application/json")
+	return client.Do(request)
 }
 
 func RemoveUser(name string) (*http.Response, error) {
@@ -526,9 +543,9 @@ func TestUpdateUserInfoSuccessfulResponse(t *testing.T) {
 	}
 
 	// 2. Deactivate the user
-	// '{"status":"disabled","groups":[]}'
+	// '{"status":"disabled"}'
 	updateUserResponse, UpdateUserError := UpdateUserInformation(
-		"updateuser", "disabled", groups)
+		"updateuser", "disabled")
 
 	// 3. Verify user got deactivated
 	if UpdateUserError != nil {
@@ -545,6 +562,39 @@ func TestUpdateUserInfoSuccessfulResponse(t *testing.T) {
 		log.Fatalln(err)
 	}
 	assert.True(strings.Contains(string(b), "disabled"))
+}
+
+func TestUpdateUserInfoLegacySuccessfulResponse(t *testing.T) {
+	assert := assert.New(t)
+	groups := []string{}
+	policies := []string{}
+
+	addUserResponse, err := AddUser("updateuserlegacy", "secretKey", groups, policies)
+	if !assert.NoError(err) {
+		return
+	}
+	if addUserResponse != nil {
+		defer addUserResponse.Body.Close()
+		assert.Equal(http.StatusCreated, addUserResponse.StatusCode)
+	}
+
+	defer func() {
+		response, removeErr := RemoveUser("updateuserlegacy")
+		if response != nil {
+			response.Body.Close()
+		}
+		assert.NoError(removeErr)
+	}()
+
+	response, err := UpdateUserInformationLegacy("updateuserlegacy", "disabled", groups)
+	if !assert.NoError(err) || response == nil {
+		return
+	}
+	defer response.Body.Close()
+	assert.Equal(http.StatusOK, response.StatusCode)
+	body, err := io.ReadAll(response.Body)
+	assert.NoError(err)
+	assert.Contains(string(body), "disabled")
 }
 
 func TestUpdateUserInfoGenericErrorResponse(t *testing.T) {
@@ -571,7 +621,7 @@ func TestUpdateUserInfoGenericErrorResponse(t *testing.T) {
 
 	// 2. Deactivate the user with wrong status
 	updateUserResponse, UpdateUserError := UpdateUserInformation(
-		"updateusererror", "inactive", groups)
+		"updateusererror", "inactive")
 
 	// 3. Verify user got deactivated
 	if UpdateUserError != nil {
@@ -582,13 +632,13 @@ func TestUpdateUserInfoGenericErrorResponse(t *testing.T) {
 	if updateUserResponse != nil {
 		fmt.Println("StatusCode:", updateUserResponse.StatusCode)
 		assert.Equal(
-			500, updateUserResponse.StatusCode, "Status Code is incorrect")
+			422, updateUserResponse.StatusCode, "Status Code is incorrect")
 	}
 	b, err := io.ReadAll(updateUserResponse.Body)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	assert.True(strings.Contains(string(b), "status not valid"))
+	assert.True(strings.Contains(string(b), "enabled"))
 }
 
 func TestRemoveUserSuccessfulResponse(t *testing.T) {

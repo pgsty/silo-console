@@ -24,6 +24,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-openapi/loads"
+	"github.com/minio/console/api/operations"
+	"github.com/minio/console/models"
 	"github.com/minio/madmin-go/v3"
 	iampolicy "github.com/minio/pkg/v3/policy"
 	asrt "github.com/stretchr/testify/assert"
@@ -334,6 +337,9 @@ func TestSetUserStatus(t *testing.T) {
 	}
 	if err := setUserStatus(ctx, adminClient, userName, expectedStatus); assert.Error(err) {
 		assert.Equal("status not valid", err.Error())
+		// Reachable only through the deprecated combined route, which must
+		// report the rejected value as a client error rather than a 500.
+		assert.Equal(400, ErrorWithContext(ctx, err).Code)
 	}
 	// Test-4: setUserStatus() handler error correctly
 	expectedStatus = "enabled"
@@ -343,6 +349,96 @@ func TestSetUserStatus(t *testing.T) {
 	if err := setUserStatus(ctx, adminClient, userName, expectedStatus); assert.Error(err) {
 		assert.Equal("error", err.Error())
 	}
+}
+
+func TestUpdateUserStatus(t *testing.T) {
+	assert := asrt.New(t)
+	adminClient := AdminClientMock{}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	previousSetUserStatusMock := minioSetUserStatusMock
+	t.Cleanup(func() {
+		minioSetUserStatusMock = previousSetUserStatusMock
+	})
+
+	var gotUser string
+	var gotStatus madmin.AccountStatus
+	minioSetUserStatusMock = func(user string, status madmin.AccountStatus) error {
+		gotUser = user
+		gotStatus = status
+		return nil
+	}
+
+	user, err := updateUserStatus(ctx, adminClient, "alice", "disabled")
+	assert.NoError(err)
+	assert.Equal("alice", gotUser)
+	assert.Equal(madmin.AccountDisabled, gotStatus)
+	assert.Equal(&models.User{AccessKey: "alice", Status: "disabled"}, user)
+}
+
+func TestUpdateUserInfoLegacyPreservesStatusAndGroups(t *testing.T) {
+	assert := asrt.New(t)
+	adminClient := AdminClientMock{}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	previousSetUserStatusMock := minioSetUserStatusMock
+	previousGetUserInfoMock := minioGetUserInfoMock
+	previousUpdateGroupMembersMock := minioUpdateGroupMembersMock
+	t.Cleanup(func() {
+		minioSetUserStatusMock = previousSetUserStatusMock
+		minioGetUserInfoMock = previousGetUserInfoMock
+		minioUpdateGroupMembersMock = previousUpdateGroupMembersMock
+	})
+
+	statusUpdated := false
+	minioSetUserStatusMock = func(user string, status madmin.AccountStatus) error {
+		statusUpdated = user == "alice" && status == madmin.AccountDisabled
+		return nil
+	}
+
+	getUserInfoCalls := 0
+	minioGetUserInfoMock = func(user string) (madmin.UserInfo, error) {
+		getUserInfoCalls++
+		memberOf := []string{}
+		if getUserInfoCalls > 1 {
+			memberOf = []string{"operators"}
+		}
+		return madmin.UserInfo{
+			MemberOf:  memberOf,
+			Status:    madmin.AccountDisabled,
+			SecretKey: user,
+		}, nil
+	}
+
+	var groupUpdate madmin.GroupAddRemove
+	minioUpdateGroupMembersMock = func(update madmin.GroupAddRemove) error {
+		groupUpdate = update
+		return nil
+	}
+
+	user, err := updateUserInfoLegacy(ctx, adminClient, "alice", "disabled", []string{"operators"})
+	assert.NoError(err)
+	assert.True(statusUpdated)
+	assert.Equal("operators", groupUpdate.Group)
+	assert.Equal([]string{"alice"}, groupUpdate.Members)
+	assert.False(groupUpdate.IsRemove)
+	assert.Equal("disabled", user.Status)
+	assert.Equal([]string{"operators"}, user.MemberOf)
+}
+
+func TestRegisterUsersHandlersIncludesLegacyRoute(t *testing.T) {
+	assert := asrt.New(t)
+	swaggerSpec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)
+	if !assert.NoError(err) {
+		return
+	}
+
+	consoleAPI := operations.NewConsoleAPI(swaggerSpec)
+	registerUsersHandlers(consoleAPI)
+	assert.NotNil(consoleAPI.UserUpdateUserInfoHandler)
+	assert.NotNil(consoleAPI.UserUpdateUserInfoLegacyHandler)
 }
 
 func TestUserGroupsBulk(t *testing.T) {

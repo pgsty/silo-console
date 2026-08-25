@@ -47,7 +47,7 @@ func NewPostConfigsImport(ctx *middleware.Context, handler PostConfigsImportHand
 /*
 	PostConfigsImport swagger:route POST /configs/import Configuration postConfigsImport
 
-Uploads a file to import MinIO server config.
+Uploads a file to import SILO server config.
 */
 type PostConfigsImport struct {
 	Context *middleware.Context
