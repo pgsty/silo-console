@@ -24,6 +24,10 @@ fixture("For user with Bucket Read & Write permissions").page(
   "http://localhost:9090",
 );
 
+const testObjectRow = Selector(
+  ".ReactVirtualized__Table__rowColumn",
+).withExactText("test.txt");
+
 test
   .before(async (t) => {
     // Create a bucket
@@ -41,9 +45,7 @@ test
       .useRole(roles.bucketObjectTags)
       .navigateTo("http://localhost:9090/browser")
       .click(testBucketBrowseButtonFor("bucketobjecttags"))
-      .click(
-        "div.ReactVirtualized__Grid.ReactVirtualized__Table__Grid > div > div:nth-child(1)",
-      )
+      .click(testObjectRow)
       .click(Selector("button").withText("Tags"))
       .typeText("#newTagKey", "tag1")
       .typeText("#newTagLabel", "test")
@@ -79,9 +81,7 @@ test
       .useRole(roles.bucketCannotTag)
       .navigateTo("http://localhost:9090/browser")
       .click(testBucketBrowseButtonFor("bucketcannottag"))
-      .click(
-        "div.ReactVirtualized__Grid.ReactVirtualized__Table__Grid > div > div:nth-child(1)",
-      )
+      .click(testObjectRow)
       .click(Selector("button").withText("Tags"))
       .typeText("#newTagKey", "tag1")
       .typeText("#newTagLabel", "test")

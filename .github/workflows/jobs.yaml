@@ -472,7 +472,7 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 3
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1
 
       - name: Clean up users & policies
         run: |

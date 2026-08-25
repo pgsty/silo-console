@@ -24,6 +24,10 @@ fixture("For user with Bucket Read & Write permissions").page(
   "http://localhost:9090",
 );
 
+const testObjectRow = Selector(
+  ".ReactVirtualized__Table__rowColumn",
+).withExactText("test.txt");
+
 test
   .before(async (t) => {
     // Create a bucket
@@ -42,20 +46,15 @@ test
       .setFilesToUpload(elements.uploadInput, "../uploads/test.txt")
       .wait(1000);
   })("All versions of an object can be deleted from a bucket", async (t) => {
-    const versionRows = Selector(
-      "div.ReactVirtualized__Grid.ReactVirtualized__Table__Grid > div > div:nth-child(1)",
-    );
     await t
       .useRole(roles.bucketReadWrite)
       .navigateTo("http://localhost:9090/browser")
       .click(testBucketBrowseButtonFor("bucketdelete3"))
-      .click(
-        "div.ReactVirtualized__Grid.ReactVirtualized__Table__Grid > div > div:nth-child(1)",
-      )
+      .click(testObjectRow)
       .click(elements.deleteButton)
       .click(elements.deleteAllVersions)
       .click(Selector("button:enabled").withExactText("Delete").nth(1))
-      .expect(versionRows.exists)
+      .expect(testObjectRow.exists)
       .notOk();
   })
   .after(async (t) => {
