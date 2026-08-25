@@ -120,13 +120,13 @@ const IDPConfigurations = ({ idpType }: IDPConfigurationsProps) => {
     {
       type: "view",
       onClick: viewAction,
-      disableButtonFunction: () => !viewIDP,
+      isDisabled: () => !viewIDP,
     },
     {
       type: "delete",
       onClick: confirmDeleteIDP,
       sendOnlyId: true,
-      disableButtonFunction: (idp: string) => !deleteIDP || idp === "Default",
+      isDisabled: (idp: string) => !deleteIDP || idp === "Default",
     },
   ];
 

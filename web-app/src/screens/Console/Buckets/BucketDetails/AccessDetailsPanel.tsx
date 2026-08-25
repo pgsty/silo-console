@@ -85,7 +85,7 @@ const AccessDetails = () => {
   const PolicyActions = [
     {
       type: "view",
-      disableButtonFunction: () => !viewPolicy,
+      isDisabled: () => !viewPolicy,
       onClick: (policy: any) => {
         navigate(`${IAM_PAGES.POLICIES}/${encodeURIComponent(policy.name)}`);
       },
@@ -95,7 +95,7 @@ const AccessDetails = () => {
   const userTableActions = [
     {
       type: "view",
-      disableButtonFunction: () => !viewUser,
+      isDisabled: () => !viewUser,
       onClick: (user: any) => {
         navigate(`${IAM_PAGES.USERS}/${encodeURIComponent(user)}`);
       },

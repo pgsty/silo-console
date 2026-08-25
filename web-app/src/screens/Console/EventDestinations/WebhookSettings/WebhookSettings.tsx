@@ -154,7 +154,7 @@ const WebhookSettings = ({
           setSelectedARN(item.name);
         }
       },
-      disableButtonFunction: (item: string) => {
+      isDisabled: (item: string) => {
         const wHook = WebhookSettingslist.find(
           (element) => element.name === item,
         );

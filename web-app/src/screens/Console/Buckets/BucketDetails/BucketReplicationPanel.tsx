@@ -210,7 +210,7 @@ const BucketReplicationPanel = () => {
     {
       type: "view",
       onClick: editReplicationRule,
-      disableButtonFunction: !hasPermission(
+      isDisabled: !hasPermission(
         bucketName,
         [
           IAM_SCOPES.S3_PUT_REPLICATION_CONFIGURATION,

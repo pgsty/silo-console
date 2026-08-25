@@ -86,7 +86,7 @@ const AccessRule = () => {
   const AccessRuleActions = [
     {
       type: "delete",
-      disableButtonFunction: () => !deleteAccessRules,
+      isDisabled: () => !deleteAccessRules,
       onClick: (accessRule: any) => {
         setDeleteAccessRuleOpen(true);
         setAccessRuleToDelete(accessRule.prefix);
@@ -94,7 +94,7 @@ const AccessRule = () => {
     },
     {
       type: "view",
-      disableButtonFunction: () => !editAccessRules,
+      isDisabled: () => !editAccessRules,
       onClick: (accessRule: any) => {
         setAccessRuleToEdit(accessRule.prefix);
         setInitialAccess(accessRule.access);

@@ -151,13 +151,13 @@ const ListPolicies = () => {
     {
       type: "view",
       onClick: viewAction,
-      disableButtonFunction: () => !viewPolicy,
+      isDisabled: () => !viewPolicy,
     },
     {
       type: "delete",
       onClick: confirmDeletePolicy,
       sendOnlyId: true,
-      disableButtonFunction: () => !canDeletePolicy,
+      isDisabled: () => !canDeletePolicy,
     },
   ];
 

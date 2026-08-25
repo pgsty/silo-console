@@ -158,12 +158,12 @@ const ListUsers = () => {
     {
       type: "view",
       onClick: viewAction,
-      disableButtonFunction: () => !viewUser,
+      isDisabled: () => !viewUser,
     },
     {
       type: "edit",
       onClick: viewAction,
-      disableButtonFunction: () => !viewUser,
+      isDisabled: () => !viewUser,
     },
   ];
 

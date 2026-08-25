@@ -290,7 +290,7 @@ const PolicyDetails = () => {
     {
       type: "view",
       onClick: userViewAction,
-      disableButtonFunction: () => !viewUser,
+      isDisabled: () => !viewUser,
     },
   ];
 
@@ -306,7 +306,7 @@ const PolicyDetails = () => {
     {
       type: "view",
       onClick: groupViewAction,
-      disableButtonFunction: () => !viewGroup,
+      isDisabled: () => !viewGroup,
     },
   ];
 

@@ -172,12 +172,12 @@ const Groups = () => {
     {
       type: "view",
       onClick: viewAction,
-      disableButtonFunction: () => !getGroup,
+      isDisabled: () => !getGroup,
     },
     {
       type: "edit",
       onClick: viewAction,
-      disableButtonFunction: () => !getGroup,
+      isDisabled: () => !getGroup,
     },
   ];
 
