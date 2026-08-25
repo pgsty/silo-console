@@ -132,15 +132,7 @@ func getSessionResponse(ctx context.Context, session *models.Principal) (*models
 		conditionValues[k] = []string{vstr}
 	}
 
-	defaultActions := policy.IsAllowedActions("", "", conditionValues)
-
-	// Allow Create Access Key when admin:CreateServiceAccount is provided with a condition
-	for _, statement := range policy.Statements {
-		if statement.Effect == "Deny" && len(statement.Conditions) > 0 &&
-			statement.Actions.Contains(minioIAMPolicy.CreateServiceAccountAdminAction) {
-			defaultActions.Add(minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction))
-		}
-	}
+	defaultActions := defaultSessionActions(policy, conditionValues)
 
 	permissions := map[string]minioIAMPolicy.ActionSet{
 		ConsoleResourceName: defaultActions,
@@ -251,6 +243,41 @@ func getSessionResponse(ctx context.Context, session *models.Principal) (*models
 		ServerEndPoint:  getMinIOServer(),
 	}
 	return sessionResp, nil
+}
+
+func defaultSessionActions(policy *minioIAMPolicy.Policy, conditionValues map[string][]string) minioIAMPolicy.ActionSet {
+	actions := policy.IsAllowedActions("", "", conditionValues)
+	createServiceAccount := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	if actions.Contains(createServiceAccount) {
+		return actions
+	}
+
+	// Session permissions are computed before an Access Key request exists, so
+	// they cannot evaluate svc:DurationSeconds. Keep the create capability
+	// visible when that request-scoped key participates in a conditional deny;
+	// SILO remains the final authority once the requested expiry is known.
+	staticPolicy := minioIAMPolicy.Policy{
+		ID:      policy.ID,
+		Version: policy.Version,
+	}
+	removedRequestScopedDeny := false
+	for _, statement := range policy.Statements {
+		if statement.Effect == minioIAMPolicy.Deny &&
+			statement.Actions.Contains(minioIAMPolicy.CreateServiceAccountAdminAction) &&
+			statement.Conditions.Keys().Match(condition.SVCDurationSeconds.ToKey()) {
+			removedRequestScopedDeny = true
+			continue
+		}
+		staticPolicy.Statements = append(staticPolicy.Statements, statement)
+	}
+
+	// Do not let a request-scoped condition override another unconditional or
+	// login-time deny for the same action.
+	if removedRequestScopedDeny && staticPolicy.IsAllowedActions("", "", conditionValues).Contains(createServiceAccount) {
+		actions.Add(createServiceAccount)
+	}
+
+	return actions
 }
 
 // getListOfEnabledFeatures returns a list of features

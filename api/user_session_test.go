@@ -17,6 +17,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"reflect"
@@ -27,8 +28,79 @@ import (
 	"github.com/minio/console/models"
 	"github.com/minio/console/pkg/auth/idp/oauth2"
 	"github.com/minio/console/pkg/auth/ldap"
+	minioIAMPolicy "github.com/minio/pkg/v3/policy"
+	"github.com/minio/pkg/v3/policy/condition"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestDefaultSessionActionsKeepsRequestScopedServiceAccountCapability(t *testing.T) {
+	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
+		"Version":"2012-10-17",
+		"Statement":[{
+			"Effect":"Deny",
+			"Action":["admin:CreateServiceAccount"],
+			"Condition":{
+				"NumericGreaterThanIfExists":{"svc:DurationSeconds":"1500"}
+			}
+		}]
+	}`))
+	assert.NoError(t, err)
+
+	action := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	assert.True(t, defaultSessionActions(policy, map[string][]string{}).Contains(action))
+
+	// Once a concrete request supplies the duration, the policy engine remains
+	// authoritative: long-lived keys are denied and short-lived keys are allowed.
+	assert.True(t, defaultSessionActions(policy, map[string][]string{
+		"DurationSeconds": {"1800"},
+	}).Contains(action), "the static session capability deliberately remains visible")
+	assert.False(t, policy.IsAllowedActions("", "", map[string][]string{
+		condition.SVCDurationSeconds.Name(): {"1800"},
+	}).Contains(action))
+	assert.True(t, defaultSessionActions(policy, map[string][]string{
+		"DurationSeconds": {"1200"},
+	}).Contains(action))
+	assert.True(t, policy.IsAllowedActions("", "", map[string][]string{
+		condition.SVCDurationSeconds.Name(): {"1200"},
+	}).Contains(action))
+}
+
+func TestDefaultSessionActionsKeepsUnconditionalServiceAccountDeny(t *testing.T) {
+	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
+		"Version":"2012-10-17",
+		"Statement":[{
+			"Effect":"Deny",
+			"Action":["admin:CreateServiceAccount"]
+		}]
+	}`))
+	assert.NoError(t, err)
+
+	action := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	assert.False(t, defaultSessionActions(policy, map[string][]string{}).Contains(action))
+}
+
+func TestDefaultSessionActionsDoesNotOverrideAnotherServiceAccountDeny(t *testing.T) {
+	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
+		"Version":"2012-10-17",
+		"Statement":[
+			{
+				"Effect":"Deny",
+				"Action":["admin:CreateServiceAccount"]
+			},
+			{
+				"Effect":"Deny",
+				"Action":["admin:CreateServiceAccount"],
+				"Condition":{
+					"NumericGreaterThanIfExists":{"svc:DurationSeconds":"1500"}
+				}
+			}
+		]
+	}`))
+	assert.NoError(t, err)
+
+	action := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	assert.False(t, defaultSessionActions(policy, map[string][]string{}).Contains(action))
+}
 
 func Test_getSessionResponse(t *testing.T) {
 	type args struct {

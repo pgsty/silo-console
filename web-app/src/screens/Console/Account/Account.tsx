@@ -55,7 +55,7 @@ import {
   setSnackBarMessage,
 } from "systemSlice";
 import { usersSort } from "utils/sortFunctions";
-import { SecureComponent } from "common/SecureComponent";
+import { hasPermission, SecureComponent } from "common/SecureComponent";
 import {
   CONSOLE_UI_RESOURCE,
   IAM_PAGES,
@@ -86,8 +86,13 @@ const Account = () => {
   const [selectedSAs, setSelectedSAs] = useState<string[]>([]);
   const [deleteMultipleOpen, setDeleteMultipleOpen] = useState<boolean>(false);
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  const [serviceAccountReadOnly, setServiceAccountReadOnly] =
+    useState<boolean>(false);
 
   const userIDP = (features && features.includes("external-idp")) || false;
+  const canUpdateServiceAccount = hasPermission(CONSOLE_UI_RESOURCE, [
+    IAM_SCOPES.ADMIN_UPDATE_SERVICEACCOUNT,
+  ]);
 
   useEffect(() => {
     fetchRecords();
@@ -140,13 +145,18 @@ const Account = () => {
     }
   };
 
-  const editModalOpen = (selectedServiceAccount: string) => {
+  const serviceAccountModalOpen = (
+    selectedServiceAccount: string,
+    readOnly: boolean,
+  ) => {
     setSelectedServiceAccount(selectedServiceAccount);
+    setServiceAccountReadOnly(readOnly);
     setIsEditOpen(true);
   };
 
   const closePolicyModal = () => {
     setIsEditOpen(false);
+    setServiceAccountReadOnly(false);
     setLoading(true);
   };
 
@@ -160,7 +170,7 @@ const Account = () => {
       type: "view",
       onClick: (value: any) => {
         if (value) {
-          editModalOpen(value.accessKey);
+          serviceAccountModalOpen(value.accessKey, true);
         }
       },
     },
@@ -174,9 +184,10 @@ const Account = () => {
     },
     {
       type: "edit",
+      isDisabled: () => !canUpdateServiceAccount,
       onClick: (value: any) => {
         if (value) {
-          editModalOpen(value.accessKey);
+          serviceAccountModalOpen(value.accessKey, false);
         }
       },
     },
@@ -210,6 +221,7 @@ const Account = () => {
           open={isEditOpen}
           selectedAccessKey={selectedServiceAccount}
           closeModalAndRefresh={closePolicyModal}
+          readOnly={serviceAccountReadOnly}
         />
       )}
       <ChangePasswordModal

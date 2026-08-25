@@ -39,12 +39,14 @@ interface IServiceAccountPolicyProps {
   open: boolean;
   selectedAccessKey: string | null;
   closeModalAndRefresh: () => void;
+  readOnly?: boolean;
 }
 
 const EditServiceAccount = ({
   open,
   selectedAccessKey,
   closeModalAndRefresh,
+  readOnly = false,
 }: IServiceAccountPolicyProps) => {
   const dispatch = useAppDispatch();
   const t = useT();
@@ -87,6 +89,9 @@ const EditServiceAccount = ({
 
   const setPolicy = (event: React.FormEvent, newPolicy: string) => {
     event.preventDefault();
+    if (readOnly) {
+      return;
+    }
     api.serviceAccounts
       .updateServiceAccount(selectedAccessKey || "", {
         policy: newPolicy,
@@ -106,9 +111,14 @@ const EditServiceAccount = ({
 
   return (
     <ModalWrapper
-      title={formatText(t("Edit details of - {name}"), {
-        name: selectedAccessKey || "",
-      })}
+      title={formatText(
+        t(
+          readOnly ? "Access Key details - {name}" : "Edit details of - {name}",
+        ),
+        {
+          name: selectedAccessKey || "",
+        },
+      )}
       modalOpen={open}
       onClose={() => {
         closeModalAndRefresh();
@@ -131,6 +141,7 @@ const EditServiceAccount = ({
                 setPolicyDefinition(value);
               }}
               editorHeight={"350px"}
+              readOnly={readOnly}
               helptip={
                 <Fragment>
                   <a
@@ -164,6 +175,7 @@ const EditServiceAccount = ({
               label={t("Expiry")}
               timeFormat={"24h"}
               secondsSelector={false}
+              disabled={readOnly}
             />
           </Box>
           <Grid
@@ -179,6 +191,7 @@ const EditServiceAccount = ({
               id={"name"}
               name={"name"}
               type={"text"}
+              disabled={readOnly}
               placeholder={t("Enter a name")}
               onChange={(e) => {
                 setName(e.target.value);
@@ -198,6 +211,7 @@ const EditServiceAccount = ({
               id={"description"}
               name={"description"}
               type={"text"}
+              disabled={readOnly}
               placeholder={t("Enter a description")}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -231,6 +245,7 @@ const EditServiceAccount = ({
                 id="saStatus"
                 name="saStatus"
                 label=""
+                disabled={readOnly}
                 onChange={(e) => {
                   setStatus(e.target.checked ? "on" : "off");
                 }}
@@ -247,16 +262,18 @@ const EditServiceAccount = ({
                 closeModalAndRefresh();
               }}
               disabled={loading}
-              label={t("Cancel")}
+              label={t(readOnly ? "Close" : "Cancel")}
             />
-            <Button
-              id={"save-sa-policy"}
-              type="submit"
-              variant="callAction"
-              color="primary"
-              disabled={loading}
-              label={t("Update")}
-            />
+            {!readOnly && (
+              <Button
+                id={"save-sa-policy"}
+                type="submit"
+                variant="callAction"
+                color="primary"
+                disabled={loading}
+                label={t("Update")}
+              />
+            )}
           </Grid>
         </Grid>
       </form>
