@@ -43,6 +43,8 @@ Reliability, localization, and security:
 - Made the SSO gate hermetic: it no longer edits `/etc/hosts` through `sudo` or installs BeautifulSoup, picks its own console port, restores global client state, tears down its containers, and runs against a pinned SILO release instead of the latest upstream image
 - Aligned the integration gate with the `416` range responses it was still asserting as server errors, and stopped it publishing its PostgreSQL fixture on the host port so the suite runs on machines that already serve 5432
 - Made the browser gates runnable away from Linux by publishing the subpath fixture ports instead of relying on host networking, corrected a permissions selector still matching the pre-fork `MinIO administrator` wording, and gave the CI matrix a manual dispatch trigger
+- Kept the forked shared package behind a top-level replacement while requiring a real upstream tag, so downstream MinIO builds can resolve Console after dependency-module replacements are ignored
+- Made Playwright CI install the committed dependency graph immutably and run it once, and serialized the two TestCafe suites that mutate shared browser or identity state
 - Restored the intended `testrunmain` build-tag boundary for the Docker-backed integration, replication, and SSO suites, so ordinary `go test ./...` runs no longer start an incomplete external environment
 
 ## Release v2.1.1

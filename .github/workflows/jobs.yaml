@@ -348,7 +348,7 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors -c 3
+        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors
 
       - name: Clean up docker
         if: always()
@@ -411,7 +411,7 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors -c 3
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors
 
       - name: Clean up users & policies
         run: |
@@ -1510,16 +1510,12 @@ jobs:
           cache-dependency-path: web-app/yarn.lock
 
       - name: Install dependencies
-        run: |
-          echo "Install dependencies"
-          cd $GITHUB_WORKSPACE/web-app
-          yarn init -y
-          yarn add -D playwright nyc @playwright/test
-          echo "yarn install"
-          yarn install --no-immutable
+        working-directory: web-app
+        run: yarn install --immutable
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        working-directory: web-app
+        run: yarn exec playwright install --with-deps chromium
 
       - uses: actions/cache@v5
         name: Console Binary Cache Istanbul Coverage
@@ -1533,14 +1529,7 @@ jobs:
           (./console server) & (make initialize-permissions)
 
       - name: Run Playwright tests
+        working-directory: web-app
         run: |
-          echo "Run tests under playwright folder only"
-          cd $GITHUB_WORKSPACE/web-app
-          yarn remove playwright
-          yarn add --dev @playwright/test
-          echo "npx playwright test"
-          npx playwright test # To run the tests
-          echo "npx nyc report"
-          npx nyc report # To see report printed in logs as text
-          echo "npx nyc report --reporter=html"
-          npx playwright test --reporter github # To run the tests
+          yarn exec playwright test --reporter=github
+          yarn exec nyc report
