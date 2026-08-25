@@ -18,11 +18,14 @@ package api
 
 import (
 	"context"
+	"encoding/xml"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/minio/console/models"
+	mcilm "github.com/minio/mc/cmd/ilm"
 	"github.com/stretchr/testify/assert"
 
 	bucketApi "github.com/minio/console/api/operations/bucket"
@@ -199,6 +202,75 @@ func TestSetLifecycleRule(t *testing.T) {
 	err2 := addBucketLifecycle(ctx, minClient, insertMock)
 
 	assert.Equal(errors.New("error setting lifecycle"), err2, fmt.Sprintf("Failed on %s: Error returned", function))
+}
+
+func TestLifecycleRuleXMLCompatibility(t *testing.T) {
+	prefix := "logs/"
+	tags := "class=audit"
+	sizeLessThan := int64(1024)
+	sizeGreaterThan := int64(4096)
+	testCases := []struct {
+		name    string
+		options mcilm.LifecycleOptions
+		want    string
+	}{
+		{
+			name: "empty filter",
+			want: "<Filter><Prefix></Prefix></Filter>",
+		},
+		{
+			name:    "prefix filter",
+			options: mcilm.LifecycleOptions{Prefix: &prefix},
+			want:    "<Filter><Prefix>logs/</Prefix></Filter>",
+		},
+		{
+			name:    "tag filter",
+			options: mcilm.LifecycleOptions{Tags: &tags},
+			want:    "<Filter><Tag><Key>class</Key><Value>audit</Value></Tag></Filter>",
+		},
+		{
+			name:    "object size less than filter",
+			options: mcilm.LifecycleOptions{ObjectSizeLessThan: &sizeLessThan},
+			want:    "<Filter><ObjectSizeLessThan>1024</ObjectSizeLessThan></Filter>",
+		},
+		{
+			name:    "object size greater than filter",
+			options: mcilm.LifecycleOptions{ObjectSizeGreaterThan: &sizeGreaterThan},
+			want:    "<Filter><ObjectSizeGreaterThan>4096</ObjectSizeGreaterThan></Filter>",
+		},
+		{
+			name:    "composite filter",
+			options: mcilm.LifecycleOptions{Prefix: &prefix, Tags: &tags},
+			want:    "<Filter><And><Prefix>logs/</Prefix><Tag><Key>class</Key><Value>audit</Value></Tag></And></Filter>",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			data, err := xml.Marshal(lifecycle.Rule{
+				ID:         "rule",
+				Status:     "Enabled",
+				RuleFilter: testCase.options.Filter(),
+				Expiration: lifecycle.Expiration{Days: 1},
+			})
+			if err != nil {
+				t.Fatalf("marshal lifecycle rule: %v", err)
+			}
+			document := string(data)
+			if count := strings.Count(document, "<Filter>"); count != 1 {
+				t.Fatalf("lifecycle rule XML contains %d Filter elements: %s", count, document)
+			}
+			start := strings.Index(document, "<Filter>")
+			end := strings.Index(document, "</Filter>")
+			if end < start {
+				t.Fatalf("lifecycle rule XML has no complete Filter element: %s", document)
+			}
+			filter := document[start : end+len("</Filter>")]
+			if filter != testCase.want {
+				t.Fatalf("lifecycle Filter XML = %s, want %s", filter, testCase.want)
+			}
+		})
+	}
 }
 
 func TestUpdateLifecycleRule(t *testing.T) {

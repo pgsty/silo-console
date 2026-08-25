@@ -140,6 +140,18 @@ The retained Go module, import paths, environment variables, API fields, and
 protocol identifiers are compatibility interfaces, not product branding. Any
 future rename of those interfaces will require aliases and a migration period.
 
+Release binaries and packages already include the maintained shared
+dependencies. Projects that embed Console as a Go module must select the SILO
+shared-package fork at the top level because Go ignores replacements declared by
+dependency modules:
+
+```go
+replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1
+```
+
+Update this replacement to the version named by each Console release instead
+of carrying the example forward unchanged.
+
 The complete, versioned list of differences from the upstream MinIO Console —
 restored features, removed features, and known gaps — is maintained in the
 [compatibility notes](https://silo.pgsty.com/compatibility/console/).

@@ -2,6 +2,10 @@
 
 ## Release v2.2.0
 
+Source-build compatibility:
+
+- Published binaries and packages include the maintained shared dependencies automatically. Go modules that embed Console source must add `replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1`; dependency-module replacements are ignored, and v2.2.0 uses the fork-only strict IAM policy validation API
+
 Object previews and version history:
 
 - Added a bounded, literal text preview for `.log`, `.txt`, `.json`, and `.xml` objects, with strict UTF-8 validation, a 1 MiB limit, cancellation, retry, anonymous access, and no active-document rendering
@@ -37,13 +41,14 @@ Reliability, localization, and security:
 - Kept request-scoped Access Key expiry conditions, including wildcard admin actions, available in the UI while leaving final authorization to SILO; preserved read-only Access Key details across self and managed-user screens with independent List/Create/Update/Remove gates; and added an OIDC create/list/get/delete integration regression through the UI's explicit-credential endpoint with the expected self-update denial
 - Added language and dark-mode controls to anonymous object-browser pages
 - Stopped anonymous pages from issuing protected Object Lock and retention requests that could only produce noisy `Access Denied` errors
+- Rejected malformed policies and bare S3 ARNs on named-policy and service-account write paths with a client error before sending an Admin API request; historical reads remain permissive, but an incompatible stored policy must be corrected before it can be saved again
+- Updated `minio-go` to v7.3.0 and the shared `silo-pkg` fork to v3.12.1, including the upstream INI import-path migration and lifecycle-filter XML compatibility coverage
 - Removed dead frontend exports and dependencies, refreshed vulnerable transitive dependency resolutions, and expanded vulnerability checks to pushes, manual runs, development dependencies, and immutable installs
 - Made Swagger and frontend asset generation fail immediately instead of masking a missing or failed Yarn command
 - Replaced the ARN handler test's live localhost dependency with deterministic registration coverage
 - Made the SSO gate hermetic: it no longer edits `/etc/hosts` through `sudo` or installs BeautifulSoup, picks its own console port, restores global client state, tears down its containers, and runs against a pinned SILO release instead of the latest upstream image
 - Aligned the integration gate with the `416` range responses it was still asserting as server errors, and stopped it publishing its PostgreSQL fixture on the host port so the suite runs on machines that already serve 5432
 - Made the browser gates runnable away from Linux by publishing the subpath fixture ports instead of relying on host networking, corrected a permissions selector still matching the pre-fork `MinIO administrator` wording, and gave the CI matrix a manual dispatch trigger
-- Kept the forked shared package behind a top-level replacement while requiring a real upstream tag, so downstream MinIO builds can resolve Console after dependency-module replacements are ignored
 - Made Playwright CI install the committed dependency graph immutably and run it once, and serialized the two TestCafe suites that mutate shared browser or identity state
 - Restored the intended `testrunmain` build-tag boundary for the Docker-backed integration, replication, and SSO suites, so ordinary `go test ./...` runs no longer start an incomplete external environment
 
