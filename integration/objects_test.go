@@ -124,12 +124,14 @@ func TestObjectGet(t *testing.T) {
 			expectedError:  nil,
 		},
 		{
+			// An unsatisfiable range on a non-empty object answers 416 with the
+			// representation length, not a server error.
 			name: "Get Invalid Range of bytes",
 			args: args{
 				encodedPrefix: "myobject.jpg",
 				bytesRange:    "bytes=9-12",
 			},
-			expectedStatus: 500,
+			expectedStatus: 416,
 			expectedError:  nil,
 		},
 		{
@@ -147,7 +149,7 @@ func TestObjectGet(t *testing.T) {
 				encodedPrefix: "myobject.jpg",
 				bytesRange:    "bytes=12-16",
 			},
-			expectedStatus: 500,
+			expectedStatus: 416,
 			expectedError:  nil,
 		},
 	}

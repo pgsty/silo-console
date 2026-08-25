@@ -97,7 +97,7 @@ test-integration:
 	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 --net=mynet123 --ip=173.18.0.3 -d --name minio2 --rm -p 9001:9001 -e MINIO_KMS_SECRET_KEY=my-minio-key:OSMM+vkKUTCvQs9YL/CVMIMt43HFhkUpqJxTmGl6rYw= -e MINIO_UPDATE=off -e MINIO_BROWSER=off $(MINIO_VERSION) server /data{1...4} --address ':9001' --console-address ':9092' && sleep 5)
 	@(docker run -p 9092:9092 --net=mynet123 --ip=173.18.0.6 -e CONSOLE_MINIO_SERVER=http://173.18.0.3:9001 -e CONSOLE_PORT=9092 --rm -d --name console2 $(TAG) && sleep 5)
 	@echo "Postgres"
-	@(docker run --net=mynet123 --ip=173.18.0.4 --name pgsqlcontainer --rm -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres && sleep 5)
+	@(docker run --net=mynet123 --ip=173.18.0.4 --name pgsqlcontainer --rm -e POSTGRES_PASSWORD=password -d postgres && sleep 5)
 	@echo "execute test and get coverage for test-integration:"
 	@(cd integration && go test -coverpkg=../api -c -tags testrunmain . && mkdir -p coverage &&  ./integration.test -test.v -test.run "^Test*" -test.coverprofile=coverage/system.out)
 	@(docker stop pgsqlcontainer)
