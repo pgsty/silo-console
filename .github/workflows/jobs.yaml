@@ -9,6 +9,9 @@ on:
   push:
     branches:
       - main
+  # This fork's automatic push/pull_request triggers have never fired, so keep a
+  # manual entry point for the full matrix (vulncheck.yaml already has one).
+  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)

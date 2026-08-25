@@ -307,12 +307,12 @@ test-start-docker-minio-w-redirect-url: initialize-docker-network
     -e MINIO_SERVER_URL='http://localhost:9000' \
 	-e MINIO_UPDATE=off \
     -v /data1 -v /data2 -v /data3 -v /data4 \
-    -d --network host --name minio --rm\
+    -d --network test-network -p 9000:9000 --name minio --rm\
     quay.io/minio/minio:latest server /data{1...4})
 
-test-start-docker-nginx-w-subpath:
+test-start-docker-nginx-w-subpath: initialize-docker-network
 	@(docker run \
-	--network host \
+	--network test-network -p 8000:8000 \
 	-d --rm \
 	--add-host=host.docker.internal:host-gateway \
 	-v ./web-app/tests/subpath-nginx/nginx.conf:/etc/nginx/nginx.conf \
@@ -322,7 +322,8 @@ test-start-docker-nginx-w-subpath:
 test-initialize-minio-nginx: test-start-docker-minio-w-redirect-url test-start-docker-nginx-w-subpath
 
 cleanup-minio-nginx:
-	@(docker stop minio test-nginx & docker network rm test-network)
+	@(docker stop minio test-nginx || true)
+	@(docker network rm test-network || true)
 
 # https://stackoverflow.com/questions/19200235/golang-tests-in-sub-directory
 # Note: go test ./... will run tests on the current folder and all subfolders.

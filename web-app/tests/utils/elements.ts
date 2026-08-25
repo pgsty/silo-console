@@ -110,7 +110,7 @@ export const groupStatusText = Selector("#group-status-label");
 //----------------------------------------------------
 export const table = Selector(".ReactVirtualized__Table");
 export const bucketsTableDisabled = Selector("#empty-results").withText(
-  "You require additional permissions in order to view Objects in this bucket. Please ask your MinIO administrator to grant you",
+  "You require additional permissions in order to view Objects in this bucket. Please ask your SILO administrator to grant you",
 );
 export const createGroupUserTable = Selector(
   ".MuiDialog-container .ReactVirtualized__Table",
