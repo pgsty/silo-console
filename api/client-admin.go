@@ -449,12 +449,14 @@ func newAdminFromClaims(claims *models.Principal, clientIP string) (*madmin.Admi
 	adminClient, err := madmin.NewWithOptions(endpoint, &madmin.Options{
 		Creds:  credentials.NewStaticV4(claims.STSAccessKeyID, claims.STSSecretAccessKey, claims.STSSessionToken),
 		Secure: tlsEnabled,
+		Transport: &accountInfoCompatibilityTransport{
+			transport: PrepareSTSClientTransport(clientIP),
+		},
 	})
 	if err != nil {
 		return nil, err
 	}
 	adminClient.SetAppInfo(globalAppName, pkg.Version)
-	adminClient.SetCustomTransport(PrepareSTSClientTransport(clientIP))
 	return adminClient, nil
 }
 
@@ -463,6 +465,9 @@ func newAdminFromCreds(accessKey, secretKey, endpoint string, tlsEnabled bool) (
 	minioClient, err := madmin.NewWithOptions(endpoint, &madmin.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: tlsEnabled,
+		Transport: &accountInfoCompatibilityTransport{
+			transport: madmin.DefaultTransport(tlsEnabled),
+		},
 	})
 	if err != nil {
 		return nil, err
