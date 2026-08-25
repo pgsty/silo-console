@@ -263,7 +263,7 @@ func defaultSessionActions(policy *minioIAMPolicy.Policy, conditionValues map[st
 	removedRequestScopedDeny := false
 	for _, statement := range policy.Statements {
 		if statement.Effect == minioIAMPolicy.Deny &&
-			statement.Actions.Contains(minioIAMPolicy.CreateServiceAccountAdminAction) &&
+			statement.Actions.Match(createServiceAccount) &&
 			statement.Conditions.Keys().Match(condition.SVCDurationSeconds.ToKey()) {
 			removedRequestScopedDeny = true
 			continue

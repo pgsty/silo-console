@@ -26,11 +26,8 @@ import CredentialsPrompt from "../Common/CredentialsPrompt/CredentialsPrompt";
 import DeleteMultipleServiceAccounts from "./DeleteMultipleServiceAccounts";
 import { selectSAs } from "../Configurations/utils";
 import EditServiceAccount from "../Account/EditServiceAccount";
-import {
-  CONSOLE_UI_RESOURCE,
-  IAM_SCOPES,
-} from "../../../common/SecureComponent/permissions";
-import { SecureComponent } from "../../../common/SecureComponent";
+import { CONSOLE_UI_RESOURCE } from "../../../common/SecureComponent/permissions";
+import { hasPermission } from "../../../common/SecureComponent";
 import {
   setErrorSnackMessage,
   setHelpName,
@@ -42,6 +39,10 @@ import { ServiceAccounts } from "../../../api/consoleApi";
 import { usersSort } from "../../../utils/sortFunctions";
 import { accountTableColumns } from "../Account/AccountUtils";
 import { useT } from "i18n";
+import {
+  buildUserServiceAccountTableActions,
+  getUserServiceAccountCapabilities,
+} from "./userServiceAccountControls";
 
 interface IUserServiceAccountsProps {
   user: string;
@@ -55,6 +56,14 @@ const UserServiceAccountsPanel = ({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const t = useT();
+  const {
+    canCreate: canCreateServiceAccount,
+    canList: canListServiceAccounts,
+    canRemove: canRemoveServiceAccount,
+    canUpdate: canUpdateServiceAccount,
+  } = getUserServiceAccountCapabilities((scope) =>
+    hasPermission(CONSOLE_UI_RESOURCE, [scope]),
+  );
 
   const [records, setRecords] = useState<ServiceAccounts>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,13 +77,15 @@ const UserServiceAccountsPanel = ({
   const [selectedSAs, setSelectedSAs] = useState<string[]>([]);
   const [deleteMultipleOpen, setDeleteMultipleOpen] = useState<boolean>(false);
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [serviceAccountReadOnly, setServiceAccountReadOnly] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    fetchRecords();
-  }, []);
+    setLoading(canListServiceAccounts);
+  }, [canListServiceAccounts]);
 
   useEffect(() => {
-    if (loading) {
+    if (loading && canListServiceAccounts) {
       api
         .invoke(
           "GET",
@@ -90,7 +101,7 @@ const UserServiceAccountsPanel = ({
           setLoading(false);
         });
     }
-  }, [loading, setLoading, setRecords, user, dispatch]);
+  }, [loading, setLoading, setRecords, user, dispatch, canListServiceAccounts]);
 
   const fetchRecords = () => {
     setLoading(true);
@@ -118,8 +129,12 @@ const UserServiceAccountsPanel = ({
     setNewServiceAccount(null);
   };
 
-  const editModalOpen = (selectedServiceAccount: string) => {
+  const serviceAccountModalOpen = (
+    selectedServiceAccount: string,
+    readOnly: boolean,
+  ) => {
     setSelectedServiceAccount(selectedServiceAccount);
+    setServiceAccountReadOnly(readOnly);
     setEditOpen(true);
   };
 
@@ -130,35 +145,16 @@ const UserServiceAccountsPanel = ({
 
   const closePolicyModal = () => {
     setEditOpen(false);
+    setServiceAccountReadOnly(false);
     setLoading(true);
   };
 
-  const tableActions = [
-    {
-      type: "view",
-      onClick: (value: any) => {
-        if (value) {
-          editModalOpen(value.accessKey);
-        }
-      },
-    },
-    {
-      type: "delete",
-      onClick: (value: any) => {
-        if (value) {
-          confirmDeleteServiceAccount(value.accessKey);
-        }
-      },
-    },
-    {
-      type: "edit",
-      onClick: (value: any) => {
-        if (value) {
-          editModalOpen(value.accessKey);
-        }
-      },
-    },
-  ];
+  const tableActions = buildUserServiceAccountTableActions({
+    canRemove: canRemoveServiceAccount,
+    canUpdate: canUpdateServiceAccount,
+    confirmDelete: confirmDeleteServiceAccount,
+    openDetails: serviceAccountModalOpen,
+  });
 
   useEffect(() => {
     dispatch(setHelpName("user_details_accounts"));
@@ -198,6 +194,7 @@ const UserServiceAccountsPanel = ({
           open={editOpen}
           selectedAccessKey={selectedServiceAccount}
           closeModalAndRefresh={closePolicyModal}
+          readOnly={serviceAccountReadOnly}
         />
       )}
 
@@ -214,36 +211,24 @@ const UserServiceAccountsPanel = ({
                 }}
                 label={t("Delete Selected")}
                 icon={<DeleteIcon />}
-                disabled={selectedSAs.length === 0}
+                disabled={selectedSAs.length === 0 || !canRemoveServiceAccount}
                 variant={"secondary"}
               />
             </TooltipWrapper>
-            <SecureComponent
-              scopes={[
-                IAM_SCOPES.ADMIN_CREATE_SERVICEACCOUNT,
-                IAM_SCOPES.ADMIN_UPDATE_SERVICEACCOUNT,
-                IAM_SCOPES.ADMIN_REMOVE_SERVICEACCOUNT,
-                IAM_SCOPES.ADMIN_LIST_SERVICEACCOUNTS,
-              ]}
-              resource={CONSOLE_UI_RESOURCE}
-              matchAll
-              errorProps={{ disabled: true }}
-            >
-              <TooltipWrapper tooltip={t("Create Access Key")}>
-                <Button
-                  id={"create-service-account"}
-                  label={t("Create Access Key")}
-                  variant="callAction"
-                  icon={<AddIcon />}
-                  onClick={() => {
-                    navigate(
-                      `/identity/users/new-user-sa/${encodeURIComponent(user)}`,
-                    );
-                  }}
-                  disabled={!hasPolicy}
-                />
-              </TooltipWrapper>
-            </SecureComponent>
+            <TooltipWrapper tooltip={t("Create Access Key")}>
+              <Button
+                id={"create-service-account"}
+                label={t("Create Access Key")}
+                variant="callAction"
+                icon={<AddIcon />}
+                onClick={() => {
+                  navigate(
+                    `/identity/users/new-user-sa/${encodeURIComponent(user)}`,
+                  );
+                }}
+                disabled={!hasPolicy || !canCreateServiceAccount}
+              />
+            </TooltipWrapper>
           </Box>
         }
       >
@@ -255,18 +240,27 @@ const UserServiceAccountsPanel = ({
         entityName={t("Access Keys")}
         customEmptyMessage={t("There are no Access Keys yet.")}
         columns={accountTableColumns(t)}
-        onSelect={(e) => selectSAs(e, setSelectedSAs, selectedSAs)}
-        onSelectAll={() => {
-          const visible = records.map((r) => `${r.accessKey}`);
-          const allVisible =
-            visible.length > 0 && visible.every((v) => selectedSAs.includes(v));
-          setSelectedSAs(
-            allVisible
-              ? selectedSAs.filter((v) => !visible.includes(v))
-              : Array.from(new Set([...selectedSAs, ...visible])),
-          );
-        }}
-        selectedItems={selectedSAs}
+        onSelect={
+          canRemoveServiceAccount
+            ? (e) => selectSAs(e, setSelectedSAs, selectedSAs)
+            : undefined
+        }
+        onSelectAll={
+          canRemoveServiceAccount
+            ? () => {
+                const visible = records.map((r) => `${r.accessKey}`);
+                const allVisible =
+                  visible.length > 0 &&
+                  visible.every((v) => selectedSAs.includes(v));
+                setSelectedSAs(
+                  allVisible
+                    ? selectedSAs.filter((v) => !visible.includes(v))
+                    : Array.from(new Set([...selectedSAs, ...visible])),
+                );
+              }
+            : undefined
+        }
+        selectedItems={canRemoveServiceAccount ? selectedSAs : []}
         isLoading={loading}
         records={records}
         idField="accessKey"

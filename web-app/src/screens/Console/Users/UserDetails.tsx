@@ -42,7 +42,6 @@ import {
   CONSOLE_UI_RESOURCE,
   deleteUserPermissions,
   disableUserPermissions,
-  editServiceAccountPermissions,
   enableDisableUserPermissions,
   enableUserPermissions,
   getGroupPermissions,
@@ -62,6 +61,7 @@ import UserServiceAccountsPanel from "./UserServiceAccountsPanel";
 import ChangeUserPasswordModal from "../Account/ChangeUserPasswordModal";
 import DeleteUser from "./DeleteUser";
 import { useT } from "i18n";
+import { getUserServiceAccountCapabilities } from "./userServiceAccountControls";
 
 interface IGroupItem {
   group: string;
@@ -118,6 +118,9 @@ const UserDetails = () => {
   );
 
   const viewGroup = hasPermission(CONSOLE_UI_RESOURCE, getGroupPermissions);
+  const canListServiceAccounts = getUserServiceAccountCapabilities((scope) =>
+    hasPermission(CONSOLE_UI_RESOURCE, [scope]),
+  ).canList;
 
   const getUserInformation = useCallback(() => {
     if (userName === "") {
@@ -439,10 +442,7 @@ const UserDetails = () => {
                   tabConfig: {
                     id: "service_accounts",
                     label: t("Service Accounts"),
-                    disabled: !hasPermission(
-                      CONSOLE_UI_RESOURCE,
-                      editServiceAccountPermissions,
-                    ),
+                    disabled: !canListServiceAccounts,
                   },
                   content: (
                     <UserServiceAccountsPanel

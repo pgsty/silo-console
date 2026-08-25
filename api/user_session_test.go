@@ -65,6 +65,23 @@ func TestDefaultSessionActionsKeepsRequestScopedServiceAccountCapability(t *test
 	}).Contains(action))
 }
 
+func TestDefaultSessionActionsKeepsRequestScopedWildcardServiceAccountCapability(t *testing.T) {
+	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
+		"Version":"2012-10-17",
+		"Statement":[{
+			"Effect":"Deny",
+			"Action":["admin:*"],
+			"Condition":{
+				"NumericGreaterThanIfExists":{"svc:DurationSeconds":"1500"}
+			}
+		}]
+	}`))
+	assert.NoError(t, err)
+
+	action := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	assert.True(t, defaultSessionActions(policy, map[string][]string{}).Contains(action))
+}
+
 func TestDefaultSessionActionsKeepsUnconditionalServiceAccountDeny(t *testing.T) {
 	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
 		"Version":"2012-10-17",
@@ -86,6 +103,29 @@ func TestDefaultSessionActionsDoesNotOverrideAnotherServiceAccountDeny(t *testin
 			{
 				"Effect":"Deny",
 				"Action":["admin:CreateServiceAccount"]
+			},
+			{
+				"Effect":"Deny",
+				"Action":["admin:CreateServiceAccount"],
+				"Condition":{
+					"NumericGreaterThanIfExists":{"svc:DurationSeconds":"1500"}
+				}
+			}
+		]
+	}`))
+	assert.NoError(t, err)
+
+	action := minioIAMPolicy.Action(minioIAMPolicy.CreateServiceAccountAdminAction)
+	assert.False(t, defaultSessionActions(policy, map[string][]string{}).Contains(action))
+}
+
+func TestDefaultSessionActionsDoesNotOverrideWildcardServiceAccountDeny(t *testing.T) {
+	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
+		"Version":"2012-10-17",
+		"Statement":[
+			{
+				"Effect":"Deny",
+				"Action":["admin:*"]
 			},
 			{
 				"Effect":"Deny",
