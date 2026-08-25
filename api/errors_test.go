@@ -58,6 +58,7 @@ func TestError(t *testing.T) {
 		"ErrGroupNameNotInRequest":        {code: 400, err: ErrGroupNameNotInRequest},
 		"ErrPolicyNameNotInRequest":       {code: 400, err: ErrPolicyNameNotInRequest},
 		"ErrPolicyBodyNotInRequest":       {code: 400, err: ErrPolicyBodyNotInRequest},
+		"ErrInvalidPolicyDocument":        {code: 400, err: ErrInvalidPolicyDocument},
 		"ErrInvalidEncryptionAlgorithm":   {code: 500, err: ErrInvalidEncryptionAlgorithm},
 		"ErrSSENotConfigured":             {code: 404, err: ErrSSENotConfigured},
 		"ErrBucketLifeCycleNotConfigured": {code: 404, err: ErrBucketLifeCycleNotConfigured},

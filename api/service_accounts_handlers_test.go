@@ -65,6 +65,108 @@ func TestAddServiceAccount(t *testing.T) {
 	}
 }
 
+func TestServiceAccountWritePathsRejectBareARNBeforeRequest(t *testing.T) {
+	previousAddServiceAccountMock := minioAddServiceAccountMock
+	previousUpdateServiceAccountMock := minioUpdateServiceAccountMock
+	t.Cleanup(func() {
+		minioAddServiceAccountMock = previousAddServiceAccountMock
+		minioUpdateServiceAccountMock = previousUpdateServiceAccountMock
+	})
+
+	addCalls := 0
+	updateCalls := 0
+	minioAddServiceAccountMock = func(_ context.Context, _, _, _, _, _, _ string, _ *time.Time, _ string) (madmin.Credentials, error) {
+		addCalls++
+		return madmin.Credentials{}, nil
+	}
+	minioUpdateServiceAccountMock = func(_ context.Context, _ string, _ madmin.UpdateServiceAccountReq) error {
+		updateCalls++
+		return nil
+	}
+
+	document := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"NotResource":["arn:aws:s3:::"]}]}`
+	client := AdminClientMock{}
+	createPaths := []struct {
+		name string
+		call func() error
+	}{
+		{name: "current user", call: func() error {
+			_, err := createServiceAccount(t.Context(), client, document, "", "", nil, "")
+			return err
+		}},
+		{name: "current user with credentials", call: func() error {
+			_, err := createServiceAccountCreds(t.Context(), client, document, "access", "secret", "", "", nil, "")
+			return err
+		}},
+		{name: "selected user", call: func() error {
+			_, err := createAUserServiceAccount(t.Context(), client, document, "alice", "", "", nil, "")
+			return err
+		}},
+		{name: "selected user with credentials", call: func() error {
+			_, err := createAUserServiceAccountCreds(t.Context(), client, document, "alice", "access", "secret", "", "", nil, "")
+			return err
+		}},
+	}
+
+	for _, createPath := range createPaths {
+		t.Run(createPath.name, func(t *testing.T) {
+			if err := createPath.call(); !errors.Is(err, ErrInvalidPolicyDocument) {
+				t.Fatalf("create service account error = %v, want ErrInvalidPolicyDocument", err)
+			}
+		})
+	}
+	if err := updateServiceAccountDetails(t.Context(), client, "access", document, nil, "", "", "", ""); !errors.Is(err, ErrInvalidPolicyDocument) {
+		t.Fatalf("update service account error = %v, want ErrInvalidPolicyDocument", err)
+	}
+
+	if addCalls != 0 || updateCalls != 0 {
+		t.Fatalf("invalid policies reached admin client: add=%d update=%d", addCalls, updateCalls)
+	}
+}
+
+func TestServiceAccountWritePathsNormalizeOptionalPolicy(t *testing.T) {
+	previousAddServiceAccountMock := minioAddServiceAccountMock
+	previousUpdateServiceAccountMock := minioUpdateServiceAccountMock
+	t.Cleanup(func() {
+		minioAddServiceAccountMock = previousAddServiceAccountMock
+		minioUpdateServiceAccountMock = previousUpdateServiceAccountMock
+	})
+
+	var addedPolicy string
+	minioAddServiceAccountMock = func(_ context.Context, policy, _, _, _, _, _ string, _ *time.Time, _ string) (madmin.Credentials, error) {
+		addedPolicy = policy
+		return madmin.Credentials{}, nil
+	}
+	var updatedPolicy []byte
+	minioUpdateServiceAccountMock = func(_ context.Context, _ string, request madmin.UpdateServiceAccountReq) error {
+		updatedPolicy = append(updatedPolicy[:0], request.NewPolicy...)
+		return nil
+	}
+
+	client := AdminClientMock{}
+	if _, err := createServiceAccount(t.Context(), client, " \n\t", "", "", nil, ""); err != nil {
+		t.Fatalf("create service account with empty policy: %v", err)
+	}
+	if addedPolicy != "" {
+		t.Fatalf("empty create policy reached admin client as %q", addedPolicy)
+	}
+
+	if err := updateServiceAccountDetails(t.Context(), client, "access", " \n\t", nil, "", "", "", ""); err != nil {
+		t.Fatalf("update service account with empty policy: %v", err)
+	}
+	if len(updatedPolicy) != 0 {
+		t.Fatalf("empty update policy reached admin client as %q", updatedPolicy)
+	}
+
+	document := `{"Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"]}]}`
+	if err := updateServiceAccountDetails(t.Context(), client, "access", document, nil, "", "", "", ""); err != nil {
+		t.Fatalf("update service account with valid policy: %v", err)
+	}
+	if string(updatedPolicy) != document {
+		t.Fatalf("valid update policy reached admin client as %q, want %q", updatedPolicy, document)
+	}
+}
+
 func TestListServiceAccounts(t *testing.T) {
 	assert := assert.New(t)
 	// mock minIO client

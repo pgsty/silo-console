@@ -156,6 +156,28 @@ func TestAddPolicy(t *testing.T) {
 	}
 }
 
+func TestAddPolicyRejectsBareARNBeforeRequest(t *testing.T) {
+	previousAddPolicyMock := minioAddPolicyMock
+	t.Cleanup(func() {
+		minioAddPolicyMock = previousAddPolicyMock
+	})
+
+	requestCalls := 0
+	minioAddPolicyMock = func(_ string, _ *iampolicy.Policy) error {
+		requestCalls++
+		return nil
+	}
+
+	document := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::"]}]}`
+	_, err := addPolicy(t.Context(), AdminClientMock{}, "bare-arn", document)
+	if !errors.Is(err, ErrInvalidPolicyDocument) {
+		t.Fatalf("addPolicy() error = %v, want ErrInvalidPolicyDocument", err)
+	}
+	if requestCalls != 0 {
+		t.Fatalf("invalid policy reached the admin client %d time(s)", requestCalls)
+	}
+}
+
 func TestSetPolicy(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

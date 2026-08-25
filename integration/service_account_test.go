@@ -179,7 +179,23 @@ func Test_ServiceAccountsAPI(t *testing.T) {
   ]
 }`),
 			},
-			expectedStatus: 500,
+			expectedStatus: 400,
+			expectedError:  nil,
+		},
+		{
+			name: "Create Service Account - Bare ARN Policy",
+			args: args{
+				api: "/service-accounts",
+				policy: swag.String(`{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:GetObject"],
+    "NotResource": ["arn:aws:s3:::"]
+  }]
+}`),
+			},
+			expectedStatus: 400,
 			expectedError:  nil,
 		},
 	}

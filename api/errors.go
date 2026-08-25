@@ -43,6 +43,7 @@ var (
 	ErrGroupNameNotInRequest            = errors.New("error group name not in request")
 	ErrPolicyNameNotInRequest           = errors.New("error policy name not in request")
 	ErrPolicyBodyNotInRequest           = errors.New("error policy body not in request")
+	ErrInvalidPolicyDocument            = errors.New("invalid policy document")
 	ErrInvalidUserStatus                = errors.New("status not valid")
 	ErrInvalidEncryptionAlgorithm       = errors.New("error invalid encryption algorithm")
 	ErrSSENotConfigured                 = errors.New("error server side encryption configuration not found")
@@ -160,6 +161,10 @@ func ErrorWithContext(ctx context.Context, err ...interface{}) *CodedAPIError {
 			if errors.Is(err1, ErrPolicyBodyNotInRequest) {
 				errorCode = 400
 				errorMessage = ErrPolicyBodyNotInRequest.Error()
+			}
+			if errors.Is(err1, ErrInvalidPolicyDocument) {
+				errorCode = 400
+				errorMessage = ErrInvalidPolicyDocument.Error()
 			}
 			if errors.Is(err1, ErrInvalidUserStatus) {
 				errorCode = 400

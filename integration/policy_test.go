@@ -153,7 +153,24 @@ func Test_AddPolicyAPI(t *testing.T) {
   ]
 }`),
 			},
-			expectedStatus: 500,
+			expectedStatus: 400,
+			expectedError:  nil,
+		},
+		{
+			name: "Create Policy - Bare ARN",
+			args: args{
+				api:  "/policies",
+				name: "bare-arn",
+				policy: swag.String(`{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:GetObject"],
+    "Resource": ["arn:aws:s3:::"]
+  }]
+}`),
+			},
+			expectedStatus: 400,
 			expectedError:  nil,
 		},
 		{

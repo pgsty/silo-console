@@ -119,7 +119,11 @@ func registerServiceAccountsHandlers(api *operations.ConsoleAPI) {
 
 // createServiceAccount adds a service account to the userClient and assigns a policy to him if defined.
 func createServiceAccount(ctx context.Context, userClient MinioAdmin, policy string, name string, description string, expiry *time.Time, comment string) (*models.ServiceAccountCreds, error) {
-	creds, err := userClient.addServiceAccount(ctx, policy, "", "", "", name, description, expiry, comment)
+	validatedPolicy, err := normalizeOptionalPolicyForWrite(policy)
+	if err != nil {
+		return nil, err
+	}
+	creds, err := userClient.addServiceAccount(ctx, validatedPolicy, "", "", "", name, description, expiry, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +133,11 @@ func createServiceAccount(ctx context.Context, userClient MinioAdmin, policy str
 // createServiceAccount adds a service account with the given credentials to the
 // userClient and assigns a policy to him if defined.
 func createServiceAccountCreds(ctx context.Context, userClient MinioAdmin, policy string, accessKey string, secretKey string, name string, description string, expiry *time.Time, comment string) (*models.ServiceAccountCreds, error) {
-	creds, err := userClient.addServiceAccount(ctx, policy, "", accessKey, secretKey, name, description, expiry, comment)
+	validatedPolicy, err := normalizeOptionalPolicyForWrite(policy)
+	if err != nil {
+		return nil, err
+	}
+	creds, err := userClient.addServiceAccount(ctx, validatedPolicy, "", accessKey, secretKey, name, description, expiry, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +176,11 @@ func getCreateServiceAccountResponse(session *models.Principal, params saApi.Cre
 
 // createServiceAccount adds a service account to a given user and assigns a policy to him if defined.
 func createAUserServiceAccount(ctx context.Context, userClient MinioAdmin, policy string, user string, name string, description string, expiry *time.Time, comment string) (*models.ServiceAccountCreds, error) {
-	creds, err := userClient.addServiceAccount(ctx, policy, user, "", "", name, description, expiry, comment)
+	validatedPolicy, err := normalizeOptionalPolicyForWrite(policy)
+	if err != nil {
+		return nil, err
+	}
+	creds, err := userClient.addServiceAccount(ctx, validatedPolicy, user, "", "", name, description, expiry, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +188,11 @@ func createAUserServiceAccount(ctx context.Context, userClient MinioAdmin, polic
 }
 
 func createAUserServiceAccountCreds(ctx context.Context, userClient MinioAdmin, policy string, user string, accessKey string, secretKey string, name string, description string, expiry *time.Time, comment string) (*models.ServiceAccountCreds, error) {
-	creds, err := userClient.addServiceAccount(ctx, policy, user, accessKey, secretKey, name, description, expiry, comment)
+	validatedPolicy, err := normalizeOptionalPolicyForWrite(policy)
+	if err != nil {
+		return nil, err
+	}
+	creds, err := userClient.addServiceAccount(ctx, validatedPolicy, user, accessKey, secretKey, name, description, expiry, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -441,8 +457,12 @@ func getServiceAccountInfo(session *models.Principal, params saApi.GetServiceAcc
 
 // setServiceAccountPolicy sets policy for a service account
 func updateServiceAccountDetails(ctx context.Context, userClient MinioAdmin, accessKey string, policy string, expiry *time.Time, name string, description string, status string, secretKey string) error {
+	validatedPolicy, err := normalizeOptionalPolicyForWrite(policy)
+	if err != nil {
+		return err
+	}
 	req := madmin.UpdateServiceAccountReq{
-		NewPolicy:      json.RawMessage(policy),
+		NewPolicy:      json.RawMessage(validatedPolicy),
 		NewSecretKey:   secretKey,
 		NewStatus:      status,
 		NewName:        name,
@@ -450,7 +470,7 @@ func updateServiceAccountDetails(ctx context.Context, userClient MinioAdmin, acc
 		NewExpiration:  expiry,
 	}
 
-	err := userClient.updateServiceAccount(ctx, accessKey, req)
+	err = userClient.updateServiceAccount(ctx, accessKey, req)
 	return err
 }
 

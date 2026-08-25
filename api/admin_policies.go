@@ -17,7 +17,6 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -529,7 +528,7 @@ func getRemovePolicyResponse(session *models.Principal, params policyApi.RemoveP
 // policy must be string in json format, in the future this will change
 // to a Policy struct{} - https://github.com/minio/minio/issues/9171
 func addPolicy(ctx context.Context, client MinioAdmin, name, policy string) (*models.Policy, error) {
-	iamp, err := iampolicy.ParseConfig(bytes.NewReader([]byte(policy)))
+	iamp, err := parseNamedPolicyForWrite(policy)
 	if err != nil {
 		return nil, err
 	}
