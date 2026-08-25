@@ -18,8 +18,8 @@ import React, { useState } from "react";
 import { ConfirmDeleteIcon } from "mds";
 import { interpolate, useT } from "i18n";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
 } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import ConfirmDialog from "../Common/ModalWrapper/ConfirmDialog";
@@ -44,7 +44,7 @@ const DeleteIDPConfigurationModal = ({
   const t = useT();
   const onDelSuccess = (res: SetIDPResponse) => {
     closeDeleteModalAndRefresh(true);
-    dispatch(setServerNeedsRestart(res.restart === true));
+    dispatch(recordServerRestartRequirement(res.restart === true));
   };
 
   const onClose = () => closeDeleteModalAndRefresh(false);

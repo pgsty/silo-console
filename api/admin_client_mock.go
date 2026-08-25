@@ -34,7 +34,7 @@ var (
 	minioHelpConfigKVMock       func(subSys, key string, envOnly bool) (madmin.Help, error)
 	minioGetConfigKVMock        func(key string) ([]byte, error)
 	minioSetConfigKVMock        func(kv string) (restart bool, err error)
-	minioDelConfigKVMock        func(name string) (err error)
+	minioDelConfigKVMock        func(name string) (restart bool, err error)
 	minioHelpConfigKVGlobalMock func(envOnly bool) (madmin.Help, error)
 
 	minioGetLogsMock func(ctx context.Context, node string, lineCnt int, logKind string) <-chan madmin.LogInfo
@@ -145,7 +145,7 @@ func (ac AdminClientMock) helpConfigKVGlobal(_ context.Context, envOnly bool) (m
 	return minioHelpConfigKVGlobalMock(envOnly)
 }
 
-func (ac AdminClientMock) delConfigKV(_ context.Context, name string) (err error) {
+func (ac AdminClientMock) delConfigKV(_ context.Context, name string) (restart bool, err error) {
 	return minioDelConfigKVMock(name)
 }
 

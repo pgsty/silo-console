@@ -20,6 +20,7 @@ import { AppState } from "./store";
 import { isDarkModeOn } from "./utils/stylesUtils";
 import { getStoredLanguage, Lang } from "./i18n/lang";
 import { addBucketAsync } from "./screens/Console/Buckets/ListBuckets/AddBucket/addBucketThunks";
+import { retainRestartRequirement } from "./utils/restartRequirement";
 
 // determine whether we have the sidebar state stored on localstorage
 const initSideBarOpen = localStorage.getItem("sidebarOpen")
@@ -106,6 +107,12 @@ const systemSlice = createSlice({
     },
     setServerNeedsRestart: (state, action: PayloadAction<boolean>) => {
       state.serverNeedsRestart = action.payload;
+    },
+    recordServerRestartRequirement: (state, action: PayloadAction<boolean>) => {
+      state.serverNeedsRestart = retainRestartRequirement(
+        state.serverNeedsRestart,
+        action.payload,
+      );
     },
     serverIsLoading: (state, action: PayloadAction<boolean>) => {
       state.serverIsLoading = action.payload;
@@ -207,6 +214,7 @@ export const {
   userLogged,
   menuOpen,
   setServerNeedsRestart,
+  recordServerRestartRequirement,
   serverIsLoading,
   setSnackBarMessage,
   setErrorSnackMessage,

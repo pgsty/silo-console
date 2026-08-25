@@ -30,9 +30,9 @@ import { useT } from "i18n";
 import { useAppDispatch } from "../../../store";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
   setHelpName,
-  setServerNeedsRestart,
 } from "../../../systemSlice";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
@@ -114,7 +114,7 @@ const AddIDPConfiguration = ({
       .createConfiguration("openid", { name, input })
       .then((res: HttpResponse<SetIDPResponse, ApiError>) => {
         navigate(backLink);
-        dispatch(setServerNeedsRestart(res.data.restart === true));
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
       })
       .catch((res: HttpResponse<SetIDPResponse, ApiError>) => {
         dispatch(setErrorSnackMessage(errorToHandler(res.error)));

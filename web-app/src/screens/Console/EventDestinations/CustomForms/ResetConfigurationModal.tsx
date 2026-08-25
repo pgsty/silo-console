@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
@@ -26,36 +26,36 @@ import { useT } from "i18n";
 
 interface IResetConfiguration {
   configurationName: string;
-  closeResetModalAndRefresh: (reloadConfiguration: boolean) => void;
+  onClose: () => void;
+  onReset: (restart: boolean) => void;
   resetOpen: boolean;
 }
 
 const ResetConfigurationModal = ({
   configurationName,
-  closeResetModalAndRefresh,
+  onClose,
+  onReset,
   resetOpen,
 }: IResetConfiguration) => {
   const dispatch = useAppDispatch();
   const t = useT();
   const [resetLoading, setResetLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (resetLoading) {
-      api.configs
-        .resetConfig(configurationName)
-        .then(() => {
-          setResetLoading(false);
-          closeResetModalAndRefresh(true);
-        })
-        .catch((err) => {
-          setResetLoading(false);
-          dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-        });
-    }
-  }, [closeResetModalAndRefresh, configurationName, resetLoading, dispatch]);
-
   const resetConfiguration = () => {
+    if (resetLoading) {
+      return;
+    }
     setResetLoading(true);
+    api.configs
+      .resetConfig(configurationName)
+      .then((res) => {
+        setResetLoading(false);
+        onReset(res.data.restart === true);
+      })
+      .catch((err) => {
+        setResetLoading(false);
+        dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+      });
   };
 
   return (
@@ -66,9 +66,7 @@ const ResetConfigurationModal = ({
       titleIcon={<ConfirmDeleteIcon />}
       isLoading={resetLoading}
       onConfirm={resetConfiguration}
-      onClose={() => {
-        closeResetModalAndRefresh(false);
-      }}
+      onClose={onClose}
       confirmationContent={
         <Fragment>
           {resetLoading && <ProgressBar />}

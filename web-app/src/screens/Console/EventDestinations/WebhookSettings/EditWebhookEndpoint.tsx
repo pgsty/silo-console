@@ -32,8 +32,8 @@ import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import {
   configurationIsLoading,
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
   setSnackBarMessage,
 } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
@@ -150,7 +150,7 @@ const EditEndpointModal = ({
       .setConfig(name, payload)
       .then((res) => {
         setSaving(false);
-        dispatch(setServerNeedsRestart(res.data.restart || false));
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
         if (!res.data.restart) {
           dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }

@@ -40,9 +40,9 @@ import { errorToHandler } from "api/errors";
 import { formatText, useT } from "i18n";
 import { useAppDispatch } from "../../../../store";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
   setHelpName,
-  setServerNeedsRestart,
   setSnackBarMessage,
 } from "../../../../systemSlice";
 import { ldapFormFields, ldapHelpBoxContents } from "../utils";
@@ -189,7 +189,7 @@ const IDPLDAPConfigurationDetails = () => {
         setEditMode(false);
         setRecord(keyVals);
         parseFields(keyVals);
-        dispatch(setServerNeedsRestart(res.data.restart || false));
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
         setFields({ ...fields, lookup_bind_password: "" });
 
         if (!res.data.restart) {
@@ -201,17 +201,14 @@ const IDPLDAPConfigurationDetails = () => {
       });
   };
 
-  const closeDeleteModalAndRefresh = async (refresh: boolean) => {
+  const resetConfiguration = (restart: boolean) => {
     setResetOpen(false);
-
-    if (refresh) {
-      dispatch(setServerNeedsRestart(refresh));
-      setRecord(undefined);
-      setFields({});
-      setIsEnabled(false);
-      setHasConfiguration(false);
-      setEditMode(false);
-    }
+    dispatch(recordServerRestartRequirement(restart));
+    setRecord(undefined);
+    setFields({});
+    setIsEnabled(false);
+    setHasConfiguration(false);
+    setEditMode(false);
   };
 
   const toggleConfiguration = (value: boolean) => {
@@ -228,7 +225,7 @@ const IDPLDAPConfigurationDetails = () => {
       .setConfig("identity_ldap", payload)
       .then((res) => {
         setIsEnabled(!isEnabled);
-        dispatch(setServerNeedsRestart(res.data.restart || false));
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
         if (!res.data.restart) {
           dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
@@ -290,7 +287,8 @@ const IDPLDAPConfigurationDetails = () => {
       {resetOpen && (
         <ResetConfigurationModal
           configurationName={"identity_ldap"}
-          closeResetModalAndRefresh={closeDeleteModalAndRefresh}
+          onClose={() => setResetOpen(false)}
+          onReset={resetConfiguration}
           resetOpen={resetOpen}
         />
       )}

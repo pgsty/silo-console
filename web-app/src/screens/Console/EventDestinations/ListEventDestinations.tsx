@@ -41,8 +41,8 @@ import { getNotificationConfigKey, notificationTransform } from "./utils";
 import { actionsTray } from "../Common/FormComponents/common/styleLibrary";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
 } from "../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../store";
 import { setDestinationLoading } from "./destinationsSlice";
@@ -117,8 +117,8 @@ const ListEventDestinations = () => {
       if (configKey) {
         api.configs
           .resetConfig(`${configKey}${accountId}`)
-          .then(() => {
-            dispatch(setServerNeedsRestart(true));
+          .then((res) => {
+            dispatch(recordServerRestartRequirement(res.data.restart === true));
             setSelNotifyEndpoint(null);
             setIsDelConfirmOpen(false);
             dispatch(setDestinationLoading(true));

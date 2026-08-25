@@ -40,9 +40,9 @@ import { useT } from "i18n";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { useAppDispatch } from "../../../store";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
   setHelpName,
-  setServerNeedsRestart,
 } from "../../../systemSlice";
 import DeleteIDPConfigurationModal from "./DeleteIDPConfigurationModal";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
@@ -200,7 +200,7 @@ const IDPConfigurationDetails = ({
       .updateConfiguration(configurationName || "", "openid", { input })
       .then((res: HttpResponse<SetIDPResponse, ApiError>) => {
         if (res.data) {
-          dispatch(setServerNeedsRestart(res.data.restart === true));
+          dispatch(recordServerRestartRequirement(res.data.restart === true));
           setEditMode(false);
         }
       })
@@ -227,7 +227,7 @@ const IDPConfigurationDetails = ({
       .then((res: HttpResponse<SetIDPResponse, ApiError>) => {
         if (res.data) {
           setIsEnabled(!isEnabled);
-          dispatch(setServerNeedsRestart(res.data.restart === true));
+          dispatch(recordServerRestartRequirement(res.data.restart === true));
         }
       })
       .catch((res: HttpResponse<SetIDPResponse, ApiError>) => {

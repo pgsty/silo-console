@@ -30,9 +30,9 @@ import {
 import { IElementValue } from "../Configurations/types";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
   setHelpName,
-  setServerNeedsRestart,
 } from "../../../systemSlice";
 import { useAppDispatch } from "../../../store";
 import { setDestinationLoading } from "./destinationsSlice";
@@ -88,9 +88,9 @@ const AddEventDestination = ({
       };
       api.configs
         .setConfig(`${service}:${identifier}`, payload)
-        .then(() => {
+        .then((res) => {
           setSaving(false);
-          dispatch(setServerNeedsRestart(true));
+          dispatch(recordServerRestartRequirement(res.data.restart === true));
           dispatch(setDestinationLoading(true));
           navigate(IAM_PAGES.EVENT_DESTINATIONS);
         })

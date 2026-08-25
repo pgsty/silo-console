@@ -18,8 +18,8 @@ import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Button, DownloadIcon } from "mds";
 import useApi from "../../Common/Hooks/useApi";
 import {
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
 } from "../../../../systemSlice";
 import TooltipWrapper from "../../Common/TooltipWrapper/TooltipWrapper";
 import { useDispatch, useSelector } from "react-redux";
@@ -44,7 +44,7 @@ const ImportConfigButton = () => {
   const [isReqLoading, invokeApi] = useApi(
     (res: any) => {
       //base64 encoded information so decode before downloading.
-      dispatch(setServerNeedsRestart(true)); //import should refreshPage as per mc.
+      dispatch(recordServerRestartRequirement(true)); //import should refreshPage as per mc.
       setRefreshPage(true);
     },
     (err) => {

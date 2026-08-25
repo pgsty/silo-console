@@ -35,9 +35,9 @@ import {
 } from "../../Configurations/types";
 import {
   configurationIsLoading,
+  recordServerRestartRequirement,
   setErrorSnackMessage,
   setHelpName,
-  setServerNeedsRestart,
   setSnackBarMessage,
 } from "../../../../systemSlice";
 import { AppState, useAppDispatch } from "../../../../store";
@@ -132,7 +132,7 @@ const EditConfiguration = ({
         .setConfig(selectedConfiguration.configuration_id, payload)
         .then((res) => {
           setSaving(false);
-          dispatch(setServerNeedsRestart(res.data.restart || false));
+          dispatch(recordServerRestartRequirement(res.data.restart === true));
           dispatch(configurationIsLoading(true));
           if (!res.data.restart) {
             dispatch(setSnackBarMessage(t("Configuration saved successfully")));
@@ -160,10 +160,8 @@ const EditConfiguration = ({
 
   const continueReset = (restart: boolean) => {
     setResetConfigurationOpen(false);
-    dispatch(setServerNeedsRestart(restart));
-    if (restart) {
-      dispatch(configurationIsLoading(true));
-    }
+    dispatch(recordServerRestartRequirement(restart));
+    dispatch(configurationIsLoading(true));
   };
 
   const resetConfigurationMOpen = () => {
@@ -184,7 +182,8 @@ const EditConfiguration = ({
         {resetConfigurationOpen && (
           <ResetConfigurationModal
             configurationName={selectedConfiguration.configuration_id}
-            closeResetModalAndRefresh={continueReset}
+            onClose={() => setResetConfigurationOpen(false)}
+            onReset={continueReset}
             resetOpen={resetConfigurationOpen}
           />
         )}

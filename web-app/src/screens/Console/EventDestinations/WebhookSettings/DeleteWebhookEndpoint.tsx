@@ -21,8 +21,8 @@ import { errorToHandler } from "api/errors";
 import ConfirmDialog from "../../Common/ModalWrapper/ConfirmDialog";
 import {
   configurationIsLoading,
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
 } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import { interpolate, useT } from "i18n";
@@ -48,9 +48,9 @@ const DeleteWebhookEndpoint = ({
     if (deleteLoading) {
       api.configs
         .resetConfig(selectedARN)
-        .then(() => {
+        .then((res) => {
           setDeleteLoading(false);
-          dispatch(setServerNeedsRestart(true));
+          dispatch(recordServerRestartRequirement(res.data.restart === true));
           dispatch(configurationIsLoading(true));
           onClose();
         })

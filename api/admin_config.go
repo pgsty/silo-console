@@ -320,9 +320,8 @@ func setConfigResponse(session *models.Principal, params cfgApi.SetConfigParams)
 	return &models.SetConfigResponse{Restart: needsRestart}, nil
 }
 
-func resetConfig(ctx context.Context, client MinioAdmin, configName *string) (err error) {
-	err = client.delConfigKV(ctx, *configName)
-	return err
+func resetConfig(ctx context.Context, client MinioAdmin, configName *string) (restart bool, err error) {
+	return client.delConfigKV(ctx, *configName)
 }
 
 // resetConfigResponse implements resetConfig() to be used by handler
@@ -338,12 +337,12 @@ func resetConfigResponse(session *models.Principal, params cfgApi.ResetConfigPar
 	// defining the client to be used
 	adminClient := AdminClient{Client: mAdmin}
 
-	err = resetConfig(ctx, adminClient, &params.Name)
+	needsRestart, err := resetConfig(ctx, adminClient, &params.Name)
 	if err != nil {
 		return nil, ErrorWithContext(ctx, err)
 	}
 
-	return &models.SetConfigResponse{Restart: true}, nil
+	return &models.SetConfigResponse{Restart: needsRestart}, nil
 }
 
 func exportConfigResponse(session *models.Principal, params cfgApi.ExportConfigParams) (*models.ConfigExportResponse, *CodedAPIError) {

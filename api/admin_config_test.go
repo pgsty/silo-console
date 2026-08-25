@@ -144,29 +144,40 @@ func TestDelConfig(t *testing.T) {
 	assert := assert.New(t)
 	adminClient := AdminClientMock{}
 	function := "resetConfig()"
-	// mock function response from setConfig()
-	minioDelConfigKVMock = func(_ string) (err error) {
-		return nil
+	// Test-1 : resetConfig() returns that a dynamic reset needs no restart.
+	minioDelConfigKVMock = func(_ string) (restart bool, err error) {
+		return false, nil
 	}
 	configName := "region"
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	// Test-1 : resetConfig() resets a config with the config name
-	err := resetConfig(ctx, adminClient, &configName)
+	restart, err := resetConfig(ctx, adminClient, &configName)
 	if err != nil {
 		t.Errorf("Failed on %s:, error occurred: %s", function, err.Error())
 	}
+	assert.False(restart)
 
-	// Test-2 : resetConfig() returns error, handle properly
-	minioDelConfigKVMock = func(_ string) (err error) {
-		return errors.New("error")
+	// Test-2 : resetConfig() propagates a required restart.
+	minioDelConfigKVMock = func(_ string) (restart bool, err error) {
+		return true, nil
+	}
+	restart, err = resetConfig(ctx, adminClient, &configName)
+	if err != nil {
+		t.Errorf("Failed on %s:, error occurred: %s", function, err.Error())
+	}
+	assert.True(restart)
+
+	// Test-3 : resetConfig() returns error, handle properly.
+	minioDelConfigKVMock = func(_ string) (restart bool, err error) {
+		return false, errors.New("error")
 	}
 
-	err = resetConfig(ctx, adminClient, &configName)
+	restart, err = resetConfig(ctx, adminClient, &configName)
 	if assert.Error(err) {
 		assert.Equal("error", err.Error())
 	}
+	assert.False(restart)
 }
 
 func Test_buildConfig(t *testing.T) {

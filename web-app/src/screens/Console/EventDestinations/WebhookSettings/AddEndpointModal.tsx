@@ -30,8 +30,8 @@ import { errorToHandler } from "api/errors";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import {
   configurationIsLoading,
+  recordServerRestartRequirement,
   setErrorSnackMessage,
-  setServerNeedsRestart,
   setSnackBarMessage,
 } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
@@ -104,7 +104,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
       .setConfig(type, payload)
       .then((res) => {
         setSaving(false);
-        dispatch(setServerNeedsRestart(res.data.restart || false));
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
         if (!res.data.restart) {
           dispatch(setSnackBarMessage(t("Configuration saved successfully")));
         }
