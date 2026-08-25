@@ -48,13 +48,20 @@ test
     // Create a bucket
     await functions.setUpBucket(t, "watch");
   })("Start button can be clicked", async (t) => {
+    const bucketOption = bucketDropdownOptionFor("watch");
     await t
       // We need to log back in after we use the admin account to create bucket,
       // using the specific role we use in this module
       .useRole(roles.watch)
       .navigateTo("http://localhost:9090/tools/watch")
+      .expect(elements.bucketNameInput.exists)
+      .ok("Bucket selector did not load", { timeout: 30000 })
       .click(elements.bucketNameInput)
-      .click(bucketDropdownOptionFor("watch"))
+      .expect(bucketOption.exists)
+      .ok("Created bucket did not appear in the selector", { timeout: 30000 })
+      .click(bucketOption)
+      .expect(elements.startButton.exists)
+      .ok("Watch start button did not become available", { timeout: 30000 })
       .click(elements.startButton);
   })
   .after(async (t) => {
