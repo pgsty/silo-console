@@ -19,7 +19,7 @@ permissions:
 # This ensures that previous jobs for the PR are canceled when the PR is
 # updated.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -204,7 +204,7 @@ jobs:
             (git fetch alt && git checkout "alt/$GH_BRANCH") || echo "$ALTREPO ($GH_BRANCH) not available, so keeping default repository/branch"
           fi
           cd $GITHUB_WORKSPACE;
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
@@ -216,8 +216,7 @@ jobs:
           path: |
             ./web-app/build/
           key: ${{ runner.os }}-assets-${{ github.run_id }}
-      - name: Build on ${{ matrix.os }}
-        if: steps.minio-latest-cache.outputs.cache-hit != 'true'
+      - name: Build on ${{ runner.os }}
         run: |
           echo "Create minio binary";
           cd $GITHUB_WORKSPACE/minio_repository;
@@ -1033,7 +1032,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v6
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
@@ -1045,7 +1044,7 @@ jobs:
           path: |
             ./console
           key: ${{ runner.os }}-binary-${{ github.run_id }}
-      - name: Build on ${{ matrix.os }}
+      - name: Build on ${{ runner.os }}
         run: |
           echo "The idea is to build console image from cached binary";
           cd $GITHUB_WORKSPACE;
@@ -1104,13 +1103,13 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - name: Build on ${{ matrix.os }}
+      - name: Build on ${{ runner.os }}
         run: |
           echo "We are going to use the latest minio image on test-integration";
           MINIO_VERSION="quay.io/minio/minio:latest";
@@ -1142,13 +1141,13 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v6
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - name: Build on ${{ matrix.os }}
+      - name: Build on ${{ runner.os }}
         run: |
           echo "Use the pinned SILO release for the Console compatibility gate";
           MINIO_VERSION="docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z";
