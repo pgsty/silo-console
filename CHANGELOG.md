@@ -23,6 +23,7 @@ Notifications and configuration:
 - Added IPv6-aware MySQL and quote-aware PostgreSQL structured DSN handling, while masking credentials in generated previews
 - Rejected database DSNs that SILO's current configuration grammar would split or mutate, before sending them to the Admin API and without returning the submitted secret
 - Rendered generic passwords and authentication tokens as password fields, including environment-overridden values
+- Honored the server's restart result for configuration add, update, delete, and reset operations, while retaining any earlier pending restart requirement until a restart completes
 - Added a non-blocking warning that browser uploads larger than 5 GiB use one non-resumable request and recommends `mcli` for multipart uploads
 
 Reliability, localization, and security:
@@ -30,10 +31,16 @@ Reliability, localization, and security:
 - Replaced unsafe translated placeholder substitutions with one-pass literal formatting, including values containing `$&`, `$1`, `$'`, backticks, braces, or repeated placeholders
 - Applied Prometheus Basic authentication to health checks and root fallback requests, retained Bearer-token precedence, and drained every response so HTTP connections can be reused
 - Made anonymous/empty sessions fail fast instead of hanging on an empty-credential Admin request, accepted canonical `401` and legacy `403` invalid-session responses, and fixed redirects below a URL subpath
+- Separated user status changes from group membership updates, validated status values, kept failed status toggles in sync, blocked enabling or disabling the signed-in user, and removed the unrelated `admin:EnableUser` requirement from group editing
+- Preserved the deprecated combined `PUT /user/{name}` endpoint for compatibility while directing new clients to the independent status and group routes, and reported an unknown status there as a client error instead of a server failure
+- Restored permission-based disabling of table row actions, which every screen had been requesting through a prop name the table component no longer reads, so view, edit, and delete buttons stayed clickable without the matching permission
+- Kept request-scoped Access Key expiry conditions available in the UI while leaving final authorization to SILO, preserved read-only Access Key details without `admin:UpdateServiceAccount`, and added an OIDC create/list/get/delete integration regression through the UI's explicit-credential endpoint with the expected self-update denial
 - Added language and dark-mode controls to anonymous object-browser pages
 - Stopped anonymous pages from issuing protected Object Lock and retention requests that could only produce noisy `Access Denied` errors
 - Removed dead frontend exports and dependencies, refreshed vulnerable transitive dependency resolutions, and expanded vulnerability checks to pushes, manual runs, development dependencies, and immutable installs
+- Made Swagger and frontend asset generation fail immediately instead of masking a missing or failed Yarn command
 - Replaced the ARN handler test's live localhost dependency with deterministic registration coverage
+- Made the SSO gate hermetic: it no longer edits `/etc/hosts` through `sudo` or installs BeautifulSoup, picks its own console port, restores global client state, tears down its containers, and runs against a pinned SILO release instead of the latest upstream image
 - Restored the intended `testrunmain` build-tag boundary for the Docker-backed integration, replication, and SSO suites, so ordinary `go test ./...` runs no longer start an incomplete external environment
 
 ## Release v2.1.1
