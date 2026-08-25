@@ -980,6 +980,7 @@ const ListObjects = () => {
           bucketName={bucketName}
           dataObject={{
             name: selectedPreview.name,
+            size: selectedPreview.size ?? 0,
             last_modified: "",
             version_id: selectedPreview.version_id,
           }}

@@ -375,7 +375,7 @@ const VersionsNavigator = ({
               objectToShare?.version_id !== undefined
                 ? objectToShare.version_id
                 : "null",
-            size: objectToShare?.size,
+            size: objectToShare?.size ?? actualInfo.size,
             content_type: objectToShare?.content_type,
             last_modified: actualInfo.last_modified || "",
           }}
