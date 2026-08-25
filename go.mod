@@ -9,7 +9,7 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 // Use Pigsty's maintained mc fork while preserving upstream imports.
 replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd01ccb
 
-replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.11.0
+replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.0
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -38,7 +38,7 @@ require (
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	github.com/minio/minio-go/v7 v7.0.99
-	github.com/minio/pkg/v3 v3.11.0
+	github.com/minio/pkg/v3 v3.12.0
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -137,7 +137,6 @@ require (
 	github.com/minio/filepath v1.0.0 // indirect
 	github.com/minio/kms-go/kes v0.3.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/mux v1.9.2 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
