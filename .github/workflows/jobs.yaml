@@ -51,6 +51,29 @@ jobs:
         run: |
           make verifiers
 
+  upstream-pkg-compat:
+    name: Build with upstream minio/pkg v3.6.1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.27.x
+      - name: Remove the SILO package replacement and test the advertised floor
+        run: |
+          go mod edit -dropreplace=github.com/minio/pkg/v3
+          go mod edit -require=github.com/minio/pkg/v3@v3.6.1
+          go mod tidy
+          test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.6.1"
+          test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/pkg/v3)"
+          go vet ./...
+          go vet -tags=testrunmain ./...
+          go test ./...
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
+          CGO_ENABLED=0 GOOS=netbsd GOARCH=amd64 go build ./...
+
   semgrep-static-code-analysis:
     name: "semgrep checks"
     runs-on: ubuntu-latest
@@ -254,6 +277,7 @@ jobs:
     name: Compiles on Go ${{ matrix.go-version }} and ${{ matrix.os }}
     needs:
       - lint-job
+      - upstream-pkg-compat
       - ui-assets
       - semgrep-static-code-analysis
       - swagger-codegen

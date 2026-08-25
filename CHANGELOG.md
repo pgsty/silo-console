@@ -2,10 +2,6 @@
 
 ## Release v2.2.0
 
-Source-build compatibility:
-
-- Published binaries and packages include the maintained shared dependencies automatically. Go modules that embed Console source must add `replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1`; dependency-module replacements are ignored, and v2.2.0 uses the fork-only strict IAM policy validation API
-
 Object previews and version history:
 
 - Added a bounded, literal text preview for `.log`, `.txt`, `.json`, and `.xml` objects, with strict UTF-8 validation, a 1 MiB limit, cancellation, retry, anonymous access, and no active-document rendering
@@ -30,6 +26,11 @@ Notifications and configuration:
 - Honored the server's restart result for configuration add, update, delete, and reset operations, while retaining any earlier pending restart requirement until a restart completes
 - Added a non-blocking warning that browser uploads larger than 5 GiB use one non-resumable request and recommends `mcli` for multipart uploads
 
+Dependencies and source builds:
+
+- Updated `minio-go` to v7.3.0 and the shared `silo-pkg` fork to v3.12.1, including the upstream INI import-path migration, lifecycle-filter XML compatibility coverage, and legacy AccountInfo tag decoding for older servers
+- Lowered Console's upstream `minio/pkg` source-compatibility floor from v3.11.0 to v3.6.1 and kept strict IAM write checks local to Console's write path instead of importing fork-only policy APIs; SILO embedders should retain the matching top-level `silo-pkg` replacement for full server policy semantics
+
 Reliability, localization, and security:
 
 - Replaced unsafe translated placeholder substitutions with one-pass literal formatting, including values containing `$&`, `$1`, `$'`, backticks, braces, or repeated placeholders
@@ -42,7 +43,6 @@ Reliability, localization, and security:
 - Added language and dark-mode controls to anonymous object-browser pages
 - Stopped anonymous pages from issuing protected Object Lock and retention requests that could only produce noisy `Access Denied` errors
 - Rejected malformed policies and bare S3 ARNs on named-policy and service-account write paths with a client error before sending an Admin API request; historical reads remain permissive, but an incompatible stored policy must be corrected before it can be saved again
-- Updated `minio-go` to v7.3.0 and the shared `silo-pkg` fork to v3.12.1, including the upstream INI import-path migration and lifecycle-filter XML compatibility coverage
 - Removed dead frontend exports and dependencies, refreshed vulnerable transitive dependency resolutions, and expanded vulnerability checks to pushes, manual runs, development dependencies, and immutable installs
 - Made Swagger and frontend asset generation fail immediately instead of masking a missing or failed Yarn command
 - Replaced the ARN handler test's live localhost dependency with deterministic registration coverage

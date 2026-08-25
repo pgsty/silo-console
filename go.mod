@@ -9,10 +9,8 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 // Use Pigsty's maintained mc fork while preserving upstream imports.
 replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd01ccb
 
-// Keep the required version on a real upstream tag so dependency module graphs
-// remain resolvable. Consumers compiling this fork must select silo-pkg with a
-// top-level replacement because dependency-module replacements are ignored and
-// Console uses fork-only strict policy validation APIs.
+// Keep the required version on a real upstream tag for downstream consumers:
+// replace directives in dependency modules are ignored by the Go toolchain.
 replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
@@ -42,7 +40,7 @@ require (
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	github.com/minio/minio-go/v7 v7.3.0
-	github.com/minio/pkg/v3 v3.11.0
+	github.com/minio/pkg/v3 v3.6.1
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
