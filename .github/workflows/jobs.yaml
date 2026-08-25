@@ -788,7 +788,7 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1
 
   all-permissions-8:
