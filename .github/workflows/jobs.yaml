@@ -1123,7 +1123,7 @@ jobs:
           key: ${{ runner.os }}-replication-coverage-2-${{ github.run_id }}
 
   sso-integration:
-    name: SSO Integration Test
+    name: SSO Integration Test with SILO
     needs:
       - lint-job
       - ui-assets
@@ -1147,8 +1147,8 @@ jobs:
 
       - name: Build on ${{ matrix.os }}
         run: |
-          echo "We are going to use the latest minio image on test-integration";
-          MINIO_VERSION="quay.io/minio/minio:latest";
+          echo "Use the pinned SILO release for the Console compatibility gate";
+          MINIO_VERSION="docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z";
           echo $MINIO_VERSION;
 
           make test-sso-integration MINIO_VERSION=$MINIO_VERSION;

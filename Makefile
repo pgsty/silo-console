@@ -67,17 +67,17 @@ swagger-console:
 	@go tool swagger version
 	@go tool swagger generate server -A console --main-package=management --server-package=api --exclude-main -P models.Principal -f ./swagger.yml -r NOTICE
 	@echo "Ensure basic install"
-	@(cd web-app; yarn; cd ..)
+	@(cd web-app && yarn)
 	@echo "Generating typescript api"
 	@make swagger-typescript-api path="../swagger.yml" output="./src/api" name="consoleApi.ts"
 	@git restore api/server.go
 
 swagger-typescript-api:
-	@(cd web-app; yarn swagger-typescript-api generate -p $(path) -o $(output) -n $(name) --custom-config ../generator.config.js; cd ..)
+	@(cd web-app && yarn swagger-typescript-api generate -p $(path) -o $(output) -n $(name) --custom-config ../generator.config.js)
 
 assets:
 	@(if [ -f "${NVM_DIR}/nvm.sh" ]; then \. "${NVM_DIR}/nvm.sh" && nvm install && nvm use && npm install -g yarn ; fi &&\
-	  cd web-app; corepack enable; yarn install; make build-static; yarn prettier --write . --log-level warn; cd ..)
+	  cd web-app && corepack enable && yarn install && make build-static && yarn prettier --write . --log-level warn)
 
 test-integration:
 	@(docker stop pgsqlcontainer || true)
@@ -158,7 +158,28 @@ test-replication:
 	@(docker stop minio2 || true)
 	@(docker network rm mynet123 || true)
 
+# The console under test and Dex must agree on one redirect URI, so the port is
+# picked here rather than hardcoded to 9090; only this target needs it, so the
+# probe stays inside the recipe instead of running on every make invocation.
 test-sso-integration:
+	@set -eu; \
+	port="$${SSO_TEST_CONSOLE_PORT:-}"; \
+	if [ -z "$$port" ]; then \
+		port="$$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()' || true)"; \
+	fi; \
+	if [ -z "$$port" ]; then \
+		echo "test-sso-integration: unable to pick a free console port; set SSO_TEST_CONSOLE_PORT" >&2; \
+		exit 1; \
+	fi; \
+	$(MAKE) --no-print-directory cleanup-sso-integration; \
+	trap '$(MAKE) --no-print-directory cleanup-sso-integration' EXIT; \
+	$(MAKE) --no-print-directory test-sso-integration-run \
+		MINIO_VERSION=$(MINIO_VERSION) \
+		SSO_TEST_CONSOLE_PORT="$$port"
+
+# Internal: driven by test-sso-integration, which allocates the shared port.
+test-sso-integration-run:
+	@test -n "$(SSO_TEST_CONSOLE_PORT)" || { echo "test-sso-integration-run needs SSO_TEST_CONSOLE_PORT; run 'make test-sso-integration' instead" >&2; exit 1; }
 	@echo "create the network in bridge mode to communicate all containers"
 	@(docker network create my-net)
 	@echo "run openldap container using MinIO Image: quay.io/minio/openldap:latest"
@@ -174,7 +195,7 @@ test-sso-integration:
 	@echo "Run Dex container using MinIO Image: quay.io/minio/dex:latest"
 	@(docker run \
 		-e DEX_ISSUER=http://dex:5556/dex \
-		-e DEX_CLIENT_REDIRECT_URI=http://127.0.0.1:9090/oauth_callback \
+		-e DEX_CLIENT_REDIRECT_URI=http://127.0.0.1:$(SSO_TEST_CONSOLE_PORT)/oauth_callback \
 		-e DEX_LDAP_SERVER=openldap:389 \
 		--network my-net \
 		-p 5556:5556 \
@@ -193,21 +214,26 @@ test-sso-integration:
 	-e MINIO_IDENTITY_OPENID_CLIENT_SECRET="minio-client-app-secret" \
 	-e MINIO_IDENTITY_OPENID_CLAIM_NAME=name \
 	-e MINIO_IDENTITY_OPENID_CONFIG_URL=http://dex:5556/dex/.well-known/openid-configuration \
-	-e MINIO_IDENTITY_OPENID_REDIRECT_URI=http://127.0.0.1:9090/oauth_callback \
+	-e MINIO_IDENTITY_OPENID_REDIRECT_URI=http://127.0.0.1:$(SSO_TEST_CONSOLE_PORT)/oauth_callback \
 	-e MINIO_ROOT_USER=minio \
 	-e MINIO_UPDATE=off \
 	-e MINIO_ROOT_PASSWORD=minio123 $(MINIO_VERSION) server /data{1...4} --address :9000 --console-address :9001)
 	@echo "run mc commands to set the policy"
 	@(docker run -e MC_UPDATE=off --name minio-client --network my-net -dit --entrypoint=/bin/sh minio/mc)
-	@(docker exec minio-client mc alias set myminio/ http://minio:9000 minio minio123)
+	@(ready=0; \
+	  for attempt in $$(seq 1 30); do \
+	    if docker exec minio-client mc alias set myminio/ http://minio:9000 minio minio123; then ready=1; break; fi; \
+	    sleep 1; \
+	  done; \
+	  if [ "$$ready" -ne 1 ]; then docker logs minio; exit 1; fi)
 	@echo "adding policy to Dillon Harper to be able to login:"
 	@(cd sso-integration && docker cp allaccess.json minio-client:/ && docker exec minio-client mc admin policy create myminio "Dillon Harper" allaccess.json)
-	@echo "starting bash script"
-	@(env bash $(PWD)/sso-integration/set-sso.sh)
-	@echo "add python module"
-	@(pip3 install bs4)
 	@echo "Executing the test:"
-	@(cd sso-integration && go test -coverpkg=../api -c -tags testrunmain . && mkdir -p coverage && ./sso-integration.test -test.v -test.run "^Test*" -test.coverprofile=coverage/sso-system.out)
+	@(cd sso-integration && go test -coverpkg=../api -c -tags testrunmain . && mkdir -p coverage && SSO_TEST_CONSOLE_PORT=$(SSO_TEST_CONSOLE_PORT) ./sso-integration.test -test.v -test.run "^Test*" -test.coverprofile=coverage/sso-system.out)
+
+cleanup-sso-integration:
+	@docker rm -f openldap dex minio minio-client >/dev/null 2>&1 || true
+	@docker network rm my-net >/dev/null 2>&1 || true
 
 test-permissions-1:
 	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})

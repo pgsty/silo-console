@@ -20,15 +20,17 @@ package ssointegration
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -39,10 +41,93 @@ import (
 	"github.com/minio/console/api"
 	"github.com/minio/console/api/operations"
 	consoleoauth2 "github.com/minio/console/pkg/auth/idp/oauth2"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-var token string
+func startConsoleServer(t *testing.T, initialize func() (*api.Server, error)) string {
+	t.Helper()
+
+	previousTransport := api.GlobalTransport
+	previousConfig := api.GlobalMinIOConfig
+	previousPort := api.Port
+	previousHostname := api.Hostname
+	previousLogInfo := api.LogInfo
+	previousLogError := api.LogError
+
+	transport := previousTransport.Clone()
+	dialer := &net.Dialer{Timeout: 10 * time.Second, KeepAlive: 15 * time.Second}
+	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(address)
+		if err == nil && host == "dex" {
+			address = net.JoinHostPort("127.0.0.1", port)
+		}
+		return dialer.DialContext(ctx, network, address)
+	}
+	api.GlobalTransport = transport
+
+	server, err := initialize()
+	require.NoError(t, err)
+	server.Port = consoleTestPort(t)
+	require.NoError(t, server.Listen())
+	port := server.Port
+	baseURL := "http://" + net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+
+	require.NotEmpty(t, api.GlobalMinIOConfig.OpenIDProviders)
+	for name, provider := range api.GlobalMinIOConfig.OpenIDProviders {
+		provider.RedirectCallback = baseURL + "/oauth_callback"
+		api.GlobalMinIOConfig.OpenIDProviders[name] = provider
+	}
+	api.Port = strconv.Itoa(port)
+	api.Hostname = "127.0.0.1"
+
+	done := make(chan error, 1)
+	go func() {
+		done <- server.Serve()
+	}()
+
+	require.Eventually(t, func() bool {
+		client := &http.Client{Timeout: 250 * time.Millisecond}
+		response, err := client.Get(baseURL + "/api/v1/login")
+		if err != nil {
+			return false
+		}
+		response.Body.Close()
+		return true
+	}, 5*time.Second, 50*time.Millisecond)
+
+	t.Cleanup(func() {
+		require.NoError(t, server.Shutdown())
+		select {
+		case err := <-done:
+			require.NoError(t, err)
+		case <-time.After(5 * time.Second):
+			t.Errorf("console test server did not shut down")
+		}
+
+		api.GlobalTransport = previousTransport
+		transport.CloseIdleConnections()
+		api.GlobalMinIOConfig = previousConfig
+		api.Port = previousPort
+		api.Hostname = previousHostname
+		api.LogInfo = previousLogInfo
+		api.LogError = previousLogError
+	})
+
+	return baseURL
+}
+
+func consoleTestPort(t *testing.T) int {
+	t.Helper()
+	value := os.Getenv("SSO_TEST_CONSOLE_PORT")
+	if value == "" {
+		return 9090
+	}
+	port, err := strconv.Atoi(value)
+	require.NoError(t, err)
+	require.Greater(t, port, 0)
+	require.LessOrEqual(t, port, 65535)
+	return port
+}
 
 func initConsoleServer(consoleIDPURL string) (*api.Server, error) {
 	// Configure Console Server with vars to get the idp config from the container
@@ -51,7 +136,7 @@ func initConsoleServer(consoleIDPURL string) (*api.Server, error) {
 			URL:              consoleIDPURL,
 			ClientID:         "minio-client-app",
 			ClientSecret:     "minio-client-app-secret",
-			RedirectCallback: "http://127.0.0.1:9090/oauth_callback",
+			RedirectCallback: "http://127.0.0.1/oauth_callback",
 		},
 	}
 
@@ -79,169 +164,188 @@ func initConsoleServer(consoleIDPURL string) (*api.Server, error) {
 	// register all APIs
 	server.ConfigureAPI()
 
-	server.Host = "0.0.0.0"
-	server.Port = 9090
-	api.Port = "9090"
-	api.Hostname = "0.0.0.0"
+	server.Host = "127.0.0.1"
+	server.Port = 0
 
 	return server, nil
 }
 
-func TestMain(t *testing.T) {
-	assert := assert.New(t)
+func authenticateOIDC(t *testing.T, client *http.Client, baseURL string) string {
+	t.Helper()
 
-	// start console server
-	go func() {
-		fmt.Println("start server")
-		srv, err := initConsoleServer("http://dex:5556/dex/.well-known/openid-configuration")
-		if err != nil {
-			log.Println(err)
-			log.Println("init fail")
-			return
+	request, err := http.NewRequest(http.MethodGet, baseURL+"/api/v1/login", nil)
+	require.NoError(t, err)
+	request.Header.Set("Content-Type", "application/json")
+	response, err := client.Do(request)
+	require.NoError(t, err)
+	body, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	require.NoError(t, response.Body.Close())
+	require.LessOrEqual(t, response.StatusCode, http.StatusMultipleChoices, string(body))
+
+	var loginDetails models.LoginDetails
+	require.NoError(t, json.Unmarshal(body, &loginDetails))
+	require.NotEmpty(t, loginDetails.RedirectRules)
+	redirectURL := fmt.Sprint(loginDetails.RedirectRules[0].Redirect)
+
+	cmd := exec.Command("python3", "dex-requests.py", redirectURL)
+	cmd.Env = append(os.Environ(), "DEX_EXTERNAL_URL=http://127.0.0.1:5556")
+	cmdOutput, err := cmd.Output()
+	require.NoError(t, err)
+	loginURL := strings.TrimSpace(string(cmdOutput))
+	_, err = url.ParseRequestURI(loginURL)
+	require.NoError(t, err)
+
+	request, err = http.NewRequest(
+		http.MethodPost,
+		loginURL,
+		bytes.NewBufferString("login=dillon%40example.io&password=dillon"),
+	)
+	require.NoError(t, err)
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	response, err = client.Do(request)
+	require.NoError(t, err)
+	require.NoError(t, response.Body.Close())
+
+	query := response.Request.URL.Query()
+	code := query.Get("code")
+	state := query.Get("state")
+	require.NotEmpty(t, code)
+	require.NotEmpty(t, state)
+
+	payload, err := json.Marshal(map[string]string{"code": code, "state": state})
+	require.NoError(t, err)
+	request, err = http.NewRequest(
+		http.MethodPost,
+		baseURL+"/api/v1/login/oauth2/auth",
+		bytes.NewReader(payload),
+	)
+	require.NoError(t, err)
+	request.Header.Set("Content-Type", "application/json")
+	response, err = client.Do(request)
+	require.NoError(t, err)
+	defer response.Body.Close()
+
+	for _, cookie := range response.Cookies() {
+		if cookie.Name == "token" {
+			require.NotEmpty(t, cookie.Value)
+			return cookie.Value
 		}
-		srv.Serve()
-	}()
-
-	fmt.Println("sleeping")
-	time.Sleep(2 * time.Second)
-
-	client := &http.Client{
-		Timeout: 2 * time.Second,
 	}
 
-	// Let's move this API here to increment our coverage
-	getRequest, getError := http.NewRequest("GET", "http://localhost:9090/api/v1/login", nil)
-	if getError != nil {
-		log.Println(getError)
-		return
-	}
-	getRequest.Header.Add("Content-Type", "application/json")
-	getResponse, getErr := client.Do(getRequest)
-	// current value:
-	// {"loginStrategy":"form"}
-	// but we want our console server to provide loginStrategy = redirect for SSO
-	if getErr != nil {
-		log.Println(getErr)
-		return
-	}
+	t.Fatal("authentication token not found in cookies response")
+	return ""
+}
 
-	body, err := io.ReadAll(getResponse.Body)
-	getResponse.Body.Close()
-	if getResponse.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", getResponse.StatusCode, body)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	var jsonMap models.LoginDetails
+func TestMain(t *testing.T) {
+	baseURL := startConsoleServer(t, func() (*api.Server, error) {
+		return initConsoleServer("http://dex:5556/dex/.well-known/openid-configuration")
+	})
+	client := &http.Client{Timeout: 10 * time.Second}
+	sessionToken := authenticateOIDC(t, client, baseURL)
+	testOIDCAccessKeyLifecycle(t, client, baseURL, sessionToken)
+}
 
-	fmt.Println(body)
+func doSessionRequest(t *testing.T, client *http.Client, baseURL, sessionToken, method, path string, body any) (*http.Response, []byte) {
+	t.Helper()
 
-	err = json.Unmarshal(body, &jsonMap)
-	if err != nil {
-		fmt.Printf("error JSON Unmarshal %s\n", err)
+	var requestBody io.Reader
+	if body != nil {
+		data, err := json.Marshal(body)
+		require.NoError(t, err)
+		requestBody = bytes.NewReader(data)
 	}
 
-	redirectRule := jsonMap.RedirectRules[0]
-	redirectAsString := fmt.Sprint(redirectRule.Redirect)
-	fmt.Println(redirectAsString)
-
-	// execute script to get the code and state
-	cmd, err := exec.Command("python3", "dex-requests.py", redirectAsString).Output()
-	if err != nil {
-		fmt.Printf("error %s\n", err)
+	request, err := http.NewRequest(method, baseURL+"/api/v1"+path, requestBody)
+	require.NoError(t, err)
+	request.Header.Set("Cookie", "token="+sessionToken)
+	if body != nil {
+		request.Header.Set("Content-Type", "application/json")
 	}
-	urlOutput := string(cmd)
-	fmt.Println("url output:", urlOutput)
-	requestLoginBody := bytes.NewReader([]byte("login=dillon%40example.io&password=dillon"))
-
-	// parse url remove carriage return
-	temp2 := strings.Split(urlOutput, "\n")
-	fmt.Println("temp2: ", temp2)
-	urlOutput = temp2[0] // remove carriage return to avoid invalid control character in url
-
-	// validate url
-	urlParseResult, urlParseError := url.Parse(urlOutput)
-	if urlParseError != nil {
-		panic(urlParseError)
-	}
-	fmt.Println(urlParseResult)
-
-	// prepare for post
-	httpRequestLogin, newRequestError := http.NewRequest(
-		"POST",
-		urlOutput,
-		requestLoginBody,
-	)
-	if newRequestError != nil {
-		fmt.Println(newRequestError)
-	}
-	httpRequestLogin.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	responseLogin, errorLogin := client.Do(httpRequestLogin)
-	if errorLogin != nil {
-		log.Println(errorLogin)
-	}
-	rawQuery := responseLogin.Request.URL.RawQuery
-	fmt.Println(rawQuery)
-	splitRawQuery := strings.Split(rawQuery, "&state=")
-	codeValue := strings.ReplaceAll(splitRawQuery[0], "code=", "")
-	stateValue := splitRawQuery[1]
-	fmt.Println("stop", splitRawQuery, codeValue, stateValue)
-
-	// get login credentials
-	codeVarIable := strings.TrimSpace(codeValue)
-	stateVarIabl := strings.TrimSpace(stateValue)
-	requestData := map[string]string{
-		"code":  codeVarIable,
-		"state": stateVarIabl,
-	}
-	requestDataJSON, _ := json.Marshal(requestData)
-
-	requestDataBody := bytes.NewReader(requestDataJSON)
-
-	request, _ := http.NewRequest(
-		"POST",
-		"http://localhost:9090/api/v1/login/oauth2/auth",
-		requestDataBody,
-	)
-	request.Header.Add("Content-Type", "application/json")
 
 	response, err := client.Do(request)
-	if err != nil {
-		log.Println(err)
-	}
-	if response != nil {
-		for _, cookie := range response.Cookies() {
-			if cookie.Name == "token" {
-				token = cookie.Value
-				break
+	require.NoError(t, err)
+	responseBody, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	require.NoError(t, response.Body.Close())
+	return response, responseBody
+}
+
+func testOIDCAccessKeyLifecycle(t *testing.T, client *http.Client, baseURL, sessionToken string) {
+	t.Helper()
+
+	accessKey := fmt.Sprintf("oidc%016x", uint64(time.Now().UnixNano()))
+	response, body := doSessionRequest(t, client, baseURL, sessionToken, http.MethodPost, "/service-account-credentials", map[string]string{
+		"accessKey":   accessKey,
+		"secretKey":   "oidc-integration-secret-key",
+		"name":        "oidc-integration",
+		"description": "OIDC access key regression",
+	})
+	require.Equal(t, http.StatusCreated, response.StatusCode, string(body))
+
+	var credentials models.ServiceAccountCreds
+	require.NoError(t, json.Unmarshal(body, &credentials))
+	require.Equal(t, accessKey, credentials.AccessKey)
+	require.NotEmpty(t, credentials.SecretKey)
+
+	accessKeyPath := "/service-accounts/" + url.PathEscape(credentials.AccessKey)
+	deleted := false
+	defer func() {
+		if deleted {
+			return
+		}
+		request, err := http.NewRequest(http.MethodDelete, baseURL+"/api/v1"+accessKeyPath, nil)
+		if err == nil {
+			request.Header.Set("Cookie", "token="+sessionToken)
+			if cleanupResponse, cleanupErr := client.Do(request); cleanupErr == nil {
+				cleanupResponse.Body.Close()
 			}
 		}
-	}
-	fmt.Println(response.Status)
-	if token == "" {
-		assert.Fail("authentication token not found in cookies response")
-	} else {
-		fmt.Println(token)
+	}()
+
+	response, body = doSessionRequest(t, client, baseURL, sessionToken, http.MethodGet, "/service-accounts", nil)
+	require.Equal(t, http.StatusOK, response.StatusCode, string(body))
+	var accounts models.ServiceAccounts
+	require.NoError(t, json.Unmarshal(body, &accounts))
+	require.Condition(t, func() bool {
+		for _, account := range accounts {
+			if account != nil && account.AccessKey == credentials.AccessKey {
+				return true
+			}
+		}
+		return false
+	}, "created OIDC access key was not listed")
+
+	response, body = doSessionRequest(t, client, baseURL, sessionToken, http.MethodGet, accessKeyPath, nil)
+	require.Equal(t, http.StatusOK, response.StatusCode, string(body))
+	var account models.ServiceAccount
+	require.NoError(t, json.Unmarshal(body, &account))
+	require.Equal(t, "oidc-integration", account.Name)
+
+	response, body = doSessionRequest(t, client, baseURL, sessionToken, http.MethodPut, accessKeyPath, map[string]string{
+		"policy": "",
+		"name":   "must-not-update",
+	})
+	require.Equal(t, http.StatusForbidden, response.StatusCode, string(body))
+
+	response, body = doSessionRequest(t, client, baseURL, sessionToken, http.MethodDelete, accessKeyPath, nil)
+	require.Equal(t, http.StatusNoContent, response.StatusCode, string(body))
+	deleted = true
+
+	response, body = doSessionRequest(t, client, baseURL, sessionToken, http.MethodGet, "/service-accounts", nil)
+	require.Equal(t, http.StatusOK, response.StatusCode, string(body))
+	require.NoError(t, json.Unmarshal(body, &accounts))
+	for _, listedAccount := range accounts {
+		if listedAccount != nil {
+			require.NotEqual(t, credentials.AccessKey, listedAccount.AccessKey)
+		}
 	}
 }
 
 func TestBadLogin(t *testing.T) {
-	assert := assert.New(t)
-
-	// start console server
-	go func() {
-		fmt.Println("start server")
-		srv, err := initConsoleServer("http://dex:5556")
-		if err != nil {
-			log.Println(err)
-			log.Println("init fail")
-			return
-		}
-		srv.Serve()
-	}()
-	fmt.Println("sleeping")
-	time.Sleep(2 * time.Second)
+	baseURL := startConsoleServer(t, func() (*api.Server, error) {
+		return initConsoleServer("http://dex:5556")
+	})
 
 	client := &http.Client{
 		Timeout: 2 * time.Second,
@@ -253,10 +357,7 @@ func TestBadLogin(t *testing.T) {
 	}
 
 	jsonState, err := json.Marshal(encodeItem)
-	if err != nil {
-		log.Println(err)
-		assert.Nil(err)
-	}
+	require.NoError(t, err)
 
 	// get login credentials
 	stateVarIable := base64.StdEncoding.EncodeToString(jsonState)
@@ -267,37 +368,38 @@ func TestBadLogin(t *testing.T) {
 		"code":  codeVarIable,
 		"state": stateVarIable,
 	}
-	requestDataJSON, _ := json.Marshal(requestData)
+	requestDataJSON, err := json.Marshal(requestData)
+	require.NoError(t, err)
 
 	requestDataBody := bytes.NewReader(requestDataJSON)
 
-	request, _ := http.NewRequest(
+	request, err := http.NewRequest(
 		"POST",
-		"http://localhost:9090/api/v1/login/oauth2/auth",
+		baseURL+"/api/v1/login/oauth2/auth",
 		requestDataBody,
 	)
+	require.NoError(t, err)
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := client.Do(request)
-	fmt.Println(response)
-	fmt.Println(err)
-	expectedError := response.Status
-	assert.Equal("400 Bad Request", expectedError)
-	bodyBytes, _ := io.ReadAll(response.Body)
+	require.NoError(t, err)
+	require.NotNil(t, response)
+	defer response.Body.Close()
+	require.Equal(t, http.StatusBadRequest, response.StatusCode)
+	bodyBytes, err := io.ReadAll(response.Body)
+	require.NoError(t, err)
 	result2 := models.APIError{}
 	err = json.Unmarshal(bodyBytes, &result2)
-	if err != nil {
-		log.Println(err)
-		assert.Nil(err)
-	}
+	require.NoError(t, err)
 }
 
-func initConsoleServerEnv(consoleIDPURL string) (*api.Server, error) {
+func initConsoleServerEnv(t *testing.T, consoleIDPURL string) (*api.Server, error) {
+	t.Helper()
 	// Configure Console Server with vars to get the idp config from the container
-	os.Setenv("CONSOLE_IDP_URL", consoleIDPURL)
-	os.Setenv("CONSOLE_IDP_CLIENT_ID", "minio-client-app")
-	os.Setenv("CONSOLE_IDP_SECRET", "minio-client-app-secret")
-	os.Setenv("CONSOLE_IDP_CALLBACK", "http://127.0.0.1:9090")
+	t.Setenv("CONSOLE_IDP_URL", consoleIDPURL)
+	t.Setenv("CONSOLE_IDP_CLIENT_ID", "minio-client-app")
+	t.Setenv("CONSOLE_IDP_SECRET", "minio-client-app-secret")
+	t.Setenv("CONSOLE_IDP_CALLBACK", "http://127.0.0.1")
 
 	swaggerSpec, err := loads.Embedded(api.SwaggerJSON, api.FlatSwaggerJSON)
 	if err != nil {
@@ -323,149 +425,16 @@ func initConsoleServerEnv(consoleIDPURL string) (*api.Server, error) {
 	// register all APIs
 	server.ConfigureAPI()
 
-	server.Host = "0.0.0.0"
-	server.Port = 9090
-	api.Port = "9090"
-	api.Hostname = "0.0.0.0"
+	server.Host = "127.0.0.1"
+	server.Port = 0
 
 	return server, nil
 }
 
 func TestEnv(t *testing.T) {
-	assert := assert.New(t)
-
-	// start console server
-	go func() {
-		fmt.Println("start server")
-		srv, err := initConsoleServerEnv("http://dex:5556/dex/.well-known/openid-configuration")
-		if err != nil {
-			log.Println(err)
-			log.Println("init fail")
-			return
-		}
-		srv.Serve()
-	}()
-
-	fmt.Println("sleeping")
-	time.Sleep(2 * time.Second)
-
-	client := &http.Client{
-		Timeout: 2 * time.Second,
-	}
-
-	// Let's move this API here to increment our coverage
-	getRequest, getError := http.NewRequest("GET", "http://localhost:9090/api/v1/login", nil)
-	if getError != nil {
-		log.Println(getError)
-		return
-	}
-	getRequest.Header.Add("Content-Type", "application/json")
-	getResponse, getErr := client.Do(getRequest)
-	// current value:
-	// {"loginStrategy":"form"}
-	// but we want our console server to provide loginStrategy = redirect for SSO
-	if getErr != nil {
-		log.Println(getErr)
-		return
-	}
-
-	body, err := io.ReadAll(getResponse.Body)
-	getResponse.Body.Close()
-	if getResponse.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", getResponse.StatusCode, body)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	var jsonMap models.LoginDetails
-
-	fmt.Println(body)
-
-	err = json.Unmarshal(body, &jsonMap)
-	if err != nil {
-		fmt.Printf("error JSON Unmarshal %s\n", err)
-	}
-
-	redirectRule := jsonMap.RedirectRules[0]
-	redirectAsString := fmt.Sprint(redirectRule.Redirect)
-	fmt.Println(redirectAsString)
-
-	// execute script to get the code and state
-	cmd, err := exec.Command("python3", "dex-requests.py", redirectAsString).Output()
-	if err != nil {
-		fmt.Printf("error %s\n", err)
-	}
-	urlOutput := string(cmd)
-	fmt.Println("url output:", urlOutput)
-	requestLoginBody := bytes.NewReader([]byte("login=dillon%40example.io&password=dillon"))
-
-	// parse url remove carriage return
-	temp2 := strings.Split(urlOutput, "\n")
-	fmt.Println("temp2: ", temp2)
-	urlOutput = temp2[0] // remove carriage return to avoid invalid control character in url
-
-	// validate url
-	urlParseResult, urlParseError := url.Parse(urlOutput)
-	if urlParseError != nil {
-		panic(urlParseError)
-	}
-	fmt.Println(urlParseResult)
-
-	// prepare for post
-	httpRequestLogin, newRequestError := http.NewRequest(
-		"POST",
-		urlOutput,
-		requestLoginBody,
-	)
-	if newRequestError != nil {
-		fmt.Println(newRequestError)
-	}
-	httpRequestLogin.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	responseLogin, errorLogin := client.Do(httpRequestLogin)
-	if errorLogin != nil {
-		log.Println(errorLogin)
-	}
-	rawQuery := responseLogin.Request.URL.RawQuery
-	fmt.Println(rawQuery)
-	splitRawQuery := strings.Split(rawQuery, "&state=")
-	codeValue := strings.ReplaceAll(splitRawQuery[0], "code=", "")
-	stateValue := splitRawQuery[1]
-	fmt.Println("stop", splitRawQuery, codeValue, stateValue)
-
-	// get login credentials
-	codeVarIable := strings.TrimSpace(codeValue)
-	stateVarIabl := strings.TrimSpace(stateValue)
-	requestData := map[string]string{
-		"code":  codeVarIable,
-		"state": stateVarIabl,
-	}
-	requestDataJSON, _ := json.Marshal(requestData)
-
-	requestDataBody := bytes.NewReader(requestDataJSON)
-
-	request, _ := http.NewRequest(
-		"POST",
-		"http://localhost:9090/api/v1/login/oauth2/auth",
-		requestDataBody,
-	)
-	request.Header.Add("Content-Type", "application/json")
-
-	response, err := client.Do(request)
-	if err != nil {
-		log.Println(err)
-	}
-	if response != nil {
-		for _, cookie := range response.Cookies() {
-			if cookie.Name == "token" {
-				token = cookie.Value
-				break
-			}
-		}
-	}
-	fmt.Println(response.Status)
-	if token == "" {
-		assert.Fail("authentication token not found in cookies response")
-	} else {
-		fmt.Println(token)
-	}
+	baseURL := startConsoleServer(t, func() (*api.Server, error) {
+		return initConsoleServerEnv(t, "http://dex:5556/dex/.well-known/openid-configuration")
+	})
+	client := &http.Client{Timeout: 10 * time.Second}
+	require.NotEmpty(t, authenticateOIDC(t, client, baseURL))
 }

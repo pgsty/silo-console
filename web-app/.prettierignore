@@ -1,5 +1,9 @@
 build 
 coverage
 .nyc_output
+playwright-report
+playwright/.auth
+storage
+test-results
 public/scripts/pdf.worker.min.mjs
 /src/api/consoleApi.ts
