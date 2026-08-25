@@ -1,0 +1,4 @@
+{
+  "selectorTimeout": 30000,
+  "assertionTimeout": 30000
+}
