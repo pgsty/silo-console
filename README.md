@@ -147,7 +147,7 @@ source should retain the matching top-level selections:
 
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826160435-81586050e2b0
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1
 	github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
 	github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.2
 )
