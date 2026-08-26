@@ -4,14 +4,19 @@ go 1.27.0
 
 tool github.com/go-swagger/go-swagger/cmd/swagger
 
+// Use PGSTY's maintained Silo Go SDK while preserving upstream import paths.
+// Keep the required version on a real upstream tag because replace directives
+// are ignored when this module is consumed as a dependency.
+replace github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
+
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd01ccb
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826160435-81586050e2b0
 
 // Keep the required version on a real upstream tag for downstream consumers:
 // replace directives in dependency modules are ignored by the Go toolchain.
-replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1
+replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.2
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -40,7 +45,7 @@ require (
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	github.com/minio/minio-go/v7 v7.3.0
-	github.com/minio/pkg/v3 v3.6.1
+	github.com/minio/pkg/v3 v3.11.0
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -161,7 +166,7 @@ require (
 	github.com/prometheus/prometheus v0.311.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rjeczalik/notify v0.9.3 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/safchain/ethtool v0.7.0 // indirect
 	github.com/sagikazarmark/locafero v0.10.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
@@ -193,7 +198,6 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/exp v0.0.0-20260820142414-ca536658362e // indirect
 	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
@@ -202,8 +206,8 @@ require (
 	// https://github.com/golang/go/issues/56152
 	golang.org/x/text v0.41.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/grpc v1.82.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect

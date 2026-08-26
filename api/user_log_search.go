@@ -51,7 +51,7 @@ func getLogSearchResponse(session *models.Principal, params logApi.LogSearchPara
 	var allowedToQueryLogSearchAPI bool
 	if permissions, ok := sessionResp.Permissions[ConsoleResourceName]; ok {
 		for _, permission := range permissions {
-			if permission == iampolicy.HealthInfoAdminAction {
+			if permission == string(iampolicy.HealthInfoAdminAction) {
 				allowedToQueryLogSearchAPI = true
 				break
 			}

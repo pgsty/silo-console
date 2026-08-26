@@ -52,7 +52,7 @@ jobs:
           make verifiers
 
   upstream-pkg-compat:
-    name: Build with upstream minio/pkg v3.6.1
+    name: Build with upstream minio/pkg v3.11.0
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -64,9 +64,9 @@ jobs:
       - name: Remove the SILO package replacement and test the advertised floor
         run: |
           go mod edit -dropreplace=github.com/minio/pkg/v3
-          go mod edit -require=github.com/minio/pkg/v3@v3.6.1
+          go mod edit -require=github.com/minio/pkg/v3@v3.11.0
           go mod tidy
-          test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.6.1"
+          test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.11.0"
           test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/pkg/v3)"
           go vet ./...
           go vet -tags=testrunmain ./...

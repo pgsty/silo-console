@@ -1,5 +1,14 @@
 # Changelog
 
+## Release v2.2.1
+
+Dependency alignment:
+
+- Routed the compatibility import `github.com/minio/minio-go/v7` to the released `github.com/pgsty/silo-go/v7` v7.3.1 SDK
+- Updated the shared package replacement to `github.com/pgsty/silo-pkg/v3` v3.12.2 and the CLI replacement to the `pgsty/mc` release commit for `RELEASE.2026-08-26T00-00-00Z`
+- Kept Console's public module requirements on resolvable upstream versions because dependency-module replacements are not inherited; embedders must retain the documented top-level SILO replacements
+- Raised the tested upstream `minio/pkg` compatibility version to v3.11.0, matching the minimum selected by the released SILO CLI module graph, and made the log-search permission comparison compile against its typed IAM action constants
+
 ## Release v2.2.0
 
 Object previews and version history:
