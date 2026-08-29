@@ -274,8 +274,8 @@ github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1 h1:CotSAPr11rZy3VK46j5rJQ
 github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1/go.mod h1:pwkfUxTikOkKc+yvEWqFg7CAPZDj5Yl0YHFcZoPKmU8=
 github.com/pgsty/silo-go/v7 v7.3.1 h1:CchXB5hdv1KGUCGBzR5Tz8hSE+3P9sGJFPY+ku8tC04=
 github.com/pgsty/silo-go/v7 v7.3.1/go.mod h1:3uUcXVLE1xLBTy+A/js/hHKkvcYQ/zMbj8rbtNQavxE=
-github.com/pgsty/silo-pkg/v3 v3.12.2 h1:pBKMVeZx78YQHFWs6PnKhXx53V16cavTzY6N0tvs1eo=
-github.com/pgsty/silo-pkg/v3 v3.12.2/go.mod h1:hSvfIz9FWTvEZqTsGEWQ8P/gD81pDee9W4j5oIvHZMY=
+github.com/pgsty/silo-pkg/v3 v3.12.3-0.20260829103855-748c94bf8ab7 h1:YSCnSqNjU2ddU84dA8ybJXOoWYx8VDu2qAzXMVweisc=
+github.com/pgsty/silo-pkg/v3 v3.12.3-0.20260829103855-748c94bf8ab7/go.mod h1:hSvfIz9FWTvEZqTsGEWQ8P/gD81pDee9W4j5oIvHZMY=
 github.com/philhofer/fwd v1.2.0 h1:e6DnBTl7vGY+Gz322/ASL4Gyp1FspeMvx1RNDoToZuM=
 github.com/philhofer/fwd v1.2.0/go.mod h1:RqIHx9QI14HlwKwm98g9Re5prTQ6LdeRQn+gXJFxsJM=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
