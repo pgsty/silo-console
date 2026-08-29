@@ -270,8 +270,8 @@ github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7olPtrEc=
 github.com/pelletier/go-toml/v2 v2.3.1/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1 h1:YwSJIbR7oVC8P5K9/HKzc95aZ8pfK3McXfobhmVb4C4=
-github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1/go.mod h1:pwkfUxTikOkKc+yvEWqFg7CAPZDj5Yl0YHFcZoPKmU8=
+github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1 h1:CotSAPr11rZy3VK46j5rJQYQ2LHT2mjrd9vf0Ak12bA=
+github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1/go.mod h1:pwkfUxTikOkKc+yvEWqFg7CAPZDj5Yl0YHFcZoPKmU8=
 github.com/pgsty/silo-go/v7 v7.3.1 h1:CchXB5hdv1KGUCGBzR5Tz8hSE+3P9sGJFPY+ku8tC04=
 github.com/pgsty/silo-go/v7 v7.3.1/go.mod h1:3uUcXVLE1xLBTy+A/js/hHKkvcYQ/zMbj8rbtNQavxE=
 github.com/pgsty/silo-pkg/v3 v3.12.2 h1:pBKMVeZx78YQHFWs6PnKhXx53V16cavTzY6N0tvs1eo=
