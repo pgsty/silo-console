@@ -16,7 +16,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260829103737-5ed037e
 
 // Keep the required version on a real upstream tag for downstream consumers:
 // replace directives in dependency modules are ignored by the Go toolchain.
-replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.2
+replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.3-0.20260829103855-748c94bf8ab7
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
