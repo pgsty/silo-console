@@ -12,7 +12,7 @@ replace github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1
 
 // Keep the required version on a real upstream tag for downstream consumers:
 // replace directives in dependency modules are ignored by the Go toolchain.
