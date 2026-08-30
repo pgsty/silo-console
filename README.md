@@ -153,12 +153,13 @@ replace (
 )
 ```
 
-These three selections are adopted as one set. `pgsty/mc` is the SILO CLI and
-compiles against the SILO package's strict policy API, so a build that keeps the
-CLI replacement must keep the shared-package replacement too; a build that takes
-neither resolves upstream `github.com/minio/mc` and upstream `github.com/minio/pkg/v3`
-together. Mixing one fork with the other project's shared package is not a
-supported configuration.
+Adopt these selections as one set. The CLI and the shared package are coupled:
+`pgsty/mc` compiles against the SILO package's strict policy API, so a build that
+keeps the CLI replacement must keep the shared-package replacement too, and a
+build that takes neither resolves upstream `github.com/minio/mc` and upstream
+`github.com/minio/pkg/v3` together. Go will resolve a partial override that pairs
+one project's CLI with the other's shared package, but Console does not support
+it and does not test it.
 
 The logical requirements remain on resolvable upstream versions because those
 requirements are part of Console's public module graph, while the replacements

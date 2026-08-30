@@ -4,8 +4,8 @@
 
 Dependency and compatibility gates:
 
-- Corrected the upstream `minio/pkg` floor job to drop the CLI replacement together with the shared-package replacement. `pgsty/mc` compiles against silo-pkg's strict policy API, so removing only the shared-package replacement produced a hybrid module graph that no consumer resolves, and the job failed for a configuration Console does not offer
-- Recorded that the SILO replacements are adopted as one set: a build without the shared-package replacement also has no CLI replacement and resolves upstream `github.com/minio/mc`
+- Corrected the upstream `minio/pkg` floor job to drop all three SILO replacements rather than the shared package alone. Replacements are not inherited, so an embedder that adds none of them resolves every dependency upstream, and that is the graph the floor describes. Removing only the shared package left `pgsty/mc`, which compiles against silo-pkg's strict policy API; the job then failed on a partial override Console does not support instead of testing the floor
+- Recorded that the SILO replacements are adopted as one set: `pgsty/mc` depends on the SILO package's strict policy semantics, so a build that keeps the CLI replacement must keep the shared-package replacement too
 - Updated the shared package replacement to the reviewed silo-pkg remote-env URL scheme repair and the CLI replacement to the reviewed pre-release MCLI source
 
 ## Release v2.2.1

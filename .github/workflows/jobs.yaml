@@ -61,21 +61,24 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: 1.27.x
-      - name: Remove the SILO package replacement and test the advertised floor
+      - name: Remove the SILO replacements and test the advertised floor
         run: |
-          # The SILO replacements are adopted as one set. pgsty/mc is the SILO
-          # CLI and compiles against silo-pkg's strict policy API, so dropping
-          # only the shared-package replacement builds a hybrid graph that no
-          # consumer resolves: a build without the package replacement also has
-          # no CLI replacement, and gets upstream minio/mc. Drop both together
-          # so this job tests the floor an upstream consumer really sees.
+          # Replacements are not inherited, so an embedder that adds none of
+          # them resolves every dependency upstream. Model exactly that: drop
+          # all three SILO replacements, not just the shared package. Dropping
+          # the shared package alone leaves pgsty/mc, which compiles against
+          # silo-pkg's strict policy API; Go resolves that graph and then fails
+          # to build it. That partial override is a configuration Console does
+          # not support, so failing on it says nothing about the floor.
           go mod edit -dropreplace=github.com/minio/pkg/v3
           go mod edit -dropreplace=github.com/minio/mc
+          go mod edit -dropreplace=github.com/minio/minio-go/v7
           go mod edit -require=github.com/minio/pkg/v3@v3.6.1
           go mod tidy
           test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.6.1"
-          test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/pkg/v3)"
-          test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/mc)"
+          for module in github.com/minio/pkg/v3 github.com/minio/mc github.com/minio/minio-go/v7; do
+            test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' "$module")"
+          done
           go vet ./...
           go vet -tags=testrunmain ./...
           go test ./...
