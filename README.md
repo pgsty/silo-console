@@ -153,6 +153,13 @@ replace (
 )
 ```
 
+These three selections are adopted as one set. `pgsty/mc` is the SILO CLI and
+compiles against the SILO package's strict policy API, so a build that keeps the
+CLI replacement must keep the shared-package replacement too; a build that takes
+neither resolves upstream `github.com/minio/mc` and upstream `github.com/minio/pkg/v3`
+together. Mixing one fork with the other project's shared package is not a
+supported configuration.
+
 The logical requirements remain on resolvable upstream versions because those
 requirements are part of Console's public module graph, while the replacements
 select the released SILO implementations for this repository's own builds. An
