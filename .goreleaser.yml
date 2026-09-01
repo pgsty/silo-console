@@ -7,8 +7,7 @@ release:
   github:
     owner: pgsty
     name: silo-console
-  # The draft is the staging area: release.yaml verifies the uploaded assets
-  # and publishes only from the protected publish-release job.
+  # Keep the release private until the maintainer reviews its notes and assets.
   draft: true
   prerelease: false
   extra_files:
@@ -138,18 +137,17 @@ nfpms:
         License: AGPL-3.0-or-later
 
 dockers_v2:
-  # Release images are pushed to a separately PRIVATE staging package and
-  # promoted by digest to ghcr.io/pgsty/silo-console only after release.yaml
-  # has verified the exact index; snapshots build locally under a per-commit
-  # tag so a stale image can never satisfy the verifier.
+  # Release images go directly to the public package. Snapshot tags stay local
+  # and include the commit so the artifact verifier cannot reuse a stale image.
   - dockerfile: Dockerfile.goreleaser
     images:
-      - "ghcr.io/pgsty/silo-console-staging"
+      - "ghcr.io/pgsty/silo-console"
     platforms:
       - linux/amd64
       - linux/arm64
     tags:
       - "{{ if .IsSnapshot }}snapshot-{{ .ShortCommit }}{{ else }}{{ .Tag }}{{ end }}"
+      - "{{ if not .IsSnapshot }}latest{{ end }}"
     build_args:
       TAG: "{{ .Tag }}"
     extra_files:

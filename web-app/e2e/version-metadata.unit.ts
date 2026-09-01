@@ -14,7 +14,7 @@ import { expect, test } from "@playwright/test";
 // version, the generated version module the License page renders, and the
 // newest CHANGELOG section. On ordinary changes the CHANGELOG head is
 // "Unreleased"; at release time (RELEASE_METADATA_MUST_BE_FINAL=1, set by the
-// release-candidate and tag workflows) it must be the release heading.
+// tag workflow) it must be the release heading.
 
 const webApp = fileURLToPath(new URL("..", import.meta.url));
 const repo = join(webApp, "..");
