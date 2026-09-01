@@ -22,7 +22,7 @@ import {
   shouldRedirectExpiredSession,
   takeRememberedRoute,
 } from "../src/api/sessionExpiry";
-import { HttpClient, HttpResponse } from "../src/api/consoleApi";
+import { Api, HttpClient, HttpResponse } from "../src/api/consoleApi";
 
 class MemoryStorage implements RouteStorage {
   items = new Map<string, string>();
@@ -180,20 +180,49 @@ test.describe("handleExpiredSession", () => {
   });
 });
 
+// A transport that answers every call with one canned response, served from
+// the given URL (or the requested URL when none is given).
+const cannedFetch =
+  (
+    status: number,
+    body: unknown,
+    url?: string,
+    contentType = "application/json",
+  ) =>
+  async (input: RequestInfo | URL) => {
+    const response = new Response(
+      typeof body === "string" ? body : JSON.stringify(body),
+      { status, headers: { "content-type": contentType } },
+    );
+    Object.defineProperty(response, "url", { value: url ?? String(input) });
+    return response;
+  };
+
 // A generated client whose transport answers every call with one canned
 // response, served from the given URL.
 const clientAnswering = (status: number, body: unknown, url: string) =>
   new HttpClient({
     baseUrl: "http://console/api/v1",
-    customFetch: async () => {
-      const response = new Response(JSON.stringify(body), {
-        status,
-        headers: { "content-type": "application/json" },
-      });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    },
+    customFetch: cannedFetch(status, body, url),
   });
+
+// The production wiring of src/api/index.ts applied to a generated Api
+// instance: every request settles through the session check.
+const apiAnswering = (
+  status: number,
+  body: unknown,
+  onExpired: () => void,
+  contentType?: string,
+) => {
+  const instance = new Api({
+    baseUrl: "http://console/api/v1",
+    customFetch: cannedFetch(status, body, undefined, contentType),
+  });
+  const original = instance.request;
+  instance.request = (params) =>
+    settleWithSessionCheck(original(params), onExpired);
+  return instance;
+};
 
 const settle = async (
   client: HttpClient,
@@ -288,6 +317,72 @@ test.describe("generated client session check", () => {
     expect(ok.outcome).toBe("fulfilled");
     expect(ok.expired).toBe(0);
     expect((ok.response.data as { status: string }).status).toBe("ok");
+  });
+
+  test("generated void methods (no response format) still detect an expiry", async () => {
+    let expired = 0;
+    const instance = apiAnswering(
+      401,
+      { message: "invalid session" },
+      () => expired++,
+    );
+    const rejection = await instance.user
+      .removeUser("alice")
+      .then(() => null)
+      .catch((reason) => reason as HttpResponse<void, unknown>);
+    expect(rejection?.status).toBe(401);
+    // The transport parsed nothing, and the original body is still readable.
+    expect(rejection?.error).toBeNull();
+    expect(await rejection?.text()).toBe(
+      JSON.stringify({ message: "invalid session" }),
+    );
+    expect(expired).toBe(1);
+  });
+
+  test("generated raw-response methods detect an expiry and keep their body", async () => {
+    let expired = 0;
+    const instance = apiAnswering(
+      403,
+      { message: "invalid session" },
+      () => expired++,
+    );
+    const rejection = await instance.buckets
+      .downloadObject("b", { prefix: "k" })
+      .then(() => null)
+      .catch((reason) => reason as HttpResponse<Blob, unknown>);
+    expect(rejection?.status).toBe(403);
+    expect(rejection?.bodyUsed).toBe(false);
+    expect(expired).toBe(1);
+  });
+
+  test("a wrong current password through a void method keeps the session", async () => {
+    let expired = 0;
+    const instance = apiAnswering(
+      401,
+      { message: "invalid Login" },
+      () => expired++,
+    );
+    await instance.account
+      .accountChangePassword({ current_secret_key: "a", new_secret_key: "b" })
+      .catch(() => undefined);
+    expect(expired).toBe(0);
+  });
+
+  test("non-JSON and unreadable 401 bodies are not treated as an expiry", async () => {
+    let expired = 0;
+    const instance = apiAnswering(
+      401,
+      "invalid session",
+      () => expired++,
+      "text/plain",
+    );
+    await instance.user.removeUser("alice").catch(() => undefined);
+    expect(expired).toBe(0);
+
+    let expiredBroken = 0;
+    const broken = apiAnswering(401, "{not json", () => expiredBroken++);
+    await broken.user.removeUser("alice").catch(() => undefined);
+    expect(expiredBroken).toBe(0);
   });
 
   test("non-response rejections are rethrown without a session check", async () => {

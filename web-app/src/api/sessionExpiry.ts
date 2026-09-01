@@ -144,6 +144,10 @@ export interface SessionResponseLike {
   status: number;
   url?: string;
   error?: unknown;
+  // Present on fetch Responses: lets the check read a JSON body the generated
+  // transport did not parse (methods declared without a response format).
+  headers?: { get(name: string): string | null };
+  clone?: () => { json(): Promise<unknown> };
 }
 
 const responseMessage = (error: unknown): string | undefined =>
@@ -158,14 +162,53 @@ const isResponseLike = (value: unknown): value is SessionResponseLike =>
   value !== null &&
   typeof (value as { status?: unknown }).status === "number";
 
+const mayBeExpiry = (response: SessionResponseLike): boolean =>
+  (response.status === 401 || response.status === 403) &&
+  !isSessionProbe(response.url || "");
+
 // isExpiredSessionResponse applies the invalid-session rule to one API
-// response: the status and message must match and the call must not be a
-// login call.
+// response whose error body has already been parsed: the status and message
+// must match and the call must not be a session probe.
 export const isExpiredSessionResponse = (
   response: SessionResponseLike,
 ): boolean =>
-  !isSessionProbe(response.url || "") &&
+  mayBeExpiry(response) &&
   isInvalidSessionResponse(response.status, responseMessage(response.error));
+
+// bodyMessage reads the `message` of a JSON error body the transport left
+// unparsed. It works on a clone, so the caller's response (its rejection value
+// and its body) stays untouched, and it never throws.
+const bodyMessage = async (
+  response: SessionResponseLike,
+): Promise<string | undefined> => {
+  if (typeof response.clone !== "function") {
+    return undefined;
+  }
+  const contentType = response.headers?.get("content-type") || "";
+  if (!contentType.toLowerCase().startsWith("application/json")) {
+    return undefined;
+  }
+  try {
+    return responseMessage(await response.clone().json());
+  } catch {
+    return undefined;
+  }
+};
+
+// expiredResponse is the asynchronous form used on live responses: generated
+// methods declared without a response format (every `void` method such as
+// removeUser, and raw methods such as downloadObject) reject with
+// `error = null`, so the message has to come from the body itself.
+export const expiredResponse = async (
+  response: SessionResponseLike,
+): Promise<boolean> => {
+  if (!mayBeExpiry(response)) {
+    return false;
+  }
+  const message =
+    responseMessage(response.error) ?? (await bodyMessage(response));
+  return isInvalidSessionResponse(response.status, message);
+};
 
 // settleWithSessionCheck runs the invalid-session rule on the outcome of a
 // generated-client request, fulfilled or rejected. The generated transport
@@ -177,14 +220,14 @@ export const settleWithSessionCheck = <T extends SessionResponseLike>(
   onExpired: () => void,
 ): Promise<T> =>
   request.then(
-    (response) => {
-      if (isExpiredSessionResponse(response)) {
+    async (response) => {
+      if (await expiredResponse(response)) {
         onExpired();
       }
       return response;
     },
-    (reason: unknown) => {
-      if (isResponseLike(reason) && isExpiredSessionResponse(reason)) {
+    async (reason: unknown) => {
+      if (isResponseLike(reason) && (await expiredResponse(reason))) {
         onExpired();
       }
       throw reason;
