@@ -12,6 +12,10 @@
 | `CONSOLE_DEBUG_LOGLEVEL` | 0 - 6; credential-bearing headers, query parameters and path segments are redacted at every level, see [Debug.md](Debug.md) |
 | `CONSOLE_CORRESPONDING_SOURCE_URL` | "" ; public https URL of the exact corresponding source for a custom or modified build, reported by `console version`, the page metadata and the License/Login/anonymous pages; must have a host and no credentials, query or fragment, otherwise it is rejected (without suppressing built-in provenance) |
 | `CONSOLE_TRUSTED_PROXIES` | Standalone only: trusted proxy IP/CIDR list; blank falls back to `MINIO_API_TRUSTED_PROXIES` |
+| `CONSOLE_WS_MAX_CONNECTIONS` | 1024; WebSocket connections the process holds at once, see [WebSocket connection limits](#websocket-connection-limits) |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256; WebSocket connections one client address holds at once |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64; anonymous WebSocket connections for the process (must not exceed the total) |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8; anonymous WebSocket connections from one client address (must not exceed the per-client cap or the anonymous budget) |
 | `CONSOLE_SHARE_MINIO_URL` | "off"
 | `CONSOLE_SECURE_ALLOWED_HOSTS` | "" |
 | `CONSOLE_SECURE_ALLOWED_HOSTS_ARE_REGEX` | "off" |
@@ -155,6 +159,42 @@ send a ping every 30 seconds and close peers that stay silent for 60 seconds,
 bound each write to 10 seconds, accept at most 4 concurrent listings, validate
 every request before allocating anything, and close the session after 10
 consecutive invalid frames.
+
+## WebSocket connection limits
+
+The per-connection bounds above do not limit how many connections one peer may
+hold, so Console also caps the number of WebSocket connections. A slot is
+reserved before the handshake is upgraded and released when the socket closes
+(including a socket the keepalive deadline declares dead), so the counts are
+the sockets the process actually holds. A handshake that would exceed a cap is
+refused before any socket exists, with `Retry-After: 5`: `429 Too Many
+Requests` when the client's own cap is the one exceeded, `503 Service
+Unavailable` when the process total or the anonymous budget is exhausted.
+
+| Variable | Default | Scope |
+|---|---|---|
+| `CONSOLE_WS_MAX_CONNECTIONS` | 1024 | every `/ws/*` connection the process holds, authenticated and anonymous together |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256 | connections from one client address |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 | anonymous `/ws/objectManager` connections for the process; anonymous connections count against the total too, so they can never take more of it than this |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 | anonymous connections from one client address |
+
+Anonymous handshakes need no credentials, so their budget is separate and
+small: public-bucket browsing opens one connection per tab, and nothing else
+can be opened without a session. Exhausting the anonymous budget therefore
+never affects signed-in users.
+
+The client address is the trust-resolved one (see [Trusted proxy source
+addresses](#trusted-proxy-source-addresses)): IPv4 addresses count
+individually, IPv6 addresses by their /64, and a peer whose address cannot be
+parsed shares one key. Behind a reverse proxy that is not listed as trusted,
+every browser shares the proxy's address and the per-client caps apply to all
+of them together; configure the trust list, or raise
+`CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT`, for such deployments.
+
+Every value must be an integer between 1 and 1048576, the anonymous budget must
+not exceed the total, and the anonymous per-client cap must not exceed either
+the per-client cap or the anonymous budget. Standalone Console refuses to start
+on an invalid value; an embedded Console logs the error and keeps the defaults.
 
 ## Outbound TLS verification
 

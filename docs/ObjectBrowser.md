@@ -44,4 +44,9 @@ dialog opened.
 ## Public buckets
 
 Anonymous browsing of public buckets uses the same identity rules for previews
-and downloads.
+and downloads. The anonymous Object Manager WebSocket draws on a separate,
+small connection budget (`CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS`, per client
+`CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT`); when it is exhausted the
+handshake is refused and the browser falls back to retrying, while signed-in
+sessions are unaffected. See docs/Environment.md, "WebSocket connection
+limits".

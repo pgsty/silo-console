@@ -116,6 +116,9 @@ func buildServer() (*api.Server, error) {
 	if err := api.ConfigureSourceIPTrust(); err != nil {
 		return nil, err
 	}
+	if err := api.ConfigureWebSocketLimits(); err != nil {
+		return nil, err
+	}
 
 	// register all APIs
 	server.ConfigureAPI()

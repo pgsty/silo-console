@@ -178,16 +178,36 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// upgrades the HTTP server connection to the WebSocket protocol.
-	conn, err := upgrader.Upgrade(w, req, nil)
+	clientIP := getWebSocketClientIP(req)
+
+	// Reserve a connection slot before upgrading. Anonymous handshakes draw on
+	// their own, smaller budget as well as on the process total, so a peer
+	// without credentials cannot hold more than that budget. The slot is given
+	// back when the hijacked socket closes.
+	release, err := currentWSConnectionLimiter().acquire(wsClientKey(clientIP), session == nil)
 	if err != nil {
+		status := http.StatusServiceUnavailable
+		var limitErr *wsLimitError
+		if errors.As(err, &limitErr) {
+			status = limitErr.status
+		}
+		w.Header().Set("Retry-After", wsRetryAfterSeconds)
+		errorsApi.ServeError(w, req, errorsApi.New(int32(status), "%v", err))
+		return
+	}
+
+	// upgrades the HTTP server connection to the WebSocket protocol.
+	counted := &wsCountedWriter{ResponseWriter: w, release: release}
+	conn, err := upgrader.Upgrade(counted, req, nil)
+	if err != nil {
+		if !counted.hijacked {
+			release()
+		}
 		ErrorWithContext(ctx, err)
 		errorsApi.ServeError(w, req, err)
 		return
 	}
 	conn.SetReadLimit(wsMaxMessageSize)
-
-	clientIP := getWebSocketClientIP(req)
 
 	switch {
 	case strings.HasPrefix(wsPath, `/trace`):

@@ -89,6 +89,9 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 	if err := ensureSourceIPTrustConfigured(); err != nil {
 		LogError("invalid trusted proxy configuration: %v", err)
 	}
+	if err := ConfigureWebSocketLimits(); err != nil {
+		LogError("invalid WebSocket connection limits, keeping the defaults: %v", err)
+	}
 	// The embedded server fills GlobalRootCAs before ConfigureAPI; standalone
 	// Console already attached the pool in loadAllCerts. Attaching again here
 	// is idempotent and keeps both paths verified with the operator's CAs.
