@@ -259,14 +259,14 @@ test.describe("upload control", () => {
     expect(calls.order).toEqual(["cleanup", "abort"]);
     expect(calls.cleanup).toBe(1);
     expect(calls.failures).toEqual([]);
-    // Its turn in the queue must not send it after all.
-    control.send();
+    // Its turn in the queue must not send it after all, nor count as running.
+    expect(control.send()).toBe(false);
     expect(request.sent).toBe(false);
   });
 
   test("cancelling an upload in flight settles it exactly once", () => {
     const { calls, control, request } = controlled();
-    control.send();
+    expect(control.send()).toBe(true);
     expect(request.sent).toBe(true);
     control.cancel();
     expect(calls.order).toEqual(["cleanup", "abort"]);
@@ -274,10 +274,10 @@ test.describe("upload control", () => {
     expect(calls.cleanup).toBe(1);
   });
 
-  test("a synchronous send failure settles as an error", () => {
+  test("a synchronous send failure settles as an error and is not in flight", () => {
     const { calls, control, request } = controlled();
     request.throwOnSend = true;
-    control.send();
+    expect(control.send()).toBe(false);
     expect(calls.failures).toEqual([
       { message: "InvalidStateError", status: 0 },
     ]);

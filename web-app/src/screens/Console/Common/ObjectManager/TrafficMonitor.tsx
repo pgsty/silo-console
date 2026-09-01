@@ -25,6 +25,11 @@ import {
   newDownloadInit,
   newUploadInit,
 } from "../../ObjectBrowser/objectBrowserSlice";
+import {
+  availableSlots,
+  pendingTransfers,
+  startUploads,
+} from "./uploadScheduler";
 
 const TrafficMonitor = () => {
   const dispatch = useAppDispatch();
@@ -56,12 +61,7 @@ const TrafficMonitor = () => {
           !object.done &&
           !currentDIP.includes(object.ID),
       );
-      const filterUploads = objects.filter(
-        (object) =>
-          object.type === "upload" &&
-          !object.done &&
-          !currentUIP.includes(object.ID),
-      );
+      const filterUploads = pendingTransfers(objects, "upload", currentUIP);
 
       const remainingDownloadSlots = limitDownloads - currentDIP.length;
 
@@ -85,21 +85,14 @@ const TrafficMonitor = () => {
         });
       }
 
-      const remainingUploadSlots = limitUploads - currentUIP.length;
-
-      if (
-        filterUploads.length > 0 &&
-        (remainingUploadSlots > 0 || limitUploads === 0)
-      ) {
-        const itemsToUpload = filterUploads.slice(0, remainingUploadSlots);
-
-        itemsToUpload.forEach((item) => {
-          // An upload that settled while queued (cancelled before it was
-          // sent) is no longer known to the transfer manager and stays idle.
-          startQueuedUpload(item.ID);
-          dispatch(newUploadInit(item.ID));
-        });
-      }
+      // An upload counts as running only once its request is in flight; an
+      // upload that settled while queued or failed to send takes no slot.
+      startUploads(
+        filterUploads,
+        availableSlots(limitUploads, currentUIP.length),
+        startQueuedUpload,
+        (id) => dispatch(newUploadInit(id)),
+      );
     }
   }, [objects, limitUploads, limitDownloads, currentDIP, currentUIP, dispatch]);
 

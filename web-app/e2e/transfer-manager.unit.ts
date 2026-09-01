@@ -19,12 +19,22 @@ test.describe("transfer manager", () => {
   test("uploads are sent and cancelled through their control until they settle", () => {
     const events: string[] = [];
     storeUploadControl("up-1", {
-      send: () => events.push("send"),
-      cancel: () => events.push("cancel"),
+      send: () => {
+        events.push("send");
+        return true;
+      },
+      cancel: () => {
+        events.push("cancel");
+      },
     });
     expect(startQueuedUpload("up-1")).toBe(true);
     expect(cancelTransfer("up-1")).toBe(true);
     expect(events).toEqual(["send", "cancel"]);
+
+    // A control whose send fails reports "not in flight".
+    storeUploadControl("up-2", { send: () => false, cancel: () => {} });
+    expect(startQueuedUpload("up-2")).toBe(false);
+    removeTrace("up-2");
 
     // Settling forgets the upload: a later queue turn or cancel is a no-op.
     removeTrace("up-1");

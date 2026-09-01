@@ -21,9 +21,10 @@
 // UploadControl drives one upload independently of XMLHttpRequest events: a
 // queued request that was never sent emits no `abort` event, so cancelling
 // has to settle the upload explicitly, and a synchronous `send()` failure
-// has to settle it as an error.
+// has to settle it as an error. `send` reports whether the request is now in
+// flight, which is the only case the scheduler may count as running.
 export interface UploadControl {
-  send: () => void;
+  send: () => boolean;
   cancel: () => void;
 }
 
@@ -42,16 +43,16 @@ export const storeUploadControl = (id: string, control: UploadControl) => {
   uploadControls[id] = control;
 };
 
-// startQueuedUpload sends a queued upload. It reports false when the upload is
-// no longer known, which means it settled (for instance, it was cancelled)
-// before its turn came.
+// startQueuedUpload sends a queued upload and reports whether its request is
+// now in flight. False means there is nothing to account for: the upload is
+// no longer known (it settled, for instance cancelled, before its turn came)
+// or its send failed synchronously and settled it as an error.
 export const startQueuedUpload = (id: string): boolean => {
   const control = uploadControls[id];
   if (!control) {
     return false;
   }
-  control.send();
-  return true;
+  return control.send();
 };
 
 // cancelTransfer cancels an upload or a download in whatever state it is in.

@@ -154,10 +154,11 @@ export const attachUploadRequestHandlers = (
 };
 
 // uploadControl binds a queued upload to its lifecycle. `send` runs when the
-// traffic monitor grants a slot and settles a synchronous failure as an
-// error; `cancel` aborts the request and then settles the upload as aborted
-// itself, because a request that was never sent emits no `abort` event
-// (a request in flight emits one, and the second finalize is a no-op).
+// traffic monitor grants a slot; it reports true only when the request is in
+// flight, and settles a synchronous failure as an error. `cancel` aborts the
+// request and then settles the upload as aborted itself, because a request
+// that was never sent emits no `abort` event (a request in flight emits one,
+// and the second finalize is a no-op).
 export const uploadControl = (
   request: SendableRequest,
   body: FormData,
@@ -166,15 +167,17 @@ export const uploadControl = (
 ): UploadControl => ({
   send: () => {
     if (lifecycle.isSettled()) {
-      return;
+      return false;
     }
     try {
       request.send(body);
+      return true;
     } catch (error) {
       lifecycle.finalize(
         "error",
         error instanceof Error && error.message ? error.message : setupError,
       );
+      return false;
     }
   },
   cancel: () => {
