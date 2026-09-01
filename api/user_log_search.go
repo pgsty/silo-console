@@ -26,7 +26,7 @@ import (
 	"github.com/minio/console/api/operations"
 	logApi "github.com/minio/console/api/operations/logging"
 	"github.com/minio/console/models"
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 )
 
 func registerLogSearchHandlers(api *operations.ConsoleAPI) {

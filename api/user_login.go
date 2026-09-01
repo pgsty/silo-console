@@ -34,8 +34,8 @@ import (
 	"github.com/minio/console/pkg/auth/ldap"
 	"github.com/minio/madmin-go/v3"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/pkg/v3/env"
-	xnet "github.com/minio/pkg/v3/net"
+	"github.com/pgsty/silo-pkg/v3/env"
+	xnet "github.com/pgsty/silo-pkg/v3/net"
 )
 
 func registerLoginHandlers(api *operations.ConsoleAPI) {

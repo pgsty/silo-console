@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/minio/madmin-go/v3"
-	minioIAMPolicy "github.com/minio/pkg/v3/policy"
+	minioIAMPolicy "github.com/pgsty/silo-pkg/v3/policy"
 )
 
 func TestReplacePolicyVariables(t *testing.T) {

@@ -43,7 +43,7 @@ import (
 	mc "github.com/minio/mc/cmd"
 	"github.com/minio/mc/pkg/probe"
 	"github.com/minio/minio-go/v7/pkg/tags"
-	"github.com/minio/pkg/v3/mimedb"
+	"github.com/pgsty/silo-pkg/v3/mimedb"
 )
 
 // enum types

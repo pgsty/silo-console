@@ -4,27 +4,18 @@ go 1.27.0
 
 tool github.com/go-swagger/go-swagger/cmd/swagger
 
-// Supported replacement graphs (see README.md and docs/Embedding.md):
-//   - all three SILO replacements below, adopted as one set (tested by downstream-embedder-compat);
-//   - none of them, resolving upstream minio/pkg v3.6.1, minio/mc and minio-go together (tested by upstream-pkg-compat);
-//   - any partial set is unsupported: pgsty/mc compiles only against the SILO package's strict policy API.
+// Supported module graphs (see README.md and docs/Embedding.md):
+//   - the maintained graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into embedders;
+//   - omitting that replacement resolves upstream minio/mc and remains a build-compatible floor (tested by upstream-pkg-compat);
+//   - minio-go resolves upstream; the retired silo-go and minio/pkg replacement graph is unsupported.
 //
 // `go run ./hack/replacements check` keeps this comment, README.md and the
-// three directives in agreement; `update` regenerates the README block.
-
-// Use PGSTY's maintained Silo Go SDK while preserving upstream import paths.
-// Keep the required version on a real upstream tag because replace directives
-// are ignored when this module is consumed as a dependency.
-replace github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
+// single maintained directive in agreement; `update` regenerates the README block.
 
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1
-
-// Keep the required version on a real upstream tag for downstream consumers:
-// replace directives in dependency modules are ignored by the Go toolchain.
-replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.3-0.20260829103855-748c94bf8ab7
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260831144523-ddac5d58ab49
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -52,11 +43,11 @@ require (
 	github.com/minio/kes v0.24.0
 	github.com/minio/madmin-go/v3 v3.0.110
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
-	github.com/minio/minio-go/v7 v7.3.0
-	github.com/minio/pkg/v3 v3.6.1
+	github.com/minio/minio-go/v7 v7.3.1-0.20260828014306-0e78d3f18efe
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pgsty/silo-pkg/v3 v3.13.0
 	github.com/rs/xid v1.6.0
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.11.1
@@ -151,6 +142,7 @@ require (
 	github.com/minio/filepath v1.0.0 // indirect
 	github.com/minio/kms-go/kes v0.3.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
+	github.com/minio/pkg/v3 v3.6.1 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect

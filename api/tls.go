@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/minio/pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/env"
 )
 
 // ConsoleTransport decorates an outbound request with the client address

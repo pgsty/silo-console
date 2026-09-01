@@ -28,7 +28,7 @@ import (
 
 	"github.com/minio/minio-go/v7/pkg/replication"
 	"github.com/minio/minio-go/v7/pkg/sse"
-	xnet "github.com/minio/pkg/v3/net"
+	xnet "github.com/pgsty/silo-pkg/v3/net"
 
 	"github.com/minio/console/models"
 	"github.com/minio/console/pkg"

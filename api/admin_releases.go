@@ -31,7 +31,7 @@ import (
 	"github.com/minio/console/api/operations"
 	release "github.com/minio/console/api/operations/release"
 	"github.com/minio/console/models"
-	"github.com/minio/pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/env"
 )
 
 var (

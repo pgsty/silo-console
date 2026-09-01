@@ -29,9 +29,9 @@ import (
 	"strings"
 
 	"github.com/minio/cli"
-	xcerts "github.com/minio/pkg/v3/certs"
-	"github.com/minio/pkg/v3/env"
 	"github.com/mitchellh/go-homedir"
+	xcerts "github.com/pgsty/silo-pkg/v3/certs"
+	"github.com/pgsty/silo-pkg/v3/env"
 )
 
 // ConfigDir - points to a user set directory.

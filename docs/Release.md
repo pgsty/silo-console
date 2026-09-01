@@ -70,57 +70,36 @@ distinguishable from a grants or fixture problem.
 
 ## 2b. Maintained dependency releases and the candidate gate
 
-Console pins three maintained forks through `replace` directives. Every one of
-them must be a **released** version before Console is tagged. The record is
-`hack/deps-release.json`; `hack/deps-release-check.sh` verifies it:
+Console directly requires the released silo-pkg module and selects the released
+pgsty/mc source through one replacement. Both must be **released** before
+Console is tagged. The record is `hack/deps-release.json`;
+`hack/deps-release-check.sh` verifies it:
 
 - `structural` (part of `make verifiers`): `go.mod` agrees with the record. A
   record marked `release_pending` (the maintainer has not created the tag yet)
   only warns here, as long as `go.mod` pins the recorded `current_pin`.
 - `online` (candidate gate and tag preflight): every tag dereferences to the
   recorded commit; a `module_tag` has at most a source-only GitHub release; a
-  `calendar_prerelease` is a published pre-release with no assets that is not
-  the repository's latest release; the module is served by
+  `calendar_release` is an immutable, non-prerelease GitHub release with assets
+  and is the repository's latest release; the module is served by
   `proxy.golang.org` from an empty module cache with no direct fallback, the
   `.info`/`.mod`/`.zip` records exist, and `sum.golang.org` and `go.sum` carry
   the same two hashes. A pending record fails.
 
-### Maintainer steps for the current record
+### Current coordinated dependency line
 
-The compatibility line (Console, SILO server, `pgsty/mc` at `5ed037e` and
-`pgsty/silo-pkg` at `748c94b`) stays on the upstream import paths; the
-own-module-path migration (`silo-pkg` v3.13.0, `mc` `RELEASE.2026-09-01`) is
-a separate coordinated release with the server.
+- `github.com/pgsty/silo-pkg/v3 v3.13.0`, annotated tag at
+  `215f116ec25120ce365c79bce4096cd7665b2c1e`, is a direct requirement.
+- `pgsty/mc` `RELEASE.2026-09-01T00-00-00Z`, immutable release at
+  `ddac5d58ab4925f3cde4bf99625e94cd47934026`, is selected as
+  `v0.0.0-20260831144523-ddac5d58ab49` through the one documented replacement.
+- minio-go resolves upstream at the version selected by the released mc graph;
+  the former silo-go replacement is retired.
 
-1. `pgsty/silo-pkg`: tag `v3.12.3` at `748c94bf8ab7f972fb34ee2385cab421c7979574`
-   (the last commit that declares `module github.com/minio/pkg/v3`) and push it.
-   A GitHub release is optional; if created it must carry no assets.
-   ```sh
-   git -C silo-pkg tag -a v3.12.3 748c94bf8ab7f972fb34ee2385cab421c7979574 -m "v3.12.3: compatibility path"
-   git -C silo-pkg push origin v3.12.3
-   ```
-2. `pgsty/mc`: choose one shape and record it in `hack/deps-release.json`:
-   - **module tag (recommended)**: a SemVer pre-release tag with no GitHub
-     release. It is a real Go version, is listed by the proxy, does not match
-     the `RELEASE.*` workflow trigger, so no binaries are built, and cannot
-     become "latest".
-     ```sh
-     git -C mc tag -a v1.0.0-compat.20260829 5ed037ef4ec17d9f321dee67d005fd3ba789b718 -m "Console compatibility source tag"
-     git -C mc push origin v1.0.0-compat.20260829
-     ```
-     Console then pins `github.com/pgsty/mc v1.0.0-compat.20260829`.
-   - **calendar pre-release**: a `RELEASE.*` tag published with
-     `gh release create <tag> --prerelease --latest=false --notes "Console compatibility source"`
-     and **no assets**; cancel the historical release workflow run for that
-     tag and confirm `gh api repos/pgsty/mc/releases/latest --jq .tag_name`
-     still names `RELEASE.2026-09-01T00-00-00Z`. Console keeps a pseudo-version
-     pin whose suffix is the tag's commit.
-   Publishing `5ed037e` as a normal binary release is not acceptable: it would
-   redistribute a CLI that lacks the later credential-redaction fixes.
-3. Console: bump the two `replace` lines to the released versions, run
-   `go mod tidy`, `go run ./hack/replacements update`, set `release_pending`
-   to `false` in `hack/deps-release.json`, and run `make verifiers` and
-   `GH_TOKEN=$(gh auth token) hack/deps-release-check.sh online`.
+Run `go mod tidy`, `go run ./hack/replacements update`, `make verifiers`, and
+`GH_TOKEN=$(gh auth token) hack/deps-release-check.sh online` after any change
+to this set. The Console and SILO server own-module-path migrations must be
+certified together.
 
 ### Certifying the candidate
 
@@ -138,7 +117,7 @@ embedder, and builds and tests the SILO server (`go test ./cmd/`, the
 server's own CI command) on the coherent graph with the candidate embedded.
 On success it publishes the commit status `release-candidate/gate` on the
 candidate and uploads `candidate-<sha>.json` (candidate, run id and attempt,
-the three replacement tuples, the resolved server commit). The tag preflight
+the maintained replacement tuple, the resolved server commit). The tag preflight
 requires that status, verifies that its run is a successful
 `release-candidate.yaml` dispatch on `main`, downloads the record from that
 exact run and checks that it binds the run and attempt to the tagged SHA, then

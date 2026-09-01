@@ -52,7 +52,7 @@ jobs:
           make verifiers
 
   upstream-pkg-compat:
-    name: Build with upstream minio/pkg v3.6.1
+    name: Build with upstream minio/mc floor
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -61,8 +61,8 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: 1.27.x
-      - name: Remove the SILO replacements and test the advertised floor
-        # hack/upstream-floor.sh models an embedder that inherits no SILO
+      - name: Remove the maintained mc replacement and test the advertised floor
+        # hack/upstream-floor.sh models an embedder that does not copy the mc
         # replacement; the release-candidate workflow runs the same script.
         run: hack/upstream-floor.sh
 

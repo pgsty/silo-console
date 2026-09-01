@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/minio/pkg/v3/ellipses"
+	"github.com/pgsty/silo-pkg/v3/ellipses"
 )
 
 // This file implements and supports ellipses pattern for

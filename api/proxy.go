@@ -26,7 +26,7 @@ import (
 	"sync/atomic"
 	"unicode"
 
-	"github.com/minio/pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/env"
 )
 
 const (

@@ -132,7 +132,7 @@ jobs:
               run: yarn exec playwright test --project=unit e2e/version-metadata.unit.ts --reporter=line
 
     upstream-floor:
-        name: Upstream minio/pkg floor without SILO replacements
+        name: Upstream minio/mc floor without the maintained replacement
         needs: guard
         runs-on: ubuntu-latest
         steps:
@@ -215,22 +215,22 @@ jobs:
               run: |
                   set -euo pipefail
                   go mod edit -replace "github.com/minio/console=${GITHUB_WORKSPACE}/console"
-                  # The three SILO tuples come from the candidate's go.mod, which the
-                  # dependency-releases job has already verified against the record.
-                  for module in github.com/minio/mc github.com/minio/minio-go/v7 github.com/minio/pkg/v3; do
-                    target="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}}@{{.Replace.Version}}' "${module}")"
-                    go mod edit -replace "${module}=${target}"
-                  done
+                  # mc is the one inherited replacement. silo-pkg is a direct
+                  # Console requirement and the server must have completed the
+                  # same own-module-path source migration.
+                  target="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}}@{{.Replace.Version}}' github.com/minio/mc)"
+                  go mod edit -replace "github.com/minio/mc=${target}"
                   go mod tidy
-                  for module in github.com/minio/mc github.com/minio/minio-go/v7 github.com/minio/pkg/v3; do
-                    want="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}} {{.Replace.Version}}' "${module}")"
-                    got="$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "${module}")"
-                    test "${got}" = "${want}" || { echo "::error::server selects ${module} => '${got}', candidate uses '${want}'" >&2; exit 1; }
-                  done
-                  if go list -m all | grep -q '^github.com/pgsty/silo-pkg/v3 '; then
-                    echo "::error::the server graph also contains github.com/pgsty/silo-pkg/v3 as a direct module (two copies of the shared package)" >&2
-                    exit 1
-                  fi
+                  want_mc="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}} {{.Replace.Version}}' github.com/minio/mc)"
+                  got_mc="$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' github.com/minio/mc)"
+                  test "${got_mc}" = "${want_mc}" || { echo "::error::server selects github.com/minio/mc => '${got_mc}', candidate uses '${want_mc}'" >&2; exit 1; }
+                  want_pkg="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)"
+                  got_pkg="$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)"
+                  test "${got_pkg}" = "${want_pkg}" || { echo "::error::server selects silo-pkg ${got_pkg}, candidate uses ${want_pkg}" >&2; exit 1; }
+                  legacy_pkg="$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/pkg/v3 2>/dev/null || true)"
+                  test -z "${legacy_pkg}" || { echo "::error::server still replaces github.com/minio/pkg/v3; migrate its source imports to github.com/pgsty/silo-pkg/v3" >&2; exit 1; }
+                  legacy_sdk="$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/minio-go/v7 2>/dev/null || true)"
+                  test -z "${legacy_sdk}" || { echo "::error::server still replaces minio-go; the coordinated graph resolves it upstream" >&2; exit 1; }
                   go build ./...
                   go vet ./...
             - name: Run the server's cmd tests on the coherent graph

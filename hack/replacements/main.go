@@ -16,8 +16,8 @@
 
 // Command replacements keeps the downstream replacement contract in sync.
 //
-// go.mod is the single source of truth for the three SILO fork replacements a
-// server embedding Console must copy. The README carries a generated copy of
+// go.mod is the single source of truth for the one maintained fork replacement
+// a server embedding Console must copy. The README carries a generated copy of
 // that block between marker comments, and go.mod carries the supported-graph
 // contract as a comment. This command generates the block, verifies README
 // and go.mod against it, and rewrites README when asked.
@@ -41,14 +41,12 @@ import (
 	"strings"
 )
 
-// canonicalReplacements is the downstream contract: exactly these three
-// import paths, replaced by exactly these forks. Adding or removing an entry is
+// canonicalReplacements is the downstream contract: exactly this import path,
+// replaced by exactly this fork. Adding or removing an entry is
 // a deliberate contract change that must update this list, the go.mod
 // contract comment, README and docs/Embedding.md together.
 var canonicalReplacements = []struct{ Old, New string }{
 	{Old: "github.com/minio/mc", New: "github.com/pgsty/mc"},
-	{Old: "github.com/minio/minio-go/v7", New: "github.com/pgsty/silo-go/v7"},
-	{Old: "github.com/minio/pkg/v3", New: "github.com/pgsty/silo-pkg/v3"},
 }
 
 const (
@@ -62,18 +60,18 @@ const (
 // contractLines must appear verbatim in go.mod so the supported-graph
 // statement cannot drift from README and CHANGELOG.
 var contractLines = []string{
-	"// Supported replacement graphs (see README.md and docs/Embedding.md):",
-	"//   - all three SILO replacements below, adopted as one set (tested by downstream-embedder-compat);",
-	"//   - none of them, resolving upstream minio/pkg v3.6.1, minio/mc and minio-go together (tested by upstream-pkg-compat);",
-	"//   - any partial set is unsupported: pgsty/mc compiles only against the SILO package's strict policy API.",
+	"// Supported module graphs (see README.md and docs/Embedding.md):",
+	"//   - the maintained graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into embedders;",
+	"//   - omitting that replacement resolves upstream minio/mc and remains a build-compatible floor (tested by upstream-pkg-compat);",
+	"//   - minio-go resolves upstream; the retired silo-go and minio/pkg replacement graph is unsupported.",
 }
 
 // readmeContractPhrases must appear in README.md prose, next to the generated block.
 var readmeContractPhrases = []string{
-	"adopted as one set",
+	"single maintained replacement",
 	"upstream-pkg-compat",
 	"downstream-embedder-compat",
-	"unsupported",
+	"directly requires",
 }
 
 type modVersion struct {
@@ -182,7 +180,7 @@ func loadCanonicalSet() (map[string]replacement, error) {
 	}
 	for _, canonical := range canonicalReplacements {
 		if _, ok := set[canonical.Old]; !ok {
-			problems = append(problems, fmt.Sprintf("%s => %s is missing; the contract requires all three replacements", canonical.Old, canonical.New))
+			problems = append(problems, fmt.Sprintf("%s => %s is missing; the contract requires this replacement", canonical.Old, canonical.New))
 		}
 	}
 	if len(problems) > 0 {
