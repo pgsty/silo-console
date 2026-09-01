@@ -62,28 +62,9 @@ jobs:
         with:
           go-version: 1.27.x
       - name: Remove the SILO replacements and test the advertised floor
-        run: |
-          # Replacements are not inherited, so an embedder that adds none of
-          # them resolves every dependency upstream. Model exactly that: drop
-          # all three SILO replacements, not just the shared package. Dropping
-          # the shared package alone leaves pgsty/mc, which compiles against
-          # silo-pkg's strict policy API; Go resolves that graph and then fails
-          # to build it. That partial override is a configuration Console does
-          # not support, so failing on it says nothing about the floor.
-          go mod edit -dropreplace=github.com/minio/pkg/v3
-          go mod edit -dropreplace=github.com/minio/mc
-          go mod edit -dropreplace=github.com/minio/minio-go/v7
-          go mod edit -require=github.com/minio/pkg/v3@v3.6.1
-          go mod tidy
-          test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.6.1"
-          for module in github.com/minio/pkg/v3 github.com/minio/mc github.com/minio/minio-go/v7; do
-            test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' "$module")"
-          done
-          go vet ./...
-          go vet -tags=testrunmain ./...
-          go test ./...
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
-          CGO_ENABLED=0 GOOS=netbsd GOARCH=amd64 go build ./...
+        # hack/upstream-floor.sh models an embedder that inherits no SILO
+        # replacement; the release-candidate workflow runs the same script.
+        run: hack/upstream-floor.sh
 
   downstream-embedder-compat:
     name: Build a minimal embedder from the README replacement block
@@ -98,46 +79,9 @@ jobs:
       - name: Verify the README block against go.mod
         run: go run ./hack/replacements check
       - name: Build an embedder that copies the README block verbatim
-        run: |
-          set -euo pipefail
-          # A SILO server embedding Console must copy the three SILO replacements
-          # from the README; replacements are not inherited. Feed exactly the
-          # published README text into a scratch module and prove the graph
-          # resolves, compiles, and selects the three forks at the documented
-          # versions.
-          embedder=$(mktemp -d)
-          go run ./hack/replacements readme-block > "$embedder/readme-block.txt"
-          cat > "$embedder/main.go" <<'EOF'
-          package main
-
-          import (
-          	"fmt"
-
-          	consoleapi "github.com/minio/console/api"
-          	consoleoauth2 "github.com/minio/console/pkg/auth/idp/oauth2"
-          )
-
-          func main() {
-          	consoleapi.GlobalMinIOConfig = consoleapi.MinIOConfig{OpenIDProviders: consoleoauth2.OpenIDPCfg{}}
-          	fmt.Println(consoleapi.Port)
-          }
-          EOF
-          cd "$embedder"
-          go mod init example.com/embedder
-          go mod edit -replace "github.com/minio/console=$GITHUB_WORKSPACE"
-          sed -n 's/^\t\([^ ]*\) => \([^ ]*\) \([^ ]*\)$/\1 \2 \3/p' readme-block.txt > tuples.txt
-          test "$(wc -l < tuples.txt)" -eq 3
-          while read -r old new version; do
-            go mod edit -replace "$old=$new@$version"
-          done < tuples.txt
-          go mod tidy
-          go build ./...
-          go vet ./...
-          while read -r old new version; do
-            got=$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "$old")
-            test "$got" = "$new $version" || { echo "$old resolved to '$got', README says '$new $version'" >&2; exit 1; }
-          done < tuples.txt
-          echo "embedder graph matches the README block"
+        # hack/embedder-compat.sh feeds the published README text into a
+        # scratch module; the release-candidate workflow runs the same script.
+        run: hack/embedder-compat.sh
 
   semgrep-static-code-analysis:
     name: "semgrep checks"

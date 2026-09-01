@@ -1,0 +1,299 @@
+name: release-candidate
+
+# Certifies one exact commit as releasable BEFORE any tag exists: dependency
+# release chain (isolated proxy + checksum database), Console standalone
+# checks, the upstream floor, the README-block embedder, and the SILO server
+# built and tested on the coherent graph. A successful run publishes the
+# commit status `release-candidate/gate` on the candidate and uploads
+# `candidate-<sha>.json`; the tag preflight (release.yaml) verifies both and
+# refuses to release a commit that was not certified from this workflow
+# running on main.
+
+on:
+    workflow_dispatch:
+        inputs:
+            candidate:
+                description: "40-hex commit SHA (an ancestor of main) to certify"
+                required: true
+            server_ref:
+                description: "pgsty/silo ref to build and test the coherent graph against"
+                required: false
+                default: "main"
+
+permissions:
+    contents: read
+
+concurrency:
+    group: release-candidate-${{ inputs.candidate }}
+    cancel-in-progress: false
+
+env:
+    CANDIDATE: ${{ inputs.candidate }}
+
+jobs:
+    guard:
+        name: Trusted workflow and candidate ancestry
+        runs-on: ubuntu-latest
+        outputs:
+            candidate: ${{ steps.check.outputs.candidate }}
+        steps:
+            - name: Checkout main
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  fetch-depth: 0
+
+            - name: Require main and a candidate that is an ancestor of main
+              id: check
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  if [[ "${GITHUB_REF}" != "refs/heads/main" ]]; then
+                    echo "::error::dispatch this workflow from refs/heads/main (got ${GITHUB_REF}); a branch copy cannot certify a candidate" >&2
+                    exit 1
+                  fi
+                  if [[ ! "${CANDIDATE}" =~ ^[0-9a-f]{40}$ ]]; then
+                    echo "::error::candidate must be a 40-hex commit SHA" >&2
+                    exit 1
+                  fi
+                  git cat-file -e "${CANDIDATE}^{commit}" || { echo "::error::${CANDIDATE} is not a commit in this repository" >&2; exit 1; }
+                  git merge-base --is-ancestor "${CANDIDATE}" "${GITHUB_SHA}" || { echo "::error::${CANDIDATE} is not an ancestor of main" >&2; exit 1; }
+                  echo "candidate=${CANDIDATE}" >> "${GITHUB_OUTPUT}"
+
+    dependency-releases:
+        name: Maintained dependency releases (proxy and checksum database)
+        needs: guard
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ needs.guard.outputs.candidate }}
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: false
+            - name: Structural and online dependency checks
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  hack/deps-release-check.sh structural
+                  hack/deps-release-check.sh online
+
+    console:
+        name: Console standalone checks and reproducible assets
+        needs: guard
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ needs.guard.outputs.candidate }}
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+            - name: Verify Go source
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  go mod verify
+                  go vet ./...
+                  go vet -tags=testrunmain ./...
+                  go test -race ./...
+                  make verifiers
+            - name: Set up Node
+              uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
+              with:
+                  node-version-file: ".nvmrc"
+            - name: Rebuild the embedded assets with the release commands
+              working-directory: web-app
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  corepack enable
+                  yarn install --immutable
+                  yarn build
+                  ./optimize-embed.sh
+                  git diff --exit-code -- build src/version.tsx
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "::error::the asset rebuild left the tree dirty:" >&2
+                    git status --porcelain >&2
+                    exit 1
+                  fi
+            - name: Require final version metadata
+              working-directory: web-app
+              env:
+                  RELEASE_METADATA_MUST_BE_FINAL: "1"
+              shell: bash
+              run: yarn exec playwright test --project=unit e2e/version-metadata.unit.ts --reporter=line
+
+    upstream-floor:
+        name: Upstream minio/pkg floor without SILO replacements
+        needs: guard
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ needs.guard.outputs.candidate }}
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+            - name: Test the floor graph
+              shell: bash
+              run: hack/upstream-floor.sh
+
+    embedder:
+        name: Minimal embedder from the README block
+        needs: guard
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ needs.guard.outputs.candidate }}
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+            - name: Verify and build the embedder
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  go run ./hack/replacements check
+                  hack/embedder-compat.sh
+
+    server:
+        name: SILO server on the coherent graph
+        needs: guard
+        runs-on: ubuntu-latest
+        timeout-minutes: 90
+        outputs:
+            server_sha: ${{ steps.resolve.outputs.server_sha }}
+        steps:
+            - name: Checkout Console candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ needs.guard.outputs.candidate }}
+                  path: console
+            - name: Checkout SILO server
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  repository: pgsty/silo
+                  ref: ${{ inputs.server_ref }}
+                  path: silo
+                  fetch-depth: 1
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "silo/go.mod"
+                  cache: true
+            - name: Resolve the server commit
+              id: resolve
+              working-directory: silo
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  sha="$(git rev-parse HEAD)"
+                  echo "server_sha=${sha}" >> "${GITHUB_OUTPUT}"
+                  echo "server ${{ inputs.server_ref }} = ${sha}" | tee -a "${GITHUB_STEP_SUMMARY}"
+            # Some server tests bind IPv6 listeners; runners disable IPv6 by default.
+            - name: Enable IPv6
+              run: |
+                  sudo sysctl net.ipv6.conf.all.disable_ipv6=0
+                  sudo sysctl net.ipv6.conf.default.disable_ipv6=0
+            - name: Embed the candidate and pin the recorded dependency set
+              working-directory: silo
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  go mod edit -replace "github.com/minio/console=${GITHUB_WORKSPACE}/console"
+                  # The three SILO tuples come from the candidate's go.mod, which the
+                  # dependency-releases job has already verified against the record.
+                  for module in github.com/minio/mc github.com/minio/minio-go/v7 github.com/minio/pkg/v3; do
+                    target="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}}@{{.Replace.Version}}' "${module}")"
+                    go mod edit -replace "${module}=${target}"
+                  done
+                  go mod tidy
+                  for module in github.com/minio/mc github.com/minio/minio-go/v7 github.com/minio/pkg/v3; do
+                    want="$(cd "${GITHUB_WORKSPACE}/console" && go list -m -f '{{.Replace.Path}} {{.Replace.Version}}' "${module}")"
+                    got="$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "${module}")"
+                    test "${got}" = "${want}" || { echo "::error::server selects ${module} => '${got}', candidate uses '${want}'" >&2; exit 1; }
+                  done
+                  if go list -m all | grep -q '^github.com/pgsty/silo-pkg/v3 '; then
+                    echo "::error::the server graph also contains github.com/pgsty/silo-pkg/v3 as a direct module (two copies of the shared package)" >&2
+                    exit 1
+                  fi
+                  go build ./...
+                  go vet ./...
+            - name: Run the server's cmd tests on the coherent graph
+              working-directory: silo
+              env:
+                  CGO_ENABLED: 0
+                  MINIO_API_REQUESTS_MAX: "10000"
+              shell: bash
+              # cmd/ is one large package; the same invocation as the server's own CI.
+              run: go test ./cmd/ -count=1 -timeout 30m
+
+    certify:
+        name: Certify the candidate
+        needs: [guard, dependency-releases, console, upstream-floor, embedder, server]
+        if: always()
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            statuses: write
+        steps:
+            - name: Checkout candidate
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ inputs.candidate }}
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: false
+            - name: Evaluate results and publish the commit status
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  NEEDS: ${{ toJSON(needs) }}
+                  SERVER_SHA: ${{ needs.server.outputs.server_sha }}
+                  SERVER_REF: ${{ inputs.server_ref }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+                  bad="$(jq -r 'to_entries[] | select(.value.result != "success") | .key' <<<"${NEEDS}" | tr '\n' ' ')"
+                  state=success
+                  description="candidate certified from main; server ${SERVER_SHA:0:12}"
+                  if [ -n "${bad// /}" ]; then
+                    state=failure
+                    description="candidate rejected: ${bad}"
+                  fi
+                  tuples="$(go mod edit -json | jq -c '[.Replace[] | select(.New.Path | startswith("github.com/pgsty/")) | {import: .Old.Path, replacement: .New.Path, version: .New.Version}]')"
+                  jq -n --arg candidate "${CANDIDATE}" --arg run_id "${GITHUB_RUN_ID}" --arg run_attempt "${GITHUB_RUN_ATTEMPT}" \
+                        --arg run_url "${run_url}" --arg workflow_ref "${GITHUB_REF}" --arg server_ref "${SERVER_REF}" \
+                        --arg server_sha "${SERVER_SHA}" --arg state "${state}" --argjson tuples "${tuples}" --argjson results "${NEEDS}" \
+                        '{candidate: $candidate, run_id: ($run_id | tonumber), run_attempt: ($run_attempt | tonumber), run_url: $run_url,
+                          workflow_ref: $workflow_ref, server_ref: $server_ref, server_sha: $server_sha, state: $state,
+                          replacements: $tuples, results: ($results | with_entries(.value = .value.result))}' \
+                        > "candidate-${CANDIDATE}.json"
+                  cat "candidate-${CANDIDATE}.json" | tee -a "${GITHUB_STEP_SUMMARY}"
+                  gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${CANDIDATE}" \
+                    -f state="${state}" -f context="release-candidate/gate" \
+                    -f target_url="${run_url}" -f description="${description:0:139}" >/dev/null
+                  [ "${state}" = success ]
+            - name: Upload the certification record
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: candidate-${{ inputs.candidate }}
+                  path: candidate-${{ inputs.candidate }}.json
+                  if-no-files-found: error

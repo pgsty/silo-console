@@ -1,0 +1,42 @@
+{
+  "_comment": [
+    "Maintained dependency releases Console pins through its three SILO replacements.",
+    "kind=module_tag: a SemVer tag with no GitHub release (the Go proxy serves it; nothing is published as a binary).",
+    "kind=calendar_prerelease: a RELEASE.* tag published as a GitHub pre-release with no assets and never marked latest; go.mod pins its pseudo-version.",
+    "release_pending=true records a tag the maintainer has not created yet: `make verifiers` warns, the release-candidate gate and the tag preflight fail.",
+    "Verified by hack/deps-release-check.sh; see docs/Release.md."
+  ],
+  "modules": [
+    {
+      "import": "github.com/minio/minio-go/v7",
+      "replacement": "github.com/pgsty/silo-go/v7",
+      "version": "v7.3.1",
+      "kind": "module_tag",
+      "tag": "v7.3.1",
+      "commit": "65b2d0bdff058461d5adcf68a0fbabcf3df6c707",
+      "repository": "pgsty/silo-go"
+    },
+    {
+      "import": "github.com/minio/pkg/v3",
+      "replacement": "github.com/pgsty/silo-pkg/v3",
+      "version": "v3.12.3",
+      "kind": "module_tag",
+      "tag": "v3.12.3",
+      "commit": "748c94bf8ab7f972fb34ee2385cab421c7979574",
+      "repository": "pgsty/silo-pkg",
+      "release_pending": true,
+      "current_pin": "v3.12.3-0.20260829103855-748c94bf8ab7"
+    },
+    {
+      "import": "github.com/minio/mc",
+      "replacement": "github.com/pgsty/mc",
+      "version": "v1.0.0-compat.20260829",
+      "kind": "module_tag",
+      "tag": "v1.0.0-compat.20260829",
+      "commit": "5ed037ef4ec17d9f321dee67d005fd3ba789b718",
+      "repository": "pgsty/mc",
+      "release_pending": true,
+      "current_pin": "v0.0.0-20260829103737-5ed037ef4ec1"
+    }
+  ]
+}

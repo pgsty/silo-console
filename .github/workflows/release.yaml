@@ -14,6 +14,7 @@ jobs:
         permissions:
             contents: read
             actions: read
+            statuses: read
         steps:
             - name: Checkout
               uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -56,6 +57,36 @@ jobs:
                   gate jobs.yaml "Required matrix"
                   gate vulncheck.yaml "Required vulnerability checks"
 
+            - name: Require a release-candidate certification of this exact commit
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  # The candidate gate (release-candidate.yaml, dispatched from main) publishes
+                  # the commit status release-candidate/gate and an artifact naming the
+                  # candidate, its run and attempt. Both are verified here; a status alone
+                  # is not trusted.
+                  status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status"                     --jq '[.statuses[] | select(.context == "release-candidate/gate")] | first // empty')
+                  [ -n "$status" ] || { echo "::error::no release-candidate/gate status on ${GITHUB_SHA}; run the release-candidate workflow from main for this commit (docs/Release.md)"; exit 1; }
+                  test "$(jq -r '.state' <<<"$status")" = "success" || { echo "::error::release-candidate/gate on ${GITHUB_SHA} is $(jq -r '.state' <<<"$status")"; exit 1; }
+                  target=$(jq -r '.target_url' <<<"$status")
+                  run_id="${target##*/actions/runs/}"
+                  [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::status target_url ${target} does not name a workflow run"; exit 1; }
+                  run=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}") || { echo "::error::cannot read run ${run_id}"; exit 1; }
+                  jq -e '.path == ".github/workflows/release-candidate.yaml" and .event == "workflow_dispatch" and .head_branch == "main" and .status == "completed" and .conclusion == "success"' <<<"$run" >/dev/null \
+                    || { echo "::error::run ${run_id} is not a successful release-candidate run dispatched on main"; exit 1; }
+                  attempt=$(jq -r '.run_attempt' <<<"$run")
+                  rm -rf candidate-record && mkdir candidate-record
+                  gh run download "${run_id}" --name "candidate-${GITHUB_SHA}" --dir candidate-record \
+                    || { echo "::error::run ${run_id} has no candidate-${GITHUB_SHA} artifact"; exit 1; }
+                  record="candidate-record/candidate-${GITHUB_SHA}.json"
+                  jq -e --arg sha "${GITHUB_SHA}" --argjson id "${run_id}" --argjson attempt "${attempt}" \
+                    '.candidate == $sha and .run_id == $id and .run_attempt == $attempt and .state == "success" and .workflow_ref == "refs/heads/main"' "$record" >/dev/null \
+                    || { echo "::error::the certification record does not bind run ${run_id} attempt ${attempt} to ${GITHUB_SHA}"; cat "$record"; exit 1; }
+                  echo "accepted release-candidate run ${run_id} (attempt ${attempt}) for ${GITHUB_SHA}: ${target}; server $(jq -r '.server_sha' "$record")" | tee -a "$GITHUB_STEP_SUMMARY"
+                  rm -rf candidate-record
+
             - name: Verify tagged release ref
               shell: bash
               run: |
@@ -79,12 +110,15 @@ jobs:
                   cache: true
 
             - name: Verify Go source
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |
                   set -euo pipefail
                   go mod verify
                   go vet ./...
                   go test -race ./...
                   make verifiers
+                  hack/deps-release-check.sh online
 
             - name: Set up Node
               uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
@@ -100,6 +134,7 @@ jobs:
                   yarn build
                   ./optimize-embed.sh
                   git diff --exit-code -- build src/version.tsx
+                  RELEASE_METADATA_MUST_BE_FINAL=1 yarn exec playwright test --project=unit e2e/version-metadata.unit.ts --reporter=line
 
             - name: Verify clean checkout
               run: |
