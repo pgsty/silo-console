@@ -8,6 +8,9 @@ More documentation to read
 - [TLS](TLS.md)
 - [Debug Logging](Debug.md)
 - [Environment Variables](Environment.md)
+- [Object Browser](ObjectBrowser.md)
+- [Embedding Console in SILO](Embedding.md)
+- [Release procedure](Release.md)
 - **Development**
     - [DEVELOPMENT](../DEVELOPMENT.md)
     - [Frontend Web App](../web-app/README.md)

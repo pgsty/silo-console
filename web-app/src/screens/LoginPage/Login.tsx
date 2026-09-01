@@ -29,6 +29,10 @@ import { redirectRules } from "./login.utils";
 import { setHelpName } from "../../systemSlice";
 import LoginLayout from "./LoginLayout";
 import { useLocalizedLink, useT } from "i18n";
+import {
+  LEGAL_DOCUMENT_PATHS,
+  sourceReference,
+} from "../../common/sourceReference";
 
 const Login = () => {
   const dispatch = useAppDispatch();
@@ -120,6 +124,7 @@ const Login = () => {
   }
 
   const docsURL = "https://silo.pgsty.com/docs/";
+  const source = sourceReference();
 
   useEffect(() => {
     dispatch(setHelpName("login"));
@@ -158,6 +163,20 @@ const Login = () => {
             >
               GitHub
             </a>
+            <span className={"separator"}>|</span>
+            {source.available ? (
+              <a href={source.url} target="_blank" rel="noopener">
+                {t("Source")}
+              </a>
+            ) : (
+              <a
+                href={LEGAL_DOCUMENT_PATHS.notice}
+                target="_blank"
+                rel="noopener"
+              >
+                {t("Notice")}
+              </a>
+            )}
             <span className={"separator"}>|</span>
             <a
               href={localize("https://silo.pgsty.com/download/")}

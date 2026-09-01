@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"strings"
 
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 )
 
 // Keep this list aligned with policy.AdminActionsWithResource. It is local so

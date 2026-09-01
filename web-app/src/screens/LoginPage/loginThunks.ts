@@ -58,7 +58,6 @@ export const doLoginAsync = createAsyncThunk(
 
         // We set the state in redux
         dispatch(userLogged(true));
-        localStorage.setItem("userLoggedIn", accessKey);
         dispatch(setNavigateTo(getTargetPath()));
         dispatch(setDarkMode(!!darkModeEnabled));
         dispatch(setLanguage(getStoredLanguage()));

@@ -39,6 +39,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/minio/console/pkg"
 	"github.com/minio/console/pkg/logger"
 	"github.com/minio/console/pkg/utils"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -47,15 +48,16 @@ import (
 	"github.com/klauspost/compress/gzip"
 
 	portal_ui "github.com/minio/console/web-app"
-	"github.com/minio/pkg/v3/env"
-	"github.com/minio/pkg/v3/mimedb"
-	xnet "github.com/minio/pkg/v3/net"
+	"github.com/pgsty/silo-pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/mimedb"
+	xnet "github.com/pgsty/silo-pkg/v3/net"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 	"github.com/minio/console/api/operations"
 	"github.com/minio/console/models"
 	"github.com/minio/console/pkg/auth"
+	"github.com/minio/console/pkg/logger/redact"
 	"github.com/unrolled/secure"
 )
 
@@ -84,28 +86,35 @@ func configureFlags(api *operations.ConsoleAPI) {
 }
 
 func configureAPI(api *operations.ConsoleAPI) http.Handler {
-	// Applies when the "x-token" header is set
-	api.KeyAuth = func(token string, _ []string) (*models.Principal, error) {
-		// we are validating the session token by decrypting the claims inside, if the operation succeed that means the jwt
-		// was generated and signed by us in the first place
-		if token == "Anonymous" {
-			return &models.Principal{}, nil
-		}
-		claims, err := auth.ParseClaimsFromToken(token)
-		if err != nil {
-			api.Logger("Unable to validate the session token %s: %v", token, err)
-			return nil, errors.New(401, "incorrect api key auth")
-		}
-		return &models.Principal{
-			STSAccessKeyID:     claims.STSAccessKeyID,
-			STSSecretAccessKey: claims.STSSecretAccessKey,
-			STSSessionToken:    claims.STSSessionToken,
-			AccountAccessKey:   claims.AccountAccessKey,
-			Hm:                 claims.HideMenu,
-			Ob:                 claims.ObjectBrowser,
-			CustomStyleOb:      claims.CustomStyleOB,
-		}, nil
+	if err := ensureSourceIPTrustConfigured(); err != nil {
+		LogError("invalid trusted proxy configuration: %v", err)
 	}
+	if err := ConfigureWebSocketLimits(); err != nil {
+		LogError("invalid WebSocket connection limits, keeping the defaults: %v", err)
+	}
+	// The embedded server fills GlobalRootCAs before ConfigureAPI; standalone
+	// Console already attached the pool in loadAllCerts. Attaching again here
+	// is idempotent and keeps both paths verified with the operator's CAs.
+	ApplyGlobalRootCAs()
+	if getMinIOServerTLSSkipVerify() {
+		if origin, ok := minioTLSSkipVerifyOrigin(); ok {
+			LogError("%s=on: TLS certificate verification is disabled for the SILO endpoint %s only; every other HTTPS peer stays verified", ConsoleMinIOServerTLSSkipVerify, origin)
+		} else {
+			LogError("%s=on is ignored because %s is not an https:// endpoint", ConsoleMinIOServerTLSSkipVerify, ConsoleMinIOServer)
+		}
+	}
+
+	if source := pkg.GetSourceReference(); source.Claimed() {
+		LogInfo("corresponding source: %s", source.String())
+	} else {
+		LogError("corresponding source is %s", source.String())
+	}
+	if pkg.OverrideRejected() {
+		LogError("%s was set but rejected (it must be an absolute https URL without credentials, query or fragment); built-in provenance is reported instead", pkg.EnvCorrespondingSourceURL)
+	}
+
+	// Applies when the "x-token" header is set
+	api.KeyAuth = keyAuth(func(format string, args ...interface{}) { api.Logger(format, args...) })
 	api.AnonymousAuth = func(_ string) (*models.Principal, error) {
 		return &models.Principal{}, nil
 	}
@@ -176,6 +185,33 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
+}
+
+// keyAuth validates the session bearer injected by AuthenticationMiddleware.
+// The bearer is decrypted session material carrying STS credentials, so a
+// validation failure is logged without the value.
+func keyAuth(logf func(string, ...interface{})) func(token string, _ []string) (*models.Principal, error) {
+	return func(token string, _ []string) (*models.Principal, error) {
+		// we are validating the session token by decrypting the claims inside, if the operation succeed that means the jwt
+		// was generated and signed by us in the first place
+		if token == "Anonymous" {
+			return &models.Principal{}, nil
+		}
+		claims, err := auth.ParseClaimsFromToken(token)
+		if err != nil {
+			logf("Unable to validate the session token: %v", err)
+			return nil, errors.New(401, "incorrect api key auth")
+		}
+		return &models.Principal{
+			STSAccessKeyID:     claims.STSAccessKeyID,
+			STSSecretAccessKey: claims.STSSecretAccessKey,
+			STSSessionToken:    claims.STSSessionToken,
+			AccountAccessKey:   claims.AccountAccessKey,
+			Hm:                 claims.HideMenu,
+			Ob:                 claims.ObjectBrowser,
+			CustomStyleOb:      claims.CustomStyleOB,
+		}, nil
+	}
 }
 
 // The TLS configuration before HTTPS server starts.
@@ -255,17 +291,35 @@ func debugLog(debugLogLevel int, r *http.Request, rw *logger.ResponseWriter) {
 	}
 }
 
+// debugLogSink receives every debug log line. Tests replace it to capture
+// output; production writes through logger.Info with the line as a literal
+// argument so URL escapes are never interpreted as format verbs.
+var debugLogSink = func(line string) {
+	logger.Info("%s", line)
+}
+
 func debugLogSummary(r *http.Request, rw *logger.ResponseWriter) {
+	debugLogSink(formatDebugLogSummary(r, rw))
+}
+
+func formatDebugLogSummary(r *http.Request, rw *logger.ResponseWriter) string {
 	statusCode := strconv.Itoa(rw.StatusCode)
 	if rw.Hijacked {
 		statusCode = "hijacked"
 	}
-	logger.Info(fmt.Sprintf("%s %s %s %s %dms", r.RemoteAddr, r.Method, r.URL, statusCode, time.Since(rw.StartTime).Milliseconds()))
+	return fmt.Sprintf("%s %s %s %s %dms", r.RemoteAddr, r.Method, redact.URL(r.URL), statusCode, time.Since(rw.StartTime).Milliseconds())
 }
 
 func debugLogDetails(r *http.Request, rw *logger.ResponseWriter) {
+	debugLogSink(formatDebugLogDetails(r, rw))
+}
+
+// formatDebugLogDetails renders the detailed request record. Credential-bearing
+// headers, query parameters and path segments are redacted through the same
+// rules audit logging applies; header names and non-sensitive values are kept.
+func formatDebugLogDetails(r *http.Request, rw *logger.ResponseWriter) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("- Method/URL:       %s %s\n", r.Method, r.URL))
+	sb.WriteString(fmt.Sprintf("- Method/URL:       %s %s\n", r.Method, redact.URL(r.URL)))
 	sb.WriteString(fmt.Sprintf("  Remote endpoint:  %s\n", r.RemoteAddr))
 	if rw.Hijacked {
 		sb.WriteString("  Status code:      <hijacked, probably a websocket>\n")
@@ -277,7 +331,7 @@ func debugLogDetails(r *http.Request, rw *logger.ResponseWriter) {
 	debugLogHeaders(&sb, r.Header)
 	sb.WriteString("  Response headers: ")
 	debugLogHeaders(&sb, rw.Header())
-	logger.Info(sb.String())
+	return sb.String()
 }
 
 func debugLogHeaders(sb *strings.Builder, h http.Header) {
@@ -295,7 +349,7 @@ func debugLogHeaders(sb *strings.Builder, h http.Header) {
 			} else {
 				first = false
 			}
-			sb.WriteString(fmt.Sprintf("%s: %s\n", key, value))
+			sb.WriteString(fmt.Sprintf("%s: %s\n", key, redact.HeaderValue(key, value)))
 		}
 	}
 	if first {
@@ -393,8 +447,9 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		claims, _ := auth.ParseClaimsFromToken(string(sessionToken))
 		if claims != nil {
-			// save user session id context
-			ctx = context.WithValue(r.Context(), utils.ContextRequestUserID, claims.STSSessionToken)
+			// Save a fingerprint of the session, never the STS session token:
+			// this value reaches audit entries and error logs as sessionID.
+			ctx = context.WithValue(r.Context(), utils.ContextRequestUserID, auth.SessionFingerprint(claims.STSSessionToken))
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -416,6 +471,8 @@ func FileServerMiddleware(next http.Handler) http.Handler {
 			serveWS(w, r)
 		case strings.HasPrefix(r.URL.Path, "/api"):
 			next.ServeHTTP(w, r)
+		case isLegalDocumentPath(r.URL.Path):
+			serveLegalDocument(w, r)
 		default:
 			if r.Method != http.MethodGet && r.Method != http.MethodHead {
 				w.Header().Set("Allow", "GET, HEAD")
@@ -519,7 +576,10 @@ func handleSPA(w http.ResponseWriter, r *http.Request) {
 	} else if getSubPath() != "/" {
 		indexPageBytes = replaceBaseInIndex(indexPageBytes, getSubPath())
 	}
-	indexPageBytes = replaceLicense(indexPageBytes)
+	var injected bool
+	if indexPageBytes, injected = injectBuildMeta(indexPageBytes); !injected {
+		noteBuildMetaSentinelMissing()
+	}
 
 	// it's important to force "Content-Type: text/html", because a previous
 	// handler may have already set the content-type to a different value.
@@ -596,12 +656,6 @@ func replaceBaseInIndex(indexPageBytes []byte, basePath string) []byte {
 		indexPageBytes = []byte(indexPageStr)
 
 	}
-	return indexPageBytes
-}
-
-func replaceLicense(indexPageBytes []byte) []byte {
-	indexPageStr := string(indexPageBytes)
-	indexPageBytes = []byte(indexPageStr)
 	return indexPageBytes
 }
 

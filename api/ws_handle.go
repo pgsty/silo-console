@@ -37,9 +37,12 @@ import (
 	"github.com/minio/websocket"
 )
 
+// upgrader is shared by every /ws endpoint. Its origin policy is a fixed
+// function that reads configuration per request; it is never mutated.
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  0,
 	WriteBufferSize: 1024,
+	CheckOrigin:     wsCheckOrigin,
 }
 
 const (
@@ -80,8 +83,11 @@ type ConsoleWebsocketMClient interface {
 type wsMinioClient struct {
 	// websocket connection.
 	conn wsConn
-	// MinIO admin Client
-	client minioClient
+	// S3 client for the session (or anonymous credentials)
+	client MinioClient
+	// clientIP is the trust-resolved client address of the handshake; every
+	// per-request client created for this session is attributed to it.
+	clientIP string
 }
 
 // WSConn interface with all functions to be implemented
@@ -133,6 +139,18 @@ func (c wsConn) readMessage() (messageType int, p []byte, err error) {
 	return c.conn.ReadMessage()
 }
 
+func (c wsConn) setReadDeadline(t time.Time) error {
+	return c.conn.SetReadDeadline(t)
+}
+
+func (c wsConn) setWriteDeadline(t time.Time) error {
+	return c.conn.SetWriteDeadline(t)
+}
+
+func (c wsConn) setPongHandler(handler func(appData string) error) {
+	c.conn.SetPongHandler(handler)
+}
+
 func (c wsConn) remoteAddress() string {
 	clientIP, _, err := net.SplitHostPort(c.conn.RemoteAddr().String())
 	if err != nil {
@@ -154,38 +172,42 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 	// Perform authentication before upgrading to a Websocket Connection
 	// authenticate WS connection with Console
 	session, err := auth.GetClaimsFromTokenInRequest(req)
-	if err != nil && (errors.Is(err, auth.ErrReadingToken) && !strings.HasPrefix(wsPath, `/objectManager`)) {
+	if err != nil && !wsAnonymousAllowed(req, wsPath, err) {
 		ErrorWithContext(ctx, err)
 		errorsApi.ServeError(w, req, errorsApi.New(http.StatusUnauthorized, "%v", err))
 		return
 	}
 
-	// If we are using a subpath we are most likely behind a reverse proxy so we most likely
-	// can't validate the proper Origin since we don't know the source domain, so we are going
-	// to allow the connection to be upgraded in this case.
-	if getSubPath() != "/" || getConsoleDevMode() {
-		upgrader.CheckOrigin = func(_ *http.Request) bool {
-			return true
+	clientIP := getWebSocketClientIP(req)
+
+	// Reserve a connection slot before upgrading. Anonymous handshakes draw on
+	// their own, smaller budget as well as on the process total, so a peer
+	// without credentials cannot hold more than that budget. The slot is given
+	// back when the hijacked socket closes.
+	release, err := currentWSConnectionLimiter().acquire(wsClientKey(clientIP), session == nil)
+	if err != nil {
+		status := http.StatusServiceUnavailable
+		var limitErr *wsLimitError
+		if errors.As(err, &limitErr) {
+			status = limitErr.status
 		}
+		w.Header().Set("Retry-After", wsRetryAfterSeconds)
+		errorsApi.ServeError(w, req, errorsApi.New(int32(status), "%v", err))
+		return
 	}
 
 	// upgrades the HTTP server connection to the WebSocket protocol.
-	conn, err := upgrader.Upgrade(w, req, nil)
+	counted := &wsCountedWriter{ResponseWriter: w, release: release}
+	conn, err := upgrader.Upgrade(counted, req, nil)
 	if err != nil {
+		if !counted.hijacked {
+			release()
+		}
 		ErrorWithContext(ctx, err)
 		errorsApi.ServeError(w, req, err)
 		return
 	}
-
-	clientIP := getSourceIPFromHeaders(req)
-	if clientIP == "" {
-		if ip, _, err := net.SplitHostPort(conn.RemoteAddr().String()); err == nil {
-			clientIP = ip
-		} else {
-			// In case there's an error, return an empty string
-			LogError("Invalid ws.RemoteAddr() = %v\n", err)
-		}
-	}
+	conn.SetReadLimit(wsMaxMessageSize)
 
 	switch {
 	case strings.HasPrefix(wsPath, `/trace`):
@@ -297,7 +319,7 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 		}
 		go wsAdminClient.profile(ctx, pOptions)
 
-	case strings.HasPrefix(wsPath, `/objectManager`):
+	case wsPath == `/objectManager`:
 		wsMinioClient, err := newWebSocketMinioClient(conn, session, clientIP)
 		if err != nil {
 			ErrorWithContext(ctx, err)
@@ -310,6 +332,23 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 		// path not found
 		closeWsConn(conn)
 	}
+}
+
+func getWebSocketClientIP(req *http.Request) string {
+	return getClientIP(req)
+}
+
+// wsAnonymousAllowed reports whether a handshake that failed authentication
+// may proceed anonymously. Only the Object Manager supports public-bucket
+// browsing, and only when no session cookie was sent at all: a cookie that is
+// present but empty, malformed, or otherwise unreadable is rejected rather than
+// silently downgraded to anonymous.
+func wsAnonymousAllowed(req *http.Request, wsPath string, authErr error) bool {
+	if wsPath != `/objectManager` || !errors.Is(authErr, auth.ErrNoAuthToken) {
+		return false
+	}
+	_, cookieErr := req.Cookie("token")
+	return errors.Is(cookieErr, http.ErrNoCookie)
 }
 
 // newWebSocketAdminClient returns a wsAdminClient authenticated as an admin user
@@ -369,7 +408,7 @@ func newWebSocketMinioClient(conn *websocket.Conn, claims *models.Principal, cli
 	minioClient := minioClient{client: mClient}
 
 	// create websocket client and handle request
-	wsMinioClient := &wsMinioClient{conn: wsConnection, client: minioClient}
+	wsMinioClient := &wsMinioClient{conn: wsConnection, client: minioClient, clientIP: clientIP}
 	return wsMinioClient, nil
 }
 

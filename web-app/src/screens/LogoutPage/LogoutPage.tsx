@@ -23,6 +23,7 @@ import { userLogged } from "../../systemSlice";
 import { resetSession } from "../Console/consoleSlice";
 import api from "../../common/api";
 import LoadingComponent from "../../common/LoadingComponent";
+import { forgetReturnRoute } from "../../api/session";
 
 const LogoutPage = () => {
   const dispatch = useAppDispatch();
@@ -32,8 +33,10 @@ const LogoutPage = () => {
       dispatch(userLogged(false));
       // Disconnect OB Websocket
       dispatch({ type: "socket/OBDisconnect" });
-      localStorage.setItem("userLoggedIn", "");
-      localStorage.setItem("redirect-path", "");
+      // The identity now comes from the session response; drop the marker
+      // older versions stored.
+      localStorage.removeItem("userLoggedIn");
+      forgetReturnRoute();
       dispatch(resetSession());
       clearSession();
 

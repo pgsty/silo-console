@@ -16,9 +16,12 @@
 
 import request from "superagent";
 import get from "lodash/get";
-import { clearSession } from "../utils";
 import { ErrorResponseHandler } from "../types";
-import { baseUrl } from "../../history";
+import {
+  isInvalidSessionResponse,
+  isSessionProbe,
+} from "../../api/sessionExpiry";
+import { expireSession } from "../../api/session";
 
 type RequestHeaders = { [name: string]: string };
 
@@ -40,19 +43,18 @@ export class API {
       .send(data)
       .then((res) => res.body)
       .catch((err) => {
-        // if we get unauthorized and we are not doing login, kick out the user
+        // An invalid session ends the session the same way for every client,
+        // whatever the login method was; login and session-probe calls are
+        // never an expiry, and anonymous browsing has no session to end (the
+        // handler then declines and the error reaches the caller as usual).
         if (
-          err.status === 401 &&
-          localStorage.getItem("userLoggedIn") &&
-          !targetURL.includes("api/v1/login")
+          !isSessionProbe(targetURL) &&
+          isInvalidSessionResponse(
+            err.status,
+            get(err, "response.body.message"),
+          ) &&
+          expireSession()
         ) {
-          if (window.location.pathname !== "/") {
-            localStorage.setItem("redirect-path", window.location.pathname);
-          }
-          clearSession();
-          // Refresh the whole page to ensure cache is clear
-          // and we dont end on an infinite loop
-          window.location.href = `${baseUrl}login`;
           return;
         }
 
@@ -87,8 +89,9 @@ export class API {
 
       return Promise.reject(throwMessage);
     } else {
-      clearSession();
-      window.location.href = `${baseUrl}login`;
+      // No HTTP status: the request never reached Console. The session is
+      // ended through the shared path so the route is remembered.
+      expireSession();
     }
   }
 }

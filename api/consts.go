@@ -21,9 +21,14 @@ const (
 	// Constants for common configuration
 	ConsoleMinIOServer = "CONSOLE_MINIO_SERVER"
 	ConsoleMinIORegion = "CONSOLE_MINIO_REGION"
-	ConsoleHostname    = "CONSOLE_HOSTNAME"
-	ConsolePort        = "CONSOLE_PORT"
-	ConsoleTLSPort     = "CONSOLE_TLS_PORT"
+	// ConsoleMinIOServerTLSSkipVerify is an explicit, opt-in compatibility
+	// switch that disables certificate verification for exactly one peer: the
+	// HTTPS origin named by CONSOLE_MINIO_SERVER. Every other outbound TLS
+	// connection keeps verifying regardless of this setting.
+	ConsoleMinIOServerTLSSkipVerify = "CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY"
+	ConsoleHostname                 = "CONSOLE_HOSTNAME"
+	ConsolePort                     = "CONSOLE_PORT"
+	ConsoleTLSPort                  = "CONSOLE_TLS_PORT"
 
 	// Constants for Secure middleware
 	ConsoleSecureAllowedHosts                    = "CONSOLE_SECURE_ALLOWED_HOSTS"

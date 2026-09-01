@@ -15,18 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { RedirectRule } from "api/consoleApi";
+import { takeReturnRoute } from "api/session";
 
-export const getTargetPath = () => {
-  let targetPath = "/browser";
-  const redirectPath = localStorage.getItem("redirect-path");
-
-  if (redirectPath) {
-    targetPath = redirectPath;
-    localStorage.setItem("redirect-path", "");
-  }
-
-  return targetPath;
-};
+export const getTargetPath = () => takeReturnRoute("/browser");
 
 export const redirectRules = (a: RedirectRule, b: RedirectRule) => {
   if (a.displayName && b.displayName) {

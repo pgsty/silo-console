@@ -4154,6 +4154,13 @@ definitions:
           $ref: "#/definitions/permissionResource"
       envConstants:
         $ref: "#/definitions/environmentConstants"
+      accountAccessKey:
+        type: string
+        description: >-
+          The account this session was opened for: the access key entered at
+          credential or STS login. Empty for sessions opened through an
+          external identity provider. The UI uses it to recognize the current
+          user; SILO enforces every self-referential restriction itself.
 
   widgetResult:
     type: object

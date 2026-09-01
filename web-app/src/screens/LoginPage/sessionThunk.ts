@@ -32,6 +32,7 @@ import {
 } from "../../../src/systemSlice";
 import { getOverrideColorVariants } from "../../utils/stylesUtils";
 import { AppState } from "../../store";
+import { setAnonymousSession } from "../../api/session";
 
 export const fetchSession = createAsyncThunk(
   "session/fetchSession",
@@ -43,6 +44,7 @@ export const fetchSession = createAsyncThunk(
     return api.session
       .sessionCheck()
       .then((res) => {
+        setAnonymousSession(false);
         dispatch(userLogged(true));
         dispatch(saveSessionResponse(res.data));
         dispatch(globalSetDistributedSetup(res.data.distributedMode || false));
@@ -72,6 +74,7 @@ export const fetchSession = createAsyncThunk(
               { headers: { "X-Anonymous": "1" } },
             )
             .then(() => {
+              setAnonymousSession(true);
               dispatch(setAnonymousMode());
             })
             .catch((res) => {

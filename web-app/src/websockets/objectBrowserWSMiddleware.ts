@@ -37,6 +37,7 @@ import {
 import { permissionItems } from "../screens/Console/Buckets/ListBuckets/Objects/utils";
 import { setErrorSnackMessage } from "../systemSlice";
 import { getStoredLanguage, translate } from "../i18n/lang";
+import { expireSession } from "../api/session";
 
 let wsInFlight: boolean = false;
 let currentRequestID: number = 0;
@@ -104,8 +105,13 @@ export const objectBrowserWSMiddleware = (
             }
 
             if (response.error?.Code === 401) {
-              // Session expired. We reload this page
-              window.location.reload();
+              // Session expired: same path as the REST clients. When there is
+              // no session to end (anonymous browsing) the page is reloaded
+              // so access to the bucket is evaluated afresh, as before.
+              if (!expireSession()) {
+                window.location.reload();
+              }
+              return;
             } else if (response.error?.Code === 403) {
               const internalPathsPrefix = response.prefix;
               let pathPrefix = "";
@@ -237,7 +243,8 @@ export const objectBrowserWSMiddleware = (
           request_id: currentRequestID,
         };
 
-        if (objectsWS && objectsWS.readyState === 1) {
+        // There is nothing to cancel before the first request was issued.
+        if (currentRequestID > 0 && objectsWS && objectsWS.readyState === 1) {
           objectsWS.send(JSON.stringify(request));
         }
         break;

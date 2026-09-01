@@ -1,9 +1,6 @@
-import { Api, HttpResponse, FullRequestParams, ApiError } from "./consoleApi";
-import {
-  isInvalidSessionResponse,
-  sessionExpiryTarget,
-  shouldRedirectExpiredSession,
-} from "./sessionExpiry";
+import { Api, HttpResponse, FullRequestParams } from "./consoleApi";
+import { settleWithSessionCheck } from "./sessionExpiry";
+import { expireSession } from "./session";
 
 export let api = new Api();
 const apiBasePath = new URL(document.baseURI).pathname;
@@ -20,28 +17,20 @@ api.request = async <T = any, E = any>({
   cancelToken,
   ...params
 }: FullRequestParams): Promise<HttpResponse<T, E>> => {
-  const internalResp = internalRequestFunc({
-    body,
-    secure,
-    path,
-    type,
-    query,
-    format,
-    baseUrl,
-    cancelToken,
-    ...params,
-  });
-  return internalResp.then((e) => CommonAPIValidation(e));
+  // The transport rejects every non-2xx response, so the session check must
+  // see rejections as well as fulfilled responses.
+  return settleWithSessionCheck(
+    internalRequestFunc<T, E>({
+      body,
+      secure,
+      path,
+      type,
+      query,
+      format,
+      baseUrl,
+      cancelToken,
+      ...params,
+    }),
+    expireSession,
+  );
 };
-
-export function CommonAPIValidation<D, E>(
-  res: HttpResponse<D, E>,
-): HttpResponse<D, E> {
-  const err = res.error as ApiError;
-  if (err && isInvalidSessionResponse(res.status, err.message)) {
-    if (shouldRedirectExpiredSession(window.location.pathname, apiBasePath)) {
-      document.location = sessionExpiryTarget(apiBasePath);
-    }
-  }
-  return res;
-}

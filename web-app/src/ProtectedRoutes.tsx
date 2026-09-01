@@ -26,6 +26,7 @@ import LoadingComponent from "./common/LoadingComponent";
 import { fetchSession } from "./screens/LoginPage/sessionThunk";
 import { setSiteReplicationInfo, setLocationPath } from "./systemSlice";
 import { SessionCallStates } from "./screens/Console/consoleSlice.types";
+import { rememberCurrentRoute } from "./api/session";
 
 interface ProtectedRouteProps {
   Component: any;
@@ -45,7 +46,7 @@ const ProtectedRoute = ({ Component }: ProtectedRouteProps) => {
   const { pathname = "" } = useLocation();
 
   const StorePathAndRedirect = () => {
-    localStorage.setItem("redirect-path", pathname);
+    rememberCurrentRoute(pathname);
     return <Navigate to={{ pathname: `/login` }} />;
   };
 

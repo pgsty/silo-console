@@ -35,6 +35,9 @@ import (
 // swagger:model sessionResponse
 type SessionResponse struct {
 
+	// The account this session was opened for: the access key entered at credential or STS login. Empty for sessions opened through an external identity provider. The UI uses it to recognize the current user; SILO enforces every self-referential restriction itself.
+	AccountAccessKey string `json:"accountAccessKey,omitempty"`
+
 	// allow resources
 	AllowResources []*PermissionResource `json:"allowResources"`
 

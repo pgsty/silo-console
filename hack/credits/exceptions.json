@@ -1,0 +1,25 @@
+{
+  "_comment": [
+    "Modules whose root carries no legal file under hack/credits' filename policy.",
+    "Each entry vendors the license text that applies, with its source, so CREDITS stays complete.",
+    "An entry for a module that now ships a legal file, or whose text file is missing, fails the run."
+  ],
+  "github.com/mattn/go-localereader": {
+    "license": "MIT",
+    "copyright": "Copyright (c) Yasuhiro Matsumoto (a.k.a. mattn)",
+    "source": "README.md of the module declares the MIT license and the author; the module ships no LICENSE file",
+    "text_file": "hack/credits/texts/go-localereader-MIT.txt"
+  },
+  "github.com/minio/colorjson": {
+    "license": "BSD-3-Clause",
+    "copyright": "Copyright (c) 2010 The Go Authors (the module is a modified copy of Go standard library code; every source file carries the Go Authors copyright header)",
+    "source": "module ships no LICENSE file; the Go BSD-3-Clause license text applies per the file headers",
+    "text_file": "hack/credits/texts/go-authors-BSD.txt"
+  },
+  "github.com/minio/filepath": {
+    "license": "BSD-3-Clause",
+    "copyright": "Copyright (c) 2010 The Go Authors (the module is a modified copy of Go standard library code; every source file carries the Go Authors copyright header)",
+    "source": "module ships no LICENSE file; the Go BSD-3-Clause license text applies per the file headers",
+    "text_file": "hack/credits/texts/go-authors-BSD.txt"
+  }
+}

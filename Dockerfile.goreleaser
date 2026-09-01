@@ -15,6 +15,7 @@ LABEL name="SILO Console" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later"
 
 COPY $TARGETPLATFORM/silo-console /console
+COPY LICENSE NOTICE CREDITS /usr/share/licenses/silo-console/
 
 EXPOSE 9090
 

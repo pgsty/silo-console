@@ -27,7 +27,7 @@ import (
 	userApi "github.com/minio/console/api/operations/user"
 	"github.com/minio/console/models"
 	"github.com/minio/madmin-go/v3"
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 )
 
 func registerServiceAccountsHandlers(api *operations.ConsoleAPI) {

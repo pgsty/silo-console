@@ -28,8 +28,8 @@ import (
 	"github.com/minio/console/models"
 	"github.com/minio/console/pkg/auth/idp/oauth2"
 	"github.com/minio/console/pkg/auth/ldap"
-	minioIAMPolicy "github.com/minio/pkg/v3/policy"
-	"github.com/minio/pkg/v3/policy/condition"
+	minioIAMPolicy "github.com/pgsty/silo-pkg/v3/policy"
+	"github.com/pgsty/silo-pkg/v3/policy/condition"
 	"github.com/stretchr/testify/assert"
 )
 

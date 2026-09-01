@@ -30,7 +30,7 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/minio/console/api/operations"
 	"github.com/minio/console/models"
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 
 	policies "github.com/minio/console/api/policy"
 )

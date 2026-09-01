@@ -26,20 +26,23 @@ import { useSelector } from "react-redux";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { interpolate, useT } from "i18n";
+import { ObjectLocation } from "../objectIdentity";
 
 interface IDeleteNonCurrentProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
   deleteOpen: boolean;
-  selectedObject: string;
-  selectedBucket: string;
+  // The object whose non-current versions are deleted, captured by the caller
+  // when the dialog opens so a later route change cannot retarget it.
+  location: ObjectLocation;
 }
 
 const DeleteNonCurrentVersions = ({
   closeDeleteModalAndRefresh,
   deleteOpen,
-  selectedBucket,
-  selectedObject,
+  location,
 }: IDeleteNonCurrentProps) => {
+  const selectedBucket = location.bucket;
+  const selectedObject = location.key;
   const dispatch = useAppDispatch();
   const t = useT();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);

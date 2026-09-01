@@ -32,6 +32,8 @@ import (
 	"github.com/minio/console/pkg/utils"
 
 	"github.com/minio/console/pkg/logger/message/audit"
+
+	"github.com/minio/console/pkg/logger/redact"
 )
 
 // ResponseWriter - is a wrapper to trap the http response status code.
@@ -205,7 +207,8 @@ func AuditLog(ctx context.Context, w *ResponseWriter, r *http.Request, reqClaims
 			outputBytes = int64(w.Size())
 		}
 
-		entry.API.Path = r.URL.Path
+		// The shared-object route carries a replayable credential in its path.
+		entry.API.Path = redact.Path(r.URL.Path)
 
 		entry.API.Status = http.StatusText(statusCode)
 		entry.API.StatusCode = statusCode

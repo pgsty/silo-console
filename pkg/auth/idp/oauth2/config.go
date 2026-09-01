@@ -26,7 +26,7 @@ import (
 
 	"github.com/minio/console/pkg/auth/token"
 	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/env"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/oauth2"
 	xoauth2 "golang.org/x/oauth2"
@@ -53,6 +53,16 @@ type ProviderConfig struct {
 // We only support Authentication with the Authorization Code Flow - spec:
 // https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 func (pc ProviderConfig) GetOauth2Provider(name string, scopes []string, r *http.Request, clnt *http.Client) (provider *Provider, err error) {
+	return pc.GetOauth2ProviderWithClients(name, scopes, r, clnt, clnt)
+}
+
+// GetOauth2ProviderWithClients is GetOauth2Provider with the two outbound
+// peers separated: idpClient talks to the identity provider (discovery, token
+// exchange, userinfo) and stsClient talks to the SILO STS endpoint. The
+// single-client constructor remains available and uses one client for both
+// roles, so existing callers keep compiling.
+func (pc ProviderConfig) GetOauth2ProviderWithClients(name string, scopes []string, r *http.Request, idpClient, stsClient *http.Client) (provider *Provider, err error) {
+	clnt := idpClient
 	var ddoc DiscoveryDoc
 	ddoc, err = parseDiscoveryDoc(r.Context(), pc.URL, clnt)
 	if err != nil {
@@ -113,6 +123,7 @@ func (pc ProviderConfig) GetOauth2Provider(name string, scopes []string, r *http
 	client.IDPName = name
 	client.UserInfo = pc.Userinfo
 	client.client = clnt
+	client.stsClient = stsClient
 
 	return client, nil
 }

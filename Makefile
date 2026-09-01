@@ -27,7 +27,18 @@ getdeps:
 			sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION); \
 	fi
 
-verifiers: getdeps fmt lint
+verifiers: getdeps fmt lint replacements deps-release credits
+
+credits:
+	@echo "Running $@ check"
+	@go run ./hack/credits check --go
+replacements:
+	@echo "Running $@ check"
+	@go run ./hack/replacements check
+
+deps-release:
+	@echo "Running $@ check"
+	@hack/deps-release-check.sh structural
 
 fmt:
 	@echo "Running $@ check"
@@ -65,7 +76,7 @@ clean-swagger:
 swagger-console:
 	@echo "Generating swagger server code from yaml"
 	@go tool swagger version
-	@go tool swagger generate server -A console --main-package=management --server-package=api --exclude-main -P models.Principal -f ./swagger.yml -r NOTICE
+	@go tool swagger generate server -A console --main-package=management --server-package=api --exclude-main -P models.Principal -f ./swagger.yml -r hack/swagger-header.txt
 	@echo "Ensure basic install"
 	@(cd web-app && yarn)
 	@echo "Generating typescript api"

@@ -17,6 +17,7 @@
 import { store } from "../../store";
 import get from "lodash/get";
 import { IAM_SCOPES } from "./permissions";
+import { grantMatchesResource, hasResourceWildcard } from "./resourceMatch";
 
 const hasPermission = (
   resource: string | string[] | undefined,
@@ -44,29 +45,16 @@ const hasPermission = (
       resources.push(resource);
     }
 
-    // Filter wildcard items
+    // Grants whose resource is a pattern. They are matched with the anchored
+    // `*`/`?` semantics SILO applies to policy resources, never as regular
+    // expressions: a resource such as `bucket/foo[bar*` or `data.?` is a
+    // literal pattern, not syntax.
     const wildcards = Object.keys(sessionGrants).filter(
-      (item) => item.includes("*") && item !== "arn:aws:s3:::*",
+      (item) => hasResourceWildcard(item) && item !== "arn:aws:s3:::*",
     );
 
-    const getMatchingWildcards = (path: string) => {
-      const items = wildcards.map((element) => {
-        const wildcardItemSection = element.split(":").slice(-1)[0];
-
-        const replaceWildcard = wildcardItemSection
-          .replace("/", "\\/")
-          .replace("*", "($|\\/?(.*?))");
-        const inRegExp = new RegExp(`${replaceWildcard}`, "gm");
-        // Avoid calling inRegExp multiple times and instead use the stored value if need it:
-        // https://stackoverflow.com/questions/59694142/regex-testvalue-returns-true-when-logged-but-false-within-an-if-statement
-        const matches = inRegExp.test(path);
-        if (matches) {
-          return element;
-        }
-        return null;
-      });
-      return items.filter((itm) => itm !== null);
-    };
+    const getMatchingWildcards = (path: string) =>
+      wildcards.filter((element) => grantMatchesResource(element, path));
 
     resources.forEach((rsItem) => {
       // Validation against inner paths & wildcards

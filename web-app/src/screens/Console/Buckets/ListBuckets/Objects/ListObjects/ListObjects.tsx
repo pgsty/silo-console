@@ -74,9 +74,9 @@ import {
 import {
   makeid,
   removeTrace,
-  storeCallForObjectWithID,
-  storeFormDataWithID,
+  storeUploadControl,
 } from "../../../../ObjectBrowser/transferManager";
+import { attachUploadRequestHandlers, uploadControl } from "../uploadRequest";
 import {
   cancelObjectInList,
   completeObject,
@@ -123,6 +123,13 @@ import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
 import TooltipWrapper from "../../../../Common/TooltipWrapper/TooltipWrapper";
 import ListObjectsTable from "./ListObjectsTable";
 import FilterObjectsSB from "../../../../ObjectBrowser/FilterObjectsSB";
+import {
+  identityKey,
+  RequestedObject,
+  routeObjectIdentity,
+} from "../objectIdentity";
+import { shareSubjectKey } from "../ObjectDetails/shareSubject";
+import { BucketObjectItem } from "./types";
 import AddAccessRule from "../../../BucketDetails/AddAccessRule";
 import { sanitizeFilePath } from "./utils";
 import { shouldRecommendMultipartUpload } from "./uploadAdvisory";
@@ -232,9 +239,25 @@ const ListObjects = () => {
   const isVersioningApplied = isVersionedMode(versioningConfig.status);
 
   const bucketName = params.bucketName || "";
-  const pathSegment = location.pathname.split(`/browser/${bucketName}/`);
-  const internalPaths =
-    pathSegment.length === 2 ? decodeURIComponent(pathSegment[1]) : "";
+  // The route is the source of truth for the object the panels show; the redux
+  // mirror (selectedInternalPaths) is written by an effect and lags behind it.
+  const routeIdentity = routeObjectIdentity(location.pathname, bucketName);
+  const internalPaths = routeIdentity.key;
+  const detailsIdentityMatches =
+    selectedInternalPaths !== null &&
+    selectedInternalPaths === routeIdentity.key;
+  const detailsIdentityKey = identityKey([bucketName, routeIdentity.key]);
+  // Dialogs opened from the object list capture the complete identity of the
+  // selected object when they open, bucket included, and are discarded when the
+  // route leaves that bucket.
+  const [shareCapture, setShareCapture] = useState<{
+    bucket: string;
+    subject: RequestedObject;
+  } | null>(null);
+  const [previewCapture, setPreviewCapture] = useState<{
+    bucket: string;
+    item: BucketObjectItem;
+  } | null>(null);
 
   const currentPath = internalPaths.split("/").filter((i: string) => i !== "");
 
@@ -391,6 +414,50 @@ const ListObjects = () => {
       }
     }
   }, [rewindEnabled, bucketToRewind, bucketName, dispatch]);
+
+  useEffect(() => {
+    if (!shareFileModalOpen || !selectedPreview) {
+      setShareCapture(null);
+      return;
+    }
+    setShareCapture(
+      (current) =>
+        current ?? {
+          bucket: bucketName,
+          subject: {
+            bucket: bucketName,
+            key: selectedPreview.name,
+            version: selectedPreview.version_id
+              ? { kind: "id", versionId: selectedPreview.version_id }
+              : { kind: "latest" },
+          },
+        },
+    );
+  }, [shareFileModalOpen, selectedPreview, bucketName]);
+
+  useEffect(() => {
+    if (!previewOpen || !selectedPreview) {
+      setPreviewCapture(null);
+      return;
+    }
+    setPreviewCapture(
+      (current) => current ?? { bucket: bucketName, item: selectedPreview },
+    );
+  }, [previewOpen, selectedPreview, bucketName]);
+
+  useEffect(() => {
+    if (shareCapture && shareCapture.bucket !== bucketName) {
+      dispatch(setShareFileModalOpen(false));
+      dispatch(setSelectedPreview(null));
+    }
+  }, [shareCapture, bucketName, dispatch]);
+
+  useEffect(() => {
+    if (previewCapture && previewCapture.bucket !== bucketName) {
+      dispatch(setPreviewOpen(false));
+      dispatch(setSelectedPreview(null));
+    }
+  }, [previewCapture, bucketName, dispatch]);
 
   useEffect(() => {
     if (folderUpload.current !== null) {
@@ -607,95 +674,51 @@ const ListObjects = () => {
             if (anonymousMode) {
               xhr.setRequestHeader("X-Anonymous", "1");
             }
-            // xhr.setRequestHeader("X-Anonymous", "1");
 
             const areMultipleFiles = files.length > 1;
-            let errorMessage = areMultipleFiles
+            const errorMessage = areMultipleFiles
               ? t("An error occurred while uploading the files.")
               : t("An error occurred while uploading the file.");
 
-            const errorMessages: any = {
-              413: t("Error - File size too large"),
-            };
-
             xhr.withCredentials = false;
-            xhr.onload = function () {
-              // resolve promise only when HTTP code is ok
-              if (xhr.status >= 200 && xhr.status < 300) {
-                dispatch(completeObject(identity));
-                resolve({ status: xhr.status });
 
-                removeTrace(ID);
-              } else {
-                // reject promise if there was a server error
-                if (errorMessages[xhr.status]) {
-                  errorMessage = errorMessages[xhr.status];
-                } else if (xhr.response) {
-                  try {
-                    const err = JSON.parse(xhr.response);
-                    errorMessage = err.detailedMessage;
-                  } catch (e) {
-                    errorMessage = t("something went wrong");
-                  }
-                }
-
-                dispatch(
-                  failObject({
-                    instanceID: identity,
-                    msg: errorMessage,
-                  }),
-                );
-                reject({ status: xhr.status, message: errorMessage });
-
-                removeTrace(ID);
-              }
-            };
-
-            xhr.upload.addEventListener("error", () => {
-              reject(errorMessage);
-              dispatch(
-                failObject({
-                  instanceID: identity,
-                  msg: "A network error occurred.",
-                }),
-              );
-              return;
+            // Every terminal state releases the transfer-manager trace (the
+            // request and its FormData/Blob) and settles this promise once.
+            const lifecycle = attachUploadRequestHandlers(xhr, {
+              fallbackError: errorMessage,
+              malformedError: t("something went wrong"),
+              networkError: t("A network error occurred."),
+              statusErrors: { 413: t("Error - File size too large") },
+              handlers: {
+                cleanup: () => removeTrace(ID),
+                complete: (status) => {
+                  dispatch(completeObject(identity));
+                  resolve({ status });
+                },
+                fail: (message, status) => {
+                  dispatch(failObject({ instanceID: identity, msg: message }));
+                  reject({ status, message });
+                },
+                abort: () => {
+                  dispatch(cancelObjectInList(identity));
+                  resolve({ status: 0, cancelled: true });
+                },
+                progress: (progress) => {
+                  dispatch(updateProgress({ instanceID: identity, progress }));
+                },
+              },
             });
 
-            xhr.upload.addEventListener("progress", (event) => {
-              const progress = Math.floor((event.loaded * 100) / event.total);
-
-              dispatch(
-                updateProgress({
-                  instanceID: identity,
-                  progress: progress,
-                }),
-              );
-            });
-
-            xhr.onerror = () => {
-              reject(errorMessage);
-              dispatch(
-                failObject({
-                  instanceID: identity,
-                  msg: "A network error occurred.",
-                }),
-              );
-              return;
-            };
-            xhr.onloadend = () => {
-              if (files.length === 0) {
-                dispatch(setReloadObjectsList(true));
+            try {
+              if (file.size === undefined) {
+                throw new Error(errorMessage);
               }
-            };
-            xhr.onabort = () => {
-              dispatch(cancelObjectInList(identity));
-            };
-
-            const formData = new FormData();
-            if (file.size !== undefined) {
+              const formData = new FormData();
               formData.append(file.size.toString(), blobFile, fileName);
-              storeCallForObjectWithID(ID, xhr);
+              storeUploadControl(
+                ID,
+                uploadControl(xhr, formData, lifecycle, errorMessage),
+              );
               dispatch(
                 setNewObject({
                   ID,
@@ -711,7 +734,14 @@ const ListObjects = () => {
                   errorMessage: "",
                 }),
               );
-              storeFormDataWithID(ID, formData);
+            } catch (error: any) {
+              // A setup failure must not leave a trace or a pending promise.
+              lifecycle.finalize(
+                "error",
+                error instanceof Error && error.message
+                  ? error.message
+                  : errorMessage,
+              );
             }
           });
         };
@@ -727,10 +757,15 @@ const ListObjects = () => {
           const errors = results.filter(
             (result) => result.status === "rejected",
           );
+          // A cancelled upload is neither a success nor an error.
+          const cancelled = results.filter(
+            (result) =>
+              result.status === "fulfilled" && result.value?.cancelled,
+          );
           if (errors.length > 0) {
             const totalFiles = uploadFilePromises.length;
             const successUploadedFiles =
-              uploadFilePromises.length - errors.length;
+              uploadFilePromises.length - errors.length - cancelled.length;
             const err: ErrorResponseHandler = {
               errorMessage: t("There were some errors during file upload"),
               detailedError: t("Uploaded files {done}/{total}")
@@ -973,19 +1008,16 @@ const ListObjects = () => {
 
   return (
     <Fragment>
-      {shareFileModalOpen && selectedPreview && (
-        <ShareFile
-          open={shareFileModalOpen}
-          closeModalAndRefresh={closeShareModal}
-          bucketName={bucketName}
-          dataObject={{
-            name: selectedPreview.name,
-            size: selectedPreview.size ?? 0,
-            last_modified: "",
-            version_id: selectedPreview.version_id,
-          }}
-        />
-      )}
+      {shareFileModalOpen &&
+        shareCapture &&
+        shareCapture.bucket === bucketName && (
+          <ShareFile
+            key={shareSubjectKey(shareCapture.subject)}
+            open={shareFileModalOpen}
+            closeModalAndRefresh={closeShareModal}
+            subject={shareCapture.subject}
+          />
+        )}
       {deleteMultipleOpen && (
         <DeleteMultipleObjects
           deleteOpen={deleteMultipleOpen}
@@ -1002,20 +1034,27 @@ const ListObjects = () => {
           bucketName={bucketName}
         />
       )}
-      {previewOpen && selectedPreview && (
-        <PreviewFileModal
-          open={previewOpen}
-          bucketName={bucketName}
-          actualInfo={{
-            name: selectedPreview.name || "",
-            last_modified: "",
-            version_id: selectedPreview.version_id || "",
-            size: selectedPreview.size,
-            content_type: selectedPreview.content_type,
-          }}
-          onClosePreview={closePreviewWindow}
-        />
-      )}
+      {previewOpen &&
+        previewCapture &&
+        previewCapture.bucket === bucketName && (
+          <PreviewFileModal
+            key={identityKey([
+              previewCapture.bucket,
+              previewCapture.item.name,
+              previewCapture.item.version_id || "",
+            ])}
+            open={previewOpen}
+            bucketName={previewCapture.bucket}
+            actualInfo={{
+              name: previewCapture.item.name || "",
+              last_modified: "",
+              version_id: previewCapture.item.version_id || "",
+              size: previewCapture.item.size,
+              content_type: previewCapture.item.content_type,
+            }}
+            onClosePreview={closePreviewWindow}
+          />
+        )}
       {!!downloadRenameModal && (
         <RenameLongFileName
           open={!!downloadRenameModal}
@@ -1230,9 +1269,10 @@ const ListObjects = () => {
           >
             {versionsMode ? (
               <Fragment>
-                {selectedInternalPaths !== null && (
+                {detailsIdentityMatches && (
                   <VersionsNavigator
-                    internalPaths={selectedInternalPaths}
+                    key={detailsIdentityKey}
+                    internalPaths={routeIdentity.key}
                     bucketName={bucketName}
                   />
                 )}
@@ -1320,9 +1360,10 @@ const ListObjects = () => {
                       title={t("Selected Objects:")}
                     />
                   )}
-                  {selectedInternalPaths !== null && (
+                  {detailsIdentityMatches && (
                     <ObjectDetailPanel
-                      internalPaths={selectedInternalPaths}
+                      key={detailsIdentityKey}
+                      internalPaths={routeIdentity.key}
                       bucketName={bucketName}
                       onClosePanel={onClosePanel}
                       versioningInfo={versioningConfig}

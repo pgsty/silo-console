@@ -113,6 +113,13 @@ func buildServer() (*api.Server, error) {
 
 	server.ConfigureFlags()
 
+	if err := api.ConfigureSourceIPTrust(); err != nil {
+		return nil, err
+	}
+	if err := api.ConfigureWebSocketLimits(); err != nil {
+		return nil, err
+	}
+
 	// register all APIs
 	server.ConfigureAPI()
 
@@ -174,6 +181,11 @@ func loadAllCerts(ctx *cli.Context) error {
 			}
 		}
 	}
+
+	// Attach the pool now: StartServer clones the transport for the audit and
+	// log webhooks before ConfigureAPI runs, and that clone must already trust
+	// the operator's CAs.
+	api.ApplyGlobalRootCAs()
 
 	if api.GlobalTLSCertsManager != nil {
 		api.GlobalTLSCertsManager.ReloadOnSignal(syscall.SIGHUP)

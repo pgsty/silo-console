@@ -27,9 +27,9 @@ import (
 	"github.com/minio/madmin-go/v3"
 
 	jwtgo "github.com/golang-jwt/jwt/v4"
-	"github.com/minio/pkg/v3/policy/condition"
+	"github.com/pgsty/silo-pkg/v3/policy/condition"
 
-	minioIAMPolicy "github.com/minio/pkg/v3/policy"
+	minioIAMPolicy "github.com/pgsty/silo-pkg/v3/policy"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/minio/console/api/operations"
@@ -241,6 +241,9 @@ func getSessionResponse(ctx context.Context, session *models.Principal) (*models
 		CustomStyles:    customStyles,
 		EnvConstants:    &envConstants,
 		ServerEndPoint:  getMinIOServer(),
+		// Empty for identity-provider sessions; the UI must treat that as
+		// "unknown", never as a match.
+		AccountAccessKey: session.AccountAccessKey,
 	}
 	return sessionResp, nil
 }

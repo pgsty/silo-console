@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Button,
@@ -36,136 +36,250 @@ import {
   setModalSnackMessage,
 } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
-import { BucketObject } from "api/consoleApi";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { getMaxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserThunks";
 import { maxShareLinkExpTime } from "screens/Console/ObjectBrowser/objectBrowserSlice";
 import debounce from "lodash/debounce";
 import { formatText, interpolate, useT } from "i18n";
+import { isObjectTarget } from "../objectIdentity";
+import { isAbortError, ObjectRequestGuard } from "../requestGuard";
+import {
+  resolveShareVersion,
+  resolveUnversionedShareSubject,
+  ShareSubject,
+  shareSubjectKey,
+  ShareVersionResolution,
+} from "./shareSubject";
 
 interface IShareFileProps {
   open: boolean;
-  bucketName: string;
-  dataObject: BucketObject;
+  subject: ShareSubject;
   closeModalAndRefresh: () => void;
+}
+
+interface SubjectResolution {
+  subjectKey: string;
+  result: ShareVersionResolution;
 }
 
 const ShareFile = ({
   open,
   closeModalAndRefresh,
-  bucketName,
-  dataObject,
+  subject,
 }: IShareFileProps) => {
   const dispatch = useAppDispatch();
   const t = useT();
   const distributedSetup = useSelector(selDistSet);
   const maxShareLinkExpTimeVal = useSelector(maxShareLinkExpTime);
   const [shareURL, setShareURL] = useState<string>("");
-  const [isLoadingVersion, setIsLoadingVersion] = useState<boolean>(true);
   const [isLoadingFile, setIsLoadingFile] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [dateValid, setDateValid] = useState<boolean>(true);
-  const [versionID, setVersionID] = useState<string>("null");
   const [toggleURL, setToggleURL] = useState<boolean>(false);
+  const [resolution, setResolution] = useState<SubjectResolution | null>(null);
+  const versionGuard = useRef(new ObjectRequestGuard<string>());
+  const shareGuard = useRef(new ObjectRequestGuard<string>());
 
-  const debouncedDateChange = debounce((newDate: string, isValid: boolean) => {
-    setDateValid(isValid);
-    if (isValid) {
-      setSelectedDate(newDate);
-      return;
-    }
-    setSelectedDate("");
-    setShareURL("");
-  }, 300);
+  // The subject is consumed through its scalar fields so effects depend on
+  // identity, never on the reference of an object a parent rebuilds per render.
+  const { bucket, key } = subject;
+  const subjectIsTarget = isObjectTarget(subject);
+  const subjectVersionId = subjectIsTarget
+    ? subject.versionId
+    : subject.version.kind === "id"
+      ? subject.version.versionId
+      : null;
+  const subjectKey = shareSubjectKey(subject);
+
+  const debouncedDateChange = useMemo(
+    () =>
+      debounce((newDate: string, isValid: boolean) => {
+        setDateValid(isValid);
+        if (isValid) {
+          setSelectedDate(newDate);
+          return;
+        }
+        setSelectedDate("");
+        setShareURL("");
+      }, 300),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedDateChange.cancel();
+    };
+  }, [debouncedDateChange]);
+
+  useEffect(() => {
+    const versions = versionGuard.current;
+    const share = shareGuard.current;
+    return () => {
+      versions.invalidate();
+      share.invalidate();
+    };
+  }, []);
 
   useEffect(() => {
     dispatch(getMaxShareLinkExpTime());
   }, [dispatch]);
 
+  // Resolve the subject to one concrete version. A target needs no lookup; a
+  // requested object is resolved against the exact-key versions listing, and
+  // nothing is shared until that lookup has settled for this very subject.
   useEffect(() => {
-    // In case version is undefined, we get the latest version of the object
-    if (dataObject.version_id === undefined) {
-      // In case it is not distributed setup, then we default to "null";
-      if (distributedSetup) {
-        api.buckets
-          .listObjects(bucketName, {
-            prefix: dataObject.name || "",
-            with_versions: distributedSetup,
-          })
-          .then((res) => {
-            const result: BucketObject[] = res.data.objects || [];
-
-            const latestVersion: BucketObject | undefined = result.find(
-              (elem: BucketObject) => elem.is_latest,
-            );
-
-            if (latestVersion) {
-              setVersionID(`${latestVersion.version_id}`);
-              return;
-            }
-
-            // Version couldn't be retrieved, we default
-            setVersionID("null");
-          })
-          .catch((err) => {
-            dispatch(setModalErrorSnackMessage(errorToHandler(err.error)));
-          });
-
-        setIsLoadingVersion(false);
-        return;
-      }
-      setVersionID("null");
-      setIsLoadingVersion(false);
+    if (subjectIsTarget) {
+      setResolution({
+        subjectKey,
+        result: { kind: "version", versionId: subjectVersionId || "" },
+      });
       return;
     }
-    setVersionID(dataObject.version_id || "null");
-    setIsLoadingVersion(false);
-  }, [bucketName, dataObject, distributedSetup, dispatch]);
+    const requested = {
+      bucket,
+      key,
+      version:
+        subjectVersionId === null
+          ? ({ kind: "latest" } as const)
+          : ({ kind: "id", versionId: subjectVersionId } as const),
+    };
+    if (!distributedSetup) {
+      setResolution({
+        subjectKey,
+        result: resolveUnversionedShareSubject(requested),
+      });
+      return;
+    }
+    const guard = versionGuard.current;
+    const ticket = guard.begin(subjectKey);
+    setResolution(null);
+    api.buckets
+      .listObjects(
+        bucket,
+        { prefix: key, with_versions: true },
+        { signal: ticket.signal },
+      )
+      .then((res) => {
+        if (!ticket.isCurrent()) {
+          return;
+        }
+        setResolution({
+          subjectKey,
+          result: resolveShareVersion(requested, {
+            bucket,
+            key,
+            kind: "versions",
+            items: res.data.objects || [],
+          }),
+        });
+      })
+      .catch((err) => {
+        if (isAbortError(err) || !ticket.isCurrent()) {
+          return;
+        }
+        dispatch(setModalErrorSnackMessage(errorToHandler(err.error)));
+        setResolution({
+          subjectKey,
+          result: { kind: "none", reason: "not-found" },
+        });
+      });
+    return () => {
+      guard.invalidate();
+    };
+  }, [
+    bucket,
+    key,
+    subjectIsTarget,
+    subjectVersionId,
+    subjectKey,
+    distributedSetup,
+    dispatch,
+  ]);
+
+  const activeResolution =
+    resolution && resolution.subjectKey === subjectKey
+      ? resolution.result
+      : null;
+  const resolvedVersionId =
+    activeResolution?.kind === "version" ? activeResolution.versionId : null;
 
   useEffect(() => {
-    if (dateValid && !isLoadingVersion) {
-      setIsLoadingFile(true);
-      setShareURL("");
+    if (!dateValid || resolvedVersionId === null) {
+      return;
+    }
+    const guard = shareGuard.current;
+    const ticket = guard.begin(subjectKey);
+    setIsLoadingFile(true);
+    setShareURL("");
 
-      const slDate = new Date(`${selectedDate}`);
-      const currDate = new Date();
+    const slDate = new Date(`${selectedDate}`);
+    const currDate = new Date();
 
-      const diffDate = Math.ceil(
-        (slDate.getTime() - currDate.getTime()) / 1000,
-      );
+    const diffDate = Math.ceil((slDate.getTime() - currDate.getTime()) / 1000);
 
-      if (diffDate > 0) {
-        api.buckets
-          .shareObject(bucketName, {
-            prefix: dataObject.name || "",
-            version_id: versionID,
+    if (diffDate > 0) {
+      api.buckets
+        .shareObject(
+          bucket,
+          {
+            prefix: key,
+            version_id: resolvedVersionId,
             expires: selectedDate !== "" ? `${diffDate}s` : "",
             toggle_url: toggleURL,
-          })
-          .then((res) => {
-            setShareURL(res.data);
-            setIsLoadingFile(false);
-          })
-          .catch((err) => {
-            dispatch(setModalErrorSnackMessage(errorToHandler(err.error)));
-            setShareURL("");
-            setIsLoadingFile(false);
-          });
-      }
+          },
+          { signal: ticket.signal },
+        )
+        .then((res) => {
+          if (!ticket.isCurrent()) {
+            return;
+          }
+          setShareURL(res.data);
+          setIsLoadingFile(false);
+        })
+        .catch((err) => {
+          if (isAbortError(err) || !ticket.isCurrent()) {
+            return;
+          }
+          dispatch(setModalErrorSnackMessage(errorToHandler(err.error)));
+          setShareURL("");
+          setIsLoadingFile(false);
+        });
     }
+    return () => {
+      guard.invalidate();
+    };
   }, [
-    dataObject,
+    bucket,
+    key,
+    subjectKey,
+    resolvedVersionId,
     selectedDate,
-    bucketName,
     dateValid,
-    setShareURL,
-    dispatch,
-    distributedSetup,
-    isLoadingVersion,
-    versionID,
     toggleURL,
+    dispatch,
   ]);
+
+  const isLoadingVersion = activeResolution === null;
+
+  const unavailableMessage = (
+    reason: Extract<ShareVersionResolution, { kind: "none" }>["reason"],
+  ): string => {
+    switch (reason) {
+      case "delete-marker":
+        return t(
+          "The current version of this object is a delete marker and cannot be shared.",
+        );
+      case "unversioned":
+        return t(
+          "This server does not expose object versions; only the current object can be shared.",
+        );
+      default:
+        return t(
+          "The selected object version could not be found. Refresh the object list and try again.",
+        );
+    }
+  };
 
   return (
     <React.Fragment>
@@ -182,7 +296,12 @@ const ShareFile = ({
             <ProgressBar />
           </Grid>
         )}
-        {!isLoadingVersion && (
+        {!isLoadingVersion && activeResolution.kind === "none" && (
+          <Grid item xs={12} id="share-unavailable" sx={{ fontSize: 14 }}>
+            {unavailableMessage(activeResolution.reason)}
+          </Grid>
+        )}
+        {!isLoadingVersion && activeResolution.kind === "version" && (
           <Fragment>
             <Grid
               item
@@ -248,7 +367,7 @@ const ShareFile = ({
                 actionButton={
                   <CopyToClipboard text={shareURL}>
                     <Button
-                      id={"copy-path"}
+                      id={"copy-share-url"}
                       variant="regular"
                       onClick={() => {
                         dispatch(

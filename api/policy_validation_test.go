@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 )
 
 func TestPolicyWriteValidationRejectsBareARNs(t *testing.T) {

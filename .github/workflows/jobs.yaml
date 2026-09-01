@@ -52,7 +52,7 @@ jobs:
           make verifiers
 
   upstream-pkg-compat:
-    name: Build with upstream minio/pkg v3.6.1
+    name: Build with upstream minio/mc floor
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -61,29 +61,27 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: 1.27.x
-      - name: Remove the SILO replacements and test the advertised floor
-        run: |
-          # Replacements are not inherited, so an embedder that adds none of
-          # them resolves every dependency upstream. Model exactly that: drop
-          # all three SILO replacements, not just the shared package. Dropping
-          # the shared package alone leaves pgsty/mc, which compiles against
-          # silo-pkg's strict policy API; Go resolves that graph and then fails
-          # to build it. That partial override is a configuration Console does
-          # not support, so failing on it says nothing about the floor.
-          go mod edit -dropreplace=github.com/minio/pkg/v3
-          go mod edit -dropreplace=github.com/minio/mc
-          go mod edit -dropreplace=github.com/minio/minio-go/v7
-          go mod edit -require=github.com/minio/pkg/v3@v3.6.1
-          go mod tidy
-          test "$(go list -m -f '{{.Version}}' github.com/minio/pkg/v3)" = "v3.6.1"
-          for module in github.com/minio/pkg/v3 github.com/minio/mc github.com/minio/minio-go/v7; do
-            test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' "$module")"
-          done
-          go vet ./...
-          go vet -tags=testrunmain ./...
-          go test ./...
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
-          CGO_ENABLED=0 GOOS=netbsd GOARCH=amd64 go build ./...
+      - name: Remove the maintained mc replacement and test the advertised floor
+        # hack/upstream-floor.sh models an embedder that does not copy the mc
+        # replacement; the release-candidate workflow runs the same script.
+        run: hack/upstream-floor.sh
+
+  downstream-embedder-compat:
+    name: Build a minimal embedder from the README replacement block
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.27.x
+      - name: Verify the README block against go.mod
+        run: go run ./hack/replacements check
+      - name: Build an embedder that copies the README block verbatim
+        # hack/embedder-compat.sh feeds the published README text into a
+        # scratch module; the release-candidate workflow runs the same script.
+        run: hack/embedder-compat.sh
 
   semgrep-static-code-analysis:
     name: "semgrep checks"
@@ -150,6 +148,38 @@ jobs:
         continue-on-error: false
         run: |
           ./check-deadcode.sh
+      - name: Set up Go for the credits check
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Check the frontend section of CREDITS
+        # The production dependency closure is read from node_modules, so this
+        # check lives where the immutable install just happened.
+        run: go run ./hack/credits check --frontend
+
+  release-artifacts:
+    name: Release artifacts carry license, notice, credits and exact provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.27.x
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: v0.36.1
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: v2.17.1
+          install-only: true
+      - name: Build a snapshot and verify every artifact
+        run: hack/verify-release-artifacts.sh snapshot
 
   swagger-codegen:
     name: "Check for uncommitted changes through Swagger Codegen Changes."
@@ -289,6 +319,7 @@ jobs:
     needs:
       - lint-job
       - upstream-pkg-compat
+      - downstream-embedder-compat
       - ui-assets
       - semgrep-static-code-analysis
       - swagger-codegen
@@ -382,7 +413,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up docker
         if: always()
@@ -445,7 +484,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -506,7 +553,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -567,7 +622,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -629,7 +692,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-5:
     name: Permissions Tests Part 5
@@ -686,7 +757,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-6:
     name: Permissions Tests Part 6
@@ -743,7 +822,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-7:
     name: Permissions Tests Part 7
@@ -800,7 +887,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-8:
     name: Permissions Tests Part 8
@@ -857,7 +952,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-A:
     name: Permissions Tests Part A
@@ -913,7 +1016,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -973,7 +1084,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -1102,25 +1221,6 @@ jobs:
             ./integration/coverage/
           key: ${{ runner.os }}-coverage-2-${{ github.run_id }}
 
-  react-tests:
-    name: React Tests
-    # there are no react tests for vitest or yest
-    if: false
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Install modules
-        working-directory: ./web-app
-        run: yarn install --immutable
-      - name: Run tests
-        working-directory: ./web-app
-        run: yarn test
   replication:
     name: Site Replication Test
     needs:
@@ -1567,3 +1667,59 @@ jobs:
         run: |
           yarn exec playwright test --reporter=github
           yarn exec nyc report
+
+  required-matrix:
+    # The release gate (release.yaml) and branch protection look at this one
+    # job. It lists every job of the matrix explicitly and fails unless each
+    # of them succeeded: a skipped, cancelled or failed job is a failure, and
+    # a job removed from this list is a reviewed contract change.
+    name: Required matrix
+    if: always()
+    needs:
+      - lint-job
+      - upstream-pkg-compat
+      - downstream-embedder-compat
+      - semgrep-static-code-analysis
+      - ui-assets
+      - swagger-codegen
+      - latest-minio
+      - compile-binary
+      - release-artifacts
+      - test-nginx-subpath
+      - all-permissions-1
+      - all-permissions-2
+      - all-permissions-3
+      - all-permissions-4
+      - all-permissions-5
+      - all-permissions-6
+      - all-permissions-7
+      - all-permissions-8
+      - all-permissions-A
+      - all-permissions-B
+      - test-pkg-on-go
+      - test-api-on-go
+      - b-integration-tests
+      - replication
+      - sso-integration
+      - coverage
+      - ui-assets-istanbul-coverage
+      - compile-binary-istanbul-coverage
+      - cross-compile-1
+      - cross-compile-2
+      - cross-compile-3
+      - cross-compile-4
+      - cross-compile-5
+      - playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to succeed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS" | tee -a "$GITHUB_STEP_SUMMARY"
+          bad=$(jq -r 'to_entries[] | select(.value.result != "success") | .key' <<<"$NEEDS")
+          if [ -n "$bad" ]; then
+            echo "::error::required jobs did not succeed: $(echo "$bad" | tr '\n' ' ')"
+            exit 1
+          fi

@@ -140,34 +140,36 @@ The retained Go module, import paths, environment variables, API fields, and
 protocol identifiers are compatibility interfaces, not product branding. Any
 future rename of those interfaces will require aliases and a migration period.
 
-Standalone Console builds select the maintained SILO SDK, CLI, and shared
-package through this repository's `replace` directives. Go ignores replacement
-directives declared by dependency modules, so a SILO server embedding Console
-source should retain the matching top-level selections:
+Standalone Console directly requires `github.com/pgsty/silo-pkg/v3` v3.13.0
+and resolves `github.com/minio/minio-go/v7` upstream. The maintained mc release
+keeps the compatibility module path `github.com/minio/mc`, but its source lives
+in `pgsty/mc` under a calendar tag that is not a Go semantic version. Console
+therefore carries a single maintained replacement, and an embedding server must
+copy it because Go ignores replacements declared by dependency modules:
 
+<!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1
-	github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
-	github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.2
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260831144523-ddac5d58ab49
 )
 ```
+<!-- silo-replacements:end -->
 
-Adopt these selections as one set. The CLI and the shared package are coupled:
-`pgsty/mc` compiles against the SILO package's strict policy API, so a build that
-keeps the CLI replacement must keep the shared-package replacement too, and a
-build that takes neither resolves upstream `github.com/minio/mc` and upstream
-`github.com/minio/pkg/v3` together. Go will resolve a partial override that pairs
-one project's CLI with the other's shared package, but Console does not support
-it and does not test it.
+The block above is generated from `go.mod` (`go run ./hack/replacements update`)
+and verified on every build (`go run ./hack/replacements check`), so it always
+names the exact mc source release this Console commit builds with. The shared
+package is an ordinary direct requirement and needs no downstream replacement:
 
-The logical requirements remain on resolvable upstream versions because those
-requirements are part of Console's public module graph, while the replacements
-select the released SILO implementations for this repository's own builds. An
-upstream MinIO source build may keep the upstream versions chosen by its own
-module graph. Console avoids fork-only source APIs and applies its strict
-policy-write checks locally; this preserves build compatibility without
-claiming that the upstream and SILO packages have identical runtime semantics.
+| Module graph | Status |
+| :-- | :-- |
+| The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies `pgsty/silo-pkg` v3.13.0 is inherited directly |
+| No mc replacement | Build-compatible upstream mc floor, tested by `upstream-pkg-compat`; it is not the released SILO CLI behavior |
+| The retired three-replacement graph | Unsupported: do not replace `github.com/minio/pkg/v3` with silo-pkg v3.13.0, whose declared module path is `github.com/pgsty/silo-pkg/v3` |
+
+This is the coordinated own-module-path line introduced by silo-pkg v3.13.0.
+Console imports `github.com/pgsty/silo-pkg/v3` directly, while upstream
+dependencies that still use `github.com/minio/pkg/v3` may coexist as a distinct
+module. See [docs/Embedding.md](docs/Embedding.md).
 
 The complete, versioned list of differences from the upstream MinIO Console —
 restored features, removed features, and known gaps — is maintained in the

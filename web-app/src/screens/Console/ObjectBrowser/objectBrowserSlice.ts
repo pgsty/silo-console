@@ -175,6 +175,10 @@ const objectBrowserSlice = createSlice({
         (item) => item.instanceID === action.payload.instanceID,
       );
 
+      if (objectToFail === -1) {
+        return;
+      }
+
       state.objectManager.objectsToManage[objectToFail].failed = true;
       state.objectManager.objectsToManage[objectToFail].waitingForFile = false;
       state.objectManager.objectsToManage[objectToFail].done = true;

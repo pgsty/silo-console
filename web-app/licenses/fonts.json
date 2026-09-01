@@ -1,0 +1,19 @@
+{
+  "_comment": "Font families bundled into web-app/build and therefore into the Console binary. hack/credits appends each OFL notice to CREDITS.",
+  "fonts": [
+    {
+      "family": "Inter",
+      "files": "build/fonts/Inter/*.woff2",
+      "license": "SIL Open Font License 1.1",
+      "source": "https://github.com/rsms/inter",
+      "text_file": "node_modules/mds/src/components/assets/fonts/Inter/OFL.txt"
+    },
+    {
+      "family": "Chakra Petch",
+      "files": "src/screens/LoginPage/assets/fonts/chakra-petch-latin-*.woff2",
+      "license": "SIL Open Font License 1.1",
+      "source": "https://github.com/m4rc1e/Chakra-Petch",
+      "text_file": "src/screens/LoginPage/assets/fonts/OFL.txt"
+    }
+  ]
+}

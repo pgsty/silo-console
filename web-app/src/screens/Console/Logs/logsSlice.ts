@@ -17,6 +17,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { LogMessage } from "./types";
 import { DateTime } from "luxon";
+import { MAX_LOG_MESSAGES, trimToNewest } from "./logBuffer";
 
 interface LogState {
   logMessages: LogMessage[];
@@ -55,6 +56,7 @@ const logsSlice = createSlice({
         }
       } else {
         msgs.push(action.payload);
+        trimToNewest(msgs, MAX_LOG_MESSAGES);
       }
       state.logMessages = msgs;
     },

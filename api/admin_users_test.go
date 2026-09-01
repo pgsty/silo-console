@@ -28,7 +28,7 @@ import (
 	"github.com/minio/console/api/operations"
 	"github.com/minio/console/models"
 	"github.com/minio/madmin-go/v3"
-	iampolicy "github.com/minio/pkg/v3/policy"
+	iampolicy "github.com/pgsty/silo-pkg/v3/policy"
 	asrt "github.com/stretchr/testify/assert"
 )
 

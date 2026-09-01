@@ -32,7 +32,7 @@ import (
 	"github.com/minio/console/pkg/auth/utils"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/set"
-	"github.com/minio/pkg/v3/env"
+	"github.com/pgsty/silo-pkg/v3/env"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/oauth2"
 	xoauth2 "golang.org/x/oauth2"
@@ -112,7 +112,20 @@ type Provider struct {
 	UserInfo     bool
 	RefreshToken string
 	oauth2Config Configuration
-	client       *http.Client
+	// client talks to the identity provider: discovery, token exchange,
+	// userinfo. It must always verify TLS peers.
+	client *http.Client
+	// stsClient talks to the SILO STS endpoint when the identity is exchanged
+	// for S3 credentials. When nil, client is used for both roles.
+	stsClient *http.Client
+}
+
+// stsHTTPClient returns the client used for the SILO STS exchange.
+func (client *Provider) stsHTTPClient() *http.Client {
+	if client.stsClient != nil {
+		return client.stsClient
+	}
+	return client.client
 }
 
 // DefaultDerivedKey is the key used to compute the HMAC for signing the oauth state parameter
@@ -153,6 +166,13 @@ var requiredResponseTypes = set.CreateStringSet("code")
 // We only support Authentication with the Authorization Code Flow - spec:
 // https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 func NewOauth2ProviderClient(scopes []string, r *http.Request, httpClient *http.Client) (*Provider, error) {
+	return NewOauth2ProviderClientWithClients(scopes, r, httpClient, httpClient)
+}
+
+// NewOauth2ProviderClientWithClients is NewOauth2ProviderClient with the
+// identity-provider client and the SILO STS client supplied separately.
+func NewOauth2ProviderClientWithClients(scopes []string, r *http.Request, idpClient, stsClient *http.Client) (*Provider, error) {
+	httpClient := idpClient
 	ddoc, err := parseDiscoveryDoc(r.Context(), GetIDPURL(), httpClient)
 	if err != nil {
 		return nil, err
@@ -204,6 +224,7 @@ func NewOauth2ProviderClient(scopes []string, r *http.Request, httpClient *http.
 	client.IDPName = GetIDPClientID()
 	client.UserInfo = GetIDPUserInfo()
 	client.client = httpClient
+	client.stsClient = stsClient
 
 	return client, nil
 }
@@ -212,11 +233,17 @@ var defaultScopes = []string{"openid", "profile", "email"}
 
 // NewOauth2ProviderClientByName returns a provider if present specified by the input name of the provider.
 func (ois OpenIDPCfg) NewOauth2ProviderClientByName(name string, scopes []string, r *http.Request, clnt *http.Client) (provider *Provider, err error) {
+	return ois.NewOauth2ProviderClientByNameWithClients(name, scopes, r, clnt, clnt)
+}
+
+// NewOauth2ProviderClientByNameWithClients is NewOauth2ProviderClientByName
+// with the identity-provider client and the SILO STS client supplied separately.
+func (ois OpenIDPCfg) NewOauth2ProviderClientByNameWithClients(name string, scopes []string, r *http.Request, idpClient, stsClient *http.Client) (provider *Provider, err error) {
 	oi, ok := ois[name]
 	if !ok {
 		return nil, fmt.Errorf("%s IDP provider does not exist", name)
 	}
-	return oi.GetOauth2Provider(name, scopes, r, clnt)
+	return oi.GetOauth2ProviderWithClients(name, scopes, r, idpClient, stsClient)
 }
 
 // NewOauth2ProviderClient instantiates a new oauth2 client using the
@@ -227,8 +254,14 @@ func (ois OpenIDPCfg) NewOauth2ProviderClientByName(name string, scopes []string
 // We only support Authentication with the Authorization Code Flow - spec:
 // https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 func (ois OpenIDPCfg) NewOauth2ProviderClient(scopes []string, r *http.Request, clnt *http.Client) (provider *Provider, providerCfg ProviderConfig, err error) {
+	return ois.NewOauth2ProviderClientWithClients(scopes, r, clnt, clnt)
+}
+
+// NewOauth2ProviderClientWithClients is OpenIDPCfg.NewOauth2ProviderClient with
+// the identity-provider client and the SILO STS client supplied separately.
+func (ois OpenIDPCfg) NewOauth2ProviderClientWithClients(scopes []string, r *http.Request, idpClient, stsClient *http.Client) (provider *Provider, providerCfg ProviderConfig, err error) {
 	for name, oi := range ois {
-		provider, err = oi.GetOauth2Provider(name, scopes, r, clnt)
+		provider, err = oi.GetOauth2ProviderWithClients(name, scopes, r, idpClient, stsClient)
 		if err != nil {
 			// Upon error look for the next IDP.
 			continue
@@ -336,7 +369,7 @@ func (client *Provider) VerifyIdentity(ctx context.Context, code, state, roleARN
 	stsEndpoint := GetSTSEndpoint()
 
 	sts := credentials.New(&credentials.STSWebIdentity{
-		Client:              client.client,
+		Client:              client.stsHTTPClient(),
 		STSEndpoint:         stsEndpoint,
 		GetWebIDTokenExpiry: getWebTokenExpiry,
 		RoleARN:             roleARN,

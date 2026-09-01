@@ -7,8 +7,14 @@ release:
   github:
     owner: pgsty
     name: silo-console
+  # The draft is the staging area: release.yaml verifies the uploaded assets
+  # and publishes only from the protected publish-release job.
   draft: true
   prerelease: false
+  extra_files:
+    - glob: LICENSE
+    - glob: NOTICE
+    - glob: CREDITS
 
 before:
   hooks:
@@ -41,15 +47,31 @@ builds:
       - -s -w -X github.com/minio/console/pkg.ReleaseTag={{.Tag}} -X github.com/minio/console/pkg.CommitID={{.FullCommit}} -X github.com/minio/console/pkg.Version={{.Version}} -X github.com/minio/console/pkg.ShortCommitID={{.ShortCommit}} -X github.com/minio/console/pkg.ReleaseTime={{.Date}}
 
 archives:
-  - name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+  # Bare executables keep their historical asset names; each executable also
+  # embeds LICENSE, NOTICE and CREDITS (`console license|notice|credits`).
+  - id: binaries
+    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
     formats: ["binary"]
+  # Bundles carry the same executable together with the legal material as files.
+  - id: bundles
+    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    formats: ["tar.gz"]
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+    files:
+      - LICENSE
+      - NOTICE
+      - CREDITS
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
   algorithm: sha256
 
 snapshot:
-  version_template: SNAPSHOT@{{.ShortCommit}}
+  # Must be a valid deb/rpm/apk version so snapshot packages can be inspected
+  # exactly like release packages (hack/verify-release-artifacts.sh).
+  version_template: "{{ incpatch .Version }}-SNAPSHOT-{{ .ShortCommit }}"
 
 changelog:
   sort: asc
@@ -74,6 +96,23 @@ nfpms:
       - rpm
       - apk
     contents:
+      - src: LICENSE
+        dst: /usr/share/licenses/silo-console/LICENSE
+        file_info:
+          mode: 0644
+      - src: NOTICE
+        dst: /usr/share/licenses/silo-console/NOTICE
+        file_info:
+          mode: 0644
+      - src: CREDITS
+        dst: /usr/share/doc/silo-console/CREDITS
+        file_info:
+          mode: 0644
+      - src: packaging/debian/copyright
+        dst: /usr/share/doc/silo-console/copyright
+        packager: deb
+        file_info:
+          mode: 0644
       # DEB/RPM packages retain the compatibility unit name, see systemd/README.md
       - src: systemd/console.service
         dst: /etc/systemd/system/minio-console.service
@@ -99,42 +138,51 @@ nfpms:
         License: AGPL-3.0-or-later
 
 dockers_v2:
+  # Release images are pushed to a separately PRIVATE staging package and
+  # promoted by digest to ghcr.io/pgsty/silo-console only after release.yaml
+  # has verified the exact index; snapshots build locally under a per-commit
+  # tag so a stale image can never satisfy the verifier.
   - dockerfile: Dockerfile.goreleaser
     images:
-      - "ghcr.io/pgsty/silo-console"
+      - "ghcr.io/pgsty/silo-console-staging"
     platforms:
       - linux/amd64
       - linux/arm64
     tags:
-      - "{{ .Tag }}"
-      - "latest"
+      - "{{ if .IsSnapshot }}snapshot-{{ .ShortCommit }}{{ else }}{{ .Tag }}{{ end }}"
     build_args:
       TAG: "{{ .Tag }}"
+    extra_files:
+      - LICENSE
+      - NOTICE
+      - CREDITS
     labels:
       "org.opencontainers.image.authors": "Pigsty"
       "org.opencontainers.image.vendor": "Pigsty"
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.description": "The SILO object storage console"
+      "org.opencontainers.image.description": "The SILO object storage console; AGPL-3.0-or-later, license and attribution in /usr/share/licenses/silo-console"
       "org.opencontainers.image.created": "{{.Date}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Tag}}"
-      "org.opencontainers.image.url": "{{.GitURL}}"
-      "org.opencontainers.image.documentation": "{{.GitURL}}"
-      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.version": "{{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}"
+      "org.opencontainers.image.url": "https://github.com/pgsty/silo-console"
+      "org.opencontainers.image.documentation": "https://github.com/pgsty/silo-console"
+      "org.opencontainers.image.source": "https://github.com/pgsty/silo-console"
       "org.opencontainers.image.licenses": "AGPL-3.0-or-later"
       "org.opencontainers.image.base.name": "scratch"
+      "io.pgsty.silo-console.source": "{{ if .IsSnapshot }}https://github.com/pgsty/silo-console/commit/{{ .FullCommit }}{{ else }}https://github.com/pgsty/silo-console/tree/{{ .Tag }}{{ end }}"
     annotations:
       "org.opencontainers.image.authors": "Pigsty"
       "org.opencontainers.image.vendor": "Pigsty"
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
-      "org.opencontainers.image.description": "The SILO object storage console"
+      "org.opencontainers.image.description": "The SILO object storage console; AGPL-3.0-or-later, license and attribution in /usr/share/licenses/silo-console"
       "org.opencontainers.image.created": "{{.Date}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Tag}}"
-      "org.opencontainers.image.url": "{{.GitURL}}"
-      "org.opencontainers.image.documentation": "{{.GitURL}}"
-      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.version": "{{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}"
+      "org.opencontainers.image.url": "https://github.com/pgsty/silo-console"
+      "org.opencontainers.image.documentation": "https://github.com/pgsty/silo-console"
+      "org.opencontainers.image.source": "https://github.com/pgsty/silo-console"
       "org.opencontainers.image.licenses": "AGPL-3.0-or-later"
       "org.opencontainers.image.base.name": "scratch"
+      "io.pgsty.silo-console.source": "{{ if .IsSnapshot }}https://github.com/pgsty/silo-console/commit/{{ .FullCommit }}{{ else }}https://github.com/pgsty/silo-console/tree/{{ .Tag }}{{ end }}"

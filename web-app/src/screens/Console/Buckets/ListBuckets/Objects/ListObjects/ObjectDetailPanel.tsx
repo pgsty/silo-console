@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import get from "lodash/get";
 import { useSelector } from "react-redux";
 import {
@@ -77,18 +77,18 @@ import {
   canDisplayObjectVersions,
   exactObjectVersions,
 } from "../ObjectDetails/objectVersions";
-
-const emptyFile: BucketObject = {
-  is_latest: true,
-  last_modified: "",
-  legal_hold_status: "",
-  name: "",
-  retention_mode: "",
-  retention_until_date: "",
-  size: 0,
-  tags: {},
-  version_id: undefined,
-};
+import {
+  deleteRequestVersion,
+  ObjectLocation,
+  ObjectTarget,
+  RequestedObject,
+  resolveObject,
+  TaggedResult,
+  targetKey,
+  versionSelectorFromRedux,
+} from "../objectIdentity";
+import { isAbortError, ObjectRequestGuard } from "../requestGuard";
+import { shareSubjectKey } from "../ObjectDetails/shareSubject";
 
 interface IObjectDetailPanelProps {
   internalPaths: string;
@@ -128,178 +128,164 @@ const ObjectDetailPanel = ({
   const [tagModalOpen, setTagModalOpen] = useState<boolean>(false);
   const [legalholdOpen, setLegalholdOpen] = useState<boolean>(false);
   const [inspectModalOpen, setInspectModalOpen] = useState<boolean>(false);
-  const [actualInfo, setActualInfo] = useState<BucketObject | null>(null);
-  const [allInfoElements, setAllInfoElements] = useState<BucketObject[]>([]);
-  const [objectToShare, setObjectToShare] = useState<BucketObject | null>(null);
-  const [versions, setVersions] = useState<BucketObject[]>([]);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
-  const [totalVersionsSize, setTotalVersionsSize] = useState<number>(0);
+  const [longFileOpen, setLongFileOpen] = useState<boolean>(false);
   const [moreVersionsThanLimit, setMoreVersionsThanLimit] =
     useState<boolean>(false);
-  const [longFileOpen, setLongFileOpen] = useState<boolean>(false);
-  const metadataGeneration = useRef(0);
+  // The listing this panel resolved its object from, tagged with the bucket
+  // and key it was requested for. Everything displayed derives from it.
+  const [listResult, setListResult] =
+    useState<TaggedResult<BucketObject> | null>(null);
   const [metadataState, setMetadataState] = useState<{
     identity: string;
     data: Record<string, unknown> | null;
   }>({ identity: "", data: null });
-  const [loadMetadata, setLoadingMetadata] = useState<boolean>(false);
+  // Two independent request streams, two guards: a metadata request must not
+  // be cancelled by a refreshed listing and vice versa.
+  const listGuard = useRef(new ObjectRequestGuard<ObjectLocation>());
+  const metadataGuard = useRef(new ObjectRequestGuard<ObjectTarget>());
 
-  const internalPathsDecoded = internalPaths || "";
-  const allPathData = internalPathsDecoded.split("/");
+  const allPathData = internalPaths.split("/");
   const currentItem = allPathData.pop() || "";
-  const metadataIdentity = `${bucketName}\u0001${internalPaths}\u0001${
-    actualInfo?.version_id || ""
-  }`;
+
+  const location = useMemo<ObjectLocation>(
+    () => ({ bucket: bucketName, key: internalPaths }),
+    [bucketName, internalPaths],
+  );
+  const requested = useMemo<RequestedObject>(
+    () => ({ ...location, version: versionSelectorFromRedux(selectedVersion) }),
+    [location, selectedVersion],
+  );
+  // Derived synchronously on every render: the panel never holds an object
+  // that does not belong to the requested bucket, key and version.
+  const validated = useMemo(
+    () => resolveObject(requested, listResult),
+    [requested, listResult],
+  );
+  const explicitVersion = requested.version.kind === "id";
+  const versions = useMemo(
+    () => (listResult?.kind === "versions" ? listResult.items : []),
+    [listResult],
+  );
+  const totalVersionsSize = useMemo(
+    () =>
+      versions.reduce((acc: number, currValue: BucketObject): number => {
+        if (currValue?.size) {
+          return acc + currValue.size;
+        }
+        return acc;
+      }, 0),
+    [versions],
+  );
+  const metadataTarget =
+    validated && !validated.info.is_delete_marker ? validated.resolved : null;
+  const metadataVersionParam = validated?.info.version_id;
+  const currentTargetKey = validated ? targetKey(validated.resolved) : "";
   const metaData =
-    metadataState.identity === metadataIdentity ? metadataState.data : null;
-
-  // calculate object name to display
-  let objectNameArray: string[] = [];
-  if (actualInfo && actualInfo.name) {
-    objectNameArray = actualInfo.name.split("/");
-  }
+    currentTargetKey !== "" && metadataState.identity === currentTargetKey
+      ? metadataState.data
+      : null;
 
   useEffect(() => {
-    if (distributedSetup && allInfoElements && allInfoElements.length >= 1) {
-      let infoElement =
-        allInfoElements.find((el: BucketObject) => el.is_latest) || emptyFile;
+    const list = listGuard.current;
+    const metadata = metadataGuard.current;
+    return () => {
+      list.invalidate();
+      metadata.invalidate();
+    };
+  }, []);
 
-      if (selectedVersion !== "") {
-        infoElement =
-          allInfoElements.find(
-            (el: BucketObject) => el.version_id === selectedVersion,
-          ) || emptyFile;
-      }
-
-      if (!infoElement.is_delete_marker) {
-        setLoadingMetadata(true);
-      }
-
-      setActualInfo(infoElement);
+  useEffect(() => {
+    if (!loadingObjectInfo || internalPaths === "") {
+      return;
     }
-  }, [selectedVersion, distributedSetup, allInfoElements]);
-
-  useEffect(() => {
-    if (loadingObjectInfo && internalPaths !== "") {
-      api.buckets
-        .listObjects(bucketName, {
+    const ticket = listGuard.current.begin(location);
+    api.buckets
+      .listObjects(
+        bucketName,
+        {
           prefix: internalPaths,
           with_versions: distributedSetup,
           limit: versionsLimit + 1,
-        })
-        .then((res) => {
-          const result = exactObjectVersions(
-            res.data.objects || [],
-            internalPaths,
-          );
-          if (distributedSetup) {
-            setMoreVersionsThanLimit(result.length > versionsLimit);
-            const visibleVersions = result.slice(0, versionsLimit);
-
-            setAllInfoElements(visibleVersions);
-            setVersions(visibleVersions);
-
-            const tVersionSize = visibleVersions.reduce(
-              (acc: number, currValue: BucketObject): number => {
-                if (currValue?.size) {
-                  return acc + currValue.size;
-                }
-                return acc;
-              },
-              0,
-            );
-
-            setTotalVersionsSize(tVersionSize);
-          } else {
-            const resInfo = result[0];
-
-            setActualInfo(resInfo || null);
-            setVersions([]);
-
-            if (resInfo && !resInfo.is_delete_marker) {
-              setLoadingMetadata(true);
-            }
-          }
-
-          dispatch(setLoadingObjectInfo(false));
-        })
-        .catch((err) => {
-          console.error("Error loading object details", err.error);
-          dispatch(setLoadingObjectInfo(false));
+        },
+        { signal: ticket.signal },
+      )
+      .then((res) => {
+        if (!ticket.isCurrent()) {
+          return;
+        }
+        const result = exactObjectVersions(
+          res.data.objects || [],
+          internalPaths,
+        );
+        setMoreVersionsThanLimit(
+          distributedSetup && result.length > versionsLimit,
+        );
+        setListResult({
+          bucket: bucketName,
+          key: internalPaths,
+          kind: distributedSetup ? "versions" : "current",
+          items: result.slice(0, versionsLimit),
         });
-    }
+        dispatch(setLoadingObjectInfo(false));
+      })
+      .catch((err) => {
+        if (isAbortError(err) || !ticket.isCurrent()) {
+          return;
+        }
+        console.error("Error loading object details", err.error);
+        dispatch(setLoadingObjectInfo(false));
+      });
   }, [
     loadingObjectInfo,
     bucketName,
     internalPaths,
+    location,
     dispatch,
     distributedSetup,
-    selectedVersion,
     versionsLimit,
   ]);
 
   useEffect(() => {
-    if (loadMetadata && internalPaths !== "") {
-      const controller = new AbortController();
-      const generation = metadataGeneration.current + 1;
-      metadataGeneration.current = generation;
-
-      setMetadataState({ identity: metadataIdentity, data: null });
-
-      api.buckets
-        .getObjectMetadata(
-          bucketName,
-          {
-            prefix: internalPaths,
-            ...(actualInfo?.version_id
-              ? { versionID: actualInfo.version_id }
-              : {}),
-          },
-          { signal: controller.signal },
-        )
-        .then((res) => {
-          if (
-            !controller.signal.aborted &&
-            metadataGeneration.current === generation
-          ) {
-            setMetadataState({
-              identity: metadataIdentity,
-              data: get(res.data, "objectMetadata", {}),
-            });
-            setLoadingMetadata(false);
-          }
-        })
-        .catch(() => {
-          if (
-            !controller.signal.aborted &&
-            metadataGeneration.current === generation
-          ) {
-            setMetadataState({ identity: metadataIdentity, data: null });
-            setLoadingMetadata(false);
-          }
-        });
-
-      return () => {
-        controller.abort();
-        if (metadataGeneration.current === generation) {
-          metadataGeneration.current += 1;
-        }
-      };
+    if (!metadataTarget) {
+      return;
     }
-  }, [
-    bucketName,
-    internalPaths,
-    loadMetadata,
-    actualInfo?.version_id,
-    metadataIdentity,
-  ]);
+    const guard = metadataGuard.current;
+    const ticket = guard.begin(metadataTarget);
+    const identity = targetKey(metadataTarget);
 
-  let tagKeys: string[] = [];
+    setMetadataState({ identity, data: null });
 
-  if (actualInfo && actualInfo.tags) {
-    tagKeys = Object.keys(actualInfo.tags);
-  }
+    api.buckets
+      .getObjectMetadata(
+        metadataTarget.bucket,
+        {
+          prefix: metadataTarget.key,
+          ...(metadataVersionParam ? { versionID: metadataVersionParam } : {}),
+        },
+        { signal: ticket.signal },
+      )
+      .then((res) => {
+        if (!ticket.isCurrent()) {
+          return;
+        }
+        setMetadataState({
+          identity,
+          data: get(res.data, "objectMetadata", {}),
+        });
+      })
+      .catch((err) => {
+        if (isAbortError(err) || !ticket.isCurrent()) {
+          return;
+        }
+        setMetadataState({ identity, data: null });
+      });
+
+    return () => {
+      guard.invalidate();
+    };
+  }, [metadataTarget, metadataVersionParam]);
 
   const openRetentionModal = () => {
     setRetentionModalOpen(true);
@@ -317,7 +303,6 @@ const ObjectDetailPanel = ({
   };
 
   const closeShareModal = () => {
-    setObjectToShare(null);
     setShareFileModalOpen(false);
   };
 
@@ -328,7 +313,7 @@ const ObjectDetailPanel = ({
   const closeDeleteModal = (closeAndReload: boolean) => {
     setDeleteOpen(false);
 
-    if (closeAndReload && selectedVersion === "") {
+    if (closeAndReload && !explicitVersion) {
       onClosePanel(true);
     } else {
       dispatch(setLoadingVersions(true));
@@ -364,7 +349,9 @@ const ObjectDetailPanel = ({
     </div>
   );
 
-  if (!actualInfo) {
+  // Until the requested object resolves against a listing for this bucket and
+  // key, nothing of a previous object is shown and no action is offered.
+  if (!validated) {
     if (loadingObjectInfo) {
       return loaderForContainer;
     }
@@ -372,15 +359,26 @@ const ObjectDetailPanel = ({
     return null;
   }
 
+  const actualInfo = validated.info;
+  const target = validated.resolved;
+  const deleteVersion = deleteRequestVersion(validated) ?? "";
+
+  let tagKeys: string[] = [];
+
+  if (actualInfo.tags) {
+    tagKeys = Object.keys(actualInfo.tags);
+  }
+
+  const objectNameArray = target.key.split("/");
   const objectName =
     objectNameArray.length > 0
       ? objectNameArray[objectNameArray.length - 1]
-      : actualInfo.name;
+      : target.key;
 
   const objectResources = [
     bucketName,
     currentItem,
-    [bucketName, actualInfo.name].join("/"),
+    [bucketName, target.key].join("/"),
   ];
   const canSetLegalHold = hasPermission(bucketName, [
     IAM_SCOPES.S3_PUT_OBJECT_LEGAL_HOLD,
@@ -415,16 +413,14 @@ const ObjectDetailPanel = ({
     IAM_SCOPES.S3_GET_OBJECT,
     IAM_SCOPES.S3_GET_ACTIONS,
   ]);
-  const previewPermissionScopes =
-    selectedVersion !== ""
-      ? [IAM_SCOPES.S3_GET_OBJECT_VERSION, IAM_SCOPES.S3_GET_ACTIONS]
-      : [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS];
-  const canReadPreviewObject =
-    selectedVersion === ""
-      ? canGetObject
-      : hasPermission(objectResources, previewPermissionScopes);
+  const previewPermissionScopes = explicitVersion
+    ? [IAM_SCOPES.S3_GET_OBJECT_VERSION, IAM_SCOPES.S3_GET_ACTIONS]
+    : [IAM_SCOPES.S3_GET_OBJECT, IAM_SCOPES.S3_GET_ACTIONS];
+  const canReadPreviewObject = !explicitVersion
+    ? canGetObject
+    : hasPermission(objectResources, previewPermissionScopes);
   const canDelete = hasPermission(
-    [bucketName, currentItem, [bucketName, actualInfo.name].join("/")],
+    [bucketName, currentItem, [bucketName, target.key].join("/")],
     [IAM_SCOPES.S3_DELETE_OBJECT, IAM_SCOPES.S3_DELETE_ACTIONS],
   );
   const versionsAvailable = canDisplayObjectVersions({
@@ -439,13 +435,13 @@ const ObjectDetailPanel = ({
     objectName: currentItem,
     canGetObject: canReadPreviewObject,
     isDeleteMarker: !!actualInfo.is_delete_marker,
-    isPrefix: !!actualInfo.name?.endsWith("/"),
+    isPrefix: target.key.endsWith("/"),
   });
 
   const multiActionButtons = [
     {
       action: () => {
-        downloadObject(dispatch, bucketName, internalPaths, actualInfo);
+        downloadObject(dispatch, bucketName, target.key, actualInfo);
       },
       label: t("Download"),
       disabled: !!actualInfo.is_delete_marker || !canGetObject,
@@ -497,7 +493,7 @@ const ObjectDetailPanel = ({
         !distributedSetup ||
         !!actualInfo.is_delete_marker ||
         !canSetLegalHold ||
-        selectedVersion !== "",
+        explicitVersion,
       icon: <LegalHoldIcon />,
       tooltip: canSetLegalHold
         ? locking
@@ -517,7 +513,7 @@ const ObjectDetailPanel = ({
         !distributedSetup ||
         !!actualInfo.is_delete_marker ||
         !canChangeRetention ||
-        selectedVersion !== "" ||
+        explicitVersion ||
         !locking,
       icon: <RetentionIcon />,
       tooltip: canChangeRetention
@@ -541,8 +537,7 @@ const ObjectDetailPanel = ({
         setTagModalOpen(true);
       },
       label: t("Tags"),
-      disabled:
-        !!actualInfo.is_delete_marker || selectedVersion !== "" || !canSetTags,
+      disabled: !!actualInfo.is_delete_marker || explicitVersion || !canSetTags,
       icon: <TagsIcon />,
       tooltip: canSetTags
         ? t("Change Tags for this File")
@@ -564,7 +559,7 @@ const ObjectDetailPanel = ({
       disabled:
         !distributedSetup ||
         !!actualInfo.is_delete_marker ||
-        selectedVersion !== "" ||
+        explicitVersion ||
         !canInspect,
       icon: <InspectMenuIcon />,
       tooltip: canInspect
@@ -620,43 +615,41 @@ const ObjectDetailPanel = ({
 
   return (
     <Fragment>
-      {shareFileModalOpen && actualInfo && (
+      {shareFileModalOpen && (
         <ShareFile
+          key={shareSubjectKey(target)}
           open={shareFileModalOpen}
           closeModalAndRefresh={closeShareModal}
-          bucketName={bucketName}
-          dataObject={objectToShare || actualInfo}
+          subject={target}
         />
       )}
-      {retentionModalOpen && actualInfo && (
+      {retentionModalOpen && (
         <SetRetention
           open={retentionModalOpen}
           closeModalAndRefresh={closeRetentionModal}
-          objectName={currentItem}
+          target={target}
           objectInfo={actualInfo}
-          bucketName={bucketName}
         />
       )}
       {deleteOpen && (
         <DeleteObject
           deleteOpen={deleteOpen}
           selectedBucket={bucketName}
-          selectedObject={internalPaths}
+          selectedObject={target.key}
           closeDeleteModalAndRefresh={closeDeleteModal}
           versioningInfo={distributedSetup ? versioningInfo : undefined}
-          selectedVersion={selectedVersion}
+          selectedVersion={deleteVersion}
         />
       )}
-      {legalholdOpen && actualInfo && (
+      {legalholdOpen && (
         <SetLegalHoldModal
           open={legalholdOpen}
           closeModalAndRefresh={closeLegalholdModal}
-          objectName={actualInfo.name || ""}
-          bucketName={bucketName}
+          target={target}
           actualInfo={actualInfo}
         />
       )}
-      {previewOpen && actualInfo && (
+      {previewOpen && (
         <PreviewFileModal
           open={previewOpen}
           bucketName={bucketName}
@@ -666,29 +659,29 @@ const ObjectDetailPanel = ({
           }}
         />
       )}
-      {tagModalOpen && actualInfo && (
+      {tagModalOpen && (
         <TagsModal
           modalOpen={tagModalOpen}
-          bucketName={bucketName}
+          target={target}
           actualInfo={actualInfo}
           onCloseAndUpdate={closeAddTagModal}
         />
       )}
-      {inspectModalOpen && actualInfo && (
+      {inspectModalOpen && (
         <InspectObject
           inspectOpen={inspectModalOpen}
           volumeName={bucketName}
-          inspectPath={actualInfo.name || ""}
+          inspectPath={target.key}
           closeInspectModalAndRefresh={closeInspectModal}
         />
       )}
-      {longFileOpen && actualInfo && (
+      {longFileOpen && (
         <RenameLongFileName
           open={longFileOpen}
           closeModal={closeFileOpen}
           currentItem={currentItem}
           bucketName={bucketName}
-          internalPaths={internalPaths}
+          internalPaths={target.key}
           actualInfo={actualInfo}
         />
       )}
@@ -753,7 +746,7 @@ const ObjectDetailPanel = ({
                 resource={[
                   bucketName,
                   currentItem,
-                  [bucketName, actualInfo.name].join("/"),
+                  [bucketName, target.key].join("/"),
                 ]}
                 scopes={[
                   IAM_SCOPES.S3_DELETE_OBJECT,
@@ -770,16 +763,12 @@ const ObjectDetailPanel = ({
                   onClick={() => {
                     setDeleteOpen(true);
                   }}
-                  disabled={
-                    selectedVersion === "" && actualInfo.is_delete_marker
-                  }
+                  disabled={!explicitVersion && actualInfo.is_delete_marker}
                   sx={{
                     width: "calc(100% - 44px)",
                     margin: "8px 0",
                   }}
-                  label={
-                    selectedVersion !== "" ? t("Delete version") : t("Delete")
-                  }
+                  label={explicitVersion ? t("Delete version") : t("Delete")}
                 />
               </SecureComponent>
             </Grid>
@@ -790,11 +779,11 @@ const ObjectDetailPanel = ({
             <br />
             <div style={{ overflowWrap: "break-word" }}>{objectName}</div>
           </Box>
-          {selectedVersion !== "" && (
+          {explicitVersion && (
             <Box className={"detailContainer"}>
               <strong>{t("Version ID:")}</strong>
               <br />
-              {selectedVersion}
+              {target.versionId}
             </Box>
           )}
           <Box className={"detailContainer"}>
@@ -802,7 +791,7 @@ const ObjectDetailPanel = ({
             <br />
             {niceBytes(`${actualInfo.size || "0"}`)}
           </Box>
-          {versionsAvailable && selectedVersion === "" && (
+          {versionsAvailable && !explicitVersion && (
             <Box className={"detailContainer"}>
               <strong>{t("Versions:")}</strong>
               <br />
@@ -821,7 +810,7 @@ const ObjectDetailPanel = ({
               )}
             </Box>
           )}
-          {selectedVersion === "" && (
+          {!explicitVersion && (
             <Box className={"detailContainer"}>
               <strong>{t("Last Modified:")}</strong>
               <br />
@@ -874,19 +863,9 @@ const ObjectDetailPanel = ({
                 <strong>{t("Retention Policy:")}</strong>
                 <br />
                 <span className={"capitalizeFirst"}>
-                  {actualInfo.version_id && actualInfo.version_id !== "null" ? (
-                    <Fragment>
-                      {actualInfo.retention_mode
-                        ? actualInfo.retention_mode.toLowerCase()
-                        : t("None")}
-                    </Fragment>
-                  ) : (
-                    <Fragment>
-                      {actualInfo.retention_mode
-                        ? actualInfo.retention_mode.toLowerCase()
-                        : t("None")}
-                    </Fragment>
-                  )}
+                  {actualInfo.retention_mode
+                    ? actualInfo.retention_mode.toLowerCase()
+                    : t("None")}
                 </span>
               </Fragment>
             </SecureComponent>
@@ -895,9 +874,7 @@ const ObjectDetailPanel = ({
             <Fragment>
               <SimpleHeader label={t("Metadata")} icon={<MetadataIcon />} />
               <Box className={"detailContainer"}>
-                {actualInfo && metaData ? (
-                  <ObjectMetaData metaData={metaData} />
-                ) : null}
+                {metaData ? <ObjectMetaData metaData={metaData} /> : null}
               </Box>
             </Fragment>
           )}

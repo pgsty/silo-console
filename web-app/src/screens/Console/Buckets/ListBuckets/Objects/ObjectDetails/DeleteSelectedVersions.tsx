@@ -25,22 +25,24 @@ import { useSelector } from "react-redux";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { interpolate, useT } from "i18n";
+import { ObjectTarget } from "../objectIdentity";
 
 interface IDeleteSelectedVersionsProps {
   closeDeleteModalAndRefresh: (refresh: boolean) => void;
   deleteOpen: boolean;
-  selectedVersions: string[];
-  selectedObject: string;
-  selectedBucket: string;
+  // Concrete versions validated against the current listing when the dialog
+  // opened; all of them belong to one bucket and key.
+  targets: ObjectTarget[];
 }
 
 const DeleteObject = ({
   closeDeleteModalAndRefresh,
   deleteOpen,
-  selectedBucket,
-  selectedVersions,
-  selectedObject,
+  targets,
 }: IDeleteSelectedVersionsProps) => {
+  const selectedBucket = targets[0]?.bucket || "";
+  const selectedObject = targets[0]?.key || "";
+  const selectedVersions = targets.map((target) => target.versionId);
   const dispatch = useAppDispatch();
   const t = useT();
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
@@ -63,10 +65,10 @@ const DeleteObject = ({
 
   useEffect(() => {
     if (deleteLoading) {
-      const selectedObjectsRequest = selectedVersions.map((versionID) => {
+      const selectedObjectsRequest = targets.map((target) => {
         return {
-          path: selectedObject,
-          versionID: versionID,
+          path: target.key,
+          versionID: target.versionId,
           recursive: false,
         };
       });
@@ -91,13 +93,12 @@ const DeleteObject = ({
     deleteLoading,
     closeDeleteModalAndRefresh,
     selectedBucket,
-    selectedObject,
-    selectedVersions,
+    targets,
     bypassGovernance,
     dispatch,
   ]);
 
-  if (!selectedVersions) {
+  if (targets.length === 0) {
     return null;
   }
 

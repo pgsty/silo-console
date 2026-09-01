@@ -25,6 +25,10 @@ import LoadingComponent from "../../common/LoadingComponent";
 import ObjectManagerButton from "../Console/Common/ObjectManager/ObjectManagerButton";
 import { SiloBrand } from "../../common/SiloBrand";
 import { useT } from "i18n";
+import {
+  LEGAL_DOCUMENT_PATHS,
+  sourceReference,
+} from "../../common/sourceReference";
 import DarkModeActivator from "../Console/Common/DarkModeActivator/DarkModeActivator";
 import LanguageActivator from "../Console/Common/LanguageActivator/LanguageActivator";
 
@@ -38,6 +42,7 @@ const ObjectManager = React.lazy(
 const AnonymousAccess = () => {
   const t = useT();
   const dispatch = useAppDispatch();
+  const source = sourceReference();
 
   return (
     <Fragment>
@@ -96,6 +101,32 @@ const AnonymousAccess = () => {
           }
         />
       </Routes>
+      <footer
+        data-testid="anonymous-legal-footer"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          justifyContent: "center",
+          padding: "12px 16px",
+          fontSize: 12,
+          opacity: 0.8,
+        }}
+      >
+        <a href={LEGAL_DOCUMENT_PATHS.license} target="_blank" rel="noopener">
+          {t("License")}
+        </a>
+        <a href={LEGAL_DOCUMENT_PATHS.notice} target="_blank" rel="noopener">
+          {t("Notice")}
+        </a>
+        {source.available ? (
+          <a href={source.url} target="_blank" rel="noopener">
+            {t("Source")}
+          </a>
+        ) : (
+          <span>{t("Source: not available for this build")}</span>
+        )}
+      </footer>
     </Fragment>
   );
 };

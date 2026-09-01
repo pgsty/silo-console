@@ -11,12 +11,81 @@ permissions:
 jobs:
     preflight:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+            statuses: read
         steps:
             - name: Checkout
               uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
               with:
                   fetch-depth: 0
                   ref: ${{ github.sha }}
+
+            - name: Require the complete validation matrix for this exact commit
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  # A tag may only be released when the exact SHA has a completed,
+                  # successful run of the full matrix and of the vulnerability checks,
+                  # proven by their summary jobs (which fail on any skipped or failed
+                  # job). Every step here fails closed: an API error, an empty
+                  # response or an unparsable page blocks the release.
+                  gate() {
+                    local workflow="$1" summary_job="$2"
+                    local runs run run_id attempt url jobs
+                    runs=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/runs?head_sha=${GITHUB_SHA}&per_page=100") \
+                      || { echo "::error::cannot list ${workflow} runs for ${GITHUB_SHA}"; exit 1; }
+                    run=$(jq -c '[.[].workflow_runs[] | select(.status == "completed" and .conclusion == "success")] | sort_by(.updated_at) | last // empty' <<<"$runs")
+                    if [ -z "$run" ]; then
+                      echo "::error::no completed successful ${workflow} run exists for ${GITHUB_SHA}; dispatch it on a branch or tag at this commit (see docs/Release.md)"
+                      exit 1
+                    fi
+                    run_id=$(jq -r '.id' <<<"$run")
+                    attempt=$(jq -r '.run_attempt' <<<"$run")
+                    url=$(jq -r '.html_url' <<<"$run")
+                    jobs=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/jobs?per_page=100") \
+                      || { echo "::error::cannot list the jobs of run ${run_id}"; exit 1; }
+                    if ! jq -e --arg job "$summary_job" '[.[].jobs[] | select(.name == $job and .conclusion == "success")] | length == 1' <<<"$jobs" >/dev/null; then
+                      echo "::error::required summary job '${summary_job}' is not successful in ${url}"
+                      exit 1
+                    fi
+                    echo "accepted ${workflow} run ${run_id} (attempt ${attempt}) for ${GITHUB_SHA}: ${url}" | tee -a "$GITHUB_STEP_SUMMARY"
+                  }
+                  gate jobs.yaml "Required matrix"
+                  gate vulncheck.yaml "Required vulnerability checks"
+
+            - name: Require a release-candidate certification of this exact commit
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  # The candidate gate (release-candidate.yaml, dispatched from main) publishes
+                  # the commit status release-candidate/gate and an artifact naming the
+                  # candidate, its run and attempt. Both are verified here; a status alone
+                  # is not trusted.
+                  status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status"                     --jq '[.statuses[] | select(.context == "release-candidate/gate")] | first // empty')
+                  [ -n "$status" ] || { echo "::error::no release-candidate/gate status on ${GITHUB_SHA}; run the release-candidate workflow from main for this commit (docs/Release.md)"; exit 1; }
+                  test "$(jq -r '.state' <<<"$status")" = "success" || { echo "::error::release-candidate/gate on ${GITHUB_SHA} is $(jq -r '.state' <<<"$status")"; exit 1; }
+                  target=$(jq -r '.target_url' <<<"$status")
+                  run_id="${target##*/actions/runs/}"
+                  [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::status target_url ${target} does not name a workflow run"; exit 1; }
+                  run=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}") || { echo "::error::cannot read run ${run_id}"; exit 1; }
+                  jq -e '.path == ".github/workflows/release-candidate.yaml" and .event == "workflow_dispatch" and .head_branch == "main" and .status == "completed" and .conclusion == "success"' <<<"$run" >/dev/null \
+                    || { echo "::error::run ${run_id} is not a successful release-candidate run dispatched on main"; exit 1; }
+                  attempt=$(jq -r '.run_attempt' <<<"$run")
+                  rm -rf candidate-record && mkdir candidate-record
+                  gh run download "${run_id}" --name "candidate-${GITHUB_SHA}" --dir candidate-record \
+                    || { echo "::error::run ${run_id} has no candidate-${GITHUB_SHA} artifact"; exit 1; }
+                  record="candidate-record/candidate-${GITHUB_SHA}.json"
+                  jq -e --arg sha "${GITHUB_SHA}" --argjson id "${run_id}" --argjson attempt "${attempt}" \
+                    '.candidate == $sha and .run_id == $id and .run_attempt == $attempt and .state == "success" and .workflow_ref == "refs/heads/main"' "$record" >/dev/null \
+                    || { echo "::error::the certification record does not bind run ${run_id} attempt ${attempt} to ${GITHUB_SHA}"; cat "$record"; exit 1; }
+                  echo "accepted release-candidate run ${run_id} (attempt ${attempt}) for ${GITHUB_SHA}: ${target}; server $(jq -r '.server_sha' "$record")" | tee -a "$GITHUB_STEP_SUMMARY"
+                  rm -rf candidate-record
 
             - name: Verify tagged release ref
               shell: bash
@@ -41,12 +110,15 @@ jobs:
                   cache: true
 
             - name: Verify Go source
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |
                   set -euo pipefail
                   go mod verify
                   go vet ./...
                   go test -race ./...
                   make verifiers
+                  hack/deps-release-check.sh online
 
             - name: Set up Node
               uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
@@ -62,6 +134,8 @@ jobs:
                   yarn build
                   ./optimize-embed.sh
                   git diff --exit-code -- build src/version.tsx
+                  RELEASE_METADATA_MUST_BE_FINAL=1 yarn exec playwright test --project=unit e2e/version-metadata.unit.ts --reporter=line
+                  (cd .. && go run ./hack/credits check --frontend)
 
             - name: Verify clean checkout
               run: |
@@ -91,6 +165,20 @@ jobs:
                   go-version-file: "go.mod"
                   cache: true
 
+            - name: Require the private staging package before any push
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  # GHCR visibility is package-wide: the candidate image must never
+                  # land in a public package before verification. The staging package
+                  # is provisioned once by the maintainer (docs/Release.md) and must
+                  # already exist as private; this job never creates it.
+                  visibility=$(gh api orgs/pgsty/packages/container/silo-console-staging --jq .visibility) \
+                    || { echo "::error::staging package ghcr.io/pgsty/silo-console-staging does not exist or is not readable; provision it as private first (docs/Release.md)"; exit 1; }
+                  test "$visibility" = "private" || { echo "::error::staging package visibility is '$visibility', must be private"; exit 1; }
+
             - name: Login to ghcr.io
               uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
               with:
@@ -100,6 +188,10 @@ jobs:
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+              with:
+                  # Pinned: cross-repository `imagetools create` copies the manifest,
+                  # config and layers recursively from this release on.
+                  version: v0.36.1
 
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
@@ -108,3 +200,172 @@ jobs:
                   args: release --clean
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload the GoReleaser metadata
+              uses: actions/upload-artifact@v7
+              with:
+                  name: dist-metadata-${{ github.sha }}
+                  path: |
+                      dist/artifacts.json
+                      dist/metadata.json
+                  if-no-files-found: error
+
+    verify-release:
+        needs: goreleaser
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            packages: read
+            actions: read
+        steps:
+            - name: Checkout
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.sha }}
+
+            - name: Set up Go
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+
+            - name: Require a protected release environment
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/release" \
+                    --jq '[.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]?] | length') \
+                    || { echo "::error::cannot read the 'release' environment; create it with required reviewers (docs/Release.md)"; exit 1; }
+                  test "$reviewers" -ge 1 || { echo "::error::the 'release' environment has no required reviewers; publication would run unapproved"; exit 1; }
+
+            - name: Login to ghcr.io
+              uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+              with:
+                  version: v0.36.1
+
+            - name: Download the GoReleaser metadata
+              uses: actions/download-artifact@v7
+              with:
+                  name: dist-metadata-${{ github.sha }}
+                  path: dist-metadata
+
+            - name: Download the draft release assets
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  sudo apt-get update -qq && sudo apt-get install -y -qq rpm rpm2cpio cpio unzip >/dev/null
+                  gh release download "${GITHUB_REF_NAME}" --dir release-assets
+
+            - name: Verify the final artifacts and the staging image
+              shell: bash
+              run: hack/verify-release-artifacts.sh release "${GITHUB_REF_NAME}" release-assets dist-metadata
+
+            - name: Upload the verification record
+              uses: actions/upload-artifact@v7
+              with:
+                  name: release-verification-${{ github.sha }}
+                  path: release-verification.json
+                  if-no-files-found: error
+
+    publish-release:
+        needs: verify-release
+        runs-on: ubuntu-latest
+        environment: release
+        permissions:
+            contents: write
+            packages: write
+            actions: read
+        steps:
+            - name: Re-check the protected release environment
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/release" \
+                    --jq '[.protection_rules[]? | select(.type == "required_reviewers") | .reviewers[]?] | length')
+                  test "$reviewers" -ge 1 || { echo "::error::the 'release' environment lost its required reviewers"; exit 1; }
+
+            - name: Checkout
+              uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+              with:
+                  ref: ${{ github.sha }}
+
+            - name: Download the verification record
+              uses: actions/download-artifact@v7
+              with:
+                  name: release-verification-${{ github.sha }}
+                  path: verification
+
+            - name: Re-verify the draft assets against the record
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  record=verification/release-verification.json
+                  test "$(jq -r .tag "$record")" = "${GITHUB_REF_NAME}" || { echo "::error::record tag mismatch"; exit 1; }
+                  test "$(jq -r .commit "$record")" = "${GITHUB_SHA}" || { echo "::error::record commit mismatch"; exit 1; }
+                  gh release download "${GITHUB_REF_NAME}" --dir recheck
+                  jq -r '.assets[] | "\(.sha256)  recheck/\(.name)"' "$record" | sha256sum -c --quiet \
+                    || { echo "::error::a draft asset changed after verification; not publishing"; exit 1; }
+                  test "$(ls recheck | wc -l)" -eq "$(jq '.assets | length' "$record")" || { echo "::error::the draft has a different number of assets than were verified"; exit 1; }
+
+            - name: Login to ghcr.io
+              uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.repository_owner }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+              with:
+                  version: v0.36.1
+
+            - name: Promote the verified image by digest
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  record=verification/release-verification.json
+                  index=$(jq -r .index_digest "$record")
+                  staging="$(jq -r .staging_image "$record")@${index}"
+                  public=ghcr.io/pgsty/silo-console
+                  previous=$(docker buildx imagetools inspect "${public}:latest" --format '{{json .Manifest.Digest}}' 2>/dev/null | tr -d '"' || true)
+                  echo "previous latest digest: ${previous:-none}" | tee -a "$GITHUB_STEP_SUMMARY"
+                  docker buildx imagetools create -t "${public}:${GITHUB_REF_NAME}" -t "${public}:latest" "${staging}"
+                  for tag in "${GITHUB_REF_NAME}" latest; do
+                    got=$(docker buildx imagetools inspect "${public}:${tag}" --format '{{json .Manifest.Digest}}' | tr -d '"')
+                    test "$got" = "$index" || { echo "::error::${public}:${tag} is ${got}, expected ${index}; restore latest from ${previous:-<none>} (docs/Release.md)"; exit 1; }
+                  done
+                  echo "promoted ${staging} to ${public}:${GITHUB_REF_NAME} and :latest (${index})" | tee -a "$GITHUB_STEP_SUMMARY"
+
+            - name: Publish the GitHub release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: gh release edit "${GITHUB_REF_NAME}" --draft=false --latest
+
+            - name: Delete the staging package version
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  id=$(gh api --paginate "orgs/pgsty/packages/container/silo-console-staging/versions?per_page=100" \
+                    --jq --arg tag "${GITHUB_REF_NAME}" '.[] | select(.metadata.container.tags | index($tag)) | .id' | head -1)
+                  if [ -z "$id" ]; then echo "::warning::no staging version tagged ${GITHUB_REF_NAME} found"; exit 0; fi
+                  gh api -X DELETE "orgs/pgsty/packages/container/silo-console-staging/versions/${id}" \
+                    || echo "::warning::could not delete staging version ${id}; remove it manually (docs/Release.md)"

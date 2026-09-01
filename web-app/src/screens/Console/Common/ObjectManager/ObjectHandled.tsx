@@ -27,7 +27,7 @@ import {
   Tooltip,
 } from "mds";
 import clsx from "clsx";
-import { callForObjectID } from "../../ObjectBrowser/transferManager";
+import { cancelTransfer } from "../../ObjectBrowser/transferManager";
 import styled from "styled-components";
 import get from "lodash/get";
 import { useT } from "i18n";
@@ -147,10 +147,9 @@ const ObjectHandled = ({ objectToDisplay, deleteFromList }: IObjectHandled) => {
           <ObjectHandledCloseButton
             onClick={() => {
               if (!objectToDisplay.done) {
-                const call = callForObjectID(objectToDisplay.ID);
-                if (call) {
-                  call.abort();
-                }
+                // Uploads settle even when queued and never sent; downloads
+                // abort their request.
+                cancelTransfer(objectToDisplay.ID);
               } else {
                 deleteFromList(objectToDisplay.instanceID);
               }

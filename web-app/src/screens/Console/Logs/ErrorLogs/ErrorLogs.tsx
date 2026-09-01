@@ -32,8 +32,7 @@ import api from "../../../../../src/common/api";
 import LogLine from "./LogLine";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../../HelpMenu";
-
-var socket: any = null;
+import { useDiagnosticSocket } from "../../Common/Hooks/useDiagnosticSocket";
 
 const ErrorLogs = () => {
   const dispatch = useAppDispatch();
@@ -51,6 +50,16 @@ const ErrorLogs = () => {
   const [logType, setLogType] = useState<string>("all");
   const [loadingNodes, setLoadingNodes] = useState<boolean>(false);
 
+  const logsSocket = useDiagnosticSocket();
+
+  // The socket closes with the component; the shared "started" flag must
+  // follow it so the page does not come back showing a stream that is gone.
+  useEffect(() => {
+    return () => {
+      dispatch(setLogsStarted(false));
+    };
+  }, [dispatch]);
+
   const startLogs = () => {
     dispatch(logResetMessages());
     const url = new URL(window.location.toString());
@@ -62,27 +71,19 @@ const ErrorLogs = () => {
     const baseLocation = new URL(document.baseURI);
     const baseUrl = baseLocation.pathname;
 
-    socket = new WebSocket(
-      `${wsProt}://${
+    logsSocket.open({
+      url: `${wsProt}://${
         url.hostname
       }:${port}${baseUrl}ws/console/?logType=${logType}&node=${
         selectedNode === "Select node" ? "" : selectedNode
       }`,
-    );
-    let interval: any | null = null;
-    if (socket !== null) {
-      socket.onopen = () => {
-        console.log("WebSocket Client Connected");
+      openMessage: "ok",
+      heartbeatMs: 10 * 1000,
+      onOpen: () => {
         dispatch(setLogsStarted(true));
-        socket.send("ok");
-        interval = setInterval(() => {
-          socket.send("ok");
-        }, 10 * 1000);
-      };
-      socket.onmessage = (message: MessageEvent) => {
-        // console.log(message.data.toString())
+      },
+      onMessage: (message: MessageEvent) => {
         // FORMAT: 00:35:17 UTC 01/01/2021
-
         let m: any = JSON.parse(message.data.toString());
         let isValidEntry = true;
         if (
@@ -104,26 +105,16 @@ const ErrorLogs = () => {
         if (isValidEntry) {
           dispatch(logMessageReceived(m));
         }
-      };
-      socket.onclose = () => {
-        clearInterval(interval);
-        console.log("connection closed by server");
+      },
+      onClose: () => {
         dispatch(setLogsStarted(false));
-      };
-      return () => {
-        socket.close(1000);
-        clearInterval(interval);
-        console.log("closing websockets");
-        dispatch(setLogsStarted(false));
-      };
-    }
+      },
+    });
   };
 
   const stopLogs = () => {
-    if (socket !== null && socket !== undefined) {
-      socket.close(1000);
-      dispatch(setLogsStarted(false));
-    }
+    logsSocket.close(1000);
+    dispatch(setLogsStarted(false));
   };
 
   const filtLow = filter.toLowerCase();
