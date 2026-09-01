@@ -9,8 +9,8 @@
 #
 # structural accepts a record marked release_pending (the tag does not exist
 # yet) as long as go.mod pins the recorded current_pin, and prints a warning;
-# online never does. The release-candidate gate and the tag preflight run
-# online, so Console cannot be tagged while a maintained release is missing.
+# online never does. The tag preflight runs online, so Console cannot be tagged
+# while a maintained release is missing.
 set -euo pipefail
 
 mode="${1:-structural}"

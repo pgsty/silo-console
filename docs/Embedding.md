@@ -29,8 +29,8 @@ that one directive from the authoritative README block between the
 
 This Console line has completed the migration described by silo-pkg v3.13.0:
 its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires v3.13.0
-directly. A SILO server embedding this Console commit must make the same source
-import migration before certification. Keeping old `github.com/minio/pkg/v3`
+directly. A SILO server adopting this Console release must make the same source
+import migration. Keeping old `github.com/minio/pkg/v3`
 imports while replacing that path with silo-pkg v3.13.0 produces
-`used for two different module paths` and is intentionally rejected by the
-release-candidate graph check.
+`used for two different module paths`. Update the embedding server's imports
+and module graph when it adopts this Console release.

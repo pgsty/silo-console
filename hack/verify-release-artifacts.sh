@@ -8,11 +8,12 @@
 #       change (release-artifacts) and locally as a rehearsal.
 #
 #   hack/verify-release-artifacts.sh release <tag> <assets-dir> <metadata-dir>
-#       Verify the final artifacts of a tagged release before publication:
+#       Legacy manual verifier for an explicitly staged tagged release; current
+#       workflows call snapshot mode only:
 #       <assets-dir> holds the draft release's downloaded assets, <metadata-dir>
 #       holds dist/artifacts.json and dist/metadata.json from the GoReleaser run,
 #       and the multi-platform image is inspected in the private staging package
-#       by tag. Writes release-verification.json for the publish job.
+#       by tag. Writes release-verification.json for manual inspection.
 #
 # Every check fails closed. Requirements: goreleaser (snapshot mode), docker
 # with buildx, jq, tar, unzip, dpkg-deb, rpm, rpm2cpio, cpio, sha256sum.

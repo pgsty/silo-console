@@ -3,7 +3,7 @@
     "Maintained dependency releases Console selects directly or through its one source replacement.",
     "kind=module_tag: a SemVer tag with no GitHub release (the Go proxy serves it; nothing is published as a binary).",
     "kind=calendar_release: an immutable published RELEASE.* GitHub release with assets; go.mod pins its pseudo-version because the tag is not SemVer.",
-    "release_pending=true records a tag the maintainer has not created yet: `make verifiers` warns, the release-candidate gate and the tag preflight fail.",
+    "release_pending=true records a tag the maintainer has not created yet: `make verifiers` warns and the tag preflight fails.",
     "Verified by hack/deps-release-check.sh; see docs/Release.md."
   ],
   "modules": [

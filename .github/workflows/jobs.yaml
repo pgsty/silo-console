@@ -63,7 +63,7 @@ jobs:
           go-version: 1.27.x
       - name: Remove the maintained mc replacement and test the advertised floor
         # hack/upstream-floor.sh models an embedder that does not copy the mc
-        # replacement; the release-candidate workflow runs the same script.
+        # replacement.
         run: hack/upstream-floor.sh
 
   downstream-embedder-compat:
@@ -80,7 +80,7 @@ jobs:
         run: go run ./hack/replacements check
       - name: Build an embedder that copies the README block verbatim
         # hack/embedder-compat.sh feeds the published README text into a
-        # scratch module; the release-candidate workflow runs the same script.
+        # scratch module.
         run: hack/embedder-compat.sh
 
   semgrep-static-code-analysis:
