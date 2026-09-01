@@ -208,7 +208,15 @@ for name in "${packages[@]}"; do
     *.rpm)
       # RPM payloads use absolute paths. GNU cpio otherwise tries to write to
       # the runner's real /etc and /usr instead of the isolated package root.
+      # It returns 1 after safely stripping those paths, so validate the RPM
+      # digest first, accept that one warning status, then verify the extracted
+      # tree byte for byte below.
+      rpm -K --nosignature "$path" >/dev/null 2>&1 || fail "$name: RPM digest verification failed"
+      set +e
       (cd "$dir" && rpm2cpio "$root/$path" | cpio "${cpio_extract_args[@]}")
+      cpio_status=$?
+      set -e
+      test "$cpio_status" -le 1 || fail "$name: cpio extraction failed with status $cpio_status"
       check_tree "$dir" "$name"
       test "$(rpm -qp --qf '%{LICENSE}' "$path" 2>/dev/null)" = "AGPL-3.0-or-later" || fail "$name: RPM License tag is '$(rpm -qp --qf '%{LICENSE}' "$path")'"
       ;;
