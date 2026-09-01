@@ -32,6 +32,10 @@ Diagnostic tools:
 - Made the Logs, Profile and Health pages own their WebSocket: the socket and its heartbeat live in a component-held session that is closed on Stop, on completion or error, and when the page unmounts (route change, logout), so leaving a page stops the server-side log stream, profiling run or health report instead of leaving it running. Callbacks are detached on close, so an unmounted page is never updated, and Start/Stop stay idempotent under React Strict Mode. Previously the cleanup was returned from a click handler, which React never runs
 - Bounded the client-side log buffer to the newest 10000 entries and reset the shared "started"/"in progress" flags when their page unmounts, so returning to a page does not show a stream or report that no longer exists
 
+Permission-aware UI:
+
+- Replaced the regular expressions built from policy resources in the session permission check with literal, anchored `*`/`?` wildcard matching that mirrors silo-pkg's resource matcher byte for byte (multiple wildcards, `?` as exactly one byte, `path.Clean` equality, S3 ARN prefix stripped, every other key exact). Resources such as `bucket/foo[bar*`, `data.?` or `a+b*` no longer throw or match the wrong paths, and a grant such as `data*` no longer applies to `mydata/`; SILO remains the authority for every request
+
 Release artifacts and attribution:
 
 - Embedded `LICENSE`, `NOTICE` and `CREDITS` in the binary (`console license|notice|credits`), served them at `/legal/LICENSE|NOTICE|CREDITS`, shipped them in new `.tar.gz`/`.zip` bundles next to the unchanged bare executables, in DEB/RPM/APK packages (`/usr/share/licenses/silo-console`, `/usr/share/doc/silo-console`, plus a DEP-5 `copyright` file with the full AGPL text for DEB) and in the container image, and attached them to the GitHub release
