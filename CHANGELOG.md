@@ -27,6 +27,11 @@ Object browser:
 - Gave the share dialog's copy button (`copy-share-url`) and the credential prompt's copy buttons (`copy-access-key`, `copy-secret-key`, `copy-console-access-key[-n]`, `copy-console-secret-key[-n]`) their own element ids; they duplicated the breadcrumb's `copy-path` id in one document. The live browser regression now gives each mutating test its own object so it passes in any order
 - Released upload references on every terminal path: success, HTTP failure, network failure on the request or the upload stream, timeout, abort and setup exceptions now run one idempotent cleanup that drops the transfer-manager trace (the `XMLHttpRequest` and its `FormData`/`Blob`) before reporting the outcome, and each upload promise settles exactly once. Cancelled uploads no longer leave the batch pending: they settle as cancelled, are excluded from the failure summary, and the listing reload after a batch runs even when a file was cancelled. Previously an aborted or failed upload kept the whole file reachable for the lifetime of the tab
 
+Diagnostic tools:
+
+- Made the Logs, Profile and Health pages own their WebSocket: the socket and its heartbeat live in a component-held session that is closed on Stop, on completion or error, and when the page unmounts (route change, logout), so leaving a page stops the server-side log stream, profiling run or health report instead of leaving it running. Callbacks are detached on close, so an unmounted page is never updated, and Start/Stop stay idempotent under React Strict Mode. Previously the cleanup was returned from a click handler, which React never runs
+- Bounded the client-side log buffer to the newest 10000 entries and reset the shared "started"/"in progress" flags when their page unmounts, so returning to a page does not show a stream or report that no longer exists
+
 Release artifacts and attribution:
 
 - Embedded `LICENSE`, `NOTICE` and `CREDITS` in the binary (`console license|notice|credits`), served them at `/legal/LICENSE|NOTICE|CREDITS`, shipped them in new `.tar.gz`/`.zip` bundles next to the unchanged bare executables, in DEB/RPM/APK packages (`/usr/share/licenses/silo-console`, `/usr/share/doc/silo-console`, plus a DEP-5 `copyright` file with the full AGPL text for DEB) and in the container image, and attached them to the GitHub release

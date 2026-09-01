@@ -40,6 +40,7 @@ import TestWrapper from "../Common/TestWrapper/TestWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 import HealthInfoResults from "./HealthInfoResults";
+import { useDiagnosticSocket } from "../Common/Hooks/useDiagnosticSocket";
 
 const HealthInfo = () => {
   const dispatch = useAppDispatch();
@@ -120,82 +121,81 @@ const HealthInfo = () => {
     setStartDiagnostic(false);
   }, [serverDiagnosticStatus, message]);
 
+  const healthSocket = useDiagnosticSocket();
+
+  // A report that is still running when the page unmounts is cancelled with
+  // its socket (the hook closes it); reset the shared status so the page does
+  // not come back in an "in progress" state nothing can finish.
   useEffect(() => {
-    if (startDiagnostic) {
-      dispatch(healthInfoResetMessage());
-      setDiagFileContent("");
-      setServerHealthInfo(undefined);
-      const url = new URL(window.location.toString());
-      const isDev = process.env.NODE_ENV === "development";
-      const port = isDev ? "9090" : url.port;
+    return () => {
+      dispatch(setServerDiagStat(""));
+    };
+  }, [dispatch]);
 
-      const wsProt = wsProtocol(url.protocol);
-
-      // check if we are using base path, if not this always is `/`
-      const baseLocation = new URL(document.baseURI);
-      const baseUrl = baseLocation.pathname;
-
-      const socket = new WebSocket(
-        `${wsProt}://${url.hostname}:${port}${baseUrl}ws/health-info?deadline=1h`,
-      );
-      let interval: any | null = null;
-      if (socket !== null) {
-        socket.onopen = () => {
-          console.log("WebSocket Client Connected");
-          socket.send("ok");
-          interval = setInterval(() => {
-            socket.send("ok");
-          }, 10 * 1000);
-          setMessage(
-            "Health Report started. Please do not refresh page during diagnosis.",
-          );
-          dispatch(setServerDiagStat(DiagStatInProgress));
-        };
-        socket.onmessage = (message: MessageEvent) => {
-          let m: ReportMessage = JSON.parse(message.data.toString());
-          if (m.serverHealthInfo) {
-            dispatch(healthInfoMessageReceived(m.serverHealthInfo));
-            setServerHealthInfo(m.serverHealthInfo);
-          }
-          if (m.encoded !== "") {
-            setDiagFileContent(m.encoded);
-          }
-          if (m.reportStatus) {
-            setReportStatus(m.reportStatus);
-          }
-        };
-        socket.onerror = (error) => {
-          console.error("error closing websocket:", error);
-          socket.close(1000);
-          clearInterval(interval);
-          dispatch(setServerDiagStat(DiagStatError));
-        };
-        socket.onclose = (event: CloseEvent) => {
-          clearInterval(interval);
-          if (
-            event.code === WSCloseInternalServerErr ||
-            event.code === WSClosePolicyViolation ||
-            event.code === WSCloseAbnormalClosure
-          ) {
-            // handle close with error
-            console.log("connection closed by server with code:", event.code);
-            setMessage(
-              "An error occurred while getting the Health Report file.",
-            );
-            dispatch(setServerDiagStat(DiagStatError));
-          } else {
-            console.log("connection closed by server");
-
-            setMessage("Health Report file is ready to be downloaded.");
-            dispatch(setServerDiagStat(DiagStatSuccess));
-          }
-        };
-      }
-    } else {
-      // reset start status
-      setStartDiagnostic(false);
+  useEffect(() => {
+    if (!startDiagnostic) {
+      return;
     }
-  }, [startDiagnostic, dispatch]);
+    dispatch(healthInfoResetMessage());
+    setDiagFileContent("");
+    setServerHealthInfo(undefined);
+    const url = new URL(window.location.toString());
+    const isDev = process.env.NODE_ENV === "development";
+    const port = isDev ? "9090" : url.port;
+
+    const wsProt = wsProtocol(url.protocol);
+
+    // check if we are using base path, if not this always is `/`
+    const baseLocation = new URL(document.baseURI);
+    const baseUrl = baseLocation.pathname;
+
+    healthSocket.open({
+      url: `${wsProt}://${url.hostname}:${port}${baseUrl}ws/health-info?deadline=1h`,
+      openMessage: "ok",
+      heartbeatMs: 10 * 1000,
+      onOpen: () => {
+        setMessage(
+          "Health Report started. Please do not refresh page during diagnosis.",
+        );
+        dispatch(setServerDiagStat(DiagStatInProgress));
+      },
+      onMessage: (message: MessageEvent) => {
+        let m: ReportMessage = JSON.parse(message.data.toString());
+        if (m.serverHealthInfo) {
+          dispatch(healthInfoMessageReceived(m.serverHealthInfo));
+          setServerHealthInfo(m.serverHealthInfo);
+        }
+        if (m.encoded !== "") {
+          setDiagFileContent(m.encoded);
+        }
+        if (m.reportStatus) {
+          setReportStatus(m.reportStatus);
+        }
+      },
+      onError: (error) => {
+        console.error("error closing websocket:", error);
+        healthSocket.close(1000);
+        dispatch(setServerDiagStat(DiagStatError));
+      },
+      onClose: (event: CloseEvent) => {
+        if (
+          event.code === WSCloseInternalServerErr ||
+          event.code === WSClosePolicyViolation ||
+          event.code === WSCloseAbnormalClosure
+        ) {
+          // handle close with error
+          console.log("connection closed by server with code:", event.code);
+          setMessage("An error occurred while getting the Health Report file.");
+          dispatch(setServerDiagStat(DiagStatError));
+        } else {
+          console.log("connection closed by server");
+
+          setMessage("Health Report file is ready to be downloaded.");
+          dispatch(setServerDiagStat(DiagStatSuccess));
+        }
+      },
+    });
+  }, [startDiagnostic, dispatch, healthSocket]);
 
   const startDiagnosticAction = () => {
     setStartDiagnostic(true);

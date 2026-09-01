@@ -22,8 +22,7 @@ import { setHelpName } from "../../../systemSlice";
 import { useT } from "i18n";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
-
-var socket: any = null;
+import { useDiagnosticSocket } from "../Common/Hooks/useDiagnosticSocket";
 
 const Profile = () => {
   const t = useT();
@@ -53,6 +52,8 @@ const Profile = () => {
     setTypes(newArr);
   };
 
+  const profileSocket = useDiagnosticSocket();
+
   const startProfiling = () => {
     const typeString = types.join(",");
 
@@ -65,16 +66,13 @@ const Profile = () => {
     const baseUrl = baseLocation.pathname;
 
     const wsProt = wsProtocol(url.protocol);
-    socket = new WebSocket(
-      `${wsProt}://${url.hostname}:${port}${baseUrl}ws/profile?types=${typeString}`,
-    );
-
-    if (socket !== null) {
-      socket.onopen = () => {
+    profileSocket.open({
+      url: `${wsProt}://${url.hostname}:${port}${baseUrl}ws/profile?types=${typeString}`,
+      openMessage: "ok",
+      onOpen: () => {
         setProfilingStarted(true);
-        socket.send("ok");
-      };
-      socket.onmessage = (message: MessageEvent) => {
+      },
+      onMessage: (message: MessageEvent) => {
         // process received message
         let response = new Blob([message.data], { type: "application/zip" });
         let filename = "profile.zip";
@@ -85,21 +83,15 @@ const Profile = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      };
-      socket.onclose = () => {
-        console.log("connection closed by server");
+      },
+      onClose: () => {
         setProfilingStarted(false);
-      };
-      return () => {
-        socket.close(1000);
-        console.log("closing websockets");
-        setProfilingStarted(false);
-      };
-    }
+      },
+    });
   };
 
   const stopProfiling = () => {
-    socket.close(1000);
+    profileSocket.close(1000);
     setProfilingStarted(false);
   };
 
