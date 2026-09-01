@@ -32,7 +32,8 @@ import {
   setModalErrorSnackMessage,
   setSnackBarMessage,
 } from "../../../systemSlice";
-import { useAppDispatch } from "../../../store";
+import { AppState, useAppDispatch } from "../../../store";
+import { useSelector } from "react-redux";
 import { api } from "api";
 import { AccountChangePasswordRequest, ApiError } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
@@ -52,7 +53,9 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
   const [reNewPassword, setReNewPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  const userLoggedIn = localStorage.getItem("userLoggedIn") || "";
+  const currentAccount = useSelector(
+    (state: AppState) => state.console.session.accountAccessKey || "",
+  );
 
   const changePassword = (event: React.FormEvent) => {
     event.preventDefault();
@@ -111,7 +114,7 @@ const ChangePassword = ({ open, closeModal }: IChangePasswordProps) => {
     <ModalWrapper
       title={t("Change Password for {user}").replace(
         "{user}",
-        () => userLoggedIn,
+        () => currentAccount,
       )}
       modalOpen={open}
       onClose={() => {

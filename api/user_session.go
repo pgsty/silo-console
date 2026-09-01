@@ -241,6 +241,9 @@ func getSessionResponse(ctx context.Context, session *models.Principal) (*models
 		CustomStyles:    customStyles,
 		EnvConstants:    &envConstants,
 		ServerEndPoint:  getMinIOServer(),
+		// Empty for identity-provider sessions; the UI must treat that as
+		// "unknown", never as a match.
+		AccountAccessKey: session.AccountAccessKey,
 	}
 	return sessionResp, nil
 }

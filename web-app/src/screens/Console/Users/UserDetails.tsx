@@ -49,7 +49,8 @@ import {
   permissionTooltipHelper,
 } from "../../../common/SecureComponent/permissions";
 import { hasPermission } from "../../../common/SecureComponent";
-import { useAppDispatch } from "../../../store";
+import { AppState, useAppDispatch } from "../../../store";
+import { useSelector } from "react-redux";
 import { policyDetailsSort } from "../../../utils/sortFunctions";
 import TooltipWrapper from "../Common/TooltipWrapper/TooltipWrapper";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
@@ -87,8 +88,12 @@ const UserDetails = () => {
   const [selectedTab, setSelectedTab] = useState<string>("groups");
 
   const userName = params.userName || "";
-  const userLoggedIn = localStorage.getItem("userLoggedIn") || "";
-  const isCurrentUser = userLoggedIn === userName;
+  // The session response names the account; it is empty for identity-provider
+  // sessions, which must never read as a match.
+  const currentAccount = useSelector(
+    (state: AppState) => state.console.session.accountAccessKey || "",
+  );
+  const isCurrentUser = currentAccount !== "" && currentAccount === userName;
   const enableEnabled =
     hasPermission(CONSOLE_UI_RESOURCE, enableUserPermissions) &&
     !enabled &&
@@ -332,7 +337,7 @@ const UserDetails = () => {
                   <TooltipWrapper
                     tooltip={
                       hasPermission(CONSOLE_UI_RESOURCE, deleteUserPermissions)
-                        ? userLoggedIn === userName
+                        ? isCurrentUser
                           ? t("You cannot delete the currently logged in User")
                           : t("Delete User")
                         : permissionTooltipHelper(
@@ -350,7 +355,7 @@ const UserDetails = () => {
                         !hasPermission(
                           CONSOLE_UI_RESOURCE,
                           deleteUserPermissions,
-                        ) || userLoggedIn === userName
+                        ) || isCurrentUser
                       }
                     />
                   </TooltipWrapper>
@@ -361,7 +366,7 @@ const UserDetails = () => {
                       onClick={changeUserPassword}
                       icon={<PasswordKeyIcon />}
                       variant={"regular"}
-                      disabled={userLoggedIn === userName}
+                      disabled={isCurrentUser}
                     />
                   </TooltipWrapper>
                 </Fragment>

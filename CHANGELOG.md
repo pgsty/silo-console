@@ -36,6 +36,13 @@ Permission-aware UI:
 
 - Replaced the regular expressions built from policy resources in the session permission check with literal, anchored `*`/`?` wildcard matching that mirrors silo-pkg's resource matcher byte for byte (multiple wildcards, `?` as exactly one byte, `path.Clean` equality, S3 ARN prefix stripped, every other key exact). Resources such as `bucket/foo[bar*`, `data.?` or `a+b*` no longer throw or match the wrong paths, and a grant such as `data*` no longer applies to `mydata/`; SILO remains the authority for every request
 
+Sessions:
+
+- Unified session expiry across the generated API client, the legacy API client and the Object Manager WebSocket: an invalid-session response (401/403 `invalid session`, never a login call or another 401 such as a wrong current password) remembers the router-relative route, clears the local session state and loads the login page, which runs the configured login method (form or identity provider) and returns to the remembered route. The legacy client no longer depends on a `localStorage` marker that identity-provider logins never set, so an expired SSO session returns to login instead of surfacing a 401; the WebSocket no longer reloads the page; subpath deployments no longer store the full document path as the return route
+- Validated the remembered return route (in-app path only, never a full or protocol-relative URL, never an auth page) and applied the same rule to credential login, the OAuth callback and the protected-route redirect
+- Added `accountAccessKey` to the session response (the access key entered at credential or STS login, empty for identity-provider sessions) and made the current-user checks in user details, user deletion and change-password read it instead of `localStorage.userLoggedIn`, which is no longer written; an empty identity never matches. SILO keeps enforcing the self-deletion restriction itself
+- Pointed the go-swagger generator at `hack/swagger-header.txt` (the previous NOTICE text) so regenerating the server does not stamp the rewritten NOTICE into every generated file; the `swagger-codegen` gate regenerates byte-identical code again
+
 Release artifacts and attribution:
 
 - Embedded `LICENSE`, `NOTICE` and `CREDITS` in the binary (`console license|notice|credits`), served them at `/legal/LICENSE|NOTICE|CREDITS`, shipped them in new `.tar.gz`/`.zip` bundles next to the unchanged bare executables, in DEB/RPM/APK packages (`/usr/share/licenses/silo-console`, `/usr/share/doc/silo-console`, plus a DEP-5 `copyright` file with the full AGPL text for DEB) and in the container image, and attached them to the GitHub release

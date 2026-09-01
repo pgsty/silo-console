@@ -20,7 +20,8 @@ import { setErrorSnackMessage } from "../../../systemSlice";
 import { ConfirmDeleteIcon, DataTable, InformativeMessage, Loader } from "mds";
 import { IAM_PAGES } from "../../../common/SecureComponent/permissions";
 import ConfirmDialog from "../Common/ModalWrapper/ConfirmDialog";
-import { useAppDispatch } from "../../../store";
+import { AppState, useAppDispatch } from "../../../store";
+import { useSelector } from "react-redux";
 import { api } from "api";
 import { UserServiceAccountItem } from "../../../api/consoleApi";
 import { errorToHandler } from "../../../api/errors";
@@ -48,7 +49,9 @@ const DeleteUser = ({
   const [userSAList, setUserSAList] = useState<UserServiceAccountItem[]>([]);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
-  const userLoggedIn = localStorage.getItem("userLoggedIn") || "";
+  const currentAccount = useSelector(
+    (state: AppState) => state.console.session.accountAccessKey || "",
+  );
 
   useEffect(() => {
     if (selectedUsers) {
@@ -92,13 +95,13 @@ const DeleteUser = ({
 
   const onConfirmDelete = () => {
     for (let user of selectedUsers) {
-      if (user === userLoggedIn) {
+      if (currentAccount !== "" && user === currentAccount) {
         dispatch(
           setErrorSnackMessage({
             errorMessage: t("Cannot delete currently logged in user"),
             detailedError: t(
               "Cannot delete currently logged in user {user}",
-            ).replace("{user}", () => userLoggedIn),
+            ).replace("{user}", () => currentAccount),
           }),
         );
         closeDeleteModalAndRefresh(true);

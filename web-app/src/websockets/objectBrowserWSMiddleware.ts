@@ -37,6 +37,7 @@ import {
 import { permissionItems } from "../screens/Console/Buckets/ListBuckets/Objects/utils";
 import { setErrorSnackMessage } from "../systemSlice";
 import { getStoredLanguage, translate } from "../i18n/lang";
+import { expireSession } from "../api/session";
 
 let wsInFlight: boolean = false;
 let currentRequestID: number = 0;
@@ -104,8 +105,9 @@ export const objectBrowserWSMiddleware = (
             }
 
             if (response.error?.Code === 401) {
-              // Session expired. We reload this page
-              window.location.reload();
+              // Session expired: same path as the REST clients.
+              expireSession();
+              return;
             } else if (response.error?.Code === 403) {
               const internalPathsPrefix = response.prefix;
               let pathPrefix = "";

@@ -569,6 +569,8 @@ export interface SessionResponse {
   customStyles?: string;
   allowResources?: PermissionResource[];
   envConstants?: EnvironmentConstants;
+  /** The account this session was opened for: the access key entered at credential or STS login. Empty for sessions opened through an external identity provider. The UI uses it to recognize the current user; SILO enforces every self-referential restriction itself. */
+  accountAccessKey?: string;
 }
 
 export interface WidgetResult {

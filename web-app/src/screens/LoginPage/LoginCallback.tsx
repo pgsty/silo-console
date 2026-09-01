@@ -23,6 +23,7 @@ import { Box, Button, WarnIcon } from "mds";
 import get from "lodash/get";
 import LoginLayout from "./LoginLayout";
 import { useT } from "i18n";
+import { takeReturnRoute } from "api/session";
 
 const CallBackContainer = styled.div(({ theme }) => ({
   "& .errorDescription": {
@@ -83,15 +84,8 @@ const LoginCallback = () => {
         api
           .invoke("POST", "/api/v1/login/oauth2/auth", { code, state })
           .then(() => {
-            // We push to history the new URL.
-            let targetPath = "/";
-            if (
-              localStorage.getItem("redirect-path") &&
-              localStorage.getItem("redirect-path") !== ""
-            ) {
-              targetPath = `${localStorage.getItem("redirect-path")}`;
-              localStorage.setItem("redirect-path", "");
-            }
+            // Return to the route the user asked for before logging in.
+            const targetPath = takeReturnRoute("/");
             if (state) {
               localStorage.setItem("auth-state", state);
             }
