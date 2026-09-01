@@ -77,6 +77,7 @@ import {
   storeCallForObjectWithID,
   storeFormDataWithID,
 } from "../../../../ObjectBrowser/transferManager";
+import { attachUploadRequestHandlers } from "../uploadRequest";
 import {
   cancelObjectInList,
   completeObject,
@@ -674,93 +675,46 @@ const ListObjects = () => {
             if (anonymousMode) {
               xhr.setRequestHeader("X-Anonymous", "1");
             }
-            // xhr.setRequestHeader("X-Anonymous", "1");
 
             const areMultipleFiles = files.length > 1;
-            let errorMessage = areMultipleFiles
+            const errorMessage = areMultipleFiles
               ? t("An error occurred while uploading the files.")
               : t("An error occurred while uploading the file.");
 
-            const errorMessages: any = {
-              413: t("Error - File size too large"),
-            };
-
             xhr.withCredentials = false;
-            xhr.onload = function () {
-              // resolve promise only when HTTP code is ok
-              if (xhr.status >= 200 && xhr.status < 300) {
-                dispatch(completeObject(identity));
-                resolve({ status: xhr.status });
 
-                removeTrace(ID);
-              } else {
-                // reject promise if there was a server error
-                if (errorMessages[xhr.status]) {
-                  errorMessage = errorMessages[xhr.status];
-                } else if (xhr.response) {
-                  try {
-                    const err = JSON.parse(xhr.response);
-                    errorMessage = err.detailedMessage;
-                  } catch (e) {
-                    errorMessage = t("something went wrong");
-                  }
-                }
-
-                dispatch(
-                  failObject({
-                    instanceID: identity,
-                    msg: errorMessage,
-                  }),
-                );
-                reject({ status: xhr.status, message: errorMessage });
-
-                removeTrace(ID);
-              }
-            };
-
-            xhr.upload.addEventListener("error", () => {
-              reject(errorMessage);
-              dispatch(
-                failObject({
-                  instanceID: identity,
-                  msg: "A network error occurred.",
-                }),
-              );
-              return;
+            // Every terminal state releases the transfer-manager trace (the
+            // request and its FormData/Blob) and settles this promise once.
+            const lifecycle = attachUploadRequestHandlers(xhr, {
+              fallbackError: errorMessage,
+              malformedError: t("something went wrong"),
+              networkError: t("A network error occurred."),
+              statusErrors: { 413: t("Error - File size too large") },
+              handlers: {
+                cleanup: () => removeTrace(ID),
+                complete: (status) => {
+                  dispatch(completeObject(identity));
+                  resolve({ status });
+                },
+                fail: (message, status) => {
+                  dispatch(failObject({ instanceID: identity, msg: message }));
+                  reject({ status, message });
+                },
+                abort: () => {
+                  dispatch(cancelObjectInList(identity));
+                  resolve({ status: 0, cancelled: true });
+                },
+                progress: (progress) => {
+                  dispatch(updateProgress({ instanceID: identity, progress }));
+                },
+              },
             });
 
-            xhr.upload.addEventListener("progress", (event) => {
-              const progress = Math.floor((event.loaded * 100) / event.total);
-
-              dispatch(
-                updateProgress({
-                  instanceID: identity,
-                  progress: progress,
-                }),
-              );
-            });
-
-            xhr.onerror = () => {
-              reject(errorMessage);
-              dispatch(
-                failObject({
-                  instanceID: identity,
-                  msg: "A network error occurred.",
-                }),
-              );
-              return;
-            };
-            xhr.onloadend = () => {
-              if (files.length === 0) {
-                dispatch(setReloadObjectsList(true));
+            try {
+              if (file.size === undefined) {
+                throw new Error(errorMessage);
               }
-            };
-            xhr.onabort = () => {
-              dispatch(cancelObjectInList(identity));
-            };
-
-            const formData = new FormData();
-            if (file.size !== undefined) {
+              const formData = new FormData();
               formData.append(file.size.toString(), blobFile, fileName);
               storeCallForObjectWithID(ID, xhr);
               dispatch(
@@ -779,6 +733,14 @@ const ListObjects = () => {
                 }),
               );
               storeFormDataWithID(ID, formData);
+            } catch (error: any) {
+              // A setup failure must not leave a trace or a pending promise.
+              lifecycle.finalize(
+                "error",
+                error instanceof Error && error.message
+                  ? error.message
+                  : errorMessage,
+              );
             }
           });
         };
@@ -794,10 +756,15 @@ const ListObjects = () => {
           const errors = results.filter(
             (result) => result.status === "rejected",
           );
+          // A cancelled upload is neither a success nor an error.
+          const cancelled = results.filter(
+            (result) =>
+              result.status === "fulfilled" && result.value?.cancelled,
+          );
           if (errors.length > 0) {
             const totalFiles = uploadFilePromises.length;
             const successUploadedFiles =
-              uploadFilePromises.length - errors.length;
+              uploadFilePromises.length - errors.length - cancelled.length;
             const err: ErrorResponseHandler = {
               errorMessage: t("There were some errors during file upload"),
               detailedError: t("Uploaded files {done}/{total}")
