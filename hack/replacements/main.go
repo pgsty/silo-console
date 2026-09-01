@@ -86,7 +86,17 @@ type replacement struct {
 
 type goModJSON struct {
 	Module  struct{ Path string } `json:"Module"`
+	Require []modVersion          `json:"Require"`
 	Replace []replacement         `json:"Replace"`
+}
+
+var canonicalDirectModules = []string{
+	"github.com/minio/minio-go/v7",
+	"github.com/pgsty/silo-pkg/v3",
+}
+
+var forbiddenModules = []string{
+	"github.com/pgsty/silo-go/v7",
 }
 
 func main() {
@@ -158,9 +168,25 @@ func loadCanonicalSet() (map[string]replacement, error) {
 
 	set := make(map[string]replacement, len(canonicalReplacements))
 	var problems []string
+	requirements := make(map[string]string, len(mod.Require))
+	for _, requirement := range mod.Require {
+		requirements[requirement.Path] = requirement.Version
+	}
+	for _, expected := range canonicalDirectModules {
+		if requirements[expected] == "" {
+			problems = append(problems, fmt.Sprintf("%s must be required directly", expected))
+		}
+	}
+	for _, forbidden := range forbiddenModules {
+		if version := requirements[forbidden]; version != "" {
+			problems = append(problems, fmt.Sprintf("%s@%s is forbidden; Console resolves minio-go upstream", forbidden, version))
+		}
+	}
 	for _, rep := range mod.Replace {
 		canonicalNew, canonical := canonicalTarget(rep.Old.Path)
 		switch {
+		case isCanonicalDirectModule(rep.Old.Path):
+			problems = append(problems, fmt.Sprintf("%s must resolve directly and cannot be replaced by %s", rep.Old.Path, rep.New.Path))
 		case canonical && rep.New.Path == canonicalNew:
 			if _, duplicate := set[rep.Old.Path]; duplicate {
 				problems = append(problems, fmt.Sprintf("%s is replaced more than once", rep.Old.Path))
@@ -187,6 +213,15 @@ func loadCanonicalSet() (map[string]replacement, error) {
 		return nil, errors.New("go.mod violates the replacement contract:\n  - " + strings.Join(problems, "\n  - "))
 	}
 	return set, nil
+}
+
+func isCanonicalDirectModule(path string) bool {
+	for _, direct := range canonicalDirectModules {
+		if direct == path {
+			return true
+		}
+	}
+	return false
 }
 
 func canonicalTarget(oldPath string) (string, bool) {

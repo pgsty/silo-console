@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## Release v2.3.0
 
 Security:
 
