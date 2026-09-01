@@ -46,7 +46,7 @@ const BucketListItem = ({
       name={bucket.name}
       icon={<BucketsIcon />}
       onClick={() => navigate(path)}
-      id={`manageBucket-${bucket.name}`}
+      id={`sidebarManageBucket-${bucket.name}`}
       visibleTooltip={!sidebarOpen}
       path={path}
       selected={selected}

@@ -36,13 +36,20 @@ test("create a new bucket", async ({ page }) => {
   await page.locator(`#create-bucket`).click();
   await page.waitForTimeout(2000);
   await page.locator(`#buckets`).click();
+  // Reload so both the sidebar and the main list contain the new bucket. Their
+  // selectors must remain unique even when both representations are mounted.
+  await page.reload();
   await page.locator("#refresh-buckets").click();
   await page.waitForTimeout(2000);
   await page.getByPlaceholder("Search Buckets").fill(bucketName);
 
-  await expect(page.locator(`#manageBucket-${bucketName}`)).toBeTruthy();
   const bucketLocatorEl = `#manageBucket-${bucketName}`;
-  await page.locator(bucketLocatorEl).click();
+  const bucketLocator = page.locator(bucketLocatorEl);
+  await expect(bucketLocator).toHaveCount(1);
+  await expect(page.locator(`#sidebarManageBucket-${bucketName}`)).toHaveCount(
+    1,
+  );
+  await bucketLocator.click();
   await page.locator("#delete-bucket-button").click();
   //confirm modal
   await page.locator("#confirm-ok").click();
