@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { Role, Selector } from "testcafe";
+import { ClientFunction, Role, Selector } from "testcafe";
 
 const data = readFileSync(__dirname + "/../constants/timestamp.txt", "utf-8");
 const unixTimestamp = data.trim();
@@ -8,6 +8,7 @@ const loginUrl = "http://localhost:9090/login";
 // diagnostics/watch/trace need to run in port 9090 (through the server) to work
 const loginUrlServer = "http://localhost:9090/login";
 const submitButton = Selector("button").withAttribute("id", "do-login");
+const currentPath = ClientFunction(() => window.location.pathname);
 const LOGIN_TIMEOUT = 30000;
 
 const loginAs = async (
@@ -22,7 +23,15 @@ const loginAs = async (
     .expect(submitButton.exists)
     .notOk(`login for ${accessKey} did not complete`, {
       timeout: LOGIN_TIMEOUT,
-    });
+    })
+    .expect(currentPath())
+    .notContains(
+      "/login",
+      `login for ${accessKey} did not leave the login page`,
+      {
+        timeout: LOGIN_TIMEOUT,
+      },
+    );
 };
 
 export const admin = Role(
