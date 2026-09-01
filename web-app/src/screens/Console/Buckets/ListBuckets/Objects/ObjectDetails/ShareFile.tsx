@@ -367,7 +367,7 @@ const ShareFile = ({
                 actionButton={
                   <CopyToClipboard text={shareURL}>
                     <Button
-                      id={"copy-path"}
+                      id={"copy-share-url"}
                       variant="regular"
                       onClick={() => {
                         dispatch(

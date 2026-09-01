@@ -18,8 +18,14 @@ test.describe.configure({ mode: "serial" });
 test.setTimeout(90_000);
 
 const bucketName = `stale-object-${generateUUID()}`;
+// A and B are read-only fixtures shared by every test; the tests that mutate
+// state (restore, delete) each own a dedicated object so the suite does not
+// depend on its execution order.
 const objectA = "alpha.txt";
 const objectB = "beta.txt";
+const restoreObject = "gamma.txt";
+const deleteVersionObject = "delta.txt";
+const deleteCurrentObject = "epsilon.txt";
 
 const minioClient = new Minio.Client({
   endPoint: "localhost",
@@ -30,7 +36,13 @@ const minioClient = new Minio.Client({
 });
 
 // Version ids as reported by the server when the fixtures were written.
-const versionIds: Record<string, string[]> = { [objectA]: [], [objectB]: [] };
+const versionIds: Record<string, string[]> = {
+  [objectA]: [],
+  [objectB]: [],
+  [restoreObject]: [],
+  [deleteVersionObject]: [],
+  [deleteCurrentObject]: [],
+};
 
 const putVersion = async (name: string, body: string) => {
   const result = await minioClient.putObject(
@@ -63,6 +75,11 @@ test.beforeAll(async () => {
   await putVersion(objectA, "alpha version two");
   await putVersion(objectB, "beta version one");
   await putVersion(objectB, "beta version two");
+  await putVersion(restoreObject, "gamma version one");
+  await putVersion(restoreObject, "gamma version two");
+  await putVersion(deleteVersionObject, "delta version one");
+  await putVersion(deleteVersionObject, "delta version two");
+  await putVersion(deleteCurrentObject, "epsilon version one");
 });
 
 test.afterAll(async () => {
@@ -166,7 +183,7 @@ test.describe("authenticated object browser", () => {
     const share = new URL((await shareRequest).url());
     expect(share.searchParams.get("prefix")).toBe(objectB);
     expect(share.searchParams.get("version_id")).toBe(versionIds[objectB][1]);
-    await expect(page.locator("#copy-path")).toBeVisible();
+    await expect(page.locator("#copy-share-url")).toBeVisible();
   });
 
   test("a version transition shows the selected version and its metadata, never the previous one", async ({
@@ -222,14 +239,14 @@ test.describe("authenticated object browser", () => {
 
   test("restore acts on the clicked row's version", async ({ page }) => {
     await visitBucket(page);
-    await openObject(page, objectA);
-    await expect(panelName(page)).toHaveText(objectA);
+    await openObject(page, restoreObject);
+    await expect(panelName(page)).toHaveText(restoreObject);
     await detailsPanel(page)
       .getByRole("button", { name: "Display Object Versions", exact: true })
       .click();
     await expect(versionRows(page)).toHaveCount(2);
 
-    const [olderVersion] = versionIds[objectA];
+    const [olderVersion] = versionIds[restoreObject];
     // Button ids repeat per row; scope to the older row.
     await versionRows(page).nth(1).locator("#version-action-restore-3").click();
     const restoreRequest = page.waitForRequest(
@@ -239,7 +256,7 @@ test.describe("authenticated object browser", () => {
     );
     await page.locator("#confirm-ok").click();
     const restore = new URL((await restoreRequest).url());
-    expect(restore.searchParams.get("prefix")).toBe(objectA);
+    expect(restore.searchParams.get("prefix")).toBe(restoreObject);
     expect(restore.searchParams.get("version_id")).toBe(olderVersion);
   });
 
@@ -247,14 +264,14 @@ test.describe("authenticated object browser", () => {
     page,
   }) => {
     await visitBucket(page);
-    await openObject(page, objectB);
-    await expect(panelName(page)).toHaveText(objectB);
+    await openObject(page, deleteVersionObject);
+    await expect(panelName(page)).toHaveText(deleteVersionObject);
     await detailsPanel(page)
       .getByRole("button", { name: "Display Object Versions", exact: true })
       .click();
     await expect(versionRows(page)).toHaveCount(2);
 
-    const [olderVersion] = versionIds[objectB];
+    const [olderVersion] = versionIds[deleteVersionObject];
     await versionRows(page).nth(1).click();
     await expect(
       detailsPanel(page).getByRole("button", {
@@ -270,14 +287,14 @@ test.describe("authenticated object browser", () => {
     );
     await page.locator("#confirm-ok").click();
     const deleted = new URL((await deleteRequest).url());
-    expect(deleted.searchParams.get("prefix")).toBe(objectB);
+    expect(deleted.searchParams.get("prefix")).toBe(deleteVersionObject);
     expect(deleted.searchParams.get("version_id")).toBe(olderVersion);
   });
 
   test("deleting the current object sends no version id", async ({ page }) => {
     await visitBucket(page);
-    await openObject(page, objectB);
-    await expect(panelName(page)).toHaveText(objectB);
+    await openObject(page, deleteCurrentObject);
+    await expect(panelName(page)).toHaveText(deleteCurrentObject);
     await detailsPanel(page).locator("#delete-element-click").click();
     const deleteRequest = page.waitForRequest(
       (request) =>
@@ -286,7 +303,7 @@ test.describe("authenticated object browser", () => {
     );
     await page.locator("#confirm-ok").click();
     const deleted = new URL((await deleteRequest).url());
-    expect(deleted.searchParams.get("prefix")).toBe(objectB);
+    expect(deleted.searchParams.get("prefix")).toBe(deleteCurrentObject);
     expect(deleted.searchParams.has("version_id")).toBe(false);
   });
 

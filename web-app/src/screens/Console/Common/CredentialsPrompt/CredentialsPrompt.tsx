@@ -179,12 +179,14 @@ const CredentialsPrompt = ({
                 {Array.isArray(consoleCreds) &&
                   consoleCreds.map((credentialsPair, index) => {
                     return (
-                      <Fragment>
+                      <Fragment key={`console-credentials-${index}`}>
                         <CredentialItem
+                          id={`copy-console-access-key-${index}`}
                           label={t("Access Key")}
                           value={credentialsPair.accessKey}
                         />
                         <CredentialItem
+                          id={`copy-console-secret-key-${index}`}
                           label={t("Secret Key")}
                           value={credentialsPair.secretKey}
                         />
@@ -194,10 +196,12 @@ const CredentialsPrompt = ({
                 {!Array.isArray(consoleCreds) && (
                   <Fragment>
                     <CredentialItem
+                      id={"copy-console-access-key"}
                       label={t("Access Key")}
                       value={consoleCreds.accessKey}
                     />
                     <CredentialItem
+                      id={"copy-console-secret-key"}
                       label={t("Secret Key")}
                       value={consoleCreds.secretKey}
                     />
@@ -209,10 +213,12 @@ const CredentialsPrompt = ({
           {(consoleCreds === null || consoleCreds === undefined) && (
             <>
               <CredentialItem
+                id={"copy-access-key"}
                 label={t("Access Key")}
                 value={newServiceAccount.accessKey || ""}
               />
               <CredentialItem
+                id={"copy-secret-key"}
                 label={t("Secret Key")}
                 value={newServiceAccount.secretKey || ""}
               />

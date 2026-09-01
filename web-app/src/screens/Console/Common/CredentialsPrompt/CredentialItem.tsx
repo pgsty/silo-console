@@ -22,11 +22,16 @@ import { useAppDispatch } from "../../../../store";
 import { useT } from "i18n";
 
 interface ICredentialsItem {
+  id?: string;
   label?: string;
   value?: string;
 }
 
-const CredentialItem = ({ label = "", value = "" }: ICredentialsItem) => {
+const CredentialItem = ({
+  id = "copy-credential",
+  label = "",
+  value = "",
+}: ICredentialsItem) => {
   const dispatch = useAppDispatch();
   const t = useT();
 
@@ -37,7 +42,7 @@ const CredentialItem = ({ label = "", value = "" }: ICredentialsItem) => {
         actionButton={
           <CopyToClipboard text={value}>
             <Button
-              id={"copy-path"}
+              id={id}
               variant="regular"
               onClick={() => {
                 dispatch(

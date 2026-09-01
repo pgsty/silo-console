@@ -23,6 +23,7 @@ Object browser:
 - Made every object action (download, share, preview, tags, retention, legal hold, inspect, rename, restore, delete) use one validated identity resolved from the current listing; actions are unavailable during a version transition, current-object delete semantics are unchanged (no version id, so a delete marker is created in versioned buckets), and an explicitly selected version deletes only that version
 - Made the share dialog resolve the exact version it shares before requesting a link, fail closed on delete markers and missing versions, and close together with the preview dialog when the object or bucket changes underneath it
 - Added deterministic unit coverage for the identity rules and request ordering, a source-scan guard, and a live browser regression for late responses, version transitions, row actions, history navigation and anonymous browsing; documented the behaviour in docs/ObjectBrowser.md (no configuration or operator migration required)
+- Gave the share dialog's copy button (`copy-share-url`) and the credential prompt's copy buttons (`copy-access-key`, `copy-secret-key`, `copy-console-access-key[-n]`, `copy-console-secret-key[-n]`) their own element ids; they duplicated the breadcrumb's `copy-path` id in one document. The live browser regression now gives each mutating test its own object so it passes in any order
 
 Release artifacts and attribution:
 
