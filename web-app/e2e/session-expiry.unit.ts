@@ -14,6 +14,7 @@ import {
   isInvalidSessionResponse,
   isLoginEndpoint,
   isReturnableRoute,
+  isSessionProbe,
   rememberRoute,
   RouteStorage,
   sessionExpiryTarget,
@@ -72,6 +73,14 @@ test.describe("session expiry routing", () => {
     expect(isLoginEndpoint("api/v1/logout")).toBe(false);
     expect(isLoginEndpoint("api/v1/buckets")).toBe(false);
   });
+
+  test("the session probe is how the app learns there is no session", () => {
+    expect(isSessionProbe("http://console/api/v1/session")).toBe(true);
+    expect(isSessionProbe("/console/api/v1/session?x=1")).toBe(true);
+    expect(isSessionProbe("api/v1/login")).toBe(true);
+    expect(isSessionProbe("api/v1/session-policies")).toBe(false);
+    expect(isSessionProbe("api/v1/buckets")).toBe(false);
+  });
 });
 
 test.describe("return route", () => {
@@ -121,13 +130,14 @@ test.describe("return route", () => {
 });
 
 test.describe("handleExpiredSession", () => {
-  const run = (pathname: string, basePath: string) => {
+  const run = (pathname: string, basePath: string, anonymous = false) => {
     const storage = new MemoryStorage();
     const calls: string[] = [];
     const handled = handleExpiredSession({
       pathname,
       basePath,
       storage,
+      anonymous,
       clearSession: () => calls.push("clear"),
       navigate: (target) => calls.push(`navigate:${target}`),
     });
@@ -143,6 +153,17 @@ test.describe("handleExpiredSession", () => {
 
   test("does nothing on the login page, so nothing loops", () => {
     const { calls, handled, storage } = run("/login", "/");
+    expect(handled).toBe(false);
+    expect(calls).toEqual([]);
+    expect(storage.getItem("redirect-path")).toBeNull();
+  });
+
+  test("does nothing while browsing anonymously", () => {
+    const { calls, handled, storage } = run(
+      "/browser/public-bucket",
+      "/",
+      true,
+    );
     expect(handled).toBe(false);
     expect(calls).toEqual([]);
     expect(storage.getItem("redirect-path")).toBeNull();
@@ -226,6 +247,18 @@ test.describe("generated client session check", () => {
         401,
         { message: "invalid Login" },
         "http://console/api/v1/account/change-password",
+      ),
+    );
+    expect(result.outcome).toBe("rejected");
+    expect(result.expired).toBe(0);
+  });
+
+  test("the unauthenticated session probe never expires the session", async () => {
+    const result = await settle(
+      clientAnswering(
+        401,
+        { message: "invalid session" },
+        "http://console/api/v1/session",
       ),
     );
     expect(result.outcome).toBe("rejected");

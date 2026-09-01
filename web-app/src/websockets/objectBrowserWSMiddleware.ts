@@ -105,8 +105,12 @@ export const objectBrowserWSMiddleware = (
             }
 
             if (response.error?.Code === 401) {
-              // Session expired: same path as the REST clients.
-              expireSession();
+              // Session expired: same path as the REST clients. When there is
+              // no session to end (anonymous browsing) the page is reloaded
+              // so access to the bucket is evaluated afresh, as before.
+              if (!expireSession()) {
+                window.location.reload();
+              }
               return;
             } else if (response.error?.Code === 403) {
               const internalPathsPrefix = response.prefix;

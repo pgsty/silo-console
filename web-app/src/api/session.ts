@@ -17,6 +17,16 @@ import {
 
 const basePath = (): string => new URL(document.baseURI).pathname;
 
+// Anonymous public-bucket browsing is entered by the session thunk after the
+// session probe failed and the bucket answered an anonymous listing. It is
+// module state rather than a store read so this module stays free of the
+// store (the store's middleware imports it).
+let anonymousSession = false;
+
+export const setAnonymousSession = (anonymous: boolean): void => {
+  anonymousSession = anonymous;
+};
+
 // expireSession ends the current session in the browser the same way for
 // every caller: the REST clients on an invalid-session response, the Object
 // Manager socket on a 401 frame. A full document load of the login page
@@ -26,6 +36,7 @@ export const expireSession = (): boolean =>
     pathname: window.location.pathname,
     basePath: basePath(),
     storage: localStorage,
+    anonymous: anonymousSession,
     clearSession,
     navigate: (target) => {
       document.location = target;

@@ -19,7 +19,7 @@ import get from "lodash/get";
 import { ErrorResponseHandler } from "../types";
 import {
   isInvalidSessionResponse,
-  isLoginEndpoint,
+  isSessionProbe,
 } from "../../api/sessionExpiry";
 import { expireSession } from "../../api/session";
 
@@ -44,15 +44,17 @@ export class API {
       .then((res) => res.body)
       .catch((err) => {
         // An invalid session ends the session the same way for every client,
-        // whatever the login method was; login calls are never an expiry.
+        // whatever the login method was; login and session-probe calls are
+        // never an expiry, and anonymous browsing has no session to end (the
+        // handler then declines and the error reaches the caller as usual).
         if (
-          !isLoginEndpoint(targetURL) &&
+          !isSessionProbe(targetURL) &&
           isInvalidSessionResponse(
             err.status,
             get(err, "response.body.message"),
-          )
+          ) &&
+          expireSession()
         ) {
-          expireSession();
           return;
         }
 

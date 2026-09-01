@@ -11,6 +11,7 @@
 
 const REDIRECT_PATH_KEY = "redirect-path";
 const LOGIN_ENDPOINT_MARKER = "api/v1/login";
+const SESSION_PROBE = /api\/v1\/session(\?|#|$)/;
 const AUTH_ROUTES = ["/login", "/logout", "/oauth_callback", "/sso"];
 
 export interface RouteStorage {
@@ -41,6 +42,14 @@ export const isInvalidSessionResponse = (
 // are never a session expiry.
 export const isLoginEndpoint = (url: string): boolean =>
   url.includes(LOGIN_ENDPOINT_MARKER);
+
+// isSessionProbe also covers GET /api/v1/session: its 401 is how the app
+// finds out that there is no session at all (unauthenticated visitors, public
+// bucket browsing). The protected-route logic decides what to do with that
+// answer; treating it as an expiry would send anonymous visitors of a public
+// bucket to the login page.
+export const isSessionProbe = (url: string): boolean =>
+  isLoginEndpoint(url) || SESSION_PROBE.test(url);
 
 export const shouldRedirectExpiredSession = (
   pathname: string,
@@ -103,6 +112,9 @@ export interface ExpiredSessionContext {
   pathname: string;
   basePath: string;
   storage: RouteStorage;
+  // Anonymous public-bucket browsing has no session to expire: a 401 there
+  // is an ordinary error, never a reason to leave the bucket.
+  anonymous: boolean;
   clearSession: () => void;
   navigate: (target: string) => void;
 }
@@ -110,12 +122,16 @@ export interface ExpiredSessionContext {
 // handleExpiredSession is the one invalid-session path: remember where the
 // user was, clear the local session state, and load the login page, which
 // takes the user through the configured login method (form or identity
-// provider) and back to the remembered route. Returns false when the browser
-// is already on the login page, so nothing loops.
+// provider) and back to the remembered route. Returns false, and does
+// nothing, when the browser is already on the login page (so nothing loops)
+// or when the app is browsing anonymously (there is no session to end).
 export const handleExpiredSession = (
   context: ExpiredSessionContext,
 ): boolean => {
-  if (!shouldRedirectExpiredSession(context.pathname, context.basePath)) {
+  if (
+    context.anonymous ||
+    !shouldRedirectExpiredSession(context.pathname, context.basePath)
+  ) {
     return false;
   }
   rememberRoute(appRoute(context.pathname, context.basePath), context.storage);
@@ -148,7 +164,7 @@ const isResponseLike = (value: unknown): value is SessionResponseLike =>
 export const isExpiredSessionResponse = (
   response: SessionResponseLike,
 ): boolean =>
-  !isLoginEndpoint(response.url || "") &&
+  !isSessionProbe(response.url || "") &&
   isInvalidSessionResponse(response.status, responseMessage(response.error));
 
 // settleWithSessionCheck runs the invalid-session rule on the outcome of a
