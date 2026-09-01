@@ -58,7 +58,8 @@ func getChangePasswordResponse(session *models.Principal, params accountApi.Acco
 	ctx, cancel := context.WithCancel(params.HTTPRequest.Context())
 	defer cancel()
 	clientIP := getClientIP(params.HTTPRequest)
-	client := GetConsoleHTTPClient(clientIP)
+	// The re-login after a password change is an STS call to the SILO endpoint.
+	client := GetMinIOHTTPClient(clientIP)
 
 	// changePassword operations requires an AdminClient initialized with parent account credentials not
 	// STS credentials

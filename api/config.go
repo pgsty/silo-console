@@ -57,10 +57,20 @@ var (
 	GlobalPublicCerts []*x509.Certificate
 	// GlobalTLSCertsManager custom TLS Manager for SNI support
 	GlobalTLSCertsManager *xcerts.Manager
-	// GlobalTransport is common transport used for all HTTP calls, this is set via
-	// MinIO server to be the correct transport, however we still define some defaults
-	// here just in case.
-	GlobalTransport = &http.Transport{
+	// GlobalTransport is the verified transport shared by every outbound HTTP
+	// call Console makes: SILO/STS, identity providers, Prometheus, release
+	// checks, audit webhooks. It authenticates its peers with the system roots
+	// plus the CA pool installed by ApplyGlobalRootCAs; nothing may hand it an
+	// InsecureSkipVerify configuration.
+	GlobalTransport = newHTTPTransport()
+)
+
+// newHTTPTransport builds Console's outbound transport with certificate and
+// host name verification enabled. The scoped compatibility transport for the
+// SILO endpoint is derived from the same constructor so the two never drift
+// apart in anything but the verification switch.
+func newHTTPTransport() *http.Transport {
+	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   10 * time.Second,
@@ -77,12 +87,23 @@ var (
 			// Can't use TLSv1.0 because of POODLE and BEAST using CBC cipher
 			// Can't use TLSv1.1 because of RC4 cipher usage
 			MinVersion: tls.VersionTLS12,
-			// Console runs in the same pod/node as MinIO this is acceptable.
-			InsecureSkipVerify: true,
-			RootCAs:            GlobalRootCAs,
+			// RootCAs stays nil (system roots) until ApplyGlobalRootCAs runs.
 		},
 	}
-)
+}
+
+// ApplyGlobalRootCAs attaches the configured CA pool to the shared outbound
+// transport. A nil pool keeps the system roots. It must run after the
+// certificate directories have been loaded and before any connection is made:
+// standalone Console calls it from loadAllCerts (before the audit webhook
+// transport is cloned) and configureAPI calls it again for the embedded server,
+// which fills GlobalRootCAs before ConfigureAPI.
+func ApplyGlobalRootCAs() {
+	if GlobalTransport.TLSClientConfig == nil {
+		GlobalTransport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+	}
+	GlobalTransport.TLSClientConfig.RootCAs = GlobalRootCAs
+}
 
 // MinIOConfig represents application configuration passed in from the MinIO
 // server to the console.

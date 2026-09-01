@@ -179,6 +179,11 @@ func loadAllCerts(ctx *cli.Context) error {
 		}
 	}
 
+	// Attach the pool now: StartServer clones the transport for the audit and
+	// log webhooks before ConfigureAPI runs, and that clone must already trust
+	// the operator's CAs.
+	api.ApplyGlobalRootCAs()
+
 	if api.GlobalTLSCertsManager != nil {
 		api.GlobalTLSCertsManager.ReloadOnSignal(syscall.SIGHUP)
 	}

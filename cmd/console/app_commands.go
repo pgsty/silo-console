@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -43,8 +42,9 @@ func StartServer(ctx *cli.Context) error {
 
 	xctx := context.Background()
 
-	transport := api.PrepareSTSClientTransport(api.LocalAddress).Transport.(*http.Transport)
-	if err := logger.InitializeLogger(xctx, transport); err != nil {
+	// Audit and log webhooks clone the verified transport; they must never
+	// inherit the SILO endpoint compatibility exemption.
+	if err := logger.InitializeLogger(xctx, api.GlobalTransport); err != nil {
 		fmt.Println("error InitializeLogger", err)
 		logger.CriticalIf(xctx, err)
 	}

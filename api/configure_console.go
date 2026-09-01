@@ -87,6 +87,17 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 	if err := ensureSourceIPTrustConfigured(); err != nil {
 		LogError("invalid trusted proxy configuration: %v", err)
 	}
+	// The embedded server fills GlobalRootCAs before ConfigureAPI; standalone
+	// Console already attached the pool in loadAllCerts. Attaching again here
+	// is idempotent and keeps both paths verified with the operator's CAs.
+	ApplyGlobalRootCAs()
+	if getMinIOServerTLSSkipVerify() {
+		if origin, ok := minioTLSSkipVerifyOrigin(); ok {
+			LogError("%s=on: TLS certificate verification is disabled for the SILO endpoint %s only; every other HTTPS peer stays verified", ConsoleMinIOServerTLSSkipVerify, origin)
+		} else {
+			LogError("%s=on is ignored because %s is not an https:// endpoint", ConsoleMinIOServerTLSSkipVerify, ConsoleMinIOServer)
+		}
+	}
 
 	// Applies when the "x-token" header is set
 	api.KeyAuth = func(token string, _ []string) (*models.Principal, error) {

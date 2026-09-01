@@ -136,7 +136,8 @@ func getLoginResponse(params authApi.LoginParams) (*models.LoginResponse, *Coded
 	lr.Sts = strings.TrimSpace(lr.Sts)
 
 	clientIP := getClientIP(params.HTTPRequest)
-	client := GetConsoleHTTPClient(clientIP)
+	// STS AssumeRole and credential refresh talk to the SILO endpoint.
+	client := GetMinIOHTTPClient(clientIP)
 
 	var err error
 	var consoleCreds *ConsoleCredentials
@@ -199,7 +200,8 @@ func getLoginDetailsResponse(params authApi.LoginDetailParams, openIDProviders o
 	for name, provider := range openIDProviders {
 		// initialize new oauth2 client
 
-		oauth2Client, err := provider.GetOauth2Provider(name, nil, r, GetConsoleHTTPClient(getClientIP(params.HTTPRequest)))
+		clientIP := getClientIP(params.HTTPRequest)
+		oauth2Client, err := provider.GetOauth2ProviderWithClients(name, nil, r, GetConsoleHTTPClient(clientIP), GetMinIOHTTPClient(clientIP))
 		if err != nil {
 			continue
 		}
@@ -265,7 +267,11 @@ func getLoginOauth2AuthResponse(params authApi.LoginOauth2AuthParams, openIDProv
 	r := params.HTTPRequest
 	lr := params.Body
 
-	client := GetConsoleHTTPClient(getClientIP(params.HTTPRequest))
+	clientIP := getClientIP(params.HTTPRequest)
+	// The identity provider is an external peer and is always verified; the
+	// STS exchange and credential refresh go to the SILO endpoint.
+	idpClient := GetConsoleHTTPClient(clientIP)
+	client := GetMinIOHTTPClient(clientIP)
 	if len(openIDProviders) > 0 {
 		// we read state
 		rState := *lr.State
@@ -289,7 +295,7 @@ func getLoginOauth2AuthResponse(params authApi.LoginOauth2AuthParams, openIDProv
 		}
 
 		// Initialize new identity provider with new oauth2Client per IDPName
-		oauth2Client, err := providerCfg.GetOauth2Provider(IDPName, nil, r, client)
+		oauth2Client, err := providerCfg.GetOauth2ProviderWithClients(IDPName, nil, r, idpClient, client)
 		if err != nil {
 			return nil, ErrorWithContext(ctx, err)
 		}

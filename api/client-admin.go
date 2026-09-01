@@ -23,7 +23,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/minio/console/pkg"
@@ -464,7 +463,9 @@ func newAdminFromCreds(accessKey, secretKey, endpoint string, tlsEnabled bool) (
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: tlsEnabled,
 		Transport: &accountInfoCompatibilityTransport{
-			transport: madmin.DefaultTransport(tlsEnabled),
+			// Remote hosts are verified with Console's CA pool; only the
+			// configured SILO endpoint can be exempted, and only explicitly.
+			transport: PrepareSTSClientTransport(""),
 		},
 	})
 	if err != nil {
@@ -472,36 +473,6 @@ func newAdminFromCreds(accessKey, secretKey, endpoint string, tlsEnabled bool) (
 	}
 	minioClient.SetAppInfo(globalAppName, pkg.Version)
 	return minioClient, nil
-}
-
-// isLocalAddress returns true if the url contains an IPv4/IPv6 hostname
-// that points to the local machine - FQDN are not supported
-func isLocalIPEndpoint(endpoint string) bool {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return false
-	}
-	return isLocalIPAddress(u.Hostname())
-}
-
-// isLocalAddress returns true if the url contains an IPv4/IPv6 hostname
-// that points to the local machine - FQDN are not supported
-func isLocalIPAddress(ipAddr string) bool {
-	if ipAddr == "" {
-		return false
-	}
-	if ipAddr == "localhost" {
-		return true
-	}
-	ip := net.ParseIP(ipAddr)
-	return ip != nil && ip.IsLoopback()
-}
-
-// GetConsoleHTTPClient caches different http clients depending on the target endpoint while taking
-// in consideration CA certs stored in ${HOME}/.console/certs/CAs and ${HOME}/.minio/certs/CAs
-// If the target endpoint points to a loopback device, skip the TLS verification.
-func GetConsoleHTTPClient(clientIP string) *http.Client {
-	return PrepareConsoleHTTPClient(clientIP)
 }
 
 // getClientIP retrieves the IP from the request headers

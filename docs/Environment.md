@@ -4,6 +4,7 @@
 | --- | -- |
 | `CONSOLE_MINIO_SERVER` | "http://localhost:9000" |
 | `CONSOLE_MINIO_REGION` | "us-east-1" |
+| `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY` | "off"; standalone only, exempts exactly the `CONSOLE_MINIO_SERVER` HTTPS origin from certificate verification, see [TLS.md](TLS.md) |
 | `CONSOLE_HOSTNAME` | "" |
 | `CONSOLE_PORT` | 9090 |
 | `CONSOLE_TLS_PORT` | 9443 |
@@ -126,3 +127,14 @@ When a reverse proxy is not listed, requests are attributed to the proxy itself.
 This is safe against client spoofing, but a policy that already permits that
 proxy address may consequently permit every client arriving through it. Review
 IP allow-lists as well as the proxy setting during migration.
+
+## Outbound TLS verification
+
+Console verifies every outbound HTTPS peer against the system roots plus the
+certificates in `~/.console/certs/CAs` (standalone) or the server's `certs/CAs`
+(embedded). Private or self-signed server certificates belong in that directory.
+`CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY=on` is an explicit opt-out that applies
+only to the configured `CONSOLE_MINIO_SERVER` HTTPS origin; identity providers,
+Prometheus, webhooks and every other destination stay verified. The full
+behaviour, including the embedded-server certificate requirement, is described
+in [TLS.md](TLS.md).

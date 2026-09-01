@@ -417,7 +417,7 @@ func newMinioClient(claims *models.Principal, clientIP string) (*minio.Client, e
 	minioClient, err := minio.New(endpoint, &minio.Options{
 		Creds:     creds,
 		Secure:    secure,
-		Transport: GetConsoleHTTPClient(clientIP).Transport,
+		Transport: PrepareSTSClientTransport(clientIP),
 	})
 	if err != nil {
 		return nil, err
@@ -489,10 +489,8 @@ func newS3Config(endpoint, accessKey, secretKey, sessionToken string, clientIP s
 		Signature:    "S3v4",
 		AppName:      globalAppName,
 		AppVersion:   pkg.Version,
-		Insecure:     isLocalIPEndpoint(endpoint),
-		Transport: &ConsoleTransport{
-			ClientIP:  clientIP,
-			Transport: GlobalTransport,
-		},
+		// mc uses the supplied transport as-is, so verification policy lives
+		// in PrepareSTSClientTransport rather than in mc's Insecure flag.
+		Transport: PrepareSTSClientTransport(clientIP),
 	}
 }
