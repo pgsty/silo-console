@@ -43,7 +43,8 @@ const (
 	ConsoleWSMaxConnectionsPerClient = "CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT"
 	// ConsoleWSMaxAnonymousConnections caps anonymous connections for the
 	// process. Anonymous connections also count against the total, so they can
-	// never consume more of it than this budget.
+	// never consume more of it than this budget, which must stay below the
+	// total.
 	ConsoleWSMaxAnonymousConnections = "CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS"
 	// ConsoleWSMaxAnonymousConnectionsPerClient caps anonymous connections
 	// from one client address.
@@ -226,11 +227,14 @@ func wsConnectionLimitsFromEnvironment(lookup func(string) (string, bool)) (wsCo
 		}
 		*setting.target = value
 	}
-	if limits.anonymous > limits.total {
-		return wsConnectionLimits{}, fmt.Errorf("%s (%d) must not exceed %s (%d)", ConsoleWSMaxAnonymousConnections, limits.anonymous, ConsoleWSMaxConnections, limits.total)
+	// The anonymous caps must stay strictly below the shared caps: otherwise
+	// anonymous peers alone could fill a shared cap and signed-in handshakes
+	// would be refused, which is exactly what the separate budget prevents.
+	if limits.anonymous >= limits.total {
+		return wsConnectionLimits{}, fmt.Errorf("%s (%d) must be less than %s (%d) so signed-in users always keep connection slots", ConsoleWSMaxAnonymousConnections, limits.anonymous, ConsoleWSMaxConnections, limits.total)
 	}
-	if limits.anonymousPerClient > limits.perClient {
-		return wsConnectionLimits{}, fmt.Errorf("%s (%d) must not exceed %s (%d)", ConsoleWSMaxAnonymousConnectionsPerClient, limits.anonymousPerClient, ConsoleWSMaxConnectionsPerClient, limits.perClient)
+	if limits.anonymousPerClient >= limits.perClient {
+		return wsConnectionLimits{}, fmt.Errorf("%s (%d) must be less than %s (%d) so signed-in users always keep connection slots", ConsoleWSMaxAnonymousConnectionsPerClient, limits.anonymousPerClient, ConsoleWSMaxConnectionsPerClient, limits.perClient)
 	}
 	if limits.anonymousPerClient > limits.anonymous {
 		return wsConnectionLimits{}, fmt.Errorf("%s (%d) must not exceed %s (%d)", ConsoleWSMaxAnonymousConnectionsPerClient, limits.anonymousPerClient, ConsoleWSMaxAnonymousConnections, limits.anonymous)

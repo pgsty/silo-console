@@ -14,8 +14,8 @@
 | `CONSOLE_TRUSTED_PROXIES` | Standalone only: trusted proxy IP/CIDR list; blank falls back to `MINIO_API_TRUSTED_PROXIES` |
 | `CONSOLE_WS_MAX_CONNECTIONS` | 1024; WebSocket connections the process holds at once, see [WebSocket connection limits](#websocket-connection-limits) |
 | `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256; WebSocket connections one client address holds at once |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64; anonymous WebSocket connections for the process (must not exceed the total) |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8; anonymous WebSocket connections from one client address (must not exceed the per-client cap or the anonymous budget) |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64; anonymous WebSocket connections for the process (must be less than the total) |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8; anonymous WebSocket connections from one client address (must be less than the per-client cap and not exceed the anonymous budget) |
 | `CONSOLE_SHARE_MINIO_URL` | "off"
 | `CONSOLE_SECURE_ALLOWED_HOSTS` | "" |
 | `CONSOLE_SECURE_ALLOWED_HOSTS_ARE_REGEX` | "off" |
@@ -191,10 +191,12 @@ every browser shares the proxy's address and the per-client caps apply to all
 of them together; configure the trust list, or raise
 `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT`, for such deployments.
 
-Every value must be an integer between 1 and 1048576, the anonymous budget must
-not exceed the total, and the anonymous per-client cap must not exceed either
-the per-client cap or the anonymous budget. Standalone Console refuses to start
-on an invalid value; an embedded Console logs the error and keeps the defaults.
+Every value must be an integer between 1 and 1048576. The anonymous budget must
+be strictly less than the total and the anonymous per-client cap strictly less
+than the per-client cap, so that signed-in users always keep at least one slot
+in each; the anonymous per-client cap must not exceed the anonymous budget.
+Standalone Console refuses to start on an invalid value; an embedded Console
+logs the error and keeps the defaults.
 
 ## Outbound TLS verification
 

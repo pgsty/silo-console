@@ -37,6 +37,17 @@ func swapWSConnectionLimits(t *testing.T, limits wsConnectionLimits) *wsConnecti
 	return limiter
 }
 
+// trustLoopbackProxy makes the test server's loopback peer a trusted proxy so
+// X-Forwarded-For can stand in for distinct clients.
+func trustLoopbackProxy(t *testing.T) {
+	t.Helper()
+	preserveSourceIPTrustState(t)
+	t.Setenv(EnvConsoleTrustedProxies, "127.0.0.1")
+	if err := ConfigureSourceIPTrust(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func envLookup(values map[string]string) func(string) (string, bool) {
 	return func(name string) (string, bool) {
 		value, ok := values[name]
@@ -75,17 +86,42 @@ func TestWSConnectionLimitsFromEnvironment(t *testing.T) {
 		{
 			name:    "anonymous budget above the total",
 			env:     map[string]string{ConsoleWSMaxConnections: "10", ConsoleWSMaxAnonymousConnections: "11"},
-			wantErr: "must not exceed CONSOLE_WS_MAX_CONNECTIONS",
+			wantErr: "must be less than CONSOLE_WS_MAX_CONNECTIONS",
+		},
+		{
+			name:    "anonymous budget equal to the total leaves signed-in users nothing",
+			env:     map[string]string{ConsoleWSMaxConnections: "64", ConsoleWSMaxAnonymousConnections: "64"},
+			wantErr: "must be less than CONSOLE_WS_MAX_CONNECTIONS",
 		},
 		{
 			name:    "anonymous per-client cap above the per-client cap",
 			env:     map[string]string{ConsoleWSMaxConnectionsPerClient: "4", ConsoleWSMaxAnonymousConnectionsPerClient: "5"},
-			wantErr: "must not exceed CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT",
+			wantErr: "must be less than CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT",
+		},
+		{
+			name:    "anonymous per-client cap equal to the per-client cap",
+			env:     map[string]string{ConsoleWSMaxConnectionsPerClient: "8", ConsoleWSMaxAnonymousConnectionsPerClient: "8"},
+			wantErr: "must be less than CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT",
 		},
 		{
 			name:    "anonymous per-client cap above the anonymous budget",
 			env:     map[string]string{ConsoleWSMaxAnonymousConnections: "4", ConsoleWSMaxAnonymousConnectionsPerClient: "5"},
 			wantErr: "must not exceed CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS",
+		},
+		{
+			name: "one client may hold the whole anonymous budget",
+			env:  map[string]string{ConsoleWSMaxAnonymousConnections: "4", ConsoleWSMaxAnonymousConnectionsPerClient: "4"},
+			want: wsConnectionLimits{total: 1024, perClient: 256, anonymous: 4, anonymousPerClient: 4},
+		},
+		{
+			name: "the smallest valid configuration keeps one slot for signed-in users",
+			env: map[string]string{
+				ConsoleWSMaxConnections:                   "2",
+				ConsoleWSMaxConnectionsPerClient:          "2",
+				ConsoleWSMaxAnonymousConnections:          "1",
+				ConsoleWSMaxAnonymousConnectionsPerClient: "1",
+			},
+			want: wsConnectionLimits{total: 2, perClient: 2, anonymous: 1, anonymousPerClient: 1},
 		},
 	}
 	for _, tt := range tests {
@@ -229,6 +265,26 @@ func TestServeWSConnectionCaps(t *testing.T) {
 			return total == 2 && anonymous == 0
 		}, "slot released after the client closed")
 		dialWS(t, objectManager, nil)
+	})
+
+	t.Run("anonymous exhaustion never refuses signed-in users", func(t *testing.T) {
+		// Two clients behind a trusted proxy: the anonymous budget is shared
+		// by every client, the per-client caps are not, and a full anonymous
+		// budget leaves the signed-in path untouched.
+		trustLoopbackProxy(t)
+		limiter := swapWSConnectionLimits(t, wsConnectionLimits{total: 10, perClient: 5, anonymous: 2, anonymousPerClient: 2})
+		clientA := http.Header{"X-Forwarded-For": {"203.0.113.1"}}
+		clientB := http.Header{"X-Forwarded-For": {"203.0.113.2"}}
+		signedInB := http.Header{"X-Forwarded-For": {"203.0.113.2"}, "Cookie": authenticated["Cookie"]}
+
+		dialWS(t, objectManager, clientA)
+		dialWS(t, objectManager, clientA)
+		dialExpectingRejection(t, objectManager, clientB, http.StatusServiceUnavailable) // budget, not B's cap
+		dialExpectingRejection(t, objectManager, clientA, http.StatusTooManyRequests)    // A's own cap
+		dialWS(t, objectManager, signedInB)
+		if total, anonymous, clients := limiter.counts(); total != 3 || anonymous != 2 || clients != 2 {
+			t.Fatalf("counts = %d/%d/%d, want 3/2/2", total, anonymous, clients)
+		}
 	})
 
 	t.Run("per-client caps", func(t *testing.T) {
