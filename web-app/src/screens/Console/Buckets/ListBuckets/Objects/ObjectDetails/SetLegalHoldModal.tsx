@@ -25,27 +25,30 @@ import { setModalErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
 import { useT } from "i18n";
+import { ObjectTarget } from "../objectIdentity";
 
 interface ISetRetentionProps {
   open: boolean;
   closeModalAndRefresh: (reload: boolean) => void;
-  objectName: string;
-  bucketName: string;
+  // The validated object version the legal hold change addresses.
+  target: ObjectTarget;
+  // Display data (current legal hold status) for that same version.
   actualInfo: BucketObject;
 }
 
 const SetLegalHoldModal = ({
   open,
   closeModalAndRefresh,
-  objectName,
-  bucketName,
+  target,
   actualInfo,
 }: ISetRetentionProps) => {
+  const bucketName = target.bucket;
+  const objectName = target.key;
   const dispatch = useAppDispatch();
   const t = useT();
   const [legalHoldEnabled, setLegalHoldEnabled] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const versionId = actualInfo.version_id;
+  const versionId = target.versionId;
 
   useEffect(() => {
     const status = get(actualInfo, "legal_hold_status", "OFF");

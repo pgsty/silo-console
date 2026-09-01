@@ -24,19 +24,22 @@ import { setErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import { restoreLocalObjectList } from "../../../../ObjectBrowser/objectBrowserSlice";
 import { interpolate, useT } from "i18n";
+import { ObjectLocation, ObjectTarget, sameLocation } from "../objectIdentity";
 
 interface IRestoreFileVersion {
   restoreOpen: boolean;
-  bucketName: string;
-  versionToRestore: BucketObject;
-  objectPath: string;
+  // The version to restore, validated against the current versions listing.
+  target: ObjectTarget;
+  // Where it is restored to: always the same bucket and key.
+  destination: ObjectLocation;
+  versionInfo: BucketObject;
   onCloseAndUpdate: (refresh: boolean) => void;
 }
 
 const RestoreFileVersion = ({
-  versionToRestore,
-  bucketName,
-  objectPath,
+  target,
+  destination,
+  versionInfo,
   restoreOpen,
   onCloseAndUpdate,
 }: IRestoreFileVersion) => {
@@ -44,21 +47,27 @@ const RestoreFileVersion = ({
   const t = useT();
   const [restoreLoading, setRestoreLoading] = useState<boolean>(false);
 
+  // Restore copies a version of an object over that same object.
+  const canRestore = sameLocation(target, destination);
+
   const restoreVersion = () => {
+    if (!canRestore) {
+      return;
+    }
     setRestoreLoading(true);
 
     api.buckets
-      .putObjectRestore(bucketName, {
-        prefix: objectPath,
-        version_id: versionToRestore.version_id || "",
+      .putObjectRestore(destination.bucket, {
+        prefix: destination.key,
+        version_id: target.versionId,
       })
       .then(() => {
         setRestoreLoading(false);
         onCloseAndUpdate(true);
         dispatch(
           restoreLocalObjectList({
-            prefix: objectPath,
-            objectInfo: versionToRestore,
+            prefix: destination.key,
+            objectInfo: versionInfo,
           }),
         );
       })
@@ -78,7 +87,7 @@ const RestoreFileVersion = ({
       onConfirm={restoreVersion}
       confirmButtonProps={{
         variant: "secondary",
-        disabled: restoreLoading,
+        disabled: restoreLoading || !canRestore,
       }}
       onClose={() => {
         onCloseAndUpdate(false);
@@ -93,14 +102,14 @@ const RestoreFileVersion = ({
               object: (
                 <Fragment>
                   <br />
-                  <b>{objectPath}</b>
+                  <b>{destination.key}</b>
                   <br />
                 </Fragment>
               ),
               version: (
                 <Fragment>
                   <br />
-                  <b>{versionToRestore.version_id}</b>
+                  <b>{target.versionId}</b>
                 </Fragment>
               ),
             },

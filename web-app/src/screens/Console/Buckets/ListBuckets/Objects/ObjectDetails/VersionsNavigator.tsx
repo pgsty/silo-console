@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import get from "lodash/get";
 import { useSelector } from "react-redux";
 import {
@@ -62,23 +62,25 @@ import { hasPermission } from "../../../../../../common/SecureComponent";
 import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions";
 import { isPreviewAvailable } from "../utils";
 import { exactObjectVersions } from "./objectVersions";
+import {
+  ObjectLocation,
+  ObjectTarget,
+  resolveObject,
+  rowTarget,
+  TaggedResult,
+} from "../objectIdentity";
+import { isAbortError, ObjectRequestGuard } from "../requestGuard";
+import { shareSubjectKey } from "./shareSubject";
 
 interface IVersionsNavigatorProps {
   internalPaths: string;
   bucketName: string;
 }
 
-const emptyFile: BucketObject = {
-  is_latest: true,
-  last_modified: "",
-  legal_hold_status: "",
-  name: "",
-  retention_mode: "",
-  retention_until_date: "",
-  size: 0,
-  tags: {},
-  version_id: undefined,
-};
+interface RowAction {
+  target: ObjectTarget;
+  info: BucketObject;
+}
 
 const VersionsNavigator = ({
   internalPaths,
@@ -111,111 +113,148 @@ const VersionsNavigator = ({
     IAM_SCOPES.S3_GET_OBJECT_VERSION,
     IAM_SCOPES.S3_GET_ACTIONS,
   ]);
-  const [shareFileModalOpen, setShareFileModalOpen] = useState<boolean>(false);
-  const [actualInfo, setActualInfo] = useState<BucketObject | null>(null);
-  const [objectToShare, setObjectToShare] = useState<BucketObject | null>(null);
-  const [versions, setVersions] = useState<BucketObject[]>([]);
-  const [moreVersionsThanLimit, setMoreVersionsThanLimit] =
-    useState<boolean>(false);
-  const [restoreVersionOpen, setRestoreVersionOpen] = useState<boolean>(false);
-  const [restoreVersion, setRestoreVersion] = useState<BucketObject | null>(
+  const [shareSubject, setShareSubject] = useState<ObjectTarget | null>(null);
+  const [previewItem, setPreviewItem] = useState<RowAction | null>(null);
+  const [restoreItem, setRestoreItem] = useState<RowAction | null>(null);
+  const [deleteNonCurrentLocation, setDeleteNonCurrentLocation] =
+    useState<ObjectLocation | null>(null);
+  const [deleteTargets, setDeleteTargets] = useState<ObjectTarget[] | null>(
     null,
   );
-  const [sortValue, setSortValue] = useState<string>("date");
-  const [previewOpen, setPreviewOpen] = useState<boolean>(false);
-  const [deleteNonCurrentOpen, setDeleteNonCurrentOpen] =
+  // The versions listing this navigator resolved, tagged with the bucket and
+  // key it was requested for; every row action is validated against it.
+  const [listResult, setListResult] =
+    useState<TaggedResult<BucketObject> | null>(null);
+  const [moreVersionsThanLimit, setMoreVersionsThanLimit] =
     useState<boolean>(false);
+  const [sortValue, setSortValue] = useState<string>("date");
   const [selectEnabled, setSelectEnabled] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [delSelectedVOpen, setDelSelectedVOpen] = useState<boolean>(false);
+  const listGuard = useRef(new ObjectRequestGuard<ObjectLocation>());
+
+  const location = useMemo<ObjectLocation>(
+    () => ({ bucket: bucketName, key: internalPaths }),
+    [bucketName, internalPaths],
+  );
+  const versions = useMemo(
+    () => (listResult?.kind === "versions" ? listResult.items : []),
+    [listResult],
+  );
+  // Display only: the current version of the object, if the listing has it.
+  const latest = useMemo(
+    () =>
+      resolveObject({ ...location, version: { kind: "latest" } }, listResult),
+    [location, listResult],
+  );
+  const isLoaded = listResult !== null;
 
   // calculate object name to display
-  let objectNameArray: string[] = [];
-  if (actualInfo && actualInfo.name) {
-    objectNameArray = actualInfo.name.split("/");
-  }
+  const objectNameArray: string[] = internalPaths.split("/");
 
   useEffect(() => {
-    if (!loadingVersions && !actualInfo) {
+    const guard = listGuard.current;
+    return () => {
+      guard.invalidate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loadingVersions && listResult === null) {
       dispatch(setLoadingVersions(true));
     }
-  }, [loadingVersions, actualInfo, dispatch]);
+  }, [loadingVersions, listResult, dispatch]);
 
   useEffect(() => {
-    if (loadingVersions && internalPaths !== "") {
-      api.buckets
-        .listObjects(bucketName, {
+    if (!loadingVersions || internalPaths === "") {
+      return;
+    }
+    const ticket = listGuard.current.begin(location);
+    api.buckets
+      .listObjects(
+        bucketName,
+        {
           prefix: internalPaths,
           with_versions: distributedSetup,
           limit: versionsLimit + 1,
-        })
-        .then((res) => {
-          const result = exactObjectVersions<BucketObject>(
-            get(res.data, "objects", []),
-            internalPaths,
-          );
+        },
+        { signal: ticket.signal },
+      )
+      .then((res) => {
+        if (!ticket.isCurrent()) {
+          return;
+        }
+        const result = exactObjectVersions<BucketObject>(
+          get(res.data, "objects", []),
+          internalPaths,
+        );
 
-          setMoreVersionsThanLimit(result.length > versionsLimit);
-          const visibleVersions = result.slice(0, versionsLimit);
-
-          if (distributedSetup) {
-            setActualInfo(
-              visibleVersions.find((el: BucketObject) => el.is_latest) ||
-                emptyFile,
-            );
-            setVersions(visibleVersions);
-          } else {
-            setActualInfo(visibleVersions[0]);
-            setVersions([]);
-          }
-
-          dispatch(setLoadingVersions(false));
-        })
-        .catch((err) => {
-          dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-          dispatch(setLoadingVersions(false));
+        setMoreVersionsThanLimit(
+          distributedSetup && result.length > versionsLimit,
+        );
+        setListResult({
+          bucket: bucketName,
+          key: internalPaths,
+          kind: distributedSetup ? "versions" : "current",
+          items: result.slice(0, versionsLimit),
         });
-    }
+        dispatch(setLoadingVersions(false));
+      })
+      .catch((err) => {
+        if (isAbortError(err) || !ticket.isCurrent()) {
+          return;
+        }
+        dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+        dispatch(setLoadingVersions(false));
+      });
   }, [
     loadingVersions,
     bucketName,
     internalPaths,
+    location,
     dispatch,
     distributedSetup,
     versionsLimit,
   ]);
 
-  const shareObject = () => {
-    setShareFileModalOpen(true);
-  };
+  // Every row action goes through the validated identity of the clicked row:
+  // same bucket, same key, concrete version from the current listing.
+  const targetFor = (item: BucketObject): ObjectTarget | null =>
+    rowTarget(location, listResult, item);
 
   const closeShareModal = () => {
-    setObjectToShare(null);
-    setShareFileModalOpen(false);
-    setPreviewOpen(false);
+    setShareSubject(null);
   };
 
   const onShareItem = (item: BucketObject) => {
-    setObjectToShare(item);
-    shareObject();
+    const target = targetFor(item);
+    if (target) {
+      setShareSubject(target);
+    }
   };
 
   const onPreviewItem = (item: BucketObject) => {
-    setObjectToShare(item);
-    setPreviewOpen(true);
+    const target = targetFor(item);
+    if (target) {
+      setPreviewItem({ target, info: item });
+    }
   };
 
   const onRestoreItem = (item: BucketObject) => {
-    setRestoreVersion(item);
-    setRestoreVersionOpen(true);
+    const target = targetFor(item);
+    if (target) {
+      setRestoreItem({ target, info: item });
+    }
   };
 
   const onDownloadItem = (item: BucketObject) => {
-    downloadObject(dispatch, bucketName, internalPaths, item);
+    if (targetFor(item)) {
+      downloadObject(dispatch, bucketName, internalPaths, item);
+    }
   };
 
   const onGlobalClick = (item: BucketObject) => {
-    dispatch(setSelectedVersion(item.version_id || ""));
+    const target = targetFor(item);
+    dispatch(setSelectedVersion(target ? target.versionId : ""));
   };
 
   const filteredRecords = versions.filter((version) => {
@@ -226,8 +265,7 @@ const VersionsNavigator = ({
   });
 
   const closeRestoreModal = (reloadObjectData: boolean) => {
-    setRestoreVersionOpen(false);
-    setRestoreVersion(null);
+    setRestoreItem(null);
 
     if (reloadObjectData) {
       dispatch(setLoadingVersions(true));
@@ -236,7 +274,7 @@ const VersionsNavigator = ({
   };
 
   const closeDeleteNonCurrent = (reloadAfterDelete: boolean) => {
-    setDeleteNonCurrentOpen(false);
+    setDeleteNonCurrentLocation(null);
 
     if (reloadAfterDelete) {
       dispatch(setLoadingVersions(true));
@@ -246,7 +284,7 @@ const VersionsNavigator = ({
   };
 
   const closeSelectedVersions = (reloadOnComplete: boolean) => {
-    setDelSelectedVOpen(false);
+    setDeleteTargets(null);
 
     if (reloadOnComplete) {
       dispatch(setLoadingVersions(true));
@@ -254,6 +292,17 @@ const VersionsNavigator = ({
       dispatch(setLoadingObjectInfo(true));
       setSelectedItems([]);
     }
+  };
+
+  const openDeleteSelectedVersions = () => {
+    // Captured when the dialog opens: only ids that still resolve against the
+    // current listing become targets; stale ids are dropped.
+    const targets = selectedItems.flatMap((versionID) => {
+      const row = versions.find((version) => version.version_id === versionID);
+      const target = row ? targetFor(row) : null;
+      return target ? [target] : [];
+    });
+    setDeleteTargets(targets);
   };
 
   const totalSpace = versions.reduce((acc: number, currValue: BucketObject) => {
@@ -319,7 +368,7 @@ const VersionsNavigator = ({
       <FileVersionItem
         style={style}
         key={key}
-        fileName={actualInfo?.name || ""}
+        fileName={internalPaths}
         versionInfo={filteredRecords[index]}
         index={versOrd}
         onDownload={onDownloadItem}
@@ -330,10 +379,10 @@ const VersionsNavigator = ({
           metaData: filteredRecords[index].content_type
             ? { "Content-Type": filteredRecords[index].content_type }
             : null,
-          objectName: actualInfo?.name || "",
+          objectName: internalPaths,
           canGetObject: canGetObjectVersion,
           isDeleteMarker: !!filteredRecords[index].is_delete_marker,
-          isPrefix: !!actualInfo?.name?.endsWith("/"),
+          isPrefix: internalPaths.endsWith("/"),
         })}
         globalClick={onGlobalClick}
         isSelected={selectedVersion === filteredRecords[index].version_id}
@@ -348,57 +397,50 @@ const VersionsNavigator = ({
 
   return (
     <Fragment>
-      {shareFileModalOpen && actualInfo && (
+      {shareSubject && (
         <ShareFile
-          open={shareFileModalOpen}
+          key={shareSubjectKey(shareSubject)}
+          open={true}
           closeModalAndRefresh={closeShareModal}
-          bucketName={bucketName}
-          dataObject={objectToShare || actualInfo}
+          subject={shareSubject}
         />
       )}
-      {restoreVersionOpen && actualInfo && restoreVersion && (
+      {restoreItem && (
         <RestoreFileVersion
-          restoreOpen={restoreVersionOpen}
-          bucketName={bucketName}
-          versionToRestore={restoreVersion}
-          objectPath={actualInfo.name || ""}
+          restoreOpen={true}
+          target={restoreItem.target}
+          destination={location}
+          versionInfo={restoreItem.info}
           onCloseAndUpdate={closeRestoreModal}
         />
       )}
-      {previewOpen && actualInfo && (
+      {previewItem && (
         <PreviewFileModal
-          open={previewOpen}
+          open={true}
           bucketName={bucketName}
           actualInfo={{
-            name: actualInfo.name || "",
-            version_id:
-              objectToShare?.version_id !== undefined
-                ? objectToShare.version_id
-                : "null",
-            size: objectToShare?.size ?? actualInfo.size,
-            content_type: objectToShare?.content_type,
-            last_modified: actualInfo.last_modified || "",
+            name: previewItem.target.key,
+            version_id: previewItem.target.versionId,
+            size: previewItem.info.size,
+            content_type: previewItem.info.content_type,
+            last_modified: previewItem.info.last_modified || "",
           }}
           onClosePreview={() => {
-            setPreviewOpen(false);
-            setObjectToShare(null);
+            setPreviewItem(null);
           }}
         />
       )}
-      {deleteNonCurrentOpen && (
+      {deleteNonCurrentLocation && (
         <DeleteNonCurrent
-          deleteOpen={deleteNonCurrentOpen}
+          deleteOpen={true}
           closeDeleteModalAndRefresh={closeDeleteNonCurrent}
-          selectedBucket={bucketName}
-          selectedObject={internalPaths}
+          location={deleteNonCurrentLocation}
         />
       )}
-      {delSelectedVOpen && (
+      {deleteTargets && (
         <DeleteSelectedVersions
-          selectedBucket={bucketName}
-          selectedObject={internalPaths}
-          deleteOpen={delSelectedVOpen}
-          selectedVersions={selectedItems}
+          deleteOpen={true}
+          targets={deleteTargets}
           closeDeleteModalAndRefresh={closeSelectedVersions}
         />
       )}
@@ -412,13 +454,13 @@ const VersionsNavigator = ({
           },
         }}
       >
-        {!actualInfo && (
+        {!isLoaded && (
           <Grid item xs={12}>
             <ProgressBar />
           </Grid>
         )}
 
-        {actualInfo && (
+        {isLoaded && (
           <Fragment>
             <Grid item xs={12}>
               <BrowserBreadcrumbs
@@ -460,7 +502,7 @@ const VersionsNavigator = ({
                   object:
                     objectNameArray.length > 0
                       ? objectNameArray[objectNameArray.length - 1]
-                      : actualInfo.name || "",
+                      : internalPaths,
                 })}
                 subTitle={
                   <Fragment>
@@ -519,9 +561,7 @@ const VersionsNavigator = ({
                       <TooltipWrapper tooltip={t("Delete Selected Versions")}>
                         <Button
                           id={"delete-multiple-versions"}
-                          onClick={() => {
-                            setDelSelectedVOpen(true);
-                          }}
+                          onClick={openDeleteSelectedVersions}
                           icon={<DeleteIcon />}
                           variant={"secondary"}
                           style={{ marginRight: 8 }}
@@ -533,7 +573,7 @@ const VersionsNavigator = ({
                       <Button
                         id={"delete-non-current"}
                         onClick={() => {
-                          setDeleteNonCurrentOpen(true);
+                          setDeleteNonCurrentLocation(location);
                         }}
                         icon={<DeleteNonCurrentIcon />}
                         variant={"secondary"}
@@ -574,7 +614,7 @@ const VersionsNavigator = ({
                 },
               }}
             >
-              {actualInfo.version_id && (
+              {listResult?.kind === "versions" && latest !== null && (
                 // @ts-ignore
                 <List
                   style={{

@@ -123,6 +123,13 @@ import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
 import TooltipWrapper from "../../../../Common/TooltipWrapper/TooltipWrapper";
 import ListObjectsTable from "./ListObjectsTable";
 import FilterObjectsSB from "../../../../ObjectBrowser/FilterObjectsSB";
+import {
+  identityKey,
+  RequestedObject,
+  routeObjectIdentity,
+} from "../objectIdentity";
+import { shareSubjectKey } from "../ObjectDetails/shareSubject";
+import { BucketObjectItem } from "./types";
 import AddAccessRule from "../../../BucketDetails/AddAccessRule";
 import { sanitizeFilePath } from "./utils";
 import { shouldRecommendMultipartUpload } from "./uploadAdvisory";
@@ -232,9 +239,25 @@ const ListObjects = () => {
   const isVersioningApplied = isVersionedMode(versioningConfig.status);
 
   const bucketName = params.bucketName || "";
-  const pathSegment = location.pathname.split(`/browser/${bucketName}/`);
-  const internalPaths =
-    pathSegment.length === 2 ? decodeURIComponent(pathSegment[1]) : "";
+  // The route is the source of truth for the object the panels show; the redux
+  // mirror (selectedInternalPaths) is written by an effect and lags behind it.
+  const routeIdentity = routeObjectIdentity(location.pathname, bucketName);
+  const internalPaths = routeIdentity.key;
+  const detailsIdentityMatches =
+    selectedInternalPaths !== null &&
+    selectedInternalPaths === routeIdentity.key;
+  const detailsIdentityKey = identityKey([bucketName, routeIdentity.key]);
+  // Dialogs opened from the object list capture the complete identity of the
+  // selected object when they open, bucket included, and are discarded when the
+  // route leaves that bucket.
+  const [shareCapture, setShareCapture] = useState<{
+    bucket: string;
+    subject: RequestedObject;
+  } | null>(null);
+  const [previewCapture, setPreviewCapture] = useState<{
+    bucket: string;
+    item: BucketObjectItem;
+  } | null>(null);
 
   const currentPath = internalPaths.split("/").filter((i: string) => i !== "");
 
@@ -391,6 +414,50 @@ const ListObjects = () => {
       }
     }
   }, [rewindEnabled, bucketToRewind, bucketName, dispatch]);
+
+  useEffect(() => {
+    if (!shareFileModalOpen || !selectedPreview) {
+      setShareCapture(null);
+      return;
+    }
+    setShareCapture(
+      (current) =>
+        current ?? {
+          bucket: bucketName,
+          subject: {
+            bucket: bucketName,
+            key: selectedPreview.name,
+            version: selectedPreview.version_id
+              ? { kind: "id", versionId: selectedPreview.version_id }
+              : { kind: "latest" },
+          },
+        },
+    );
+  }, [shareFileModalOpen, selectedPreview, bucketName]);
+
+  useEffect(() => {
+    if (!previewOpen || !selectedPreview) {
+      setPreviewCapture(null);
+      return;
+    }
+    setPreviewCapture(
+      (current) => current ?? { bucket: bucketName, item: selectedPreview },
+    );
+  }, [previewOpen, selectedPreview, bucketName]);
+
+  useEffect(() => {
+    if (shareCapture && shareCapture.bucket !== bucketName) {
+      dispatch(setShareFileModalOpen(false));
+      dispatch(setSelectedPreview(null));
+    }
+  }, [shareCapture, bucketName, dispatch]);
+
+  useEffect(() => {
+    if (previewCapture && previewCapture.bucket !== bucketName) {
+      dispatch(setPreviewOpen(false));
+      dispatch(setSelectedPreview(null));
+    }
+  }, [previewCapture, bucketName, dispatch]);
 
   useEffect(() => {
     if (folderUpload.current !== null) {
@@ -973,19 +1040,16 @@ const ListObjects = () => {
 
   return (
     <Fragment>
-      {shareFileModalOpen && selectedPreview && (
-        <ShareFile
-          open={shareFileModalOpen}
-          closeModalAndRefresh={closeShareModal}
-          bucketName={bucketName}
-          dataObject={{
-            name: selectedPreview.name,
-            size: selectedPreview.size ?? 0,
-            last_modified: "",
-            version_id: selectedPreview.version_id,
-          }}
-        />
-      )}
+      {shareFileModalOpen &&
+        shareCapture &&
+        shareCapture.bucket === bucketName && (
+          <ShareFile
+            key={shareSubjectKey(shareCapture.subject)}
+            open={shareFileModalOpen}
+            closeModalAndRefresh={closeShareModal}
+            subject={shareCapture.subject}
+          />
+        )}
       {deleteMultipleOpen && (
         <DeleteMultipleObjects
           deleteOpen={deleteMultipleOpen}
@@ -1002,20 +1066,27 @@ const ListObjects = () => {
           bucketName={bucketName}
         />
       )}
-      {previewOpen && selectedPreview && (
-        <PreviewFileModal
-          open={previewOpen}
-          bucketName={bucketName}
-          actualInfo={{
-            name: selectedPreview.name || "",
-            last_modified: "",
-            version_id: selectedPreview.version_id || "",
-            size: selectedPreview.size,
-            content_type: selectedPreview.content_type,
-          }}
-          onClosePreview={closePreviewWindow}
-        />
-      )}
+      {previewOpen &&
+        previewCapture &&
+        previewCapture.bucket === bucketName && (
+          <PreviewFileModal
+            key={identityKey([
+              previewCapture.bucket,
+              previewCapture.item.name,
+              previewCapture.item.version_id || "",
+            ])}
+            open={previewOpen}
+            bucketName={previewCapture.bucket}
+            actualInfo={{
+              name: previewCapture.item.name || "",
+              last_modified: "",
+              version_id: previewCapture.item.version_id || "",
+              size: previewCapture.item.size,
+              content_type: previewCapture.item.content_type,
+            }}
+            onClosePreview={closePreviewWindow}
+          />
+        )}
       {!!downloadRenameModal && (
         <RenameLongFileName
           open={!!downloadRenameModal}
@@ -1230,9 +1301,10 @@ const ListObjects = () => {
           >
             {versionsMode ? (
               <Fragment>
-                {selectedInternalPaths !== null && (
+                {detailsIdentityMatches && (
                   <VersionsNavigator
-                    internalPaths={selectedInternalPaths}
+                    key={detailsIdentityKey}
+                    internalPaths={routeIdentity.key}
                     bucketName={bucketName}
                   />
                 )}
@@ -1320,9 +1392,10 @@ const ListObjects = () => {
                       title={t("Selected Objects:")}
                     />
                   )}
-                  {selectedInternalPaths !== null && (
+                  {detailsIdentityMatches && (
                     <ObjectDetailPanel
-                      internalPaths={selectedInternalPaths}
+                      key={detailsIdentityKey}
+                      internalPaths={routeIdentity.key}
                       bucketName={bucketName}
                       onClosePanel={onClosePanel}
                       versioningInfo={versioningConfig}

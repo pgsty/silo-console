@@ -27,12 +27,14 @@ import { AppState, useAppDispatch } from "../../../../../../store";
 import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
 import DateSelector from "../../../../Common/FormComponents/DateSelector/DateSelector";
 import { useT } from "i18n";
+import { ObjectTarget } from "../objectIdentity";
 
 interface ISetRetentionProps {
   open: boolean;
   closeModalAndRefresh: (updateInfo: boolean) => void;
-  objectName: string;
-  bucketName: string;
+  // The validated object version the retention change addresses.
+  target: ObjectTarget;
+  // Display data (current retention) for that same version.
   objectInfo: BucketObject;
 }
 
@@ -43,10 +45,11 @@ interface IRefObject {
 const SetRetention = ({
   open,
   closeModalAndRefresh,
-  objectName,
+  target,
   objectInfo,
-  bucketName,
 }: ISetRetentionProps) => {
+  const bucketName = target.bucket;
+  const objectName = target.key.split("/").pop() || "";
   const dispatch = useAppDispatch();
   const t = useT();
   const retentionConfig = useSelector(
@@ -146,8 +149,8 @@ const SetRetention = ({
 
   const saveNewRetentionPolicy = () => {
     setIsSaving(true);
-    const selectedObject = objectInfo.name || "";
-    const versionId = objectInfo.version_id || null;
+    const selectedObject = target.key;
+    const versionId = target.versionId;
 
     const expireDate =
       !statusEnabled && type === "governance" ? "" : `${date}T23:59:59Z`;

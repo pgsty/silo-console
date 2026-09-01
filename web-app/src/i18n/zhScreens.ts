@@ -1417,6 +1417,12 @@ export const zhScreens: Record<string, string> = {
     "以下变更会被复制到所有其他站点",
   "The following URL lets you share this object without requiring a login.":
     "以下 URL 可以让他人无需登录即可访问此对象。",
+  "The current version of this object is a delete marker and cannot be shared.":
+    "此对象的当前版本是删除标记，无法分享。",
+  "The selected object version could not be found. Refresh the object list and try again.":
+    "找不到所选的对象版本。请刷新对象列表后重试。",
+  "This server does not expose object versions; only the current object can be shared.":
+    "此服务器不提供对象版本，只能分享当前对象。",
   "The instance needs to be restarted for configuration changes to take effect.":
     "需要重启实例，配置变更才能生效。",
   "The MinIO name is used here solely to identify the origin of the source code and to describe compatibility — {notice}.":

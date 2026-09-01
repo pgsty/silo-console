@@ -237,7 +237,8 @@ export const objectBrowserWSMiddleware = (
           request_id: currentRequestID,
         };
 
-        if (objectsWS && objectsWS.readyState === 1) {
+        // There is nothing to cancel before the first request was issued.
+        if (currentRequestID > 0 && objectsWS && objectsWS.readyState === 1) {
           objectsWS.send(JSON.stringify(request));
         }
         break;

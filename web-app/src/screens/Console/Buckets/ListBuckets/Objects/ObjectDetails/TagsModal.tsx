@@ -43,10 +43,13 @@ import {
 } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import { interpolate, useT } from "i18n";
+import { ObjectTarget } from "../objectIdentity";
 
 interface ITagModal {
   modalOpen: boolean;
-  bucketName: string;
+  // The validated object version every tag mutation addresses.
+  target: ObjectTarget;
+  // Display data (current tags) for that same version.
   actualInfo: BucketObject;
   onCloseAndUpdate: (refresh: boolean) => void;
 }
@@ -59,9 +62,10 @@ const DeleteTag = styled.b(({ theme }) => ({
 const AddTagModal = ({
   modalOpen,
   onCloseAndUpdate,
-  bucketName,
+  target,
   actualInfo,
 }: ITagModal) => {
+  const bucketName = target.bucket;
   const dispatch = useAppDispatch();
   const t = useT();
   const distributedSetup = useSelector(selDistSet);
@@ -75,8 +79,8 @@ const AddTagModal = ({
   const currentTags = actualInfo.tags;
   const currTagKeys = Object.keys(currentTags || {});
 
-  const allPathData = actualInfo.name?.split("/");
-  const currentItem = allPathData?.pop() || "";
+  const allPathData = target.key.split("/");
+  const currentItem = allPathData.pop() || "";
 
   const resetForm = () => {
     setNewLabel("");
@@ -90,12 +94,12 @@ const AddTagModal = ({
     newTag[newKey] = newLabel;
     const newTagList = { ...currentTags, ...newTag };
 
-    const verID = distributedSetup ? actualInfo.version_id || "" : "null";
+    const verID = distributedSetup ? target.versionId : "null";
 
     api.buckets
       .putObjectTags(
         bucketName,
-        { prefix: actualInfo.name || "", version_id: verID },
+        { prefix: target.key, version_id: verID },
         { tags: newTagList },
       )
       .then(() => {
@@ -112,12 +116,12 @@ const AddTagModal = ({
     const cleanObject: any = { ...currentTags };
     delete cleanObject[deleteKey];
 
-    const verID = distributedSetup ? actualInfo.version_id || "" : "null";
+    const verID = distributedSetup ? target.versionId : "null";
 
     api.buckets
       .putObjectTags(
         bucketName,
-        { prefix: actualInfo.name || "", version_id: verID },
+        { prefix: target.key, version_id: verID },
         { tags: cleanObject },
       )
       .then(() => {
