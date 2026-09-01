@@ -14,8 +14,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// The transfer manager holds the in-flight downloads (their request objects)
+// and the queued or running uploads (a control that can send or cancel them)
+// by transfer id, and forgets a transfer as soon as it settles.
+
+// UploadControl drives one upload independently of XMLHttpRequest events: a
+// queued request that was never sent emits no `abort` event, so cancelling
+// has to settle the upload explicitly, and a synchronous `send()` failure
+// has to settle it as an error.
+export interface UploadControl {
+  send: () => void;
+  cancel: () => void;
+}
+
 let objectCalls: { [key: string]: XMLHttpRequest } = {};
-let formDataElements: { [key: string]: FormData } = {};
+let uploadControls: { [key: string]: UploadControl } = {};
 
 export const storeCallForObjectWithID = (id: string, call: any) => {
   objectCalls[id] = call;
@@ -25,17 +38,42 @@ export const callForObjectID = (id: string): any => {
   return objectCalls[id];
 };
 
-export const storeFormDataWithID = (id: string, formData: FormData) => {
-  formDataElements[id] = formData;
+export const storeUploadControl = (id: string, control: UploadControl) => {
+  uploadControls[id] = control;
 };
 
-export const formDataFromID = (id: string): FormData => {
-  return formDataElements[id];
+// startQueuedUpload sends a queued upload. It reports false when the upload is
+// no longer known, which means it settled (for instance, it was cancelled)
+// before its turn came.
+export const startQueuedUpload = (id: string): boolean => {
+  const control = uploadControls[id];
+  if (!control) {
+    return false;
+  }
+  control.send();
+  return true;
+};
+
+// cancelTransfer cancels an upload or a download in whatever state it is in.
+// Uploads settle through their control; downloads abort their request, which
+// settles them through their own handlers.
+export const cancelTransfer = (id: string): boolean => {
+  const control = uploadControls[id];
+  if (control) {
+    control.cancel();
+    return true;
+  }
+  const call = objectCalls[id];
+  if (call) {
+    call.abort();
+    return true;
+  }
+  return false;
 };
 
 export const removeTrace = (id: string) => {
   delete objectCalls[id];
-  delete formDataElements[id];
+  delete uploadControls[id];
 };
 
 export const makeid = (length: number) => {

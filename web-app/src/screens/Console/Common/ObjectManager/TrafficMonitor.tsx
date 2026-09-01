@@ -19,7 +19,7 @@ import { AppState, useAppDispatch } from "../../../../store";
 import { useSelector } from "react-redux";
 import {
   callForObjectID,
-  formDataFromID,
+  startQueuedUpload,
 } from "../../ObjectBrowser/transferManager";
 import {
   newDownloadInit,
@@ -94,12 +94,9 @@ const TrafficMonitor = () => {
         const itemsToUpload = filterUploads.slice(0, remainingUploadSlots);
 
         itemsToUpload.forEach((item) => {
-          const uploadRequest = callForObjectID(item.ID);
-          const formDataID = formDataFromID(item.ID);
-
-          if (uploadRequest && formDataID) {
-            uploadRequest.send(formDataID);
-          }
+          // An upload that settled while queued (cancelled before it was
+          // sent) is no longer known to the transfer manager and stays idle.
+          startQueuedUpload(item.ID);
           dispatch(newUploadInit(item.ID));
         });
       }

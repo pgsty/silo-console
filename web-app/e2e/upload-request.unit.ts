@@ -8,6 +8,7 @@
 import { expect, test } from "@playwright/test";
 import {
   attachUploadRequestHandlers,
+  uploadControl,
   uploadErrorMessage,
 } from "../src/screens/Console/Buckets/ListBuckets/Objects/uploadRequest";
 
@@ -16,6 +17,10 @@ type Listener = (event: ProgressEvent) => void;
 class FakeUploadRequest {
   status = 0;
   response: unknown = "";
+  sent = false;
+  done = false;
+  throwOnSend = false;
+  body: FormData | null = null;
   onload: XMLHttpRequest["onload"] = null;
   onerror: XMLHttpRequest["onerror"] = null;
   onabort: XMLHttpRequest["onabort"] = null;
@@ -31,9 +36,19 @@ class FakeUploadRequest {
     handler?.call(this as unknown as XMLHttpRequest, {} as ProgressEvent);
   }
 
+  // XMLHttpRequest.send(): throws unless the request is OPENED and unsent.
+  send(body: FormData) {
+    if (this.sent || this.throwOnSend) {
+      throw new Error("InvalidStateError");
+    }
+    this.sent = true;
+    this.body = body;
+  }
+
   load(status: number, response: unknown = "") {
     this.status = status;
     this.response = response;
+    this.done = true;
     this.fire(this.onload);
   }
 
@@ -45,8 +60,13 @@ class FakeUploadRequest {
     this.listeners.error.forEach((listener) => listener({} as ProgressEvent));
   }
 
+  // XMLHttpRequest.abort(): the abort event fires only while a sent request
+  // is still in flight (WHATWG XHR, "abort()" and the request error steps).
   abort() {
-    this.fire(this.onabort);
+    if (this.sent && !this.done) {
+      this.done = true;
+      this.fire(this.onabort);
+    }
   }
 
   timeout() {
@@ -155,6 +175,7 @@ test.describe("upload request lifecycle", () => {
 
   test("aborts release the trace and never report a failure", () => {
     const { calls, request } = setup();
+    request.send(new FormData());
     request.abort();
     request.networkError();
     request.load(200);
@@ -216,5 +237,60 @@ test.describe("upload request lifecycle", () => {
     expect(uploadErrorMessage(400, "{}", options)).toBe("fallback");
     expect(uploadErrorMessage(400, "{", options)).toBe("malformed");
     expect(uploadErrorMessage(400, new Blob(), options)).toBe("fallback");
+  });
+});
+
+test.describe("upload control", () => {
+  const controlled = () => {
+    const base = setup();
+    const control = uploadControl(
+      base.request,
+      new FormData(),
+      base.lifecycle,
+      "setup failed",
+    );
+    return { ...base, control };
+  };
+
+  test("cancelling a queued upload settles it although no abort event fires", () => {
+    const { calls, control, request } = controlled();
+    control.cancel();
+    expect(request.sent).toBe(false);
+    expect(calls.order).toEqual(["cleanup", "abort"]);
+    expect(calls.cleanup).toBe(1);
+    expect(calls.failures).toEqual([]);
+    // Its turn in the queue must not send it after all.
+    control.send();
+    expect(request.sent).toBe(false);
+  });
+
+  test("cancelling an upload in flight settles it exactly once", () => {
+    const { calls, control, request } = controlled();
+    control.send();
+    expect(request.sent).toBe(true);
+    control.cancel();
+    expect(calls.order).toEqual(["cleanup", "abort"]);
+    expect(calls.abort).toBe(1);
+    expect(calls.cleanup).toBe(1);
+  });
+
+  test("a synchronous send failure settles as an error", () => {
+    const { calls, control, request } = controlled();
+    request.throwOnSend = true;
+    control.send();
+    expect(calls.failures).toEqual([
+      { message: "InvalidStateError", status: 0 },
+    ]);
+    expect(calls.cleanup).toBe(1);
+    control.cancel();
+    expect(calls.cleanup).toBe(1);
+  });
+
+  test("cancelling after completion changes nothing", () => {
+    const { calls, control, request } = controlled();
+    control.send();
+    request.load(200);
+    control.cancel();
+    expect(calls.order).toEqual(["cleanup", "complete"]);
   });
 });

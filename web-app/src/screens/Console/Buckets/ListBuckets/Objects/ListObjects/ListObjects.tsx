@@ -74,10 +74,9 @@ import {
 import {
   makeid,
   removeTrace,
-  storeCallForObjectWithID,
-  storeFormDataWithID,
+  storeUploadControl,
 } from "../../../../ObjectBrowser/transferManager";
-import { attachUploadRequestHandlers } from "../uploadRequest";
+import { attachUploadRequestHandlers, uploadControl } from "../uploadRequest";
 import {
   cancelObjectInList,
   completeObject,
@@ -716,7 +715,10 @@ const ListObjects = () => {
               }
               const formData = new FormData();
               formData.append(file.size.toString(), blobFile, fileName);
-              storeCallForObjectWithID(ID, xhr);
+              storeUploadControl(
+                ID,
+                uploadControl(xhr, formData, lifecycle, errorMessage),
+              );
               dispatch(
                 setNewObject({
                   ID,
@@ -732,7 +734,6 @@ const ListObjects = () => {
                   errorMessage: "",
                 }),
               );
-              storeFormDataWithID(ID, formData);
             } catch (error: any) {
               // A setup failure must not leave a trace or a pending promise.
               lifecycle.finalize(

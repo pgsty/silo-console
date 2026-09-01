@@ -12,6 +12,8 @@
 // reports the outcome exactly once. Handlers stay inert after that, so late
 // events cannot resurrect an entry or settle a promise twice.
 
+import { UploadControl } from "../../../ObjectBrowser/transferManager";
+
 interface UploadRequestLike {
   status: number;
   response: unknown;
@@ -44,6 +46,16 @@ interface AttachUploadRequestOptions {
 }
 
 type UploadOutcome = "abort" | "complete" | "error";
+
+interface UploadLifecycle {
+  finalize: (kind: UploadOutcome, message?: string, status?: number) => boolean;
+  isSettled: () => boolean;
+}
+
+interface SendableRequest {
+  send(body: FormData): void;
+  abort(): void;
+}
 
 export const uploadErrorMessage = (
   status: number,
@@ -80,7 +92,7 @@ export const uploadErrorMessage = (
 export const attachUploadRequestHandlers = (
   request: UploadRequestLike,
   options: AttachUploadRequestOptions,
-) => {
+): UploadLifecycle => {
   let settled = false;
 
   const finalize = (kind: UploadOutcome, message = "", status = 0): boolean => {
@@ -140,3 +152,33 @@ export const attachUploadRequestHandlers = (
     isSettled: () => settled,
   };
 };
+
+// uploadControl binds a queued upload to its lifecycle. `send` runs when the
+// traffic monitor grants a slot and settles a synchronous failure as an
+// error; `cancel` aborts the request and then settles the upload as aborted
+// itself, because a request that was never sent emits no `abort` event
+// (a request in flight emits one, and the second finalize is a no-op).
+export const uploadControl = (
+  request: SendableRequest,
+  body: FormData,
+  lifecycle: UploadLifecycle,
+  setupError: string,
+): UploadControl => ({
+  send: () => {
+    if (lifecycle.isSettled()) {
+      return;
+    }
+    try {
+      request.send(body);
+    } catch (error) {
+      lifecycle.finalize(
+        "error",
+        error instanceof Error && error.message ? error.message : setupError,
+      );
+    }
+  },
+  cancel: () => {
+    request.abort();
+    lifecycle.finalize("abort");
+  },
+});
