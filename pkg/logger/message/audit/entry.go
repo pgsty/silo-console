@@ -26,6 +26,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
+	"github.com/minio/console/pkg/logger/redact"
 	"github.com/minio/console/pkg/utils"
 
 	xhttp "github.com/minio/console/pkg/http"
@@ -84,15 +85,18 @@ func ToEntry(w http.ResponseWriter, r *http.Request, reqClaims map[string]interf
 	entry.UserAgent = r.UserAgent()
 	entry.ReqClaims = reqClaims
 
-	q := r.URL.Query()
+	// Redact before flattening so joined multi-value strings never carry a
+	// credential; the rules are shared with detailed debug logging.
+	q := redact.Values(r.URL.Query())
 	reqQuery := make(map[string]string, len(q))
 	for k, v := range q {
 		reqQuery[k] = strings.Join(v, ",")
 	}
 	entry.ReqQuery = reqQuery
 
-	reqHeader := make(map[string]string, len(r.Header))
-	for k, v := range r.Header {
+	redactedHeader := redact.Headers(r.Header)
+	reqHeader := make(map[string]string, len(redactedHeader))
+	for k, v := range redactedHeader {
 		reqHeader[k] = strings.Join(v, ",")
 	}
 	entry.ReqHeader = reqHeader
@@ -118,8 +122,9 @@ func ToEntry(w http.ResponseWriter, r *http.Request, reqClaims map[string]interf
 		entry.SessionID = sessionID
 	}
 
-	respHeader := make(map[string]string, len(wh))
-	for k, v := range wh {
+	redactedRespHeader := redact.Headers(wh)
+	respHeader := make(map[string]string, len(redactedRespHeader))
+	for k, v := range redactedRespHeader {
 		respHeader[k] = strings.Join(v, ",")
 	}
 	entry.RespHeader = respHeader

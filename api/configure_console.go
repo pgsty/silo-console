@@ -56,6 +56,7 @@ import (
 	"github.com/minio/console/api/operations"
 	"github.com/minio/console/models"
 	"github.com/minio/console/pkg/auth"
+	"github.com/minio/console/pkg/logger/redact"
 	"github.com/unrolled/secure"
 )
 
@@ -100,27 +101,7 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 	}
 
 	// Applies when the "x-token" header is set
-	api.KeyAuth = func(token string, _ []string) (*models.Principal, error) {
-		// we are validating the session token by decrypting the claims inside, if the operation succeed that means the jwt
-		// was generated and signed by us in the first place
-		if token == "Anonymous" {
-			return &models.Principal{}, nil
-		}
-		claims, err := auth.ParseClaimsFromToken(token)
-		if err != nil {
-			api.Logger("Unable to validate the session token %s: %v", token, err)
-			return nil, errors.New(401, "incorrect api key auth")
-		}
-		return &models.Principal{
-			STSAccessKeyID:     claims.STSAccessKeyID,
-			STSSecretAccessKey: claims.STSSecretAccessKey,
-			STSSessionToken:    claims.STSSessionToken,
-			AccountAccessKey:   claims.AccountAccessKey,
-			Hm:                 claims.HideMenu,
-			Ob:                 claims.ObjectBrowser,
-			CustomStyleOb:      claims.CustomStyleOB,
-		}, nil
-	}
+	api.KeyAuth = keyAuth(func(format string, args ...interface{}) { api.Logger(format, args...) })
 	api.AnonymousAuth = func(_ string) (*models.Principal, error) {
 		return &models.Principal{}, nil
 	}
@@ -191,6 +172,33 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 	api.ServerShutdown = func() {}
 
 	return setupGlobalMiddleware(api.Serve(setupMiddlewares))
+}
+
+// keyAuth validates the session bearer injected by AuthenticationMiddleware.
+// The bearer is decrypted session material carrying STS credentials, so a
+// validation failure is logged without the value.
+func keyAuth(logf func(string, ...interface{})) func(token string, _ []string) (*models.Principal, error) {
+	return func(token string, _ []string) (*models.Principal, error) {
+		// we are validating the session token by decrypting the claims inside, if the operation succeed that means the jwt
+		// was generated and signed by us in the first place
+		if token == "Anonymous" {
+			return &models.Principal{}, nil
+		}
+		claims, err := auth.ParseClaimsFromToken(token)
+		if err != nil {
+			logf("Unable to validate the session token: %v", err)
+			return nil, errors.New(401, "incorrect api key auth")
+		}
+		return &models.Principal{
+			STSAccessKeyID:     claims.STSAccessKeyID,
+			STSSecretAccessKey: claims.STSSecretAccessKey,
+			STSSessionToken:    claims.STSSessionToken,
+			AccountAccessKey:   claims.AccountAccessKey,
+			Hm:                 claims.HideMenu,
+			Ob:                 claims.ObjectBrowser,
+			CustomStyleOb:      claims.CustomStyleOB,
+		}, nil
+	}
 }
 
 // The TLS configuration before HTTPS server starts.
@@ -270,17 +278,35 @@ func debugLog(debugLogLevel int, r *http.Request, rw *logger.ResponseWriter) {
 	}
 }
 
+// debugLogSink receives every debug log line. Tests replace it to capture
+// output; production writes through logger.Info with the line as a literal
+// argument so URL escapes are never interpreted as format verbs.
+var debugLogSink = func(line string) {
+	logger.Info("%s", line)
+}
+
 func debugLogSummary(r *http.Request, rw *logger.ResponseWriter) {
+	debugLogSink(formatDebugLogSummary(r, rw))
+}
+
+func formatDebugLogSummary(r *http.Request, rw *logger.ResponseWriter) string {
 	statusCode := strconv.Itoa(rw.StatusCode)
 	if rw.Hijacked {
 		statusCode = "hijacked"
 	}
-	logger.Info(fmt.Sprintf("%s %s %s %s %dms", r.RemoteAddr, r.Method, r.URL, statusCode, time.Since(rw.StartTime).Milliseconds()))
+	return fmt.Sprintf("%s %s %s %s %dms", r.RemoteAddr, r.Method, redact.URL(r.URL), statusCode, time.Since(rw.StartTime).Milliseconds())
 }
 
 func debugLogDetails(r *http.Request, rw *logger.ResponseWriter) {
+	debugLogSink(formatDebugLogDetails(r, rw))
+}
+
+// formatDebugLogDetails renders the detailed request record. Credential-bearing
+// headers, query parameters and path segments are redacted through the same
+// rules audit logging applies; header names and non-sensitive values are kept.
+func formatDebugLogDetails(r *http.Request, rw *logger.ResponseWriter) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("- Method/URL:       %s %s\n", r.Method, r.URL))
+	sb.WriteString(fmt.Sprintf("- Method/URL:       %s %s\n", r.Method, redact.URL(r.URL)))
 	sb.WriteString(fmt.Sprintf("  Remote endpoint:  %s\n", r.RemoteAddr))
 	if rw.Hijacked {
 		sb.WriteString("  Status code:      <hijacked, probably a websocket>\n")
@@ -292,7 +318,7 @@ func debugLogDetails(r *http.Request, rw *logger.ResponseWriter) {
 	debugLogHeaders(&sb, r.Header)
 	sb.WriteString("  Response headers: ")
 	debugLogHeaders(&sb, rw.Header())
-	logger.Info(sb.String())
+	return sb.String()
 }
 
 func debugLogHeaders(sb *strings.Builder, h http.Header) {
@@ -310,7 +336,7 @@ func debugLogHeaders(sb *strings.Builder, h http.Header) {
 			} else {
 				first = false
 			}
-			sb.WriteString(fmt.Sprintf("%s: %s\n", key, value))
+			sb.WriteString(fmt.Sprintf("%s: %s\n", key, redact.HeaderValue(key, value)))
 		}
 	}
 	if first {
@@ -408,8 +434,9 @@ func AuthenticationMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		claims, _ := auth.ParseClaimsFromToken(string(sessionToken))
 		if claims != nil {
-			// save user session id context
-			ctx = context.WithValue(r.Context(), utils.ContextRequestUserID, claims.STSSessionToken)
+			// Save a fingerprint of the session, never the STS session token:
+			// this value reaches audit entries and error logs as sessionID.
+			ctx = context.WithValue(r.Context(), utils.ContextRequestUserID, auth.SessionFingerprint(claims.STSSessionToken))
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

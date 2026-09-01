@@ -9,7 +9,7 @@
 | `CONSOLE_PORT` | 9090 |
 | `CONSOLE_TLS_PORT` | 9443 |
 | `CONSOLE_SUBPATH` | i.e. /console |
-| `CONSOLE_DEBUG_LOGLEVEL` | 0 - 6 |
+| `CONSOLE_DEBUG_LOGLEVEL` | 0 - 6; credential-bearing headers, query parameters and path segments are redacted at every level, see [Debug.md](Debug.md) |
 | `CONSOLE_TRUSTED_PROXIES` | Standalone only: trusted proxy IP/CIDR list; blank falls back to `MINIO_API_TRUSTED_PROXIES` |
 | `CONSOLE_SHARE_MINIO_URL` | "off"
 | `CONSOLE_SECURE_ALLOWED_HOSTS` | "" |
