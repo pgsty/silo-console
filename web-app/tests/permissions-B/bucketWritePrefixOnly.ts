@@ -15,8 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as roles from "../utils/roles";
-import * as elements from "../utils/elements";
 import { Selector } from "testcafe";
+import {
+  expectEnabled,
+  objectListWrapper,
+  uploadControl,
+  waitForPage,
+} from "../utils/ready";
 
 fixture("For user with Bucket Write to specific prefix permissions").page(
   "http://localhost:9090",
@@ -26,11 +31,13 @@ test
   .before(async (t) => {})(
     "Upload File button is disable and Upload Folder button is enabled on bucket root path",
     async (t) => {
-      const uploadButton = elements.uploadButton;
       await t
         .useRole(roles.bucketWritePrefixOnly)
-        .navigateTo("http://localhost:9090/browser/testcafe")
-        .click(uploadButton)
+        .navigateTo("http://localhost:9090/browser/testcafe");
+      await waitForPage(objectListWrapper, "the object browser");
+      await expectEnabled(uploadControl, "the Upload button");
+      await t
+        .click(uploadControl)
         .expect(
           Selector("div")
             .withAttribute("label", "Upload File")
@@ -51,11 +58,13 @@ test
   .before(async (t) => {})(
     "Upload File and Folder buttons are enabled on bucket prefix path",
     async (t) => {
-      const uploadButton = elements.uploadButton;
       await t
         .useRole(roles.bucketWritePrefixOnly)
-        .navigateTo("http://localhost:9090/browser/testcafe/write")
-        .click(uploadButton)
+        .navigateTo("http://localhost:9090/browser/testcafe/write");
+      await waitForPage(objectListWrapper, "the object browser");
+      await expectEnabled(uploadControl, "the Upload button");
+      await t
+        .click(uploadControl)
         .expect(
           Selector("div")
             .withAttribute("label", "Upload File")

@@ -17,6 +17,11 @@ Security:
 - Restricted anonymous Object Manager access to handshakes that carry no session cookie at all; an empty, malformed or unreadable cookie is rejected instead of being downgraded to anonymous, and every other WebSocket endpoint rejects a missing cookie before upgrading
 - Replaced the subpath allow-all WebSocket origin policy with an explicit one: same authority, the `CONSOLE_BROWSER_REDIRECT_URL` authority, a single host asserted by a trusted proxy through `CONSOLE_SECURE_HOSTS_PROXY_HEADERS`, or `CONSOLE_SECURE_ALLOWED_HOSTS`. Subpath deployments whose proxy does not preserve the `Host` header must configure one of these; see docs/Environment.md
 
+Release and CI gates:
+
+- Made tagged releases fail closed: the release preflight now requires, for the exact tagged commit, a completed successful `jobs.yaml` run whose new `Required matrix` summary job succeeded and a `vulncheck.yaml` run whose `Required vulnerability checks` summary succeeded; the summary jobs list every job explicitly and fail on any skipped, cancelled or failed job, API errors block the release, and the accepted run ids and attempts are written to the job summary. A manually dispatched release cannot bypass the gate
+- Stabilized the Permissions A and B browser suites: navigation now waits in two observable stages (the routed page rendered, then the control exists and is enabled) with failure messages that name the stage, instead of clicking an enabled-only selector immediately after a full navigation; removed the permanently skipped React test job
+- Every TestCafe job now captures a screenshot of each failed test and uploads it as a per-job, per-attempt artifact; docs/Release.md documents the dispatch, tagging, rerun and audit procedure and the recommended branch protection
 Dependency and compatibility gates:
 
 - Generated the README's downstream replacement block from `go.mod` between `silo-replacements` markers and added `go run ./hack/replacements check` to `make verifiers`, which fails when the block, the three directives, or the supported-graph comment in `go.mod` disagree; the block now names the exact `pgsty/mc` and `silo-pkg` versions this commit builds with

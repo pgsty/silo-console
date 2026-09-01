@@ -24,6 +24,12 @@ import {
   usersElement,
 } from "../utils/elements-menu";
 import { IAM_PAGES } from "../../src/common/SecureComponent/permissions";
+import {
+  createPolicyControl,
+  expectEnabled,
+  policiesPageHeader,
+  waitForPage,
+} from "../utils/ready";
 
 const iamPolicyListItem = Selector(
   ".ReactVirtualized__Table__rowColumn",
@@ -33,6 +39,17 @@ const iamPolicyDelete = iamPolicyListItem
   .nextSibling()
   .child("button")
   .withAttribute("aria-label", "delete");
+
+const policiesURL = `http://localhost:9090${IAM_PAGES.POLICIES}`;
+
+// openPolicies navigates to the Policies page and waits, in two observable
+// stages, for the routed page to render and for the Create Policy control to
+// be usable. Only then is clicking it meaningful.
+const openPolicies = async (t: TestController) => {
+  await t.navigateTo(policiesURL);
+  await waitForPage(policiesPageHeader, "the Policies page");
+  await expectEnabled(createPolicyControl, "the Create Policy button");
+};
 
 fixture("For user with IAM Policies permissions")
   .page("http://localhost:9090")
@@ -51,41 +68,31 @@ test("IAM Policies sidebar item exists", async (t) => {
 });
 
 test("Create Policy button exists", async (t) => {
-  const createPolicyButtonExists = elements.createPolicyButton.exists;
-  await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .expect(createPolicyButtonExists)
-    .ok();
+  await openPolicies(t);
+  await t.expect(elements.createPolicyButton.exists).ok();
 });
 
 test("Create Policy button is clickable", async (t) => {
-  await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .click(elements.createPolicyButton);
+  await openPolicies(t);
+  await t.click(createPolicyControl);
 });
 
 test("Policy Name input exists in the Create Policy modal", async (t) => {
   const policyNameInputExists = elements.createPolicyName.exists;
-  await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .click(elements.createPolicyButton)
-    .expect(policyNameInputExists)
-    .ok();
+  await openPolicies(t);
+  await t.click(createPolicyControl).expect(policyNameInputExists).ok();
 });
 
 test("Policy textfield exists in the Create Policy modal", async (t) => {
   const policyTextfieldExists = elements.createPolicyTextfield.exists;
-  await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .click(elements.createPolicyButton)
-    .expect(policyTextfieldExists)
-    .ok();
+  await openPolicies(t);
+  await t.click(createPolicyControl).expect(policyTextfieldExists).ok();
 });
 
 test("Create Policy modal can be submitted after inputs are entered", async (t) => {
+  await openPolicies(t);
   await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .click(elements.createPolicyButton)
+    .click(createPolicyControl)
     .typeText(elements.createPolicyName, constants.TEST_IAM_POLICY_NAME)
     .typeText(elements.createPolicyTextfield, constants.TEST_IAM_POLICY, {
       paste: true,
@@ -94,8 +101,9 @@ test("Create Policy modal can be submitted after inputs are entered", async (t) 
     .click(elements.saveButton);
 }).after(async (t) => {
   // Clean up created policy
+  await t.navigateTo(policiesURL);
+  await waitForPage(policiesPageHeader, "the Policies page");
   await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
     .typeText(elements.searchResourceInput, constants.TEST_IAM_POLICY_NAME)
     .click(iamPolicyDelete)
     .click(elements.deleteButton);
@@ -103,9 +111,9 @@ test("Create Policy modal can be submitted after inputs are entered", async (t) 
 
 test("Created Policy can be viewed and deleted", async (t) => {
   const iamPolicyListItemExists = iamPolicyListItem.exists;
+  await openPolicies(t);
   await t
-    .navigateTo(`http://localhost:9090${IAM_PAGES.POLICIES}`)
-    .click(elements.createPolicyButton)
+    .click(createPolicyControl)
     .typeText(elements.createPolicyName, constants.TEST_IAM_POLICY_NAME)
     .typeText(elements.createPolicyTextfield, constants.TEST_IAM_POLICY, {
       paste: true,

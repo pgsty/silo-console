@@ -9,6 +9,7 @@ More documentation to read
 - [Debug Logging](Debug.md)
 - [Environment Variables](Environment.md)
 - [Embedding Console in SILO](Embedding.md)
+- [Release procedure](Release.md)
 - **Development**
     - [DEVELOPMENT](../DEVELOPMENT.md)
     - [Frontend Web App](../web-app/README.md)

@@ -11,12 +11,50 @@ permissions:
 jobs:
     preflight:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
         steps:
             - name: Checkout
               uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
               with:
                   fetch-depth: 0
                   ref: ${{ github.sha }}
+
+            - name: Require the complete validation matrix for this exact commit
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  # A tag may only be released when the exact SHA has a completed,
+                  # successful run of the full matrix and of the vulnerability checks,
+                  # proven by their summary jobs (which fail on any skipped or failed
+                  # job). Every step here fails closed: an API error, an empty
+                  # response or an unparsable page blocks the release.
+                  gate() {
+                    local workflow="$1" summary_job="$2"
+                    local runs run run_id attempt url jobs
+                    runs=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/runs?head_sha=${GITHUB_SHA}&per_page=100") \
+                      || { echo "::error::cannot list ${workflow} runs for ${GITHUB_SHA}"; exit 1; }
+                    run=$(jq -c '[.[].workflow_runs[] | select(.status == "completed" and .conclusion == "success")] | sort_by(.updated_at) | last // empty' <<<"$runs")
+                    if [ -z "$run" ]; then
+                      echo "::error::no completed successful ${workflow} run exists for ${GITHUB_SHA}; dispatch it on a branch or tag at this commit (see docs/Release.md)"
+                      exit 1
+                    fi
+                    run_id=$(jq -r '.id' <<<"$run")
+                    attempt=$(jq -r '.run_attempt' <<<"$run")
+                    url=$(jq -r '.html_url' <<<"$run")
+                    jobs=$(gh api --paginate --slurp "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/jobs?per_page=100") \
+                      || { echo "::error::cannot list the jobs of run ${run_id}"; exit 1; }
+                    if ! jq -e --arg job "$summary_job" '[.[].jobs[] | select(.name == $job and .conclusion == "success")] | length == 1' <<<"$jobs" >/dev/null; then
+                      echo "::error::required summary job '${summary_job}' is not successful in ${url}"
+                      exit 1
+                    fi
+                    echo "accepted ${workflow} run ${run_id} (attempt ${attempt}) for ${GITHUB_SHA}: ${url}" | tee -a "$GITHUB_STEP_SUMMARY"
+                  }
+                  gate jobs.yaml "Required matrix"
+                  gate vulncheck.yaml "Required vulnerability checks"
 
             - name: Verify tagged release ref
               shell: bash

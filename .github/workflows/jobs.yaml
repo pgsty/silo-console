@@ -437,7 +437,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up docker
         if: always()
@@ -500,7 +508,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -561,7 +577,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -622,7 +646,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -684,7 +716,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-5:
     name: Permissions Tests Part 5
@@ -741,7 +781,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-6:
     name: Permissions Tests Part 6
@@ -798,7 +846,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-7:
     name: Permissions Tests Part 7
@@ -855,7 +911,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-8:
     name: Permissions Tests Part 8
@@ -912,7 +976,15 @@ jobs:
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
   all-permissions-A:
     name: Permissions Tests Part A
@@ -968,7 +1040,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -1028,7 +1108,15 @@ jobs:
         run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
 
       - name: Run TestCafe Tests
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1
+        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
+        run: npx testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+      - name: Upload TestCafe screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
+          path: testcafe-screenshots
+          if-no-files-found: warn
 
       - name: Clean up users & policies
         run: |
@@ -1157,25 +1245,6 @@ jobs:
             ./integration/coverage/
           key: ${{ runner.os }}-coverage-2-${{ github.run_id }}
 
-  react-tests:
-    name: React Tests
-    # there are no react tests for vitest or yest
-    if: false
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Install modules
-        working-directory: ./web-app
-        run: yarn install --immutable
-      - name: Run tests
-        working-directory: ./web-app
-        run: yarn test
   replication:
     name: Site Replication Test
     needs:
@@ -1622,3 +1691,58 @@ jobs:
         run: |
           yarn exec playwright test --reporter=github
           yarn exec nyc report
+
+  required-matrix:
+    # The release gate (release.yaml) and branch protection look at this one
+    # job. It lists every job of the matrix explicitly and fails unless each
+    # of them succeeded: a skipped, cancelled or failed job is a failure, and
+    # a job removed from this list is a reviewed contract change.
+    name: Required matrix
+    if: always()
+    needs:
+      - lint-job
+      - upstream-pkg-compat
+      - downstream-embedder-compat
+      - semgrep-static-code-analysis
+      - ui-assets
+      - swagger-codegen
+      - latest-minio
+      - compile-binary
+      - test-nginx-subpath
+      - all-permissions-1
+      - all-permissions-2
+      - all-permissions-3
+      - all-permissions-4
+      - all-permissions-5
+      - all-permissions-6
+      - all-permissions-7
+      - all-permissions-8
+      - all-permissions-A
+      - all-permissions-B
+      - test-pkg-on-go
+      - test-api-on-go
+      - b-integration-tests
+      - replication
+      - sso-integration
+      - coverage
+      - ui-assets-istanbul-coverage
+      - compile-binary-istanbul-coverage
+      - cross-compile-1
+      - cross-compile-2
+      - cross-compile-3
+      - cross-compile-4
+      - cross-compile-5
+      - playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to succeed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS" | tee -a "$GITHUB_STEP_SUMMARY"
+          bad=$(jq -r 'to_entries[] | select(.value.result != "success") | .key' <<<"$NEEDS")
+          if [ -n "$bad" ]; then
+            echo "::error::required jobs did not succeed: $(echo "$bad" | tr '\n' ' ')"
+            exit 1
+          fi

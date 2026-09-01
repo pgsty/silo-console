@@ -61,3 +61,23 @@ jobs:
         working-directory: ./web-app
         continue-on-error: false
         run: yarn npm audit --recursive --severity high --no-deprecations
+
+  required-vulnerability-checks:
+    name: Required vulnerability checks
+    if: always()
+    needs:
+      - vulncheck
+      - react-code-known-vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to succeed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS" | tee -a "$GITHUB_STEP_SUMMARY"
+          bad=$(jq -r 'to_entries[] | select(.value.result != "success") | .key' <<<"$NEEDS")
+          if [ -n "$bad" ]; then
+            echo "::error::required jobs did not succeed: $(echo "$bad" | tr '\n' ' ')"
+            exit 1
+          fi
