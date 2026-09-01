@@ -17,11 +17,11 @@
 import * as roles from "../utils/roles";
 import * as elements from "../utils/elements";
 import * as functions from "../utils/functions";
+import * as constants from "../utils/constants";
 import {
   namedTestBucketBrowseButtonFor,
   setUpNamedBucket,
   setVersionedBucket,
-  testBucketBrowseButtonFor,
 } from "../utils/functions";
 import { Selector } from "testcafe";
 import { deniedError, file } from "../permissions-6/resourceTesting";
@@ -29,6 +29,7 @@ import { deniedError, file } from "../permissions-6/resourceTesting";
 fixture("Rewind Testing").page("http://localhost:9090");
 
 const bucketname = "bucketname";
+const rewindBucketName = `${constants.TEST_BUCKET_NAME}-abucketrewind`;
 const test3BucketBrowseButton = namedTestBucketBrowseButtonFor(bucketname);
 
 test
@@ -38,21 +39,18 @@ test
     await functions.setVersioned(t, "abucketrewind");
     await t
       .useRole(roles.bucketReadWrite)
-      .navigateTo("http://localhost:9090/browser")
-      .click(testBucketBrowseButtonFor("abucketrewind"))
+      .navigateTo(`http://localhost:9090/browser/${rewindBucketName}`)
       // Upload object to bucket
       .setFilesToUpload(elements.uploadInput, "../uploads/test.txt")
       .wait(1000)
-      .navigateTo("http://localhost:9090/browser")
-      .click(testBucketBrowseButtonFor("abucketrewind"))
+      .navigateTo(`http://localhost:9090/browser/${rewindBucketName}`)
       // Upload object to bucket
       .setFilesToUpload(elements.uploadInput, "../uploads/test.txt")
       .wait(1000);
   })("Rewind works in bucket", async (t) => {
     await t
       .useRole(roles.bucketReadWrite)
-      .navigateTo("http://localhost:9090/browser")
-      .click(testBucketBrowseButtonFor("abucketrewind"))
+      .navigateTo(`http://localhost:9090/browser/${rewindBucketName}`)
       .expect(elements.table.exists)
       .ok()
       .click(elements.rewindButton)
