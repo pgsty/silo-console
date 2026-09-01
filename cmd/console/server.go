@@ -113,6 +113,10 @@ func buildServer() (*api.Server, error) {
 
 	server.ConfigureFlags()
 
+	if err := api.ConfigureSourceIPTrust(); err != nil {
+		return nil, err
+	}
+
 	// register all APIs
 	server.ConfigureAPI()
 

@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 )
 
 type ConsoleTransport struct {
@@ -26,11 +27,23 @@ type ConsoleTransport struct {
 }
 
 func (t *ConsoleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t.ClientIP != "" {
-		// Do not set an empty x-forwarded-for
-		req.Header.Add(xForwardedFor, t.ClientIP)
+	forwardedReq := req.Clone(req.Context())
+	forwardedReq.Header = req.Header.Clone()
+	for header := range forwardedReq.Header {
+		if strings.EqualFold(header, xForwardedFor) ||
+			strings.EqualFold(header, xRealIP) ||
+			strings.EqualFold(header, forwarded) {
+			delete(forwardedReq.Header, header)
+		}
 	}
-	return t.Transport.RoundTrip(req)
+
+	if clientIP := canonicalSourceIP(t.ClientIP); clientIP != "" {
+		if forwardedReq.Header == nil {
+			forwardedReq.Header = make(http.Header)
+		}
+		forwardedReq.Header.Set(xForwardedFor, clientIP)
+	}
+	return t.Transport.RoundTrip(forwardedReq)
 }
 
 // PrepareSTSClientTransport :

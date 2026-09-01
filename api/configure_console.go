@@ -84,6 +84,10 @@ func configureFlags(api *operations.ConsoleAPI) {
 }
 
 func configureAPI(api *operations.ConsoleAPI) http.Handler {
+	if err := ensureSourceIPTrustConfigured(); err != nil {
+		LogError("invalid trusted proxy configuration: %v", err)
+	}
+
 	// Applies when the "x-token" header is set
 	api.KeyAuth = func(token string, _ []string) (*models.Principal, error) {
 		// we are validating the session token by decrypting the claims inside, if the operation succeed that means the jwt

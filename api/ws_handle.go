@@ -177,15 +177,7 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	clientIP := getSourceIPFromHeaders(req)
-	if clientIP == "" {
-		if ip, _, err := net.SplitHostPort(conn.RemoteAddr().String()); err == nil {
-			clientIP = ip
-		} else {
-			// In case there's an error, return an empty string
-			LogError("Invalid ws.RemoteAddr() = %v\n", err)
-		}
-	}
+	clientIP := getWebSocketClientIP(req)
 
 	switch {
 	case strings.HasPrefix(wsPath, `/trace`):
@@ -310,6 +302,10 @@ func serveWS(w http.ResponseWriter, req *http.Request) {
 		// path not found
 		closeWsConn(conn)
 	}
+}
+
+func getWebSocketClientIP(req *http.Request) string {
+	return getClientIP(req)
 }
 
 // newWebSocketAdminClient returns a wsAdminClient authenticated as an admin user

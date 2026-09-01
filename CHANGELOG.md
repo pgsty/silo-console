@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+Security:
+
+- Stopped trusting client-controlled `X-Forwarded-For`, `X-Real-IP`, and RFC 7239 `Forwarded` values from arbitrary peers. Standalone Console now accepts an explicit `CONSOLE_TRUSTED_PROXIES` IP/CIDR allow-list, embedded Console follows `MINIO_API_TRUSTED_PROXIES`, and the default is intentionally trust-none
+- Walked repeated proxy chains from right to left with bounded work, canonicalized literal IPv4/IPv6 addresses, and failed closed on malformed, catch-all, separators-only, or unreadable remote configuration
+- Sanitized Console-to-SILO requests by cloning them, removing every inbound source-address header, and emitting exactly one canonical `X-Forwarded-For` value derived from Console's trust decision
+
 Dependency and compatibility gates:
 
 - Corrected the upstream `minio/pkg` floor job to drop all three SILO replacements rather than the shared package alone. Replacements are not inherited, so an embedder that adds none of them resolves every dependency upstream, and that is the graph the floor describes. Removing only the shared package left `pgsty/mc`, which compiles against silo-pkg's strict policy API; the job then failed on a partial override Console does not support instead of testing the floor
