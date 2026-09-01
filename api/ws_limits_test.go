@@ -275,15 +275,19 @@ func TestServeWSConnectionCaps(t *testing.T) {
 		limiter := swapWSConnectionLimits(t, wsConnectionLimits{total: 10, perClient: 5, anonymous: 2, anonymousPerClient: 2})
 		clientA := http.Header{"X-Forwarded-For": {"203.0.113.1"}}
 		clientB := http.Header{"X-Forwarded-For": {"203.0.113.2"}}
+		signedInA := http.Header{"X-Forwarded-For": {"203.0.113.1"}, "Cookie": authenticated["Cookie"]}
 		signedInB := http.Header{"X-Forwarded-For": {"203.0.113.2"}, "Cookie": authenticated["Cookie"]}
 
 		dialWS(t, objectManager, clientA)
 		dialWS(t, objectManager, clientA)
 		dialExpectingRejection(t, objectManager, clientB, http.StatusServiceUnavailable) // budget, not B's cap
-		dialExpectingRejection(t, objectManager, clientA, http.StatusTooManyRequests)    // A's own cap
+		dialExpectingRejection(t, objectManager, clientA, http.StatusTooManyRequests)    // A's own anonymous cap
+		// The same client that exhausted its anonymous cap still signs in: the
+		// per-client cap keeps slots the anonymous cap cannot take.
+		dialWS(t, objectManager, signedInA)
 		dialWS(t, objectManager, signedInB)
-		if total, anonymous, clients := limiter.counts(); total != 3 || anonymous != 2 || clients != 2 {
-			t.Fatalf("counts = %d/%d/%d, want 3/2/2", total, anonymous, clients)
+		if total, anonymous, clients := limiter.counts(); total != 4 || anonymous != 2 || clients != 2 {
+			t.Fatalf("counts = %d/%d/%d, want 4/2/2", total, anonymous, clients)
 		}
 	})
 
