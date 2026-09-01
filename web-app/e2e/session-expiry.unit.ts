@@ -10,15 +10,18 @@ import {
   appRoute,
   forgetRememberedRoute,
   handleExpiredSession,
+  isExpiredSessionResponse,
   isInvalidSessionResponse,
   isLoginEndpoint,
   isReturnableRoute,
   rememberRoute,
   RouteStorage,
   sessionExpiryTarget,
+  settleWithSessionCheck,
   shouldRedirectExpiredSession,
   takeRememberedRoute,
 } from "../src/api/sessionExpiry";
+import { HttpClient, HttpResponse } from "../src/api/consoleApi";
 
 class MemoryStorage implements RouteStorage {
   items = new Map<string, string>();
@@ -153,5 +156,124 @@ test.describe("handleExpiredSession", () => {
 
     const callback = run("/oauth_callback", "/");
     expect(callback.storage.getItem("redirect-path")).toBeNull();
+  });
+});
+
+// A generated client whose transport answers every call with one canned
+// response, served from the given URL.
+const clientAnswering = (status: number, body: unknown, url: string) =>
+  new HttpClient({
+    baseUrl: "http://console/api/v1",
+    customFetch: async () => {
+      const response = new Response(JSON.stringify(body), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    },
+  });
+
+const settle = async (
+  client: HttpClient,
+): Promise<{
+  expired: number;
+  outcome: "fulfilled" | "rejected";
+  response: HttpResponse<unknown, unknown>;
+}> => {
+  let expired = 0;
+  try {
+    const response = await settleWithSessionCheck(
+      client.request({ path: "/buckets", method: "GET", format: "json" }),
+      () => expired++,
+    );
+    return { expired, outcome: "fulfilled", response };
+  } catch (reason) {
+    return {
+      expired,
+      outcome: "rejected",
+      response: reason as HttpResponse<unknown, unknown>,
+    };
+  }
+};
+
+test.describe("generated client session check", () => {
+  const buckets = "http://console/api/v1/buckets";
+
+  test("a rejected 401 invalid session expires and still rejects for the caller", async () => {
+    const result = await settle(
+      clientAnswering(401, { message: "invalid session" }, buckets),
+    );
+    expect(result.outcome).toBe("rejected");
+    expect(result.expired).toBe(1);
+    expect(result.response.status).toBe(401);
+    expect((result.response.error as { message: string }).message).toBe(
+      "invalid session",
+    );
+  });
+
+  test("a rejected 403 invalid session expires too", async () => {
+    const result = await settle(
+      clientAnswering(403, { message: "invalid session" }, buckets),
+    );
+    expect(result.outcome).toBe("rejected");
+    expect(result.expired).toBe(1);
+  });
+
+  test("a wrong current password is a 401 that keeps the session", async () => {
+    const result = await settle(
+      clientAnswering(
+        401,
+        { message: "invalid Login" },
+        "http://console/api/v1/account/change-password",
+      ),
+    );
+    expect(result.outcome).toBe("rejected");
+    expect(result.expired).toBe(0);
+  });
+
+  test("login calls never expire the session", async () => {
+    const result = await settle(
+      clientAnswering(
+        401,
+        { message: "invalid session" },
+        "http://console/api/v1/login/oauth2/auth",
+      ),
+    );
+    expect(result.outcome).toBe("rejected");
+    expect(result.expired).toBe(0);
+  });
+
+  test("other errors and successes pass through untouched", async () => {
+    const denied = await settle(
+      clientAnswering(403, { message: "Access Denied." }, buckets),
+    );
+    expect(denied.outcome).toBe("rejected");
+    expect(denied.expired).toBe(0);
+
+    const ok = await settle(clientAnswering(200, { status: "ok" }, buckets));
+    expect(ok.outcome).toBe("fulfilled");
+    expect(ok.expired).toBe(0);
+    expect((ok.response.data as { status: string }).status).toBe("ok");
+  });
+
+  test("non-response rejections are rethrown without a session check", async () => {
+    let expired = 0;
+    await expect(
+      settleWithSessionCheck(
+        Promise.reject(new Error("network down")),
+        () => expired++,
+      ),
+    ).rejects.toThrow("network down");
+    expect(expired).toBe(0);
+    expect(
+      isExpiredSessionResponse({
+        status: 401,
+        error: { message: "invalid session" },
+      }),
+    ).toBe(true);
+    expect(
+      isExpiredSessionResponse({ status: 401, error: "invalid session" }),
+    ).toBe(false);
   });
 });

@@ -123,3 +123,54 @@ export const handleExpiredSession = (
   context.navigate(sessionExpiryTarget(context.basePath));
   return true;
 };
+
+export interface SessionResponseLike {
+  status: number;
+  url?: string;
+  error?: unknown;
+}
+
+const responseMessage = (error: unknown): string | undefined =>
+  typeof error === "object" &&
+  error !== null &&
+  typeof (error as { message?: unknown }).message === "string"
+    ? (error as { message: string }).message
+    : undefined;
+
+const isResponseLike = (value: unknown): value is SessionResponseLike =>
+  typeof value === "object" &&
+  value !== null &&
+  typeof (value as { status?: unknown }).status === "number";
+
+// isExpiredSessionResponse applies the invalid-session rule to one API
+// response: the status and message must match and the call must not be a
+// login call.
+export const isExpiredSessionResponse = (
+  response: SessionResponseLike,
+): boolean =>
+  !isLoginEndpoint(response.url || "") &&
+  isInvalidSessionResponse(response.status, responseMessage(response.error));
+
+// settleWithSessionCheck runs the invalid-session rule on the outcome of a
+// generated-client request, fulfilled or rejected. The generated transport
+// rejects every non-2xx response, so an expiry only ever arrives as a
+// rejection; a check on fulfilled responses alone never runs. The original
+// outcome is preserved for the caller either way.
+export const settleWithSessionCheck = <T extends SessionResponseLike>(
+  request: Promise<T>,
+  onExpired: () => void,
+): Promise<T> =>
+  request.then(
+    (response) => {
+      if (isExpiredSessionResponse(response)) {
+        onExpired();
+      }
+      return response;
+    },
+    (reason: unknown) => {
+      if (isResponseLike(reason) && isExpiredSessionResponse(reason)) {
+        onExpired();
+      }
+      throw reason;
+    },
+  );
