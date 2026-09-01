@@ -21,15 +21,24 @@ import (
 	"crypto/x509"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/minio/console/pkg/auth/idp/oauth2"
-	xcerts "github.com/pgsty/silo-pkg/v3/certs"
 	"github.com/pgsty/silo-pkg/v3/env"
 	xnet "github.com/pgsty/silo-pkg/v3/net"
 )
+
+// TLSCertsManager is the certificate-manager boundary shared with embedding
+// servers. Keeping it structural lets upstream MinIO and SILO provide their
+// respective pkg/certs manager while Console owns the silo-pkg module path.
+type TLSCertsManager interface {
+	AddCertificate(certFile, keyFile string) error
+	GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error)
+	ReloadOnSignal(...os.Signal)
+}
 
 var (
 	// Port console default port
@@ -56,7 +65,7 @@ var (
 	// GlobalPublicCerts has certificates Console will use to serve clients
 	GlobalPublicCerts []*x509.Certificate
 	// GlobalTLSCertsManager custom TLS Manager for SNI support
-	GlobalTLSCertsManager *xcerts.Manager
+	GlobalTLSCertsManager TLSCertsManager
 	// GlobalTransport is the verified transport shared by every outbound HTTP
 	// call Console makes: SILO/STS, identity providers, Prometheus, release
 	// checks, audit webhooks. It authenticates its peers with the system roots
