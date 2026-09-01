@@ -27,6 +27,10 @@ fail() { echo "verify-release-artifacts: FAIL: $*" >&2; exit 1; }
 sha() { sha256sum "$1" | cut -d' ' -f1; }
 have() { command -v "$1" >/dev/null 2>&1 || fail "$1 is required"; }
 for tool in jq tar unzip dpkg-deb rpm rpm2cpio cpio sha256sum docker go; do have "$tool"; done
+cpio_extract_args=(-idm --quiet)
+if cpio --help 2>&1 | grep -q -- '--no-absolute-filenames'; then
+  cpio_extract_args+=(--no-absolute-filenames)
+fi
 
 repository_url="https://github.com/pgsty/silo-console"
 staging_image="ghcr.io/pgsty/silo-console-staging"
@@ -202,7 +206,9 @@ for name in "${packages[@]}"; do
       dep5_ok "$dir/usr/share/doc/silo-console/copyright"
       ;;
     *.rpm)
-      (cd "$dir" && rpm2cpio "$root/$path" 2>/dev/null | cpio -idm --quiet) || (cd "$dir" && rpm2cpio "$path" | cpio -idm --quiet)
+      # RPM payloads use absolute paths. GNU cpio otherwise tries to write to
+      # the runner's real /etc and /usr instead of the isolated package root.
+      (cd "$dir" && rpm2cpio "$root/$path" | cpio "${cpio_extract_args[@]}")
       check_tree "$dir" "$name"
       test "$(rpm -qp --qf '%{LICENSE}' "$path" 2>/dev/null)" = "AGPL-3.0-or-later" || fail "$name: RPM License tag is '$(rpm -qp --qf '%{LICENSE}' "$path")'"
       ;;
