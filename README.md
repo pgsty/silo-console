@@ -145,21 +145,35 @@ package through this repository's `replace` directives. Go ignores replacement
 directives declared by dependency modules, so a SILO server embedding Console
 source should retain the matching top-level selections:
 
+<!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260826171527-70a2950478e1
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260829103737-5ed037ef4ec1
 	github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 v7.3.1
-	github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.2
+	github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.3-0.20260829103855-748c94bf8ab7
 )
 ```
+<!-- silo-replacements:end -->
 
-Adopt these selections as one set. The CLI and the shared package are coupled:
-`pgsty/mc` compiles against the SILO package's strict policy API, so a build that
-keeps the CLI replacement must keep the shared-package replacement too, and a
-build that takes neither resolves upstream `github.com/minio/mc` and upstream
-`github.com/minio/pkg/v3` together. Go will resolve a partial override that pairs
-one project's CLI with the other's shared package, but Console does not support
-it and does not test it.
+The block above is generated from `go.mod` (`go run ./hack/replacements update`)
+and verified on every build (`go run ./hack/replacements check`), so it always
+names the exact versions this Console commit builds with. The three selections
+are adopted as one set; any partial set is unsupported:
+
+| Module graph | Status |
+| :-- | :-- |
+| All three SILO replacements (the block above) | Supported; the CI job `downstream-embedder-compat` builds a minimal embedder from the README block on every change |
+| None of them: upstream `minio/pkg/v3` v3.6.1, upstream `minio/mc`, upstream `minio-go` v7.3.0 | Build-compatible floor, tested by `upstream-pkg-compat`; SILO-specific IAM semantics are not present |
+| Any partial set (for example `pgsty/mc` with upstream `minio/pkg/v3`, or `silo-pkg` with upstream `mc`) | Unsupported and untested: `pgsty/mc` compiles only against the SILO package's strict policy API |
+
+`silo-pkg` v3.13.0 and later live at the module path `github.com/pgsty/silo-pkg/v3`
+and import themselves under that path. Go accepts such a module as a
+replacement target, but pairing it with `github.com/minio/pkg/v3` imports yields
+`used for two different module paths`, so it is not a compatible drop-in for this
+Console line; embedders stay on the v3.12.x compatibility-path versions listed
+above until Console and the SILO server migrate to the new path together (drop
+the replacement, require `github.com/pgsty/silo-pkg/v3`, rewrite imports).
+See [docs/Embedding.md](docs/Embedding.md).
 
 The logical requirements remain on resolvable upstream versions because those
 requirements are part of Console's public module graph, while the replacements

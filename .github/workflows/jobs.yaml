@@ -85,6 +85,60 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
           CGO_ENABLED=0 GOOS=netbsd GOARCH=amd64 go build ./...
 
+  downstream-embedder-compat:
+    name: Build a minimal embedder from the README replacement block
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.27.x
+      - name: Verify the README block against go.mod
+        run: go run ./hack/replacements check
+      - name: Build an embedder that copies the README block verbatim
+        run: |
+          set -euo pipefail
+          # A SILO server embedding Console must copy the three SILO replacements
+          # from the README; replacements are not inherited. Feed exactly the
+          # published README text into a scratch module and prove the graph
+          # resolves, compiles, and selects the three forks at the documented
+          # versions.
+          embedder=$(mktemp -d)
+          go run ./hack/replacements readme-block > "$embedder/readme-block.txt"
+          cat > "$embedder/main.go" <<'EOF'
+          package main
+
+          import (
+          	"fmt"
+
+          	consoleapi "github.com/minio/console/api"
+          	consoleoauth2 "github.com/minio/console/pkg/auth/idp/oauth2"
+          )
+
+          func main() {
+          	consoleapi.GlobalMinIOConfig = consoleapi.MinIOConfig{OpenIDProviders: consoleoauth2.OpenIDPCfg{}}
+          	fmt.Println(consoleapi.Port)
+          }
+          EOF
+          cd "$embedder"
+          go mod init example.com/embedder
+          go mod edit -replace "github.com/minio/console=$GITHUB_WORKSPACE"
+          sed -n 's/^\t\([^ ]*\) => \([^ ]*\) \([^ ]*\)$/\1 \2 \3/p' readme-block.txt > tuples.txt
+          test "$(wc -l < tuples.txt)" -eq 3
+          while read -r old new version; do
+            go mod edit -replace "$old=$new@$version"
+          done < tuples.txt
+          go mod tidy
+          go build ./...
+          go vet ./...
+          while read -r old new version; do
+            got=$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "$old")
+            test "$got" = "$new $version" || { echo "$old resolved to '$got', README says '$new $version'" >&2; exit 1; }
+          done < tuples.txt
+          echo "embedder graph matches the README block"
+
   semgrep-static-code-analysis:
     name: "semgrep checks"
     runs-on: ubuntu-latest
@@ -289,6 +343,7 @@ jobs:
     needs:
       - lint-job
       - upstream-pkg-compat
+      - downstream-embedder-compat
       - ui-assets
       - semgrep-static-code-analysis
       - swagger-codegen

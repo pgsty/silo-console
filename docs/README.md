@@ -8,6 +8,7 @@ More documentation to read
 - [TLS](TLS.md)
 - [Debug Logging](Debug.md)
 - [Environment Variables](Environment.md)
+- [Embedding Console in SILO](Embedding.md)
 - **Development**
     - [DEVELOPMENT](../DEVELOPMENT.md)
     - [Frontend Web App](../web-app/README.md)

@@ -19,6 +19,8 @@ Security:
 
 Dependency and compatibility gates:
 
+- Generated the README's downstream replacement block from `go.mod` between `silo-replacements` markers and added `go run ./hack/replacements check` to `make verifiers`, which fails when the block, the three directives, or the supported-graph comment in `go.mod` disagree; the block now names the exact `pgsty/mc` and `silo-pkg` versions this commit builds with
+- Added the `downstream-embedder-compat` CI job, which builds a minimal embedder from the published README text and asserts the three effective replacement tuples, and documented the supported (all three), floor (none) and unsupported (partial) module graphs in `go.mod`, README and docs/Embedding.md, including why `silo-pkg` v3.13.0's own module path is not a drop-in replacement for this line
 - Corrected the upstream `minio/pkg` floor job to drop all three SILO replacements rather than the shared package alone. Replacements are not inherited, so an embedder that adds none of them resolves every dependency upstream, and that is the graph the floor describes. Removing only the shared package left `pgsty/mc`, which compiles against silo-pkg's strict policy API; the job then failed on a partial override Console does not support instead of testing the floor
 - Recorded that the SILO replacements are adopted as one set: `pgsty/mc` depends on the SILO package's strict policy semantics, so a build that keeps the CLI replacement must keep the shared-package replacement too
 - Updated the shared package replacement to the reviewed silo-pkg remote-env URL scheme repair and the CLI replacement to the reviewed pre-release MCLI source

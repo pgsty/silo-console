@@ -27,7 +27,11 @@ getdeps:
 			sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION); \
 	fi
 
-verifiers: getdeps fmt lint
+verifiers: getdeps fmt lint replacements
+
+replacements:
+	@echo "Running $@ check"
+	@go run ./hack/replacements check
 
 fmt:
 	@echo "Running $@ check"

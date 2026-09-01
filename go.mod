@@ -4,6 +4,14 @@ go 1.27.0
 
 tool github.com/go-swagger/go-swagger/cmd/swagger
 
+// Supported replacement graphs (see README.md and docs/Embedding.md):
+//   - all three SILO replacements below, adopted as one set (tested by downstream-embedder-compat);
+//   - none of them, resolving upstream minio/pkg v3.6.1, minio/mc and minio-go together (tested by upstream-pkg-compat);
+//   - any partial set is unsupported: pgsty/mc compiles only against the SILO package's strict policy API.
+//
+// `go run ./hack/replacements check` keeps this comment, README.md and the
+// three directives in agreement; `update` regenerates the README block.
+
 // Use PGSTY's maintained Silo Go SDK while preserving upstream import paths.
 // Keep the required version on a real upstream tag because replace directives
 // are ignored when this module is consumed as a dependency.
