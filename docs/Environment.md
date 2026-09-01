@@ -128,6 +128,33 @@ This is safe against client spoofing, but a policy that already permits that
 proxy address may consequently permit every client arriving through it. Review
 IP allow-lists as well as the proxy setting during migration.
 
+## WebSocket origin policy
+
+Browser WebSocket handshakes to `/ws/*` are accepted only when the `Origin`
+authority matches the request `Host`, matches the authority of
+`CONSOLE_BROWSER_REDIRECT_URL`, is asserted by a trusted proxy (the TCP peer is
+listed in `CONSOLE_TRUSTED_PROXIES` or, embedded, `MINIO_API_TRUSTED_PROXIES`,
+**and** the first configured `CONSOLE_SECURE_HOSTS_PROXY_HEADERS` header present
+carries exactly one host[:port] equal to the Origin authority), or matches
+`CONSOLE_SECURE_ALLOWED_HOSTS` (exact, or anchored regular expressions with
+`CONSOLE_SECURE_ALLOWED_HOSTS_ARE_REGEX=on`). Requests without an `Origin`
+header (non-browser clients) and `CONSOLE_DEV_MODE=on` are accepted.
+
+Subpath deployments are no longer exempt from this check. A reverse proxy that
+preserves the full authority (`proxy_set_header Host $http_host;` for nginx;
+`$host` drops a non-default port) needs nothing else; otherwise set
+`CONSOLE_BROWSER_REDIRECT_URL`, or trust the proxy and have it overwrite
+`X-Forwarded-Host` with `CONSOLE_SECURE_HOSTS_PROXY_HEADERS=X-Forwarded-Host`, or
+list the public host in `CONSOLE_SECURE_ALLOWED_HOSTS`.
+
+The Object Manager WebSocket (`/ws/objectManager`) allows anonymous connections
+only when no session cookie is sent at all; an empty or malformed cookie is
+rejected. Every WebSocket frame is limited to 32 KiB. Object Manager sessions
+send a ping every 30 seconds and close peers that stay silent for 60 seconds,
+bound each write to 10 seconds, accept at most 4 concurrent listings, validate
+every request before allocating anything, and close the session after 10
+consecutive invalid frames.
+
 ## Outbound TLS verification
 
 Console verifies every outbound HTTPS peer against the system roots plus the
