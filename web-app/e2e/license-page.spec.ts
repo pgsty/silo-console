@@ -27,7 +27,12 @@ test("the License page reports the embedded Console version", async ({
   ).version as string;
 
   await page.goto(`${SERVER_ENDPOINT}/license`);
-  const consoleRow = page.locator(".line", { hasText: "this Console" });
+  // Two rows name "this Console": the version row (a chip) and the
+  // corresponding-source row (a link). Only the former carries the version.
+  const consoleRow = page.locator(".line", {
+    has: page.locator(".chip"),
+    hasText: "this Console",
+  });
   await expect(consoleRow).toHaveCount(1);
   await expect(consoleRow.locator(".chip")).toHaveText(`v${version}`);
 });
