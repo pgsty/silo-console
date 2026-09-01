@@ -212,3 +212,81 @@ EOF
 
 This is an administrative action outside the repository; the release gate in
 section 2 blocks a tag regardless of the branch setting.
+
+## 6. Release artifacts, legal material and publication
+
+Every artifact carries `LICENSE`, `NOTICE` and `CREDITS`:
+
+- bare executables embed them (`console license`, `console notice`,
+  `console credits`; `console version` prints the exact corresponding source);
+- `.tar.gz`/`.zip` bundles ship them as files next to the executable;
+- DEB, RPM and APK packages install `/usr/share/licenses/silo-console/{LICENSE,NOTICE}`
+  and `/usr/share/doc/silo-console/CREDITS` (DEB also a DEP-5
+  `/usr/share/doc/silo-console/copyright` with the full AGPL text);
+- the container image carries them under `/usr/share/licenses/silo-console/`
+  and the labels `org.opencontainers.image.{revision,version,licenses,source}`
+  and `io.pgsty.silo-console.source` (exact tag or commit URL);
+- the running server serves them at `/legal/LICENSE`, `/legal/NOTICE`,
+  `/legal/CREDITS` and injects the exact source into the page metadata used by
+  the License, Login and anonymous pages.
+
+`CREDITS` is generated (`go run ./hack/credits update`): the union of the Go
+modules linked on every release target, with the fork that provides each
+replaced import path, plus the production frontend dependency closure and the
+bundled fonts. `make verifiers` checks the Go section; the frontend section is
+checked where `web-app/node_modules` exists (`ui-assets`, the candidate gate,
+the tag preflight).
+
+`hack/verify-release-artifacts.sh snapshot` builds a GoReleaser snapshot and
+verifies the full matrix (6 bare binaries, 6 bundles, 9 packages, 2 platform
+images), file lists, byte-identical legal files, package license metadata, the
+DEP-5 file, image labels and the embedded texts of the native binary and image.
+CI runs it on every change (`release-artifacts`).
+
+### Staging and publication (build once, verify, promote)
+
+1. `goreleaser` builds the artifacts, uploads them to a **draft** GitHub
+   release and pushes the multi-platform image to the **private** staging
+   package `ghcr.io/pgsty/silo-console-staging:<tag>`. Before pushing, the job
+   verifies through the Packages API that the staging package exists and is
+   private; it never creates it.
+2. `verify-release` verifies the environment protection of `release`, downloads
+   the draft's assets and the GoReleaser metadata, runs
+   `hack/verify-release-artifacts.sh release <tag> …` against the exact bytes
+   and the staging index, and uploads `release-verification.json` (asset
+   sha256s, index and per-platform digests).
+3. `publish-release` runs in the protected `release` environment (required
+   reviewers). After approval it re-checks the environment protection,
+   re-downloads the assets and compares them to the record, records the
+   previous `latest` image digest for rollback, copies the verified index **by
+   digest** into `ghcr.io/pgsty/silo-console:<tag>` and `:latest`
+   (`docker buildx imagetools create`, a carbon copy of the same digest),
+   re-inspects the public tags, publishes the GitHub release
+   (`draft=false`, latest), and finally deletes the staging package version.
+
+If promotion fails after the public tags were created, the GitHub release is
+still a draft; restore `latest` from the recorded previous digest
+(`docker buildx imagetools create -t ghcr.io/pgsty/silo-console:latest ghcr.io/pgsty/silo-console@<previous-digest>`)
+and re-run the job. The source digest was verified before the copy, so the
+public tags are never wrong bytes — only possibly premature.
+
+### One-time provisioning (maintainer)
+
+- Create the private staging package once by copying the current public image
+  into the new name, then confirm its visibility and grant the repository's
+  Actions write access:
+  ```sh
+  docker buildx imagetools create -t ghcr.io/pgsty/silo-console-staging:bootstrap ghcr.io/pgsty/silo-console:latest
+  gh api orgs/pgsty/packages/container/silo-console-staging --jq .visibility   # must print: private
+  ```
+  (GitHub → Packages → silo-console-staging → Package settings → Danger Zone →
+  visibility private; Manage Actions access → add `pgsty/silo-console` with
+  write.)
+- Create the `release` environment with at least one required reviewer
+  (Settings → Environments → release → Required reviewers). The workflow reads
+  the protection rules through the API and refuses to verify or publish
+  without one.
+- Pin Buildx: `docker/setup-buildx-action` is pinned to a Buildx release that
+  copies images across repositories recursively (v0.36.1 at the time of
+  writing); the post-promotion digest assertion proves the copy on every
+  release.

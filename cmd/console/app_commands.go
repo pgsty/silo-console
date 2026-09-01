@@ -31,6 +31,10 @@ import (
 var appCmds = []cli.Command{
 	serverCmd,
 	updateCmd,
+	versionCmd,
+	licenseCmd,
+	noticeCmd,
+	creditsCmd,
 }
 
 // StartServer starts the console service

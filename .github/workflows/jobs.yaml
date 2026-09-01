@@ -148,6 +148,38 @@ jobs:
         continue-on-error: false
         run: |
           ./check-deadcode.sh
+      - name: Set up Go for the credits check
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Check the frontend section of CREDITS
+        # The production dependency closure is read from node_modules, so this
+        # check lives where the immutable install just happened.
+        run: go run ./hack/credits check --frontend
+
+  release-artifacts:
+    name: Release artifacts carry license, notice, credits and exact provenance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Go 1.27.x
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.27.x
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          version: v0.36.1
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          version: v2.17.1
+          install-only: true
+      - name: Build a snapshot and verify every artifact
+        run: hack/verify-release-artifacts.sh snapshot
 
   swagger-codegen:
     name: "Check for uncommitted changes through Swagger Codegen Changes."
@@ -1652,6 +1684,7 @@ jobs:
       - swagger-codegen
       - latest-minio
       - compile-binary
+      - release-artifacts
       - test-nginx-subpath
       - all-permissions-1
       - all-permissions-2

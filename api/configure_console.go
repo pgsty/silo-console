@@ -39,6 +39,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/minio/console/pkg"
 	"github.com/minio/console/pkg/logger"
 	"github.com/minio/console/pkg/utils"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -98,6 +99,15 @@ func configureAPI(api *operations.ConsoleAPI) http.Handler {
 		} else {
 			LogError("%s=on is ignored because %s is not an https:// endpoint", ConsoleMinIOServerTLSSkipVerify, ConsoleMinIOServer)
 		}
+	}
+
+	if source := pkg.GetSourceReference(); source.Claimed() {
+		LogInfo("corresponding source: %s", source.String())
+	} else {
+		LogError("corresponding source is %s", source.String())
+	}
+	if pkg.OverrideRejected() {
+		LogError("%s was set but rejected (it must be an absolute https URL without credentials, query or fragment); built-in provenance is reported instead", pkg.EnvCorrespondingSourceURL)
 	}
 
 	// Applies when the "x-token" header is set
@@ -458,6 +468,8 @@ func FileServerMiddleware(next http.Handler) http.Handler {
 			serveWS(w, r)
 		case strings.HasPrefix(r.URL.Path, "/api"):
 			next.ServeHTTP(w, r)
+		case isLegalDocumentPath(r.URL.Path):
+			serveLegalDocument(w, r)
 		default:
 			if r.Method != http.MethodGet && r.Method != http.MethodHead {
 				w.Header().Set("Allow", "GET, HEAD")
@@ -561,7 +573,10 @@ func handleSPA(w http.ResponseWriter, r *http.Request) {
 	} else if getSubPath() != "/" {
 		indexPageBytes = replaceBaseInIndex(indexPageBytes, getSubPath())
 	}
-	indexPageBytes = replaceLicense(indexPageBytes)
+	var injected bool
+	if indexPageBytes, injected = injectBuildMeta(indexPageBytes); !injected {
+		noteBuildMetaSentinelMissing()
+	}
 
 	// it's important to force "Content-Type: text/html", because a previous
 	// handler may have already set the content-type to a different value.
@@ -638,12 +653,6 @@ func replaceBaseInIndex(indexPageBytes []byte, basePath string) []byte {
 		indexPageBytes = []byte(indexPageStr)
 
 	}
-	return indexPageBytes
-}
-
-func replaceLicense(indexPageBytes []byte) []byte {
-	indexPageStr := string(indexPageBytes)
-	indexPageBytes = []byte(indexPageStr)
 	return indexPageBytes
 }
 

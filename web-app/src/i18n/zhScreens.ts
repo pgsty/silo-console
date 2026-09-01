@@ -1714,4 +1714,10 @@ export const zhScreens: Record<string, string> = {
   "No buckets yet.": "暂无存储桶。",
   "No buckets match this filter.": "没有符合筛选条件的存储桶。",
   Trademark: "商标",
+  Notice: "声明",
+  License: "许可证",
+  "Corresponding source for this build": "本次构建对应的源码",
+  "The exact corresponding source is not available for this build: {reason}. See the NOTICE for how to obtain it.":
+    "本次构建无法给出精确的对应源码：{reason}。获取方式见 NOTICE。",
+  "Source: not available for this build": "源码：本次构建不可用",
 };

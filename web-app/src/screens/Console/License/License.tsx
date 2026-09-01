@@ -28,6 +28,11 @@ import {
 } from "../../../common/SecureComponent/permissions";
 import { SILO_COLORS, SiloBrand } from "../../../common/SiloBrand";
 import { interpolate, useLocalizedLink, useT } from "i18n";
+import {
+  LEGAL_DOCUMENT_PATHS,
+  REPOSITORY_URL,
+  sourceReference,
+} from "../../../common/sourceReference";
 
 const SILO_SITE_URL = "https://silo.pgsty.com/";
 const SILO_SOURCE_URL = "https://github.com/pgsty/silo";
@@ -184,6 +189,7 @@ const License = () => {
   const localize = useLocalizedLink();
   const t = useT();
   const consoleVersion = version.startsWith("v") ? version : `v${version}`;
+  const source = sourceReference();
 
   // Server release comes from the same admin-info API the dashboard uses.
   // Accounts without admin:ServerInfo never issue the request and simply
@@ -341,7 +347,7 @@ const License = () => {
               </div>
               <div className="line">
                 <a
-                  href="https://github.com/pgsty/silo-console/blob/main/LICENSE"
+                  href={LEGAL_DOCUMENT_PATHS.license}
                   target="_blank"
                   rel="license noopener noreferrer"
                 >
@@ -392,13 +398,33 @@ const License = () => {
               </div>
               <div className="line">
                 <a
-                  href="https://github.com/pgsty/silo-console"
+                  href={source.available ? source.url : REPOSITORY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   pgsty/silo-console
                 </a>
                 <span className="what">{t("this Console")}</span>
+              </div>
+              <div className="line" data-testid="corresponding-source">
+                {source.available ? (
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("Corresponding source for this build")}
+                  </a>
+                ) : (
+                  <span className="what">
+                    {interpolate(
+                      t(
+                        "The exact corresponding source is not available for this build: {reason}. See the NOTICE for how to obtain it.",
+                      ),
+                      { reason: source.reason },
+                    )}
+                  </span>
+                )}
               </div>
               <div className="line">
                 <a
@@ -434,7 +460,7 @@ const License = () => {
                   {
                     credits: (
                       <a
-                        href="https://github.com/pgsty/silo-console/blob/main/CREDITS"
+                        href={LEGAL_DOCUMENT_PATHS.credits}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -443,7 +469,7 @@ const License = () => {
                     ),
                     notice: (
                       <a
-                        href="https://github.com/pgsty/silo-console/blob/main/NOTICE"
+                        href={LEGAL_DOCUMENT_PATHS.notice}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
