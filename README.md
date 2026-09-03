@@ -163,13 +163,15 @@ package is an ordinary direct requirement and needs no downstream replacement:
 | Module graph | Status |
 | :-- | :-- |
 | The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies `pgsty/silo-pkg` v3.13.2 is inherited directly |
-| No mc replacement | Build-compatible upstream mc floor, tested by `upstream-pkg-compat`; it is not the released SILO CLI behavior |
+| No mc replacement | Best-effort upstream compatibility signal, tested by the non-blocking `upstream-pkg-compat` job; it is neither the released SILO CLI behavior nor a dependency floor |
 | The retired three-replacement graph | Unsupported: do not replace `github.com/minio/pkg/v3` with silo-pkg v3.13.0 or later, whose declared module path is `github.com/pgsty/silo-pkg/v3` |
 
 This is the coordinated own-module-path line introduced by silo-pkg v3.13.0.
 Console imports `github.com/pgsty/silo-pkg/v3` directly, while upstream
 dependencies that still use `github.com/minio/pkg/v3` may coexist as a distinct
-module. See [docs/Embedding.md](docs/Embedding.md).
+module. Compatibility with unmodified upstream MinIO and mc is maintained on a
+best-effort basis and never overrides the SILO dependency graph. See
+[docs/Embedding.md](docs/Embedding.md).
 
 The complete, versioned list of differences from the upstream MinIO Console —
 restored features, removed features, and known gaps — is maintained in the

@@ -4,10 +4,10 @@ go 1.27.1
 
 tool github.com/go-swagger/go-swagger/cmd/swagger
 
-// Supported module graphs (see README.md and docs/Embedding.md):
-//   - the maintained graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into embedders;
-//   - omitting that replacement resolves upstream minio/mc and remains a build-compatible floor (tested by upstream-pkg-compat);
-//   - minio-go resolves upstream; the retired silo-go and minio/pkg replacement graph is unsupported.
+// Supported module policy (see README.md and docs/Embedding.md):
+//   - the maintained SILO graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into the SILO embedder;
+//   - omitting that replacement is tested by upstream-pkg-compat only as a best-effort compatibility signal, never as a release dependency floor;
+//   - minio-go resolves upstream by policy; the retired silo-go and minio/pkg replacement graph is unsupported.
 //
 // `go run ./hack/replacements check` keeps this comment, README.md and the
 // single maintained directive in agreement; `update` regenerates the README block.
@@ -46,9 +46,6 @@ require (
 	// Keep upstream master: v7.3.0 predates checksum and S3 Express fixes
 	// already included in this pseudo-version.
 	github.com/minio/minio-go/v7 v7.3.1-0.20260828014306-0e78d3f18efe
-	// Keep the latest upstream-MinIO-compatible release. v3.11.0 makes admin
-	// action constants typed AdminAction and breaks the current MinIO embedder.
-	github.com/minio/pkg/v3 v3.10.1
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -147,6 +144,9 @@ require (
 	github.com/minio/filepath v1.0.0 // indirect
 	github.com/minio/kms-go/kes v0.3.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
+	// Legacy path reached only through minio/colorjson; maintained Console code
+	// imports github.com/pgsty/silo-pkg/v3 directly.
+	github.com/minio/pkg/v3 v3.6.1 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect

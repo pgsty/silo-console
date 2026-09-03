@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Model an embedder that inherits no replacement: drop the maintained pgsty/mc
-# selection and prove the resulting upstream-mc graph still vets, tests and
-# builds. Run in a scratch checkout: it edits go.mod and go.sum in place.
+# Best-effort compatibility probe: model an embedder that inherits no
+# replacement, drop the maintained pgsty/mc selection, and report whether the
+# resulting upstream-mc graph still vets, tests and builds. This probe is not a
+# supported SILO dependency floor and must not constrain maintained packages.
+# Run in a scratch checkout: it edits go.mod and go.sum in place.
 #
 # Console requires pgsty/silo-pkg directly and uses upstream minio-go, so mc is
 # now the only replacement an embedder has to copy.
@@ -17,4 +19,4 @@ go vet -tags=testrunmain ./...
 go test ./...
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
 CGO_ENABLED=0 GOOS=netbsd GOARCH=amd64 go build ./...
-echo "upstream mc floor: vet, test and cross-builds pass without the maintained mc replacement"
+echo "best-effort upstream mc graph: vet, test and cross-builds pass without the maintained mc replacement"

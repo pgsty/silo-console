@@ -247,8 +247,8 @@ github.com/minio/minio-go/v7 v7.3.1-0.20260828014306-0e78d3f18efe h1:By2FKNSOUGL
 github.com/minio/minio-go/v7 v7.3.1-0.20260828014306-0e78d3f18efe/go.mod h1:KUPWdecEO1LWyUz+sTGXAuf2jZHrPh5fCsRH86QbPfk=
 github.com/minio/mux v1.10.1 h1:grrK8SwRKbkNFE6qG7WAvFGH09bB46d5teOOtKfQ14s=
 github.com/minio/mux v1.10.1/go.mod h1:INYT4sMSTJy0QWUEA/E2DZNxJ5sAxIwbnyZjkzNFRfE=
-github.com/minio/pkg/v3 v3.10.1 h1:aQc+Kg5F3NW6xn16u+zjINFxQyqlutMhgdybt/UcC1Q=
-github.com/minio/pkg/v3 v3.10.1/go.mod h1:gBNHbob7QUCu/5nOtkAEEpN6diu1o1lwFpEnzU35s9U=
+github.com/minio/pkg/v3 v3.6.1 h1:gaNT80BS/iuIany5ylTkVmfN4s6UYY30OtImFv4GQA8=
+github.com/minio/pkg/v3 v3.6.1/go.mod h1:fYlexVD0GMD0XNeBHeefFI6YBE0Oo8oDbDPWm3Jd68I=
 github.com/minio/selfupdate v0.6.0 h1:i76PgT0K5xO9+hjzKcacQtO7+MjJ4JKA8Ak8XQ9DDwU=
 github.com/minio/selfupdate v0.6.0/go.mod h1:bO02GTIPCMQFTEvE5h4DjYB58bCoZ35XLeBf0buTDdM=
 github.com/minio/websocket v1.6.0 h1:CPvnQvNvlVaQmvw5gtJNyYQhg4+xRmrPNhBbv8BdpAE=

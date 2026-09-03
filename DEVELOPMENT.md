@@ -39,11 +39,12 @@ CONSOLE_DEV_MODE=on
 
 Refer to `/web-app` [instructions](/web-app/README.md) to run the web app locally.
 
-# Compatibility testing inside MinIO
+# Best-effort compatibility testing inside upstream MinIO
 
 To test Console embedded in an upstream-compatible MinIO binary, build it from
-the MinIO repository as described below. This is a compatibility workflow, not
-the SILO release workflow.
+the MinIO repository as described below. This is an advisory compatibility
+workflow, not the supported SILO release workflow, and its result must not
+override the maintained `silo-pkg` dependency selected for SILO.
 
 ### 0. Building with UI Changes
 
