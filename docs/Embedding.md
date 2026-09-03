@@ -13,8 +13,14 @@ that one directive from the authoritative README block between the
 | Module graph | Status |
 | :-- | :-- |
 | The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.13.2 requirement |
-| No mc replacement | Build-compatible upstream mc floor, tested by `upstream-pkg-compat`; this does not claim released SILO CLI behavior |
+| No mc replacement | Best-effort compatibility probe, tested by the non-blocking `upstream-pkg-compat` job; this is not the released SILO graph and does not constrain maintained dependency versions |
 | The retired `minio/pkg => silo-pkg` or `minio-go => silo-go` replacements | Unsupported. silo-pkg v3.13.0 and later own `github.com/pgsty/silo-pkg/v3`, and minio-go now resolves upstream |
+
+SILO keeps inexpensive source and wire compatibility where practical, but the
+supported release graph is the coordinated PGSTY stack. A failure found only in
+an unmodified upstream MinIO or mc graph is advisory: investigate and document
+it, but do not downgrade `silo-pkg` or duplicate its APIs to make that graph
+compile. `minio-go` is the explicit exception and resolves upstream by policy.
 
 ## Keeping the block in sync
 

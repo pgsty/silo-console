@@ -22,48 +22,9 @@ __init__() {
   export PATH=${PATH}:${GOPATH}/bin
   export MC_UPDATE=off
 
-  ARCH="$(uname -m)"
-  case $ARCH in
-  'i386')
-    ARCH='amd64'
-    alias ls='ls --color=auto'
-    ;;
-  'x86_64')
-    ARCH='amd64'
-    alias ls='ls -G'
-    ;;
-  'arm')
-    ARCH='arm64'
-    ;;
-  *) ;;
-  esac
-
-  echo $ARCH
-
-  OS="$(uname)"
-  case $OS in
-  'Linux')
-    OS='linux'
-    alias ls='ls --color=auto'
-    ;;
-  'FreeBSD')
-    OS='freebsd'
-    alias ls='ls -G'
-    ;;
-  'WindowsNT')
-    OS='windows'
-    ;;
-  'Darwin')
-    OS='darwin'
-    ;;
-  'SunOS')
-    OS='solaris'
-    ;;
-  'AIX') ;;
-  *) ;;
-  esac
-
-  curl -sLO "https://dl.min.io/client/mc/release/$OS-$ARCH/mc" -o mc
+  # Build the exact pgsty/mc source selected by Console's go.mod replacement.
+  # `go install ...@version` ignores the main module's replacements.
+  go build -o mc github.com/minio/mc
   chmod +x mc
   mv mc /usr/local/bin
 

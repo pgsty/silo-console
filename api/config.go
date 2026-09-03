@@ -31,9 +31,9 @@ import (
 	xnet "github.com/pgsty/silo-pkg/v3/net"
 )
 
-// TLSCertsManager is the certificate-manager boundary shared with embedding
-// servers. Keeping it structural lets upstream MinIO and SILO provide their
-// respective pkg/certs manager while Console owns the silo-pkg module path.
+// TLSCertsManager keeps Console's embedding boundary structural. SILO provides
+// the maintained silo-pkg implementation; compatible implementations may also
+// satisfy the interface without becoming Console's product dependency.
 type TLSCertsManager interface {
 	AddCertificate(certFile, keyFile string) error
 	GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error)

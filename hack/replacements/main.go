@@ -60,10 +60,10 @@ const (
 // contractLines must appear verbatim in go.mod so the supported-graph
 // statement cannot drift from README and CHANGELOG.
 var contractLines = []string{
-	"// Supported module graphs (see README.md and docs/Embedding.md):",
-	"//   - the maintained graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into embedders;",
-	"//   - omitting that replacement resolves upstream minio/mc and remains a build-compatible floor (tested by upstream-pkg-compat);",
-	"//   - minio-go resolves upstream; the retired silo-go and minio/pkg replacement graph is unsupported.",
+	"// Supported module policy (see README.md and docs/Embedding.md):",
+	"//   - the maintained SILO graph directly requires pgsty/silo-pkg and copies the single pgsty/mc replacement into the SILO embedder;",
+	"//   - omitting that replacement is tested by upstream-pkg-compat only as a best-effort compatibility signal, never as a release dependency floor;",
+	"//   - minio-go resolves upstream by policy; the retired silo-go and minio/pkg replacement graph is unsupported.",
 }
 
 // readmeContractPhrases must appear in README.md prose, next to the generated block.

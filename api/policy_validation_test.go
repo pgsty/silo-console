@@ -58,13 +58,10 @@ func TestResourceWriteValidation(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			resource, err := iampolicy.ParseResource(testCase.resource)
-			if err != nil {
-				t.Fatalf("ParseResource(%q): %v", testCase.resource, err)
-			}
-			err = validateResourcesForWrite(iampolicy.NewResourceSet(resource))
+			document := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["` + testCase.resource + `"]}]}`
+			_, err := parsePolicyForWrite(document)
 			if (err != nil) != testCase.wantErr {
-				t.Fatalf("validateResourcesForWrite(%q) error = %v, wantErr %v", testCase.resource, err, testCase.wantErr)
+				t.Fatalf("parsePolicyForWrite(resource %q) error = %v, wantErr %v", testCase.resource, err, testCase.wantErr)
 			}
 		})
 	}

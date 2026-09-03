@@ -5,8 +5,10 @@ BUILD_VERSION:=$(shell git describe --exact-match --tags $(git log -n1 --pretty=
 BUILD_TIME:=$(shell date 2>/dev/null)
 TAG ?= "ghcr.io/pgsty/silo-console:$(BUILD_VERSION)-dev"
 #TAG ?= "ghcr.io/pgsty/silo-console:dev"
-MINIO_VERSION ?= "quay.io/minio/minio:latest"
-#MINIO_VERSION ?= "quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z"
+# Retain the historical variable name for test-script compatibility. Release
+# gates run against a pinned SILO image; override it explicitly for an advisory
+# upstream compatibility probe.
+MINIO_VERSION ?= "docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z"
 
 TARGET_BUCKET ?= "target"
 NODE_VERSION := $(shell cat .nvmrc)
@@ -230,7 +232,7 @@ test-sso-integration-run:
 	-e MINIO_UPDATE=off \
 	-e MINIO_ROOT_PASSWORD=minio123 $(MINIO_VERSION) server /data{1...4} --address :9000 --console-address :9001)
 	@echo "run mc commands to set the policy"
-	@(docker run -e MC_UPDATE=off --name minio-client --network my-net -dit --entrypoint=/bin/sh minio/mc)
+	@(docker run -e MC_UPDATE=off --name minio-client --network my-net -dit --entrypoint=/bin/sh docker.io/pgsty/mc:RELEASE.2026-09-03T07-13-05Z)
 	@(ready=0; \
 	  for attempt in $$(seq 1 30); do \
 	    if docker exec minio-client mc alias set myminio/ http://minio:9000 minio minio123; then ready=1; break; fi; \
@@ -247,52 +249,52 @@ cleanup-sso-integration:
 	@docker network rm my-net >/dev/null 2>&1 || true
 
 test-permissions-1:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-1/")
 	@(docker stop minio)
 
 test-permissions-2:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-2/")
 	@(docker stop minio)
 
 test-permissions-3:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-3/")
 	@(docker stop minio)
 
 test-permissions-4:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-4/")
 	@(docker stop minio)
 
 test-permissions-5:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-5/")
 	@(docker stop minio)
 
 test-permissions-6:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-6/")
 	@(docker stop minio)
 
 test-permissions-7:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-7/")
 	@(docker stop minio)
 
 test-permissions-8:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-8/")
 	@(docker stop minio)
 
 test-permissions-A:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-A/")
 	@(docker stop minio)
 
 test-permissions-B:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 	@(env bash $(PWD)/web-app/tests/scripts/permissions.sh "web-app/tests/permissions-B/")
 	@(docker stop minio)
 
@@ -300,7 +302,7 @@ test-apply-permissions:
 	@(env bash $(PWD)/web-app/tests/scripts/initialize-env.sh)
 
 test-start-docker-minio:
-	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 quay.io/minio/minio:latest server /data{1...4})
+	@(docker run -v /data1 -v /data2 -v /data3 -v /data4 -e MINIO_UPDATE=off -d --name minio --rm -p 9000:9000 $(MINIO_VERSION) server /data{1...4})
 
 initialize-permissions: test-start-docker-minio test-apply-permissions
 	@echo "Done initializing permissions test"
@@ -319,7 +321,7 @@ test-start-docker-minio-w-redirect-url: initialize-docker-network
 	-e MINIO_UPDATE=off \
     -v /data1 -v /data2 -v /data3 -v /data4 \
     -d --network test-network -p 9000:9000 --name minio --rm\
-    quay.io/minio/minio:latest server /data{1...4})
+	    $(MINIO_VERSION) server /data{1...4})
 
 test-start-docker-nginx-w-subpath: initialize-docker-network
 	@(docker run \
