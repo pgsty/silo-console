@@ -7,7 +7,7 @@ Security and build maintenance:
 - Builds with Go 1.27.1 and GitHub Actions `setup-go` v7
 - Updates the maintained dependency chain to released `silo-pkg` v3.13.2 and immutable `pgsty/mc` `RELEASE.2026-09-03T07-13-05Z` (`a2ef95c0`), while keeping `minio-go` on upstream master commit `0e78d3f18efe`
 - Refreshes the compiled Go dependency closure, including `golang.org/x/crypto` v0.56.0 for the SSH channel denial-of-service fixes, gRPC-Go v1.83.2 for CVE-2026-84304, Protobuf v1.36.12, `klauspost/compress` v1.20.0, Prometheus libraries, JWX v3.2.0 and the current go-openapi line
-- Keeps the separate upstream `minio/pkg` compatibility module at v3.6.1: v3.11.0 changes admin-action constants to a distinct type and prevents the current upstream MinIO server from embedding Console; maintained Console code uses `silo-pkg` v3.13.2 directly
+- Keeps the separate upstream `minio/pkg` compatibility module at v3.10.1, the latest release that builds with the current upstream MinIO server: v3.11.0 changes admin-action constants to a distinct type and breaks that embedder; maintained Console code uses `silo-pkg` v3.13.2 directly
 - Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, and structured-clone advisories; the remaining TestCafe `replicator` advisory is confined to the development-only browser test runner and has no patched release
 - Regenerates the embedded frontend and third-party notices from the final dependency graph; no Console route, API, configuration, or deployment migration is required
 - Marks verifier targets as phony so case-insensitive filesystems cannot mistake `CREDITS` for an already-completed `credits` check
