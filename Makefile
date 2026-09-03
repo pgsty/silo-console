@@ -14,7 +14,7 @@ GOLANGCI_VERSION := 2.13.1
 
 default: console
 
-.PHONY: console
+.PHONY: console getdeps verifiers credits replacements deps-release fmt lint
 console:
 	@echo "Building SILO Console binary to './console'"
 	@(GO111MODULE=on CGO_ENABLED=0 go build -trimpath --tags=kqueue --ldflags "-s -w" -o console ./cmd/console)

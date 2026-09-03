@@ -140,7 +140,7 @@ The retained Go module, import paths, environment variables, API fields, and
 protocol identifiers are compatibility interfaces, not product branding. Any
 future rename of those interfaces will require aliases and a migration period.
 
-Standalone Console directly requires `github.com/pgsty/silo-pkg/v3` v3.13.0
+Standalone Console directly requires `github.com/pgsty/silo-pkg/v3` v3.13.2
 and resolves `github.com/minio/minio-go/v7` upstream. The maintained mc release
 keeps the compatibility module path `github.com/minio/mc`, but its source lives
 in `pgsty/mc` under a calendar tag that is not a Go semantic version. Console
@@ -150,7 +150,7 @@ copy it because Go ignores replacements declared by dependency modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260831144523-ddac5d58ab49
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260903063637-a2ef95c035d9
 )
 ```
 <!-- silo-replacements:end -->
@@ -162,9 +162,9 @@ package is an ordinary direct requirement and needs no downstream replacement:
 
 | Module graph | Status |
 | :-- | :-- |
-| The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies `pgsty/silo-pkg` v3.13.0 is inherited directly |
+| The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies `pgsty/silo-pkg` v3.13.2 is inherited directly |
 | No mc replacement | Build-compatible upstream mc floor, tested by `upstream-pkg-compat`; it is not the released SILO CLI behavior |
-| The retired three-replacement graph | Unsupported: do not replace `github.com/minio/pkg/v3` with silo-pkg v3.13.0, whose declared module path is `github.com/pgsty/silo-pkg/v3` |
+| The retired three-replacement graph | Unsupported: do not replace `github.com/minio/pkg/v3` with silo-pkg v3.13.0 or later, whose declared module path is `github.com/pgsty/silo-pkg/v3` |
 
 This is the coordinated own-module-path line introduced by silo-pkg v3.13.0.
 Console imports `github.com/pgsty/silo-pkg/v3` directly, while upstream

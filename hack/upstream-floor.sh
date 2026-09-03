@@ -10,7 +10,7 @@ set -euo pipefail
 go mod edit -dropreplace=github.com/minio/mc
 go mod tidy
 test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/mc)"
-test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "v3.13.0"
+test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "v3.13.2"
 test -z "$(go list -m -f '{{if .Replace}}{{.Replace.Path}}{{end}}' github.com/minio/minio-go/v7)"
 go vet ./...
 go vet -tags=testrunmain ./...

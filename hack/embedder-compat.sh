@@ -47,5 +47,5 @@ while read -r old new version; do
   got="$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "$old")"
   test "$got" = "$new $version" || { echo "$old resolved to '$got', README says '$new $version'" >&2; exit 1; }
 done < tuples.txt
-test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "v3.13.0" || { echo "embedder did not inherit silo-pkg v3.13.0" >&2; exit 1; }
+test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "v3.13.2" || { echo "embedder did not inherit silo-pkg v3.13.2" >&2; exit 1; }
 echo "embedder graph matches the README block"
