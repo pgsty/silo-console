@@ -25,6 +25,9 @@ concurrency:
 env:
   FIREFOX_VERSION: latest
   TESTCAFE_VERSION: 3.7.4
+  # Historical test recipes call this MINIO_VERSION. The release gate uses the
+  # maintained SILO server; upstream MinIO is probed separately as best effort.
+  MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z
 
 jobs:
   lint-job:
@@ -1176,7 +1179,7 @@ jobs:
           key: ${{ runner.os }}-coverage-api-2-${{ github.run_id }}
 
   b-integration-tests:
-    name: Integration Tests with Latest Distributed MinIO
+    name: Integration Tests with Pinned SILO
     needs:
       - lint-job
       - ui-assets
@@ -1212,8 +1215,7 @@ jobs:
           echo "Create Console image: $TAG";
           docker build -q --no-cache -t $TAG . -f Dockerfile.release
 
-          echo "We are going to use the latest minio image on test-integration";
-          MINIO_VERSION="quay.io/minio/minio:latest";
+          echo "Use the pinned SILO image for integration tests";
           echo $MINIO_VERSION;
 
           make test-integration MINIO_VERSION=$MINIO_VERSION TAG=$TAG;
@@ -1251,8 +1253,7 @@ jobs:
 
       - name: Build on ${{ runner.os }}
         run: |
-          echo "We are going to use the latest minio image on test-integration";
-          MINIO_VERSION="quay.io/minio/minio:latest";
+          echo "Use the pinned SILO image for site-replication tests";
           echo $MINIO_VERSION;
 
           make test-replication MINIO_VERSION=$MINIO_VERSION;
@@ -1290,7 +1291,6 @@ jobs:
       - name: Build on ${{ runner.os }}
         run: |
           echo "Use the pinned SILO release for the Console compatibility gate";
-          MINIO_VERSION="docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z";
           echo $MINIO_VERSION;
 
           make test-sso-integration MINIO_VERSION=$MINIO_VERSION;

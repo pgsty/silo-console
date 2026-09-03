@@ -24,8 +24,8 @@ export CI
 sudo curl -#L "https://dl.k8s.io/release/v1.23.1/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
 sudo chmod +x /usr/local/bin/kubectl
 
-sudo curl -#L "https://dl.min.io/client/mc/release/linux-amd64/mc" -o /usr/local/bin/mc
-sudo chmod +x /usr/local/bin/mc
+go build -o mc github.com/minio/mc
+sudo install -m 0755 mc /usr/local/bin/mc
 
 __init__() {
   export TIMESTAMP=$(date "+%s")

@@ -86,7 +86,8 @@ __init__() {
   export PATH=${PATH}:${GOPATH}/bin
   export MC_UPDATE=off
 
-  go install github.com/minio/mc@latest
+  mkdir -p "${GOPATH}/bin"
+  go build -o "${GOPATH}/bin/mc" github.com/minio/mc
 
   add_alias
 

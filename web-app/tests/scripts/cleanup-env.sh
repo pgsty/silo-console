@@ -68,8 +68,8 @@ __init__() {
   export PATH=${PATH}:${GOPATH}/bin
   export MC_UPDATE=off
 
-  wget https://dl.min.io/client/mc/release/linux-amd64/mc
-  chmod +x mc
+  mkdir -p "${GOPATH}/bin"
+  go build -o "${GOPATH}/bin/mc" github.com/minio/mc
 
   add_alias
 }
