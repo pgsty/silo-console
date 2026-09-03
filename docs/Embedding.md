@@ -12,7 +12,7 @@ that one directive from the authoritative README block between the
 
 | Module graph | Status |
 | :-- | :-- |
-| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` version |
+| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.13.2 requirement |
 | No mc replacement | Build-compatible upstream mc floor, tested by `upstream-pkg-compat`; this does not claim released SILO CLI behavior |
 | The retired `minio/pkg => silo-pkg` or `minio-go => silo-go` replacements | Unsupported. silo-pkg v3.13.0 and later own `github.com/pgsty/silo-pkg/v3`, and minio-go now resolves upstream |
 
@@ -28,9 +28,9 @@ that one directive from the authoritative README block between the
 ## Own-module-path migration
 
 This Console line has completed the migration described by silo-pkg v3.13.0:
-its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires v3.13.0
-directly. A SILO server adopting this Console release must make the same source
+its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires the
+current v3.13.2 release directly. A SILO server adopting this Console release must make the same source
 import migration. Keeping old `github.com/minio/pkg/v3`
-imports while replacing that path with silo-pkg v3.13.0 produces
+imports while replacing that path with silo-pkg v3.13.0 or later produces
 `used for two different module paths`. Update the embedding server's imports
 and module graph when it adopts this Console release.
