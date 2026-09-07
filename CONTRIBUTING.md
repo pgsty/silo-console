@@ -1,7 +1,32 @@
-# Console Server Contribution Guide
-This is a REST portal server created using [go-swagger](https://github.com/go-swagger/go-swagger)
+# Contributing to SILO Console
 
-The API handlers are created using a YAML definition located in `swagger.YAML`.
+Submit issues and pull requests to [pgsty/silo-console](https://github.com/pgsty/silo-console).
+SILO Console is maintained and tested with the [SILO server](https://github.com/pgsty/silo).
+Compatibility with unmodified upstream MinIO is best effort.
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for the development environment and frontend
+workflow. The REST API uses [go-swagger](https://github.com/go-swagger/go-swagger).
+The API handlers are created from `swagger.yml`.
+
+## Licensing of Contributions
+
+Code contributions are accepted under [GNU AGPL v3.0 or later](LICENSE)
+(`AGPL-3.0-or-later`), the same license as SILO Console.
+
+- **No CLA.** Contributors retain copyright in their original work. No
+  Contributor License Agreement, copyright assignment, or separate Apache-2.0
+  license grant to SILO or upstream MinIO maintainers is required. Contributions
+  are accepted inbound=outbound; maintainers receive no rights beyond the
+  applicable project license.
+- **DCO sign-off.** Sign each commit with `git commit -s` to certify the
+  [Developer Certificate of Origin 1.1](https://developercertificate.org/).
+  Preserve sign-off trailers when squashing commits.
+- **Provenance and notices.** Preserve original authorship, copyright, and
+  license notices when importing or modifying existing code. New original files
+  name their actual copyright holders and use AGPL-3.0-or-later. Separately
+  licensed third-party material keeps its existing license and attribution.
+
+## API Changes
 
 To add new api, the YAML file needs to be updated with all the desired apis using
 the [Swagger Basic Structure](https://swagger.io/docs/specification/2-0/basic-structure/), this includes paths,
@@ -14,7 +39,7 @@ Once the YAML file is ready we can autogenerate the code needed for the new api 
 Validate it:
 
 ```
-swagger validate ./swagger.yml
+go tool swagger validate ./swagger.yml
 ```
 
 Update server code:
@@ -41,11 +66,10 @@ go test ./api
 
 ## Commit changes
 
-After verification, commit your changes. This is a [great post](https://chris.beams.io/posts/git-commit/) on how to
-write useful commit messages
+After verification, commit your changes with a concise message and a DCO sign-off:
 
 ```
-$ git commit -am 'Add some feature'
+git commit -s -am 'Add some feature'
 ```
 
 ### Push to the branch
@@ -58,9 +82,9 @@ $ git push origin my-new-feature
 
 ### Create a Pull Request
 
-Pull requests can be created via GitHub. Refer
-to [this document](https://help.github.com/articles/creating-a-pull-request/) for detailed steps on how to create a pull
-request. After a Pull Request gets peer reviewed and approved, it will be merged.
+Open a pull request against the `main` branch of `pgsty/silo-console`. Include
+the motivation, test evidence, and compatibility or UI impact. Public product
+documentation belongs in [pgsty/silo.pgsty.com](https://github.com/pgsty/silo.pgsty.com).
 
 ## FAQs
 
