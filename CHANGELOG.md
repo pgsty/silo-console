@@ -9,7 +9,10 @@ Security and build maintenance:
 - Refreshes the compiled Go dependency closure, including `golang.org/x/crypto` v0.56.0 for the SSH channel denial-of-service fixes, gRPC-Go v1.83.2 for CVE-2026-84304, Protobuf v1.36.12, `klauspost/compress` v1.20.0, Prometheus libraries, JWX v3.2.0 and the current go-openapi line
 - Uses `silo-pkg` v3.13.2's strict policy API directly instead of duplicating it around an upstream compatibility floor. Any remaining `minio/pkg` package is transitive legacy code, not the maintained implementation; upstream MinIO/mc builds remain best-effort, non-blocking compatibility signals
 - Runs release-gating integration, permissions, replication, SSO, subpath and browser tests against the pinned SILO server and the exact released `pgsty/mc` source selected by `go.mod`; upstream server and client probes remain visible but advisory
-- Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, and structured-clone advisories; the remaining TestCafe `replicator` advisory is confined to the development-only browser test runner and has no patched release
+- Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, structured-clone, and fflate advisories; fflate 0.8.3 is selected throughout the runtime and test dependency graph
+- Updates the development SDK's stream-json dependency to 3.5.0 with a small MinIO JavaScript SDK compatibility patch and notification parser tests for its CommonJS and ESM builds
+- Updates TestCafe to 3.7.6 locally and in CI, removing its vulnerable `replicator` dependency
+- Excludes PDF.js's Node-only native canvas dependency from browser credits so regeneration is consistent across build platforms
 - Regenerates the embedded frontend and third-party notices from the final dependency graph; no Console route, API, configuration, or deployment migration is required
 - Marks verifier targets as phony so case-insensitive filesystems cannot mistake `CREDITS` for an already-completed `credits` check
 
