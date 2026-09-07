@@ -18,15 +18,14 @@ source "${SCRIPT_DIR}/common.sh"
 __init__() {
   export TIMESTAMP=$(date "+%s")
   echo $TIMESTAMP >web-app/tests/constants/timestamp.txt
-  export GOPATH=/tmp/gopath
-  export PATH=${PATH}:${GOPATH}/bin
   export MC_UPDATE=off
 
   # Build the exact pgsty/mc source selected by Console's go.mod replacement.
   # `go install ...@version` ignores the main module's replacements.
-  go build -o mc github.com/minio/mc
-  chmod +x mc
-  mv mc /usr/local/bin
+  # Keep setup-go's module/build caches, and never enter add_alias without mc.
+  go build -o mc github.com/minio/mc || return
+  chmod +x mc || return
+  mv mc /usr/local/bin || return
 
   add_alias
 }
