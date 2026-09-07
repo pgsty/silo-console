@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Restore local-proxy source addresses in the embedded SILO Console when Server explicitly enables the embedded trust policy. Loopback TCP peers are trusted unless the policy is `none`/`off`; forwarded-chain hops still require explicit list membership. Standalone defaults and rejection of untrusted remote headers are unchanged ([silo#147](https://github.com/pgsty/silo/issues/147)).
+
 ## Release v2.3.1
 
 Security and build maintenance:

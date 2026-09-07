@@ -85,7 +85,7 @@
 Console uses the resolved client address when it requests STS credentials or
 calls SILO on a user's behalf. This address can affect `aws:SourceIp` policy
 conditions, so forwarded source headers are ignored unless the request's direct
-TCP peer is explicitly trusted.
+TCP peer is trusted.
 
 `CONSOLE_TRUSTED_PROXIES` accepts exact IPv4/IPv6 addresses and CIDR blocks
 separated by commas, semicolons, or whitespace. Bare addresses trust one host.
@@ -93,7 +93,7 @@ Catch-all `0.0.0.0/0` and `::/0` entries are rejected. Configure proxy addresses
 not client networks, and configure the edge proxy to remove every inbound
 `X-Forwarded-For`, `X-Real-IP`, and `Forwarded` header it does not author.
 
-The secure default is to trust no proxy. If neither applicable variable names a
+Standalone Console defaults to trusting no proxy. If neither applicable variable names a
 trusted peer, Console uses the TCP peer and ignores all three forwarded source
 headers. This intentionally changes deployments that previously relied on
 implicit trust. Set the appropriate variable before upgrading when source IP
@@ -104,14 +104,25 @@ policies or client attribution must pass through a reverse proxy.
 | Standalone Console, no reverse proxy | Trust no forwarded headers | Must trust Console's egress peer to preserve the browser client IP | Set `CONSOLE_TRUSTED_PROXIES=none` whenever `MINIO_API_TRUSTED_PROXIES` is present in Console's environment; leaving it unset is only equivalent when the SILO setting is absent too |
 | Standalone Console behind a reverse proxy | Trust only the Console-facing proxy peers | Must trust Console's egress peer to preserve the browser client IP | Set `CONSOLE_TRUSTED_PROXIES` for Console ingress and configure the SILO setting separately |
 | Standalone Console using one shared list | Fall back to the SILO setting when the Console setting is absent or blank | Trust only listed API peers | Set `MINIO_API_TRUSTED_PROXIES` to every required Console-ingress proxy and Console-egress peer; use this only when one list is correct for both listeners |
-| Console embedded in SILO | Trust only peers from the SILO setting | Trust only peers from the SILO setting | Set `MINIO_API_TRUSTED_PROXIES` |
+| Console embedded in SILO with the post-0903 proxy fix | Trust loopback TCP peers plus explicitly listed peers; `none`/`off` disables both | Existing Server policy: unset accepts forwarding; a list trusts listed peers plus loopback; `none`/`off` ignores forwarding | Use `MINIO_API_TRUSTED_PROXIES` for remote proxies; local loopback proxies need no setting |
 
 An absent or blank `CONSOLE_TRUSTED_PROXIES` falls back to
 `MINIO_API_TRUSTED_PROXIES`; the two lists are only interchangeable when the same
 peers front both listeners. `CONSOLE_TRUSTED_PROXIES=none` or `off` explicitly
 suppresses the fallback. A malformed, separators-only, catch-all, or unreadable
 remote value is an error and fails closed to trust-none. Standalone Console
-refuses to start; embedded Console logs the error and retains trust-none.
+refuses to start; Server builds with the post-0903 fix also propagate the error
+and exit instead of relying on normally silenced Console logs.
+
+The embedded repair ([silo#147](https://github.com/pgsty/silo/issues/147)) restores
+trust in local processes that connect over literal loopback IPs (`127.0.0.0/8`
+or `::1`, including IPv4-mapped addresses). Unset or blank trusts only those
+TCP peers; an explicit list adds remote peers. `none`/`off` disables the local
+exception too. Only explicit list entries are skipped when walking a forwarded
+chain: a loopback address inside a header is not implicitly trusted. Local
+proxies must sanitize forwarded headers; proxies on another host or container
+need their actual peer addresses listed. Standalone Console has no implicit
+loopback exception.
 
 Forwarded chains are read from the peer backwards. The first address outside
 the trusted list is the client. The walk stops, and the request is attributed
@@ -122,13 +133,16 @@ is consulted per request, chosen by presence in the order `X-Forwarded-For`,
 `X-Real-IP`, `Forwarded`, so a client cannot choose which proxy-authored header
 Console believes; the proxy must remove the families it does not author.
 
-In the current embedded server, SILO removes `CONSOLE_*` variables before it
-configures Console. `CONSOLE_TRUSTED_PROXIES` is therefore standalone-only;
+Server builds with the #148 repair keep the four WebSocket limits below;
+earlier builds, including 0903, remove every `CONSOLE_*` value before
+configuring Console. `CONSOLE_TRUSTED_PROXIES` is therefore standalone-only;
 embedded deployments must use `MINIO_API_TRUSTED_PROXIES`. That server setting
 also governs direct S3 API source attribution, which remains a separate ingress
-path from standalone Console.
+path from standalone Console. With `MINIO_API_TRUSTED_PROXIES=none`/`off`, S3
+also ignores the browser address forwarded by embedded Console, so source-IP
+policies through Console see the internal peer.
 
-When a reverse proxy is not listed, requests are attributed to the proxy itself.
+When a reverse proxy is not trusted, requests are attributed to the proxy itself.
 This is safe against client spoofing, but a policy that already permits that
 proxy address may consequently permit every client arriving through it. Review
 IP allow-lists as well as the proxy setting during migration.
@@ -138,7 +152,7 @@ IP allow-lists as well as the proxy setting during migration.
 Browser WebSocket handshakes to `/ws/*` are accepted only when the `Origin`
 authority matches the request `Host`, matches the authority of
 `CONSOLE_BROWSER_REDIRECT_URL`, is asserted by a trusted proxy (the TCP peer is
-listed in `CONSOLE_TRUSTED_PROXIES` or, embedded, `MINIO_API_TRUSTED_PROXIES`,
+trusted under the source-address policy above,
 **and** the first configured `CONSOLE_SECURE_HOSTS_PROXY_HEADERS` header present
 carries exactly one host[:port] equal to the Origin authority), or matches
 `CONSOLE_SECURE_ALLOWED_HOSTS` (exact, or anchored regular expressions with
@@ -178,6 +192,12 @@ Unavailable` when the process total or the anonymous budget is exhausted.
 | `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 | anonymous `/ws/objectManager` connections for the process; anonymous connections count against the total too, so they can never take more of it than this |
 | `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 | anonymous connections from one client address |
 
+Server builds containing the [silo#148](https://github.com/pgsty/silo/issues/148)
+repair preserve these four settings, whether supplied directly or loaded with
+`MINIO_CONFIG_ENV_FILE`. The 0903 Server release discards them and always uses
+the defaults. Other `CONSOLE_*` operator overrides are still removed on the
+embedded path. Follow silo#148 for release availability.
+
 Anonymous handshakes need no credentials, so their budget is separate and
 small: public-bucket browsing opens one connection per tab, and nothing else
 can be opened without a session. Exhausting the anonymous budget therefore
@@ -186,7 +206,7 @@ never affects signed-in users.
 The client address is the trust-resolved one (see [Trusted proxy source
 addresses](#trusted-proxy-source-addresses)): IPv4 addresses count
 individually, IPv6 addresses by their /64, and a peer whose address cannot be
-parsed shares one key. Behind a reverse proxy that is not listed as trusted,
+parsed shares one key. Behind a reverse proxy that is not trusted,
 every browser shares the proxy's address and the per-client caps apply to all
 of them together; configure the trust list, or raise
 `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT`, for such deployments.
@@ -195,8 +215,11 @@ Every value must be an integer between 1 and 1048576. The anonymous budget must
 be strictly less than the total and the anonymous per-client cap strictly less
 than the per-client cap, so that signed-in users always keep at least one slot
 in each; the anonymous per-client cap must not exceed the anonymous budget.
-Standalone Console refuses to start on an invalid value; an embedded Console
-logs the error and keeps the defaults.
+An unset variable uses its default. Explicitly blank values and literal
+`env://` references are invalid integers. Standalone Console and Server builds
+containing the repair return configuration errors before Console serves
+requests. A Server initialization failure exits the process; its S3 listener
+may already have started at that point.
 
 ## Outbound TLS verification
 

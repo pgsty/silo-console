@@ -123,6 +123,31 @@ func TestWSCheckOrigin(t *testing.T) {
 	}
 }
 
+func TestEmbeddedLoopbackWSOrigin(t *testing.T) {
+	preserveSourceIPTrustState(t)
+	t.Setenv(EnvConsoleTrustedProxies, "")
+	t.Setenv(EnvMinIOTrustedProxies, "")
+	if err := ConfigureEmbeddedSourceIPTrust(); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv(ConsoleDevMode, "off")
+	t.Setenv(ConsoleBrowserRedirectURL, "")
+	t.Setenv(ConsoleSecureAllowedHosts, "")
+	t.Setenv(ConsoleSecureHostsProxyHeaders, "")
+	req := originRequest("https://public.example", "backend:9090", "127.0.0.1:1234", http.Header{"X-Forwarded-Host": {"public.example"}})
+	if wsCheckOrigin(req) {
+		t.Fatal("loopback alone authorized an Origin without a configured host header")
+	}
+	t.Setenv(ConsoleSecureHostsProxyHeaders, "X-Forwarded-Host")
+	if !wsCheckOrigin(req) {
+		t.Fatal("trusted loopback proxy's matching configured authority was rejected")
+	}
+	req.Header.Set("Origin", "https://evil.example")
+	if wsCheckOrigin(req) {
+		t.Fatal("loopback authorized an Origin that does not match the asserted authority")
+	}
+}
+
 func TestValidAuthority(t *testing.T) {
 	tests := map[string]bool{
 		"public.example":         true,
