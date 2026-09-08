@@ -1,8 +1,9 @@
 {
   "_comment": [
-    "Maintained dependency releases Console selects directly or through its one source replacement.",
-    "kind=module_tag: a SemVer tag with no GitHub release (the Go proxy serves it; nothing is published as a binary).",
+    "Maintained dependencies Console selects directly or through its one source replacement.",
+    "kind=module_tag: a SemVer tag served by the Go proxy, optionally accompanied by a published source-only GitHub release with no binary assets.",
     "kind=calendar_release: an immutable published RELEASE.* GitHub release with assets; go.mod pins its pseudo-version because the tag is not SemVer.",
+    "kind=source_commit: an immutable MC pseudo-version accepted on main with successful Go, Crosscompile, VulnCheck and Test Release Pipeline push runs; no MC release tag or binaries are created.",
     "release_pending=true records a tag the maintainer has not created yet: `make verifiers` warns and the tag preflight fails.",
     "Verified by hack/deps-release-check.sh; see docs/Release.md."
   ],
@@ -10,20 +11,19 @@
     {
       "selection": "direct",
       "import": "github.com/pgsty/silo-pkg/v3",
-      "version": "v3.13.2",
+      "version": "v3.13.3",
       "kind": "module_tag",
-      "tag": "v3.13.2",
-      "commit": "6ad4c4147d431881d7a09e94da380c62d197342f",
+      "tag": "v3.13.3",
+      "commit": "a92c54d7ad910060dd6053c2fc38d41f3229bcfe",
       "repository": "pgsty/silo-pkg"
     },
     {
       "selection": "replace",
       "import": "github.com/minio/mc",
       "replacement": "github.com/pgsty/mc",
-      "version": "v0.0.0-20260903063637-a2ef95c035d9",
-      "kind": "calendar_release",
-      "tag": "RELEASE.2026-09-03T07-13-05Z",
-      "commit": "a2ef95c035d9ae7cc01469a63926900f1786f9e2",
+      "version": "v0.0.0-20260908140805-c8aa5d25a63a",
+      "kind": "source_commit",
+      "commit": "c8aa5d25a63a617bb6d832ec3fb65257fea6078e",
       "repository": "pgsty/mc"
     }
   ]

@@ -276,10 +276,10 @@ github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7olPtrEc=
 github.com/pelletier/go-toml/v2 v2.3.1/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/pgsty/mc v0.0.0-20260903063637-a2ef95c035d9 h1:kJkqK0hJrmvdTOPiI98HoPmET0SHYI9+ytaTRzQdGAs=
-github.com/pgsty/mc v0.0.0-20260903063637-a2ef95c035d9/go.mod h1:+j12ENu7ggWIaBY4nakGABVmkjfJgogzijHIbaJFSOk=
-github.com/pgsty/silo-pkg/v3 v3.13.2 h1:Clw11c/J54Tx6pijNCWtXiC7e0fwP/f5Tgeb6fsXg2w=
-github.com/pgsty/silo-pkg/v3 v3.13.2/go.mod h1:0GmaDA0ArQ8bkAI/obiSNTBQzdgBu6W0e0olDCbyXXo=
+github.com/pgsty/mc v0.0.0-20260908140805-c8aa5d25a63a h1:JIVjuYP7yXjNFGzQX44zE9BsVPTRkdip8TlsmW7mTgE=
+github.com/pgsty/mc v0.0.0-20260908140805-c8aa5d25a63a/go.mod h1:VHif+uy3s+nOcQKy808NlNpYawINOeGSyisgjoSBNVs=
+github.com/pgsty/silo-pkg/v3 v3.13.3 h1:d2xYTn4LXoWIAIjBlW/17wtA/Ut1ap29t+1ww4TFa8o=
+github.com/pgsty/silo-pkg/v3 v3.13.3/go.mod h1:0GmaDA0ArQ8bkAI/obiSNTBQzdgBu6W0e0olDCbyXXo=
 github.com/philhofer/fwd v1.2.0 h1:e6DnBTl7vGY+Gz322/ASL4Gyp1FspeMvx1RNDoToZuM=
 github.com/philhofer/fwd v1.2.0/go.mod h1:RqIHx9QI14HlwKwm98g9Re5prTQ6LdeRQn+gXJFxsJM=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=

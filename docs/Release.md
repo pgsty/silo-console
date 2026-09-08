@@ -35,9 +35,13 @@ Record and watch the run IDs. Rerun a failed job only for an infrastructure
 failure; fix a product failure in a new commit and validate the new SHA.
 
 The tag preflight also runs `hack/deps-release-check.sh online`. It verifies the
-maintained `silo-pkg` and `mc` releases recorded in
-`hack/deps-release.json` against their tags, the public Go proxy, the checksum
-database, and `go.sum`.
+maintained dependencies recorded in `hack/deps-release.json` against the public
+Go proxy, the checksum database, and `go.sum`. Library tags must resolve to the
+recorded commit. MC may select either a published calendar release or an
+immutable `source_commit`: that commit must have landed on main, and its latest
+main-push runs of Go, Crosscompile, VulnCheck and Test Release Pipeline must all
+have succeeded. This validates the source embedded by Console without tagging
+or publishing a new standalone mcli release.
 
 ## 3. Tag and build
 
@@ -53,7 +57,7 @@ Before GoReleaser runs, the tag workflow checks:
 - the exact-SHA matrix and vulnerability summaries;
 - that the tag resolves to the checked-out commit;
 - that the CHANGELOG and generated frontend version match the tag;
-- that the maintained dependency releases remain available; and
+- that the maintained dependency tags or accepted MC source remain available; and
 - that rebuilding `web-app/build` and `src/version.tsx` produces no diff.
 
 GoReleaser then uploads binaries, archives, packages, checksums, legal files,
