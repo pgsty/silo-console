@@ -236,7 +236,7 @@ const ListObjects = () => {
     data: Record<string, unknown> | null;
   }>({ identity: "", data: null });
 
-  const isVersioningApplied = isVersionedMode(versioningConfig.status);
+  const isVersioningApplied = isVersionedMode(versioningConfig?.status);
 
   const bucketName = params.bucketName || "";
   // The route is the source of truth for the object the panels show; the redux

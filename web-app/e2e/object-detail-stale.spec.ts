@@ -133,6 +133,25 @@ const versionRows = (page: Page) => page.locator(".ctrItem");
 test.describe("authenticated object browser", () => {
   test.use({ storageState: minioadminFile });
 
+  test("an empty versioning response keeps the object list usable", async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.route(`**/api/v1/buckets/${bucketName}/versioning`, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "null",
+      }),
+    );
+    await visitBucket(page);
+    await page.locator("#refresh-objects-list").click();
+    await expect(objectRow(page, objectA)).toBeVisible();
+    await expect(page.locator("#showDeletedObjects")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
   test("a late listing for A cannot replace B's details or actions", async ({
     page,
   }) => {
