@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Verify that Console's maintained direct dependency and source replacement
-# point at released versions, as recorded in hack/deps-release.json.
+# point at released versions or accepted MC source, as recorded in
+# hack/deps-release.json.
 #
 #   hack/deps-release-check.sh structural   # offline: go.mod agrees with the record
 #   hack/deps-release-check.sh online       # + tags dereference to the recorded
@@ -10,7 +11,8 @@
 # structural accepts a record marked release_pending (the tag does not exist
 # yet) as long as go.mod pins the recorded current_pin, and prints a warning;
 # online never does. The tag preflight runs online, so Console cannot be tagged
-# while a maintained release is missing.
+# while a required maintained release is missing. MC may instead select an
+# immutable source commit with successful main-branch validation.
 set -euo pipefail
 
 mode="${1:-structural}"
@@ -52,7 +54,8 @@ for i in $(seq 0 $((count - 1))); do
   pending=$(m release_pending); current_pin=$(m current_pin)
 
   [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "$import: commit must be 40 hex characters" >&2; problems=$((problems + 1)); continue; }
-  [[ -n "$tag" && -n "$repository" && -n "$version" ]] || { echo "$import: tag, repository and version are required" >&2; problems=$((problems + 1)); continue; }
+  [[ -n "$repository" && -n "$version" ]] || { echo "$import: repository and version are required" >&2; problems=$((problems + 1)); continue; }
+  [[ "$kind" = source_commit || -n "$tag" ]] || { echo "$import: tag is required" >&2; problems=$((problems + 1)); continue; }
 
   case "$kind" in
     module_tag)
@@ -60,9 +63,13 @@ for i in $(seq 0 $((count - 1))); do
       is_pseudo "$version" && { echo "$import: module_tag version $version is a pseudo-version" >&2; problems=$((problems + 1)); }
       test "$version" = "$tag" || { echo "$import: module_tag requires version == tag ($version != $tag)" >&2; problems=$((problems + 1)); }
       ;;
-    calendar_release)
-      is_pseudo "$version" || { echo "$import: calendar_release version $version must be a pseudo-version" >&2; problems=$((problems + 1)); }
+    calendar_release|source_commit)
+      is_pseudo "$version" || { echo "$import: $kind version $version must be a pseudo-version" >&2; problems=$((problems + 1)); }
       [[ "$version" == *"${commit:0:12}" ]] || { echo "$import: pseudo-version $version does not end in commit ${commit:0:12}" >&2; problems=$((problems + 1)); }
+      if [ "$kind" = source_commit ]; then
+        [[ "$selection" = replace && "$import" = github.com/minio/mc && "$replacement" = github.com/pgsty/mc && "$repository" = pgsty/mc && -z "$tag" && -z "$pending" ]] \
+          || { echo "$import: source_commit is only for a committed MC source replacement without a release tag" >&2; problems=$((problems + 1)); continue; }
+      fi
       ;;
     *) echo "$import: unknown kind $kind" >&2; problems=$((problems + 1)); continue ;;
   esac
@@ -97,31 +104,35 @@ for i in $(seq 0 $((count - 1))); do
   command -v gh >/dev/null || fail "gh is required for online mode"
   [ -n "${GH_TOKEN:-}" ] || fail "GH_TOKEN is required for online mode"
 
-  ref=$(gh api "repos/$repository/git/ref/tags/$tag" 2>/dev/null) || { echo "$import: tag $tag does not exist in $repository" >&2; problems=$((problems + 1)); continue; }
-  sha=$(jq -r '.object.sha' <<<"$ref"); type=$(jq -r '.object.type' <<<"$ref")
-  if [ "$type" = "tag" ]; then
-    sha=$(gh api "repos/$repository/git/tags/$sha" --jq '.object.sha')
-  fi
-  test "$sha" = "$commit" || { echo "$import: $repository@$tag dereferences to $sha, record says $commit" >&2; problems=$((problems + 1)); continue; }
+  if [ "$kind" = source_commit ]; then
+    bash "$root/hack/check-mc-source.sh" "$commit" || { problems=$((problems + 1)); continue; }
+  else
+    ref=$(gh api "repos/$repository/git/ref/tags/$tag" 2>/dev/null) || { echo "$import: tag $tag does not exist in $repository" >&2; problems=$((problems + 1)); continue; }
+    sha=$(jq -r '.object.sha' <<<"$ref"); type=$(jq -r '.object.type' <<<"$ref")
+    if [ "$type" = "tag" ]; then
+      sha=$(gh api "repos/$repository/git/tags/$sha" --jq '.object.sha')
+    fi
+    test "$sha" = "$commit" || { echo "$import: $repository@$tag dereferences to $sha, record says $commit" >&2; problems=$((problems + 1)); continue; }
 
-  release=$(gh api "repos/$repository/releases/tags/$tag" 2>/dev/null || true)
-  case "$kind" in
-    module_tag)
-      # A module tag needs no GitHub release. If one exists it must be a
-      # published, source-only release: no binary is ever distributed from it.
-      if [ -n "$release" ]; then
-        jq -e '.draft == false and (.assets | length) == 0' <<<"$release" >/dev/null \
-          || { echo "$import: the GitHub release for module tag $tag must be published and carry no assets" >&2; problems=$((problems + 1)); }
-      fi
-      ;;
-    calendar_release)
-      [ -n "$release" ] || { echo "$import: calendar_release $tag must be a published GitHub release" >&2; problems=$((problems + 1)); continue; }
-      jq -e '.draft == false and .prerelease == false and .immutable == true and (.assets | length) > 0' <<<"$release" >/dev/null \
-        || { echo "$import: $tag must be published, immutable, non-prerelease and carry release assets" >&2; problems=$((problems + 1)); }
-      latest=$(gh api "repos/$repository/releases/latest" --jq '.tag_name' 2>/dev/null || true)
-      test "$latest" = "$tag" || { echo "$import: $tag must be the latest release of $repository (latest is $latest)" >&2; problems=$((problems + 1)); }
-      ;;
-  esac
+    release=$(gh api "repos/$repository/releases/tags/$tag" 2>/dev/null || true)
+    case "$kind" in
+      module_tag)
+        # A module tag needs no GitHub release. If one exists it must be a
+        # published, source-only release: no binary is ever distributed from it.
+        if [ -n "$release" ]; then
+          jq -e '.draft == false and (.assets | length) == 0' <<<"$release" >/dev/null \
+            || { echo "$import: the GitHub release for module tag $tag must be published and carry no assets" >&2; problems=$((problems + 1)); }
+        fi
+        ;;
+      calendar_release)
+        [ -n "$release" ] || { echo "$import: calendar_release $tag must be a published GitHub release" >&2; problems=$((problems + 1)); continue; }
+        jq -e '.draft == false and .prerelease == false and .immutable == true and (.assets | length) > 0' <<<"$release" >/dev/null \
+          || { echo "$import: $tag must be published, immutable, non-prerelease and carry release assets" >&2; problems=$((problems + 1)); }
+        latest=$(gh api "repos/$repository/releases/latest" --jq '.tag_name' 2>/dev/null || true)
+        test "$latest" = "$tag" || { echo "$import: $tag must be the latest release of $repository (latest is $latest)" >&2; problems=$((problems + 1)); }
+        ;;
+    esac
+  fi
 
   # Isolated proxy + checksum database verification.
   work=$(mktemp -d)
@@ -142,7 +153,7 @@ for i in $(seq 0 $((count - 1))); do
   grep -qF "$module_path $version/go.mod $gomodsum" <<<"$lookup" || { echo "$import: checksum database go.mod hash differs from the downloaded module" >&2; problems=$((problems + 1)); }
   grep -qF "$module_path $version $sum" go.sum || { echo "$import: go.sum lacks '$module_path $version $sum'" >&2; problems=$((problems + 1)); }
   grep -qF "$module_path $version/go.mod $gomodsum" go.sum || { echo "$import: go.sum lacks the go.mod hash for $module_path $version" >&2; problems=$((problems + 1)); }
-  echo "$import: $module_path@$version verified ($selection/$kind, $repository@$tag = $commit, proxy + sum.golang.org + go.sum agree)"
+  echo "$import: $module_path@$version verified ($selection/$kind, $repository@${tag:-$commit} = $commit, proxy + sum.golang.org + go.sum agree)"
 done
 
 if [ "$problems" -gt 0 ]; then

@@ -41,6 +41,7 @@ replacements:
 deps-release:
 	@echo "Running $@ check"
 	@hack/deps-release-check.sh structural
+	@bash hack/check-mc-source_test.sh
 
 fmt:
 	@echo "Running $@ check"

@@ -1,6 +1,6 @@
 # Changelog
 
-## Release v2.3.1
+## Release v2.4.0
 
 Correctness and usability:
 
@@ -19,10 +19,12 @@ Correctness and usability:
 Security and build maintenance:
 
 - Builds with Go 1.27.1 and GitHub Actions `setup-go` v7
-- Updates the maintained dependency chain to released `silo-pkg` v3.13.2 and immutable `pgsty/mc` `RELEASE.2026-09-03T07-13-05Z` (`a2ef95c0`), while keeping `minio-go` on upstream master commit `0e78d3f18efe`
+- Updates the maintained dependency chain to released `silo-pkg` v3.13.3 and `pgsty/mc` source commit `c8aa5d25`, while keeping `minio-go` on upstream master commit `0e78d3f18efe`
+- Preserves distinct Deny/NotResource policy clauses and string-condition values through silo-pkg v3.13.3, fixes Deny detection before indexing, and bounds wildcard matching. Previously lost clauses must be restored from the original policy source; the upgrade cannot recover missing stored statements
+- Accepts an unpublished MC source revision only after all four required main-push workflows succeed, while retaining public Go proxy and checksum verification; this Console release does not create a standalone mcli release
 - Refreshes the compiled Go dependency closure, including `golang.org/x/crypto` v0.56.0 for the SSH channel denial-of-service fixes, gRPC-Go v1.83.2 for CVE-2026-84304, Protobuf v1.36.12, `klauspost/compress` v1.20.0, Prometheus libraries, JWX v3.2.0 and the current go-openapi line
-- Uses `silo-pkg` v3.13.2's strict policy API directly instead of duplicating it around an upstream compatibility floor. Any remaining `minio/pkg` package is transitive legacy code, not the maintained implementation; upstream MinIO/mc builds remain best-effort, non-blocking compatibility signals
-- Runs release-gating integration, permissions, replication, SSO, subpath and browser tests against the pinned SILO server and the exact released `pgsty/mc` source selected by `go.mod`; upstream server and client probes remain visible but advisory
+- Uses `silo-pkg` v3.13.3's strict policy API directly instead of duplicating it around an upstream compatibility floor. Any remaining `minio/pkg` package is transitive legacy code, not the maintained implementation; upstream MinIO/mc builds remain best-effort, non-blocking compatibility signals
+- Runs release-gating integration, permissions, replication, SSO, subpath and browser tests against the pinned SILO server and the exact `pgsty/mc` source selected by `go.mod`; upstream server and client probes remain visible but advisory
 - Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, structured-clone, and fflate advisories; fflate 0.8.3 is selected throughout the runtime and test dependency graph
 - Updates the development SDK's stream-json dependency to 3.5.0 with a small MinIO JavaScript SDK compatibility patch and notification parser tests for its CommonJS and ESM builds
 - Updates TestCafe to 3.7.6 locally and in CI, removing its vulnerable `replicator` dependency
