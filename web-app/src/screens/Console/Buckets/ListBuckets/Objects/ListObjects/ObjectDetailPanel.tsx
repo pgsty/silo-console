@@ -93,7 +93,7 @@ import { shareSubjectKey } from "../ObjectDetails/shareSubject";
 interface IObjectDetailPanelProps {
   internalPaths: string;
   bucketName: string;
-  versioningInfo: BucketVersioningResponse;
+  versioningInfo: BucketVersioningResponse | null;
   locking: boolean | undefined;
   onClosePanel: (hardRefresh: boolean) => void;
 }
@@ -427,7 +427,7 @@ const ObjectDetailPanel = ({
     currentVersionID: actualInfo.version_id,
     distributedSetup,
     exactVersionCount: versions.length,
-    versioningStatus: versioningInfo.status,
+    versioningStatus: versioningInfo?.status,
   });
 
   const previewAvailable = isPreviewAvailable({
@@ -637,7 +637,9 @@ const ObjectDetailPanel = ({
           selectedBucket={bucketName}
           selectedObject={target.key}
           closeDeleteModalAndRefresh={closeDeleteModal}
-          versioningInfo={distributedSetup ? versioningInfo : undefined}
+          versioningInfo={
+            distributedSetup ? (versioningInfo ?? undefined) : undefined
+          }
           selectedVersion={deleteVersion}
         />
       )}

@@ -1720,4 +1720,18 @@ export const zhScreens: Record<string, string> = {
   "The exact corresponding source is not available for this build: {reason}. See the NOTICE for how to obtain it.":
     "本次构建无法给出精确的对应源码：{reason}。获取方式见 NOTICE。",
   "Source: not available for this build": "源码：本次构建不可用",
+  // ---- Object Browser paging ----------------------------------------------
+  "Items per page": "每页条数",
+  "First page": "首页",
+  "Previous page": "上一页",
+  "Next page": "下一页",
+  "{count} items in total": "共 {count} 项",
+  "Page {page} · {count} on this page": "第 {page} 页 · 本页 {count} 项",
+  "Sorting, filtering and select all apply to this page only.":
+    "排序、筛选和全选仅作用于本页。",
+  "No objects match the filter": "没有匹配的对象",
+  "No objects on this page match the filter": "本页没有匹配项",
+  "Showing the first {count} entries; the listing stopped at the row or time limit.":
+    "仅显示前 {count} 项，列举已在行数或时间上限处停止。",
+  "Start typing to filter objects on this page": "输入以筛选本页对象",
 };

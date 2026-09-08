@@ -34,6 +34,10 @@ export interface WebsocketRequest {
   prefix?: string;
   date?: string;
   request_id: number;
+  // One "objects" page: how many entries it may hold and the opaque cursor
+  // returned with the previous page's request_end (empty for the first page).
+  page_size?: number;
+  continuation_token?: string;
 }
 
 export interface WebsocketResponse {
@@ -43,6 +47,11 @@ export interface WebsocketResponse {
   data?: ObjectResponse[];
   prefix?: string;
   bucketName?: string;
+  // On request_end: the cursor of the page that follows, empty at the end of
+  // the prefix; and whether a rewind listing was cut short by its row cap or
+  // time budget.
+  next_continuation_token?: string;
+  truncated?: boolean;
 }
 
 interface WebsocketErrorResponse {

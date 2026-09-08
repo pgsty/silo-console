@@ -21,13 +21,16 @@ import (
 	"time"
 
 	"github.com/minio/mc/cmd"
-	"github.com/minio/minio-go/v7"
 )
 
 type objectsListOpts struct {
 	BucketName string
 	Prefix     string
 	Date       time.Time
+	// PageSize and ContinuationToken bound one "objects" page; see
+	// listObjectPage. Rewind listings ignore them.
+	PageSize          int
+	ContinuationToken string
 }
 
 type ObjectsRequest struct {
@@ -36,6 +39,11 @@ type ObjectsRequest struct {
 	Prefix     string `json:"prefix"`
 	Date       string `json:"date"`
 	RequestID  int64  `json:"request_id"`
+	// PageSize is the number of entries one objects page may hold; 0 selects
+	// objectPageDefaultSize. ContinuationToken is the opaque token that came
+	// with the previous page's request_end frame, empty for the first page.
+	PageSize          int    `json:"page_size,omitempty"`
+	ContinuationToken string `json:"continuation_token,omitempty"`
 }
 
 type WSResponse struct {
@@ -45,6 +53,14 @@ type WSResponse struct {
 	Prefix     string           `json:"prefix,omitempty"`
 	BucketName string           `json:"bucketName,omitempty"`
 	Data       []ObjectResponse `json:"data,omitempty"`
+	// NextContinuationToken accompanies the request_end frame of an objects
+	// page and names the page that follows; it is empty once the listing has
+	// reached the end of the prefix.
+	NextContinuationToken string `json:"next_continuation_token,omitempty"`
+	// Truncated accompanies the request_end frame of a rewind listing that
+	// was stopped by the row cap or the time budget, so the client can label
+	// the result as incomplete.
+	Truncated bool `json:"truncated,omitempty"`
 }
 
 type ObjectResponse struct {
@@ -58,8 +74,13 @@ type ObjectResponse struct {
 
 func getObjectsOptionsFromReq(request ObjectsRequest) (*objectsListOpts, error) {
 	pOptions := objectsListOpts{
-		BucketName: request.BucketName,
-		Prefix:     request.Prefix,
+		BucketName:        request.BucketName,
+		Prefix:            request.Prefix,
+		PageSize:          request.PageSize,
+		ContinuationToken: request.ContinuationToken,
+	}
+	if pOptions.PageSize <= 0 {
+		pOptions.PageSize = objectPageDefaultSize
 	}
 
 	if request.Mode == "rewind" {
@@ -73,14 +94,6 @@ func getObjectsOptionsFromReq(request ObjectsRequest) (*objectsListOpts, error) 
 	}
 
 	return &pOptions, nil
-}
-
-func startObjectsListing(ctx context.Context, client MinioClient, objOpts *objectsListOpts) <-chan minio.ObjectInfo {
-	opts := minio.ListObjectsOptions{
-		Prefix: objOpts.Prefix,
-	}
-
-	return client.listObjects(ctx, objOpts.BucketName, opts)
 }
 
 func startRewindListing(ctx context.Context, client MCClient, objOpts *objectsListOpts) <-chan *cmd.ClientContent {

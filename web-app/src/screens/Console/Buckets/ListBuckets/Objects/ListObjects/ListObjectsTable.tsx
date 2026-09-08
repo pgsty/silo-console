@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { listModeColumns, rewindModeColumns } from "./ListObjectsHelpers";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../../../store";
@@ -23,14 +23,17 @@ import {
   setLoadingVersions,
   setObjectDetailsView,
   setPreviewOpen,
-  setReloadObjectsList,
   setSelectedObjects,
   setSelectedObjectView,
   setSelectedPreview,
 } from "../../../../ObjectBrowser/objectBrowserSlice";
+import {
+  ObjectSortField,
+  visiblePageObjects,
+} from "../../../../ObjectBrowser/objectPaging";
+import ObjectPager from "../../../../ObjectBrowser/ObjectPager";
 import { useNavigate, useParams } from "react-router-dom";
 import get from "lodash/get";
-import { sortListObjects } from "../utils";
 import { resolveAnonymousOpen } from "../Preview/anonymousPreview";
 import { PreviewRequestGeneration } from "../Preview/textPreview";
 import { BucketObjectItem } from "./types";
@@ -54,7 +57,8 @@ const ListObjectsTable = () => {
   const [sortDirection, setSortDirection] = useState<
     "ASC" | "DESC" | undefined
   >("ASC");
-  const [currentSortField, setCurrentSortField] = useState<string>("name");
+  const [currentSortField, setCurrentSortField] =
+    useState<ObjectSortField>("name");
   const anonymousOpenGeneration = useRef(new PreviewRequestGeneration());
   const anonymousMetadataController = useRef<AbortController | null>(null);
 
@@ -83,6 +87,9 @@ const ListObjectsTable = () => {
     (state: AppState) => state.objectBrowser.rewind.rewindEnabled,
   );
   const records = useSelector((state: AppState) => state.objectBrowser.records);
+  const pageComplete = useSelector(
+    (state: AppState) => state.objectBrowser.objectPage.complete,
+  );
   const searchObjects = useSelector(
     (state: AppState) => state.objectBrowser.searchObjects,
   );
@@ -101,23 +108,19 @@ const ListObjectsTable = () => {
     IAM_SCOPES.S3_ALL_LIST_BUCKET,
   ]);
 
-  const plSelect = records.filter((b: BucketObjectItem) => {
-    if (searchObjects === "") {
-      return true;
-    } else {
-      const objectName = b.name.toLowerCase();
-      return objectName.indexOf(searchObjects.toLowerCase()) >= 0;
-    }
-  });
-  const sortASC = plSelect.sort(sortListObjects(currentSortField));
-
-  let payload: BucketObjectItem[] = [];
-
-  if (sortDirection === "ASC") {
-    payload = sortASC;
-  } else {
-    payload = sortASC.reverse();
-  }
+  // The filter and the sort act on the committed page in memory; neither
+  // reaches the server. When the page is the whole directory they cover the
+  // whole directory, otherwise this page only.
+  const payload: BucketObjectItem[] = useMemo(
+    () =>
+      visiblePageObjects(
+        records,
+        searchObjects,
+        currentSortField,
+        sortDirection,
+      ),
+    [records, searchObjects, currentSortField, sortDirection],
+  );
 
   const openPath = async (object: BucketObject) => {
     anonymousMetadataController.current?.abort();
@@ -185,11 +188,11 @@ const ListObjectsTable = () => {
     },
   ];
 
+  // A column sort reorders the loaded page; it does not reload the listing.
   const sortChange = (sortData: any) => {
     const newSortDirection = get(sortData, "sortDirection", "DESC");
-    setCurrentSortField(sortData.sortBy);
+    setCurrentSortField(sortData.sortBy as ObjectSortField);
     setSortDirection(newSortDirection);
-    dispatch(setReloadObjectsList(true));
   };
 
   const selectAllItems = () => {
@@ -234,48 +237,60 @@ const ListObjectsTable = () => {
         ? t("This location is empty, please try uploading a new file")
         : t("This location is empty");
 
+  // The page has rows, but none of them matches the filter. The pager below
+  // the table stays usable, so the other pages can still be filtered.
+  if (records.length > 0 && payload.length === 0) {
+    errorMessage = pageComplete
+      ? t("No objects match the filter")
+      : t("No objects on this page match the filter");
+  }
+
   if (connectionError) {
     errorMessage = t(
       "Objects List unavailable. Please review your WebSockets configuration and try again",
     );
   }
 
-  let customPaperHeight = "calc(100vh - 290px)";
+  // The pager takes the bottom of the space the table used to fill.
+  let customPaperHeight = "calc(100vh - 336px)";
 
   if (obOnly) {
-    customPaperHeight = "calc(100vh - 315px)";
+    customPaperHeight = "calc(100vh - 361px)";
   }
 
   return (
-    <DataTable
-      itemActions={tableActions}
-      columns={rewindEnabled ? rewindModeColumns(t) : listModeColumns(t)}
-      isLoading={requestInProgress}
-      entityName={t("Objects")}
-      idField="name"
-      records={payload}
-      customPaperHeight={customPaperHeight}
-      selectedItems={selectedObjects}
-      onSelect={!anonymousMode ? selectListObjects : undefined}
-      customEmptyMessage={errorMessage}
-      sortEnabled={{
-        currentSort: currentSortField,
-        currentDirection: sortDirection,
-        onSortClick: sortChange,
-      }}
-      onSelectAll={selectAllItems}
-      rowStyle={({ index }) => {
-        if (payload[index]?.delete_flag) {
-          return "deleted";
-        }
+    <Fragment>
+      <DataTable
+        itemActions={tableActions}
+        columns={rewindEnabled ? rewindModeColumns(t) : listModeColumns(t)}
+        isLoading={requestInProgress}
+        entityName={t("Objects")}
+        idField="name"
+        records={payload}
+        customPaperHeight={customPaperHeight}
+        selectedItems={selectedObjects}
+        onSelect={!anonymousMode ? selectListObjects : undefined}
+        customEmptyMessage={errorMessage}
+        sortEnabled={{
+          currentSort: currentSortField,
+          currentDirection: sortDirection,
+          onSortClick: sortChange,
+        }}
+        onSelectAll={selectAllItems}
+        rowStyle={({ index }) => {
+          if (payload[index]?.delete_flag) {
+            return "deleted";
+          }
 
-        return "";
-      }}
-      sx={{
-        minHeight: detailsOpen ? "100%" : "initial",
-      }}
-      noBackground
-    />
+          return "";
+        }}
+        sx={{
+          minHeight: detailsOpen ? "100%" : "initial",
+        }}
+        noBackground
+      />
+      <ObjectPager />
+    </Fragment>
   );
 };
 export default ListObjectsTable;

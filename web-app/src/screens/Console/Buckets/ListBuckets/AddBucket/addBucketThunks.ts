@@ -24,11 +24,19 @@ import {
   ObjectRetentionUnit,
 } from "../../../../../api/consoleApi";
 
+import { hasCreateBucketPermission } from "../../../../../common/SecureComponent/createBucketPermission";
+
 export const addBucketAsync = createAsyncThunk(
   "buckets/addBucketAsync",
   async (_, { getState, rejectWithValue, dispatch }) => {
     const state = getState() as AppState;
 
+    if (!hasCreateBucketPermission(state.console.session?.permissions)) {
+      return rejectWithValue({
+        message: "Access Denied.",
+        detailedMessage: "Missing s3:CreateBucket permission.",
+      });
+    }
     const bucketName = state.addBucket.name;
     const versioningEnabled = state.addBucket.versioningEnabled;
     const lockingEnabled = state.addBucket.lockingEnabled;

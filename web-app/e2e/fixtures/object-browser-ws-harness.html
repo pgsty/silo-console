@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- The app resolves its API and login paths from the document base;
+         the harness is a root deployment. -->
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Object Manager middleware harness</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script
+      type="module"
+      src="/e2e/fixtures/objectBrowserWSHarness.ts"
+    ></script>
+  </body>
+</html>

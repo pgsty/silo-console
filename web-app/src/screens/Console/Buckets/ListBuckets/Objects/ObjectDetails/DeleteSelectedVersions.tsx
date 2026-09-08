@@ -18,10 +18,9 @@ import React, { Fragment, useEffect, useState } from "react";
 import ConfirmDialog from "../../../../Common/ModalWrapper/ConfirmDialog";
 import { ConfirmDeleteIcon, Switch } from "mds";
 import { setErrorSnackMessage } from "../../../../../../systemSlice";
-import { AppState, useAppDispatch } from "../../../../../../store";
+import { useAppDispatch } from "../../../../../../store";
 import { hasPermission } from "../../../../../../common/SecureComponent";
 import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions";
-import { useSelector } from "react-redux";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { interpolate, useT } from "i18n";
@@ -48,15 +47,15 @@ const DeleteObject = ({
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [bypassGovernance, setBypassGovernance] = useState<boolean>(false);
 
-  const retentionConfig = useSelector(
-    (state: AppState) => state.objectBrowser.retentionConfig,
-  );
-
+  // A bucket default does not describe retention on individual versions.
+  // Keep bypass an explicit, permission-gated choice; SILO enforces the lock.
   const canBypass =
-    hasPermission(
-      [selectedBucket],
-      [IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION],
-    ) && retentionConfig?.mode === "governance";
+    hasPermission(selectedBucket, [
+      IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION,
+    ]) ||
+    hasPermission(`${selectedBucket}/${selectedObject}`, [
+      IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION,
+    ]);
 
   const onClose = () => closeDeleteModalAndRefresh(false);
   const onConfirmDelete = () => {

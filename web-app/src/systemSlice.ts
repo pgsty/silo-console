@@ -21,11 +21,7 @@ import { isDarkModeOn } from "./utils/stylesUtils";
 import { getStoredLanguage, Lang } from "./i18n/lang";
 import { addBucketAsync } from "./screens/Console/Buckets/ListBuckets/AddBucket/addBucketThunks";
 import { retainRestartRequirement } from "./utils/restartRequirement";
-
-// determine whether we have the sidebar state stored on localstorage
-const initSideBarOpen = localStorage.getItem("sidebarOpen")
-  ? JSON.parse(localStorage.getItem("sidebarOpen")!)["open"]
-  : true;
+import { getStoredSidebarOpen } from "./utils/sidebarState";
 
 interface SystemState {
   value: number;
@@ -58,7 +54,7 @@ const initialState: SystemState = {
   loggedIn: false,
   showMarketplace: false,
   userName: "",
-  sidebarOpen: initSideBarOpen,
+  sidebarOpen: getStoredSidebarOpen(),
   siteReplicationInfo: { siteName: "", curSite: false, enabled: false },
   serverNeedsRestart: false,
   serverIsLoading: false,

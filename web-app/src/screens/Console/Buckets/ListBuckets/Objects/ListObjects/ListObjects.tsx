@@ -1197,7 +1197,8 @@ const ListObjects = () => {
                       if (versionsMode) {
                         dispatch(setLoadingVersions(true));
                       } else {
-                        dispatch(resetMessages());
+                        // The committed page is requested again and stays
+                        // on screen until the fresh page arrives.
                         dispatch(setReloadObjectsList(true));
                       }
                     }}

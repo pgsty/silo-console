@@ -852,7 +852,6 @@ func getDeleteObjectResponse(session *models.Principal, params objectApi.DeleteO
 func getDeleteMultiplePathsResponse(session *models.Principal, params objectApi.DeleteMultipleObjectsParams) *CodedAPIError {
 	ctx, cancel := context.WithCancel(params.HTTPRequest.Context())
 	defer cancel()
-	var version string
 	var allVersions bool
 	var bypass bool
 	if params.AllVersions != nil {
@@ -862,9 +861,6 @@ func getDeleteMultiplePathsResponse(session *models.Principal, params objectApi.
 		bypass = *params.Bypass
 	}
 	for i := 0; i < len(params.Files); i++ {
-		if params.Files[i].VersionID != "" {
-			version = params.Files[i].VersionID
-		}
 		prefix := params.Files[i].Path
 		s3Client, err := newS3BucketClient(session, params.BucketName, prefix, getClientIP(params.HTTPRequest))
 		if err != nil {
@@ -873,7 +869,7 @@ func getDeleteMultiplePathsResponse(session *models.Principal, params objectApi.
 		// create a mc S3Client interface implementation
 		// defining the client to be used
 		mcClient := mcClient{client: s3Client}
-		err = deleteObjects(ctx, mcClient, params.BucketName, params.Files[i].Path, version, params.Files[i].Recursive, allVersions, false, bypass)
+		err = deleteObjects(ctx, mcClient, params.BucketName, params.Files[i].Path, params.Files[i].VersionID, params.Files[i].Recursive, allVersions, false, bypass)
 		if err != nil {
 			return ErrorWithContext(ctx, err)
 		}
@@ -881,77 +877,79 @@ func getDeleteMultiplePathsResponse(session *models.Principal, params objectApi.
 	return nil
 }
 
-// deleteObjects deletes either a single object or multiple objects based on recursive flag
-func deleteObjects(ctx context.Context, client MCClient, bucket string, path string, versionID string, recursive, allVersions, nonCurrentVersionsOnly, bypass bool) error {
-	// Delete All non-Current versions only.
-	if nonCurrentVersionsOnly {
-		return deleteNonCurrentVersions(ctx, client, bypass)
+// deleteObjects deletes a single key, or lists a directory / object versions first.
+func deleteObjects(ctx context.Context, client MCClient, bucket, path, versionID string, recursive, allVersions, nonCurrentVersionsOnly, bypass bool) error {
+	if recursive || allVersions || nonCurrentVersionsOnly {
+		return deleteListedObjects(ctx, client, bucket, path, mc.ListOptions{
+			Recursive:         recursive || nonCurrentVersionsOnly,
+			ShowDir:           mc.DirNone,
+			WithOlderVersions: allVersions || nonCurrentVersionsOnly,
+			WithDeleteMarkers: allVersions || nonCurrentVersionsOnly,
+		}, nonCurrentVersionsOnly, bypass)
 	}
-
-	if recursive || allVersions {
-		return deleteMultipleObjects(ctx, client, path, recursive, allVersions, bypass)
-	}
-
 	return deleteSingleObject(ctx, client, bucket, path, versionID, bypass)
 }
 
-// Return standardized URL to be used to compare later.
-func getStandardizedURL(targetURL string) string {
-	return filepath.FromSlash(targetURL)
+// The SDK lists by prefix even for a single object. Compare the complete S3 key
+// without filesystem normalization or URL decoding: both can change object identity.
+func matchesDeleteTarget(content *mc.ClientContent, bucket, path string) bool {
+	target := "/" + bucket + "/" + path
+	if path == "" || strings.HasSuffix(path, "/") {
+		return strings.HasPrefix(content.URL.Path, target)
+	}
+	return content.URL.Path == target
 }
 
-// deleteMultipleObjects uses listing before removal, it can list recursively or not,
-//
-//	Use cases:
-//	   * Remove objects recursively
-func deleteMultipleObjects(ctx context.Context, client MCClient, path string, recursive, allVersions, isBypass bool) error {
-	// Constants defined to make this code more readable
-	const (
-		isIncomplete   = false
-		isRemoveBucket = false
-		forceDelete    = false // Force delete not meant to be used by console UI.
-	)
-
-	listOpts := mc.ListOptions{
-		Recursive:         recursive,
-		Incomplete:        isIncomplete,
-		ShowDir:           mc.DirNone,
-		WithOlderVersions: allVersions,
-		WithDeleteMarkers: allVersions,
-	}
-
+func deleteListedObjects(ctx context.Context, client MCClient, bucket, path string, opts mc.ListOptions, nonCurrentOnly, bypass bool) error {
 	lctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-
 	contentCh := make(chan *mc.ClientContent)
-
+	listingDone := make(chan error, 1)
 	go func() {
-		defer close(contentCh)
-
-		for content := range client.list(lctx, listOpts) {
+		var listingErr error
+		defer func() {
+			listingDone <- listingErr
+			close(contentCh)
+		}()
+		// MC can send pending objects and its final error after cancellation.
+		// Drain those results so its lister exits, without forwarding more work
+		// or replacing the original removal error with context.Canceled.
+		for content := range client.list(lctx, opts) {
+			if lctx.Err() != nil {
+				continue
+			}
 			if content.Err != nil {
+				listingErr = content.Err.ToGoError()
+				cancel()
 				continue
 			}
-
-			if !strings.HasSuffix(getStandardizedURL(content.URL.Path), path) && !strings.HasSuffix(path, "/") {
+			if !matchesDeleteTarget(content, bucket, path) || (nonCurrentOnly && content.IsLatest) {
 				continue
 			}
-
 			select {
 			case contentCh <- content:
 			case <-lctx.Done():
-				return
 			}
 		}
 	}()
 
-	for result := range client.remove(ctx, isIncomplete, isRemoveBucket, isBypass, forceDelete, contentCh) {
-		if result.Err != nil {
-			return result.Err.Cause
+	var removeErr error
+	// Drain results after cancellation as the MC client also reports its final
+	// cancellation/error on this channel. Returning early can strand its worker.
+	for result := range client.remove(lctx, false, false, bypass, false, contentCh) {
+		if result.Err != nil && removeErr == nil {
+			removeErr = result.Err.ToGoError()
+			cancel()
 		}
 	}
-
-	return nil
+	cancel()
+	if err := <-listingDone; err != nil {
+		return err
+	}
+	if removeErr != nil {
+		return removeErr
+	}
+	return ctx.Err()
 }
 
 func deleteSingleObject(ctx context.Context, client MCClient, bucket, object string, versionID string, isBypass bool) error {
@@ -969,47 +967,6 @@ func deleteSingleObject(ctx context.Context, client MCClient, bucket, object str
 			return result.Err.Cause
 		}
 	}
-	return nil
-}
-
-func deleteNonCurrentVersions(ctx context.Context, client MCClient, isBypass bool) error {
-	lctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	contentCh := make(chan *mc.ClientContent)
-
-	go func() {
-		defer close(contentCh)
-
-		// Get current object versions
-		for lsObj := range client.list(lctx, mc.ListOptions{
-			WithDeleteMarkers: true,
-			WithOlderVersions: true,
-			Recursive:         true,
-		}) {
-			if lsObj.Err != nil {
-				continue
-			}
-
-			if lsObj.IsLatest {
-				continue
-			}
-
-			// All non-current objects proceed to purge.
-			select {
-			case contentCh <- lsObj:
-			case <-lctx.Done():
-				return
-			}
-		}
-	}()
-
-	for result := range client.remove(ctx, false, false, isBypass, false, contentCh) {
-		if result.Err != nil {
-			return result.Err.Cause
-		}
-	}
-
 	return nil
 }
 

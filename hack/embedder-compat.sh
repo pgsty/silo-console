@@ -12,6 +12,9 @@ cd "$console_root"
 
 embedder="$(mktemp -d)"
 go run ./hack/replacements readme-block > "$embedder/readme-block.txt"
+# Reuse the repository's verified checksums; tidy still resolves the embedder's
+# graph, but need not refetch checksum records already committed by Console.
+cp go.sum "$embedder/go.sum"
 
 cat > "$embedder/main.go" <<'EOF'
 package main

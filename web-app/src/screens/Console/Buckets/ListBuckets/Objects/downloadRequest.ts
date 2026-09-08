@@ -67,16 +67,19 @@ export const downloadErrorMessage = async (
   return fallback;
 };
 
-export const downloadFilename = (contentDisposition: string | null): string => {
+export const downloadFilename = (
+  contentDisposition: string | null,
+  fallback = "download",
+): string => {
   if (!contentDisposition) {
-    return "download";
+    return fallback;
   }
 
   try {
     const decoded = decodeURIComponent(contentDisposition);
-    return /filename="([^"]*)"/i.exec(decoded)?.[1] || "download";
+    return /filename="([^"]*)"/i.exec(decoded)?.[1] || fallback;
   } catch {
-    return "download";
+    return fallback;
   }
 };
 

@@ -80,6 +80,10 @@ const CreatePathModal = ({
       folderPath = simplePath.endsWith("/") ? simplePath : `${simplePath}/`;
     }
 
+    // This dialog only navigates to the new path; it creates no object. The
+    // records are the loaded page, so this is an advisory for names on that
+    // page, not proof that no such object exists in the directory. Scanning
+    // the whole directory for it is deliberately not done.
     const sharesName = (record: BucketObjectItem) =>
       record.name === folderPath + pathUrl;
 

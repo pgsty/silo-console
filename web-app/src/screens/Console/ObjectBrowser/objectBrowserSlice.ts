@@ -25,6 +25,12 @@ import {
   GetBucketRetentionConfig,
 } from "api/consoleApi";
 import { AppState } from "store";
+import {
+  commitObjectPage as commitPageState,
+  initialObjectPageState,
+  ObjectPageCommit,
+  resetObjectPaging as resetPageState,
+} from "./objectPaging";
 
 const defaultRewind = {
   rewindEnabled: false,
@@ -61,6 +67,7 @@ const initialState: ObjectBrowserState = {
   simplePath: null,
   // object browser
   records: [],
+  objectPage: initialObjectPageState,
   loadingVersioning: true,
   versionInfo: {},
   lockingEnabled: false,
@@ -253,6 +260,11 @@ const objectBrowserSlice = createSlice({
       state.objectManager.managerOpen = false;
     },
     setSearchObjects: (state, action: PayloadAction<string>) => {
+      // The filter changes which rows "select all" covers, so a selection
+      // made under another filter is dropped.
+      if (state.searchObjects !== action.payload) {
+        state.selectedObjects = [];
+      }
       state.searchObjects = action.payload;
     },
     setRequestInProgress: (state, action: PayloadAction<boolean>) => {
@@ -297,8 +309,36 @@ const objectBrowserSlice = createSlice({
         action.payload,
       ];
     },
-    setRecords: (state, action: PayloadAction<BucketObjectItem[]>) => {
-      state.records = action.payload;
+    // The listing moves to another directory, bucket or mode: the rows,
+    // cursors and selection of the previous listing leave at once, before the
+    // new page is requested, so nothing of the old scope shows under the new.
+    resetObjectListing: (
+      state,
+      action: PayloadAction<{ clearFilter: boolean }>,
+    ) => {
+      state.records = [];
+      state.objectPage = resetPageState(state.objectPage);
+      state.selectedObjects = [];
+      if (action.payload.clearFilter) {
+        state.searchObjects = "";
+      }
+    },
+    // A page arrived in full: rows, page size, cursor history and page number
+    // change together, and only here. A failed or canceled page never
+    // reaches this reducer, so the previous page stays on screen.
+    commitObjectPage: (
+      state,
+      action: PayloadAction<{
+        records: BucketObjectItem[];
+        commit: ObjectPageCommit;
+      }>,
+    ) => {
+      state.records = action.payload.records;
+      state.objectPage = commitPageState(
+        state.objectPage,
+        action.payload.commit,
+      );
+      state.requestInProgress = false;
     },
     setLoadingVersioning: (state, action: PayloadAction<boolean>) => {
       state.loadingVersioning = action.payload;
@@ -315,19 +355,20 @@ const objectBrowserSlice = createSlice({
     setLoadingLocking: (state, action: PayloadAction<boolean>) => {
       state.loadingLocking = action.payload;
     },
-    newMessage: (state, action: PayloadAction<BucketObjectItem[]>) => {
-      state.records = [...state.records, ...action.payload];
-    },
+    // Drops the listing on screen together with its cursors and selection;
+    // used when the listing can no longer be shown (no permission) or when
+    // its mode changes. A plain reload keeps the page until the new one
+    // arrives, see setReloadObjectsList.
     resetMessages: (state) => {
       state.records = [];
+      state.objectPage = resetPageState(state.objectPage);
+      state.selectedObjects = [];
     },
+    // Asks the browser handler to request the committed page again. The rows
+    // stay on screen until the new page arrives, so a failed reload leaves
+    // the previous page rather than an empty table.
     setReloadObjectsList: (state, action: PayloadAction<boolean>) => {
       state.reloadObjectsList = action.payload;
-
-      // If we initialize a request, then we must clean the records list
-      if (action.payload) {
-        state.records = [];
-      }
     },
     setSelectedObjects: (state, action: PayloadAction<string[]>) => {
       state.selectedObjects = action.payload;
@@ -421,13 +462,13 @@ export const {
   setSimplePathHandler,
   newDownloadInit,
   newUploadInit,
-  setRecords,
+  resetObjectListing,
+  commitObjectPage,
   resetMessages,
   setLoadingVersioning,
   setIsVersioned,
   setLoadingLocking,
   setLockingEnabled,
-  newMessage,
   setSelectedObjects,
   setDownloadRenameModal,
   setSelectedPreview,

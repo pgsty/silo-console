@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IEmbeddedCustomStyles } from "../common/types";
-import get from "lodash/get";
+import get from "lodash/get.js";
 
 export const getOverrideColorVariants: (
   customStyles: string,

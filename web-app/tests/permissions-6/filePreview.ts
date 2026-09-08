@@ -75,7 +75,7 @@ test
       .click(pdfFile)
       .click(Selector(".objectActions button").withText("Preview"))
       .expect(Selector(".react-pdf__Page__canvas").exists)
-      .notOk(); //It shoud be ok and not notOk and working but it is somehow not in testing..
+      .ok("the PDF preview did not render", { timeout: 30000 });
   })
   .after(async (t) => {
     await functions.cleanUpNamedBucketAndUploads(t, bucketName);
@@ -93,11 +93,13 @@ test
   })("PDF with Alert doesn't execute script", async (t) => {
     await t
       .useRole(roles.admin)
+      .setNativeDialogHandler(() => false)
       .navigateTo(`http://localhost:9090/browser`)
       .click(bucketNameAction)
       .click(fileScript)
       .click(Selector(".objectActions button").withText("Preview"))
-      .setNativeDialogHandler(() => false);
+      .expect(Selector(".react-pdf__Page__canvas").exists)
+      .ok("the PDF preview did not render", { timeout: 30000 });
 
     const history = await t.getNativeDialogHistory();
 

@@ -29,7 +29,7 @@ import {
 import { AppState, useAppDispatch } from "../../../store";
 import { Bucket, BucketList, EventInfo } from "./types";
 import { niceBytes, timeFromDate } from "../../../common/utils";
-import { wsProtocol } from "../../../utils/wsUtils";
+import { watchURL } from "./watchURL";
 import { ErrorResponseHandler } from "../../../common/types";
 import { watchMessageReceived, watchResetMessages } from "./watchSlice";
 import { setHelpName } from "../../../systemSlice";
@@ -71,17 +71,14 @@ const Watch = () => {
     dispatch(watchResetMessages());
     // begin watch if bucketName in bucketList and start pressed
     if (start && bucketList.some((bucket) => bucket.name === bucketName)) {
-      const url = new URL(window.location.toString());
-      const isDev = process.env.NODE_ENV === "development";
-      const port = isDev ? "9090" : url.port;
-
-      // check if we are using base path, if not this always is `/`
-      const baseLocation = new URL(document.baseURI);
-      const baseUrl = baseLocation.pathname;
-
-      const wsProt = wsProtocol(url.protocol);
       const socket = new WebSocket(
-        `${wsProt}://${url.hostname}:${port}${baseUrl}ws/watch/${bucketName}?prefix=${prefix}&suffix=${suffix}`,
+        watchURL(
+          document.baseURI,
+          bucketName,
+          prefix,
+          suffix,
+          process.env.NODE_ENV === "development",
+        ),
       );
 
       let interval: any | null = null;

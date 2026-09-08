@@ -109,7 +109,18 @@ const EditLifecycleConfiguration = ({
   }, [dispatch, loadingTiers, lifecycleRule.transition?.storage_class]);
 
   useEffect(() => {
-    let valid = true;
+    const validDays = (value: string, minimum: number) =>
+      value.trim() !== "" &&
+      Number.isInteger(Number(value)) &&
+      Number(value) >= minimum;
+    let valid =
+      ilmType === "expiry"
+        ? (!lifecycleRule.expiration?.days || validDays(expiryDays, 1)) &&
+          (!lifecycleRule.expiration?.noncurrent_expiration_days ||
+            validDays(NCExpirationDays, 1))
+        : (!lifecycleRule.transition?.days || validDays(transitionDays, 0)) &&
+          (!lifecycleRule.transition?.noncurrent_transition_days ||
+            validDays(NCTransitionDays, 1));
 
     if (ilmType !== "expiry") {
       if (
@@ -121,6 +132,8 @@ const EditLifecycleConfiguration = ({
     }
     setIsFormValid(valid);
   }, [
+    lifecycleRule,
+    NCExpirationDays,
     ilmType,
     expiryDays,
     transitionDays,
@@ -233,7 +246,7 @@ const EditLifecycleConfiguration = ({
   const saveRecord = (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (addLoading) {
+    if (addLoading || !isFormValid) {
       return;
     }
     setAddLoading(true);
@@ -393,7 +406,7 @@ const EditLifecycleConfiguration = ({
                 }}
                 label={t("Expiry Days")}
                 value={expiryDays}
-                min="0"
+                min="1"
               />
             )}
 
@@ -408,7 +421,7 @@ const EditLifecycleConfiguration = ({
                   }}
                   label={t("Non-current Expiration Days")}
                   value={NCExpirationDays}
-                  min="0"
+                  min="1"
                 />
               )}
             {ilmType === "transition" && lifecycleRule.transition?.days && (
@@ -449,7 +462,7 @@ const EditLifecycleConfiguration = ({
                     }}
                     label={t("Non-current Transition Days")}
                     value={NCTransitionDays}
-                    min="0"
+                    min="1"
                   />
                   <Select
                     label={t("Non-current Version Transition Storage Class")}
@@ -506,6 +519,12 @@ const EditLifecycleConfiguration = ({
                       value="expired_delete_marker"
                       id="expired_delete_marker"
                       name="expired_delete_marker"
+                      disabled={
+                        !!lifecycleRule.expiration?.days ||
+                        (!!lifecycleRule.expiration?.date &&
+                          lifecycleRule.expiration.date !==
+                            "0001-01-01T00:00:00Z")
+                      }
                       checked={expiredObjectDM}
                       onChange={(
                         event: React.ChangeEvent<HTMLInputElement>,
