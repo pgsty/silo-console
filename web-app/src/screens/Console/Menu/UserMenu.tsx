@@ -18,7 +18,12 @@ import BucketsListing from "./Listing/BucketsListing";
 import { setAddBucketOpen } from "../Buckets/ListBuckets/AddBucket/addBucketsSlice";
 import { useT } from "i18n";
 
+import { hasCreateBucketPermission } from "../../../common/SecureComponent/createBucketPermission";
+
 const UserMenu = () => {
+  const canCreateBucket = useSelector((state: AppState) =>
+    hasCreateBucketPermission(state.console.session?.permissions),
+  );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -34,13 +39,15 @@ const UserMenu = () => {
   return (
     <>
       <MenuSectionHeader label={t("User")} />
-      <MenuItem
-        name={t("Create Bucket")}
-        icon={<AddIcon />}
-        onClick={() => dispatch(setAddBucketOpen(true))}
-        visibleTooltip={!sidebarOpen}
-        id="menu-create-bucket"
-      />
+      {canCreateBucket && (
+        <MenuItem
+          name={t("Create Bucket")}
+          icon={<AddIcon />}
+          onClick={() => dispatch(setAddBucketOpen(true))}
+          visibleTooltip={!sidebarOpen}
+          id="menu-create-bucket"
+        />
+      )}
       <MenuItem
         group="User"
         name={t("Object Browser")}

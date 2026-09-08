@@ -13,9 +13,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -46,11 +49,47 @@ func shrinkWSTimers(t *testing.T, pong, ping, write time.Duration) {
 	})
 }
 
-func useListObjectsMock(t *testing.T, fn func(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo) {
-	t.Helper()
-	previous := minioListObjectsMock
-	minioListObjectsMock = fn
-	t.Cleanup(func() { minioListObjectsMock = previous })
+// s3Page lists sorted keys the way ListObjectsV2 with a "/" delimiter does:
+// keys under prefix roll up at the first delimiter after it, the listing
+// resumes after the token (or after start-after when there is no token) and
+// holds at most limit entries; the token of a truncated page is the last name
+// returned.
+func s3Page(keys []string, prefix, startAfter, token string, limit int) (contents, prefixes []string, next string) {
+	cursor := token
+	if cursor == "" {
+		cursor = startAfter
+	}
+	seen := map[string]bool{}
+	var last string
+	for _, key := range keys {
+		if !strings.HasPrefix(key, prefix) {
+			continue
+		}
+		name := key
+		if i := strings.Index(key[len(prefix):], "/"); i >= 0 {
+			name = key[:len(prefix)+i+1]
+		}
+		if name <= cursor || seen[name] {
+			continue
+		}
+		if len(contents)+len(prefixes) == limit {
+			return contents, prefixes, last
+		}
+		seen[name] = true
+		last = name
+		if name != key {
+			prefixes = append(prefixes, name)
+		} else {
+			contents = append(contents, key)
+		}
+	}
+	return contents, prefixes, ""
+}
+
+// pageCall is one recorded ListObjectsV2 call.
+type pageCall struct {
+	prefix, startAfter, token string
+	maxKeys                   int
 }
 
 // objectSessionServer serves one Object Manager session per connection on a
@@ -221,49 +260,73 @@ func collectListing(t *testing.T, conn *websocket.Conn, id int64) []string {
 	}
 }
 
-// listingRecorder is a listObjects mock that records the contexts it was
-// called with and can hold listings open until released.
+// listingRecorder is a scripted objectPageLister serving one directory of
+// sorted keys. It records the page context of every listing and every list
+// call, never returns more than MaxKeys, can cap single responses below
+// MaxKeys to produce short pages, and can hold listings open until released.
 type listingRecorder struct {
 	mu       sync.Mutex
-	contexts []context.Context
-	release  chan struct{} // nil: return immediately
-	ignore   bool          // ignore ctx cancellation while blocked
-	items    []string
+	contexts []context.Context // one per listing: the page client context
+	pages    []pageCall        // one per list call
+	release  chan struct{}     // nil: return immediately
+	ignore   bool              // ignore ctx cancellation while blocked
+	items    []string          // sorted keys; "a/x" lists as the prefix "a/"
+	caps     []int             // response cap per call, below MaxKeys; 0 = none
+	err      error             // returned by call failAt, or by every call when failAt is 0
+	failAt   int
+	// ignoreStartAfter models a server that returns the prefix's own marker.
+	ignoreStartAfter bool
 }
 
 func (r *listingRecorder) install(t *testing.T) {
 	t.Helper()
-	useListObjectsMock(t, func(ctx context.Context, _ string, _ minio.ListObjectsOptions) <-chan minio.ObjectInfo {
+	previous := newObjectPageLister
+	newObjectPageLister = func(ctx context.Context, _ *models.Principal, _, _ string) (objectPageLister, error) {
 		r.mu.Lock()
 		r.contexts = append(r.contexts, ctx)
-		release, ignore, items := r.release, r.ignore, r.items
 		r.mu.Unlock()
-		out := make(chan minio.ObjectInfo)
-		go func() {
-			defer close(out)
-			if release != nil {
-				if ignore {
-					<-release
-				} else {
-					select {
-					case <-release:
-					case <-ctx.Done():
-						out <- minio.ObjectInfo{Err: ctx.Err()}
-						return
-					}
-				}
+		return r, nil
+	}
+	t.Cleanup(func() { newObjectPageLister = previous })
+}
+
+func (r *listingRecorder) listPage(ctx context.Context, _, prefix, startAfter, token string, maxKeys int) (minio.ListBucketV2Result, error) {
+	r.mu.Lock()
+	r.pages = append(r.pages, pageCall{prefix: prefix, startAfter: startAfter, token: token, maxKeys: maxKeys})
+	call := len(r.pages)
+	release, ignore, items, err, failAt := r.release, r.ignore, r.items, r.err, r.failAt
+	limit := maxKeys
+	if call <= len(r.caps) && r.caps[call-1] > 0 && r.caps[call-1] < limit {
+		limit = r.caps[call-1]
+	}
+	if r.ignoreStartAfter {
+		startAfter = ""
+	}
+	r.mu.Unlock()
+
+	if release != nil {
+		if ignore {
+			<-release
+		} else {
+			select {
+			case <-release:
+			case <-ctx.Done():
+				return minio.ListBucketV2Result{}, ctx.Err()
 			}
-			for _, name := range items {
-				select {
-				case out <- minio.ObjectInfo{Key: name, Size: 1, LastModified: time.Unix(0, 0)}:
-				case <-ctx.Done():
-					out <- minio.ObjectInfo{Err: ctx.Err()}
-					return
-				}
-			}
-		}()
-		return out
-	})
+		}
+	}
+	if err != nil && (failAt == 0 || failAt == call) {
+		return minio.ListBucketV2Result{}, err
+	}
+	contents, prefixes, next := s3Page(items, prefix, startAfter, token, limit)
+	result := minio.ListBucketV2Result{IsTruncated: next != "", NextContinuationToken: next}
+	for _, key := range contents {
+		result.Contents = append(result.Contents, minio.ObjectInfo{Key: key, Size: 1, LastModified: time.Unix(0, 0)})
+	}
+	for _, name := range prefixes {
+		result.CommonPrefixes = append(result.CommonPrefixes, minio.CommonPrefix{Prefix: name})
+	}
+	return result, nil
 }
 
 func (r *listingRecorder) setRelease(release chan struct{}) {
@@ -283,10 +346,17 @@ func (r *listingRecorder) canceled() (n int) {
 	return n
 }
 
+// calls reports the number of list calls made so far.
 func (r *listingRecorder) calls() int {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return len(r.contexts)
+	return len(r.pages)
+}
+
+func (r *listingRecorder) pageCalls() []pageCall {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]pageCall(nil), r.pages...)
 }
 
 func waitUntil(t *testing.T, timeout time.Duration, condition func() bool, what string) {
@@ -305,33 +375,103 @@ func waitUntil(t *testing.T, timeout time.Duration, condition func() bool, what 
 
 const fakeS3AccessKey = "AKIAFAKEACCESSKEY0001"
 
-// fakeS3 answers bucket-location and ListObjectsV2 requests. Bucket "public"
-// lists for everyone; bucket "private" lists only for requests signed with
-// fakeS3AccessKey.
-func fakeS3(t *testing.T) *httptest.Server {
+// fakeS3Server answers bucket-location and ListObjectsV2 requests over a
+// fixed, sorted key set, honoring prefix, delimiter, start-after,
+// continuation-token and max-keys. Bucket "public" lists for everyone; bucket
+// "private" lists only for requests signed with fakeS3AccessKey.
+type fakeS3Server struct {
+	*httptest.Server
+	mu        sync.Mutex
+	keys      []string
+	cap       int           // response cap below max-keys; 0 = the S3 maximum
+	block     chan struct{} // when set, list requests wait for it or for the request context
+	lists     []pageCall
+	agents    []string
+	locations atomic.Int32
+}
+
+func fakeS3(t *testing.T) *fakeS3Server {
 	t.Helper()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/xml")
-		if _, isLocation := r.URL.Query()["location"]; isLocation {
-			_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/"></LocationConstraint>`)
+	srv := &fakeS3Server{keys: []string{"a.txt", "docs/b.txt"}}
+	srv.Server = httptest.NewServer(http.HandlerFunc(srv.serve))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
+func (srv *fakeS3Server) serve(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/xml")
+	query := r.URL.Query()
+	if _, isLocation := query["location"]; isLocation {
+		srv.locations.Add(1)
+		_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/"></LocationConstraint>`)
+		return
+	}
+	bucket := strings.Trim(r.URL.Path, "/")
+	signed := strings.HasPrefix(r.Header.Get("Authorization"), "AWS4-HMAC-SHA256 Credential="+fakeS3AccessKey+"/")
+	if bucket == "private" && !signed {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><Error><Code>AccessDenied</Code><Message>Access Denied.</Message><Resource>/private</Resource><RequestId>1</RequestId></Error>`)
+		return
+	}
+	if bucket != "public" && bucket != "private" {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message></Error>`)
+		return
+	}
+
+	maxKeys, _ := strconv.Atoi(query.Get("max-keys"))
+	call := pageCall{prefix: query.Get("prefix"), startAfter: query.Get("start-after"), token: query.Get("continuation-token"), maxKeys: maxKeys}
+	srv.mu.Lock()
+	srv.lists = append(srv.lists, call)
+	srv.agents = append(srv.agents, r.UserAgent())
+	keys, limit, block := srv.keys, srv.cap, srv.block
+	srv.mu.Unlock()
+	if block != nil {
+		select {
+		case <-block:
+		case <-r.Context().Done():
 			return
 		}
-		bucket := strings.Trim(r.URL.Path, "/")
-		signed := strings.HasPrefix(r.Header.Get("Authorization"), "AWS4-HMAC-SHA256 Credential="+fakeS3AccessKey+"/")
-		if bucket == "private" && !signed {
-			w.WriteHeader(http.StatusForbidden)
-			_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><Error><Code>AccessDenied</Code><Message>Access Denied.</Message><Resource>/private</Resource><RequestId>1</RequestId></Error>`)
-			return
-		}
-		if bucket != "public" && bucket != "private" {
-			w.WriteHeader(http.StatusNotFound)
-			_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message></Error>`)
-			return
-		}
-		_, _ = fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>%s</Name><Prefix></Prefix><KeyCount>2</KeyCount><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>a.txt</Key><LastModified>2026-01-01T00:00:00.000Z</LastModified><ETag>"a"</ETag><Size>1</Size><StorageClass>STANDARD</StorageClass></Contents><Contents><Key>docs/b.txt</Key><LastModified>2026-01-01T00:00:00.000Z</LastModified><ETag>"b"</ETag><Size>2</Size><StorageClass>STANDARD</StorageClass></Contents></ListBucketResult>`, bucket)
-	}))
-	t.Cleanup(server.Close)
-	return server
+	}
+	if limit <= 0 || limit > 1000 {
+		limit = 1000
+	}
+	if maxKeys > 0 && maxKeys < limit {
+		limit = maxKeys
+	}
+	if query.Get("delimiter") != "/" {
+		w.WriteHeader(http.StatusNotImplemented)
+		_, _ = fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><Error><Code>NotImplemented</Code><Message>only the "/" delimiter is supported</Message></Error>`)
+		return
+	}
+	contents, prefixes, next := s3Page(keys, call.prefix, call.startAfter, call.token, limit)
+
+	var body strings.Builder
+	fmt.Fprintf(&body, `<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>%s</Name><Prefix>%s</Prefix><Delimiter>/</Delimiter><EncodingType>url</EncodingType><KeyCount>%d</KeyCount><MaxKeys>%d</MaxKeys><IsTruncated>%t</IsTruncated>`,
+		bucket, url.QueryEscape(call.prefix), len(contents)+len(prefixes), limit, next != "")
+	if next != "" {
+		fmt.Fprintf(&body, `<NextContinuationToken>%s</NextContinuationToken>`, html.EscapeString(next))
+	}
+	for _, key := range contents {
+		fmt.Fprintf(&body, `<Contents><Key>%s</Key><LastModified>2026-01-01T00:00:00.000Z</LastModified><ETag>"e"</ETag><Size>%d</Size><StorageClass>STANDARD</StorageClass></Contents>`, url.QueryEscape(key), len(key))
+	}
+	for _, name := range prefixes {
+		fmt.Fprintf(&body, `<CommonPrefixes><Prefix>%s</Prefix></CommonPrefixes>`, url.QueryEscape(name))
+	}
+	body.WriteString(`</ListBucketResult>`)
+	_, _ = io.WriteString(w, body.String())
+}
+
+func (srv *fakeS3Server) listCalls() []pageCall {
+	srv.mu.Lock()
+	defer srv.mu.Unlock()
+	return append([]pageCall(nil), srv.lists...)
+}
+
+func (srv *fakeS3Server) userAgents() []string {
+	srv.mu.Lock()
+	defer srv.mu.Unlock()
+	return append([]string(nil), srv.agents...)
 }
 
 func consoleSessionCookie(t *testing.T, accessKey string) string {
@@ -358,7 +498,8 @@ func TestObjectManagerAnonymousAndAuthenticatedListing(t *testing.T) {
 	t.Run("anonymous public bucket lists", func(t *testing.T) {
 		conn := dialWS(t, base+"/ws/objectManager", nil)
 		sendJSON(t, conn, objectsRequest(1, "public"))
-		if names := collectListing(t, conn, 1); strings.Join(names, ",") != "a.txt,docs/b.txt" {
+		// The listing is delimited: docs/b.txt shows as the prefix docs/.
+		if names := collectListing(t, conn, 1); strings.Join(names, ",") != "a.txt,docs/" {
 			t.Fatalf("names = %v", names)
 		}
 	})
@@ -847,6 +988,14 @@ func TestParseObjectsRequest(t *testing.T) {
 		{"empty bucket", websocket.TextMessage, `{"mode":"objects","request_id":1}`, errWSBucketName},
 		{"long prefix", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","prefix":"` + strings.Repeat("p", 1025) + `","request_id":1}`, errWSPrefixTooLong},
 		{"bad date", websocket.TextMessage, `{"mode":"rewind","bucket_name":"public","date":"2026-01-01","request_id":1}`, errWSRewindDate},
+		{"page options", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","page_size":1000,"continuation_token":"YS50eHQ=","request_id":1}`, nil},
+		{"zero page size", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","page_size":0,"request_id":1}`, nil},
+		{"negative page size", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","page_size":-1,"request_id":1}`, errWSPageSize},
+		{"oversized page size", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","page_size":1001,"request_id":1}`, errWSPageSize},
+		{"the former 5000 limit is oversized", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","page_size":5000,"request_id":1}`, errWSPageSize},
+		{"rewind page size is validated too", websocket.TextMessage, `{"mode":"rewind","bucket_name":"public","date":"2026-01-01T00:00:00Z","page_size":1001,"request_id":1}`, errWSPageSize},
+		{"control character in token", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","continuation_token":"a\nb","request_id":1}`, errWSContinuationTkn},
+		{"oversized token", websocket.TextMessage, `{"mode":"objects","bucket_name":"public","continuation_token":"` + strings.Repeat("t", wsMaxContinuationTokenLength+1) + `","request_id":1}`, errWSContinuationTkn},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

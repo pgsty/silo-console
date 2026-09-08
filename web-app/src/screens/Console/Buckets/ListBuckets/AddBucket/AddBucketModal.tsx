@@ -66,6 +66,7 @@ import {
   permissionTooltipHelper,
 } from "../../../../../common/SecureComponent/permissions";
 import { hasPermission } from "../../../../../common/SecureComponent";
+import { hasCreateBucketPermission } from "../../../../../common/SecureComponent/createBucketPermission";
 import BucketNamingRules from "./BucketNamingRules";
 import { api } from "../../../../../api";
 import { ObjectRetentionMode } from "../../../../../api/consoleApi";
@@ -82,6 +83,9 @@ const ErrorBox = styled.div(({ theme }) => ({
 }));
 
 const AddBucketModal = () => {
+  const canCreateBucket = useSelector((state: AppState) =>
+    hasCreateBucketPermission(state.console.session?.permissions),
+  );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const t = useT();
@@ -740,9 +744,14 @@ const AddBucketModal = () => {
               />
               <TooltipWrapper
                 tooltip={
-                  invalidFields.length > 0 || !isDirty || hasErrors
-                    ? t("You must apply a valid name to the bucket")
-                    : ""
+                  !canCreateBucket
+                    ? permissionTooltipHelper(
+                        [IAM_SCOPES.S3_CREATE_BUCKET],
+                        t("create a bucket"),
+                      )
+                    : invalidFields.length > 0 || !isDirty || hasErrors
+                      ? t("You must apply a valid name to the bucket")
+                      : ""
                 }
               >
                 <Button
@@ -751,6 +760,7 @@ const AddBucketModal = () => {
                   variant="callAction"
                   color="primary"
                   disabled={
+                    !canCreateBucket ||
                     addLoading ||
                     invalidFields.length > 0 ||
                     !isDirty ||

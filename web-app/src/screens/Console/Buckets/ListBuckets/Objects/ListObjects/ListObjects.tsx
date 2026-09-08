@@ -236,7 +236,7 @@ const ListObjects = () => {
     data: Record<string, unknown> | null;
   }>({ identity: "", data: null });
 
-  const isVersioningApplied = isVersionedMode(versioningConfig.status);
+  const isVersioningApplied = isVersionedMode(versioningConfig?.status);
 
   const bucketName = params.bucketName || "";
   // The route is the source of truth for the object the panels show; the redux
@@ -1197,7 +1197,8 @@ const ListObjects = () => {
                       if (versionsMode) {
                         dispatch(setLoadingVersions(true));
                       } else {
-                        dispatch(resetMessages());
+                        // The committed page is requested again and stays
+                        // on screen until the fresh page arrives.
                         dispatch(setReloadObjectsList(true));
                       }
                     }}

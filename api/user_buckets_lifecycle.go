@@ -113,6 +113,9 @@ func getBucketLifecycle(ctx context.Context, client MinioClient, bucketName stri
 		if rulePrefix == "" {
 			rulePrefix = rule.RuleFilter.Prefix
 		}
+		if rulePrefix == "" {
+			rulePrefix = rule.Prefix
+		}
 
 		rules = append(rules, &models.ObjectBucketLifecycle{
 			ID:     rule.ID,
@@ -295,18 +298,16 @@ func editBucketLifecycle(ctx context.Context, client MinioClient, params bucketA
 	// Verify if transition items are set
 	switch *params.Body.Type {
 	case models.UpdateBucketLifecycleTypeTransition:
-		if params.Body.TransitionDays == 0 && params.Body.NoncurrentversionTransitionDays == 0 {
-			return errors.New("you must select transition days or non-current transition days configuration")
+		if params.Body.TransitionDays < 0 || params.Body.NoncurrentversionTransitionDays < 0 {
+			return errors.New("transition days cannot be negative")
 		}
 
 		status := !params.Body.Disable
 		opts = ilm.LifecycleOptions{
-			ID:                        id,
-			Prefix:                    &params.Body.Prefix,
-			Status:                    &status,
-			Tags:                      &params.Body.Tags,
-			ExpiredObjectDeleteMarker: &params.Body.ExpiredObjectDeleteMarker,
-			ExpiredObjectAllversions:  &params.Body.ExpiredObjectDeleteAll,
+			ID:     id,
+			Prefix: &params.Body.Prefix,
+			Status: &status,
+			Tags:   &params.Body.Tags,
 		}
 
 		if params.Body.NoncurrentversionTransitionDays > 0 {
@@ -315,13 +316,17 @@ func editBucketLifecycle(ctx context.Context, client MinioClient, params bucketA
 			opts.NoncurrentVersionTransitionDays = &noncurrentVersionTransitionDays
 			opts.NoncurrentVersionTransitionStorageClass = &noncurrentVersionTransitionStorageClass
 
-		} else {
+		}
+		if params.Body.TransitionDays > 0 || params.Body.StorageClass != "" {
 			tdays := strconv.Itoa(int(params.Body.TransitionDays))
 			sclass := strings.ToUpper(params.Body.StorageClass)
 			opts.TransitionDays = &tdays
 			opts.StorageClass = &sclass
 		}
 	case models.UpdateBucketLifecycleTypeExpiry: // Verify if expiry configuration is set
+		if params.Body.ExpiryDays < 0 || params.Body.NoncurrentversionExpirationDays < 0 {
+			return errors.New("expiration days cannot be negative")
+		}
 		if params.Body.NoncurrentversionTransitionDays != 0 {
 			return errors.New("non current version Transition Days cannot be set when expiry is being configured")
 		}
@@ -332,18 +337,17 @@ func editBucketLifecycle(ctx context.Context, client MinioClient, params bucketA
 
 		status := !params.Body.Disable
 		opts = ilm.LifecycleOptions{
-			ID:                        id,
-			Prefix:                    &params.Body.Prefix,
-			Status:                    &status,
-			Tags:                      &params.Body.Tags,
-			ExpiredObjectDeleteMarker: &params.Body.ExpiredObjectDeleteMarker,
-			ExpiredObjectAllversions:  &params.Body.ExpiredObjectDeleteAll,
+			ID:     id,
+			Prefix: &params.Body.Prefix,
+			Status: &status,
+			Tags:   &params.Body.Tags,
 		}
 
 		if params.Body.NoncurrentversionExpirationDays > 0 {
 			days := int(params.Body.NoncurrentversionExpirationDays)
 			opts.NoncurrentVersionExpirationDays = &days
-		} else {
+		}
+		if params.Body.ExpiryDays > 0 {
 			days := strconv.Itoa(int(params.Body.ExpiryDays))
 			opts.ExpiryDays = &days
 		}
@@ -363,9 +367,46 @@ func editBucketLifecycle(ctx context.Context, client MinioClient, params bucketA
 		return errors.New("unable to find the matching rule to update")
 	}
 
+	// The API uses zero as the default for unspecified day fields. Do not turn
+	// an update of noncurrent versions (or status/tags) into removal of the
+	// current expiration/transition, including rules imported with a date.
+	if *params.Body.Type == models.UpdateBucketLifecycleTypeExpiry {
+		if params.Body.ExpiredObjectDeleteMarker {
+			if params.Body.ExpiryDays > 0 {
+				return errors.New("delete marker expiration cannot be combined with expiration days")
+			}
+			opts.ExpiredObjectDeleteMarker = &params.Body.ExpiredObjectDeleteMarker
+		}
+		opts.ExpiredObjectAllversions = &params.Body.ExpiredObjectDeleteAll
+		rule.Expiration.DeleteMarker = lifecycle.ExpireDeleteMarker(params.Body.ExpiredObjectDeleteMarker)
+	}
+
+	// Rebuild only the editable filter fields. Clear the legacy spellings so
+	// an old Tag/And.Prefix cannot override the values submitted by the form.
+	rule.Prefix = ""
+	rule.RuleFilter.Prefix = ""
+	rule.RuleFilter.Tag = lifecycle.Tag{}
+	rule.RuleFilter.And.Prefix = ""
+
 	err2 := ilm.ApplyRuleFields(rule, opts)
 	if err2.ToGoError() != nil {
 		return fmt.Errorf("unable to generate new lifecycle rule: %v", err2.ToGoError())
+	}
+
+	// Size constraints are not exposed by the form. Keep them when combining
+	// the edited prefix/tags; Filter's XML encoder otherwise chooses just one.
+	filter := &rule.RuleFilter
+	if !filter.And.IsEmpty() || (params.Body.Prefix != "" && (filter.ObjectSizeGreaterThan != 0 || filter.ObjectSizeLessThan != 0)) {
+		filter.And.Prefix = params.Body.Prefix
+		filter.Prefix = ""
+		if filter.ObjectSizeGreaterThan != 0 {
+			filter.And.ObjectSizeGreaterThan = filter.ObjectSizeGreaterThan
+			filter.ObjectSizeGreaterThan = 0
+		}
+		if filter.ObjectSizeLessThan != 0 {
+			filter.And.ObjectSizeLessThan = filter.ObjectSizeLessThan
+			filter.ObjectSizeLessThan = 0
+		}
 	}
 
 	return client.setBucketLifecycle(ctx, params.BucketName, lfcCfg)

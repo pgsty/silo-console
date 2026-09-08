@@ -34,9 +34,8 @@ import {
 } from "mds";
 
 import { actionsTray } from "../../Common/FormComponents/common/styleLibrary";
-import { SecureComponent } from "../../../../common/SecureComponent";
+import { hasCreateBucketPermission } from "../../../../common/SecureComponent/createBucketPermission";
 import {
-  CONSOLE_UI_RESOURCE,
   IAM_PAGES,
   IAM_PERMISSIONS,
   IAM_ROLES,
@@ -44,7 +43,7 @@ import {
   permissionTooltipHelper,
 } from "../../../../common/SecureComponent/permissions";
 import { setErrorSnackMessage, setHelpName } from "../../../../systemSlice";
-import { useAppDispatch } from "../../../../store";
+import { AppState, useAppDispatch } from "../../../../store";
 import { useSelector } from "react-redux";
 import { selFeatures } from "../../consoleSlice";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
@@ -185,7 +184,9 @@ const ListBuckets = () => {
     setSelectedBuckets(selectAllBuckets);
   };
 
-  const canCreateBucket = hasPermission("*", [IAM_SCOPES.S3_CREATE_BUCKET]);
+  const canCreateBucket = useSelector((state: AppState) =>
+    hasCreateBucketPermission(state.console.session?.permissions),
+  );
   const canListBuckets = hasPermission("*", [
     IAM_SCOPES.S3_LIST_BUCKET,
     IAM_SCOPES.S3_ALL_LIST_BUCKET,
@@ -442,23 +443,22 @@ const ListBuckets = () => {
                             <br />
                           </Fragment>
                         )}
-                        <SecureComponent
-                          scopes={[IAM_SCOPES.S3_CREATE_BUCKET]}
-                          resource={CONSOLE_UI_RESOURCE}
-                        >
-                          <br />
-                          {interpolate(t("To get started, {createBucket}"), {
-                            createBucket: (
-                              <ActionLink
-                                onClick={() => {
-                                  navigate(IAM_PAGES.ADD_BUCKETS);
-                                }}
-                              >
-                                {t("Create a Bucket.")}
-                              </ActionLink>
-                            ),
-                          })}
-                        </SecureComponent>
+                        {canCreateBucket && (
+                          <Fragment>
+                            <br />
+                            {interpolate(t("To get started, {createBucket}"), {
+                              createBucket: (
+                                <ActionLink
+                                  onClick={() => {
+                                    navigate(IAM_PAGES.ADD_BUCKETS);
+                                  }}
+                                >
+                                  {t("Create a Bucket.")}
+                                </ActionLink>
+                              ),
+                            })}
+                          </Fragment>
+                        )}
                       </Fragment>
                     }
                   />

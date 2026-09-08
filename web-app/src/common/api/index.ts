@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import request from "superagent";
-import get from "lodash/get";
+import get from "lodash/get.js";
 import { ErrorResponseHandler } from "../types";
 import {
   isInvalidSessionResponse,
@@ -89,9 +89,14 @@ export class API {
 
       return Promise.reject(throwMessage);
     } else {
-      // No HTTP status: the request never reached Console. The session is
-      // ended through the shared path so the route is remembered.
-      expireSession();
+      // A network failure, timeout or cancelled request says nothing about
+      // authentication. Reject so callers can recover without losing login.
+      const transportError: ErrorResponseHandler = {
+        errorMessage: "A network error occurred.",
+        detailedError: "",
+        statusCode: 0,
+      };
+      return Promise.reject(transportError);
     }
   }
 }

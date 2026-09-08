@@ -46,6 +46,8 @@ import KeyRevealer from "./KeyRevealer";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import HelpMenu from "../HelpMenu";
 
+import { inspectDownload } from "./inspectDownload";
+
 const ExampleBlock = ({
   volumeVal,
   pathVal,
@@ -137,30 +139,12 @@ const Inspect = () => {
     setIsFormValid(isValid);
   }, [volumeName, inspectPath, t]);
 
-  const makeRequest = async (url: string) => {
-    return await fetch(url, { method: "GET" });
-  };
-
   const performInspect = async () => {
     let basename = document.baseURI.replace(window.location.origin, "");
     const urlOfInspectApi = `${basename}api/v1/admin/inspect?volume=${encodeURIComponent(volumeName)}&file=${encodeURIComponent(inspectPath)}&encrypt=${isEncrypt}`;
 
-    makeRequest(urlOfInspectApi)
-      .then(async (res) => {
-        if (!res.ok) {
-          const resErr: any = await res.json();
-
-          dispatch(
-            setErrorSnackMessage({
-              errorMessage: resErr.message,
-              detailedError: resErr.code,
-            }),
-          );
-        }
-        const blob: Blob = await res.blob();
-
-        //@ts-ignore
-        const filename = res.headers.get("content-disposition").split('"')[1];
+    inspectDownload(urlOfInspectApi, t("An error occurred"))
+      .then(({ blob, filename }) => {
         const decryptKey = getCookieValue(filename) || "";
 
         performDownload(blob, filename);

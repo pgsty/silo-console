@@ -22,7 +22,6 @@ import (
 	"time"
 
 	mc "github.com/minio/mc/cmd"
-	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -125,110 +124,4 @@ func TestWSRewindObjects(t *testing.T) {
 	}
 }
 
-func TestWSListObjects(t *testing.T) {
-	assert := assert.New(t)
-	client := minioClientMock{}
-
-	tests := []struct {
-		name         string
-		wantErr      bool
-		testOptions  objectsListOpts
-		testMessages []minio.ObjectInfo
-	}{
-		{
-			name:    "Get list with multiple elements",
-			wantErr: false,
-			testOptions: objectsListOpts{
-				BucketName: "buckettest",
-				Prefix:     "/",
-			},
-			testMessages: []minio.ObjectInfo{
-				{
-					Key:          "/file1.txt",
-					Size:         500,
-					IsLatest:     true,
-					LastModified: time.Now(),
-				},
-				{
-					Key:          "/file2.txt",
-					Size:         500,
-					IsLatest:     true,
-					LastModified: time.Now(),
-				},
-				{
-					Key: "/path1",
-				},
-			},
-		},
-		{
-			name:    "Empty list of elements",
-			wantErr: false,
-			testOptions: objectsListOpts{
-				BucketName: "emptybucket",
-				Prefix:     "/",
-			},
-			testMessages: []minio.ObjectInfo{},
-		},
-		{
-			name:    "Get list with one element",
-			wantErr: false,
-			testOptions: objectsListOpts{
-				BucketName: "buckettest",
-				Prefix:     "/",
-			},
-			testMessages: []minio.ObjectInfo{
-				{
-					Key:          "/file2.txt",
-					Size:         500,
-					IsLatest:     true,
-					LastModified: time.Now(),
-				},
-			},
-		},
-		{
-			name:    "Get data from subpaths",
-			wantErr: false,
-			testOptions: objectsListOpts{
-				BucketName: "buckettest",
-				Prefix:     "/path1/path2",
-			},
-			testMessages: []minio.ObjectInfo{
-				{
-					Key:          "/path1/path2/file1.txt",
-					Size:         500,
-					IsLatest:     true,
-					LastModified: time.Now(),
-				},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(_ *testing.T) {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
-			minioListObjectsMock = func(_ context.Context, _ string, _ minio.ListObjectsOptions) <-chan minio.ObjectInfo {
-				ch := make(chan minio.ObjectInfo)
-				go func() {
-					defer close(ch)
-					for _, m := range tt.testMessages {
-						ch <- m
-					}
-				}()
-				return ch
-			}
-
-			objectsListing := startObjectsListing(ctx, client, &tt.testOptions)
-
-			// check that the TestReceiver got the same number of data from Console
-			totalItems := 0
-			for data := range objectsListing {
-				// Compare elements as we are defining the channel responses
-				assert.Equal(tt.testMessages[totalItems].Key, data.Key)
-				totalItems++
-			}
-			assert.Equal(len(tt.testMessages), totalItems)
-		})
-	}
-}
+// Plain object listings are served page by page; see ws_objects_page_test.go.

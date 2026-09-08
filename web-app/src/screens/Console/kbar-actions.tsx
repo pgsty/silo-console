@@ -25,6 +25,7 @@ export const routesAsKbarActions = (
   navigate: (url: string) => void,
   features?: string[],
   t: (text: string) => string = (text) => text,
+  canCreateBucket = false,
 ) => {
   const initialActions: Action[] = [];
   // Untranslated routes: names display through t() below while the English
@@ -65,7 +66,7 @@ export const routesAsKbarActions = (
     perform: () => navigate(IAM_PAGES.ADD_BUCKETS),
     icon: <BucketsIcon />,
   };
-  initialActions.push(a);
+  if (canCreateBucket) initialActions.push(a);
 
   if (buckets) {
     buckets.map((buck) => [

@@ -84,8 +84,11 @@ while (queue.length > 0) {
         (Array.isArray(manifest.licenses) ? manifest.licenses.map((l) => l.type ?? l).join(" OR ") : "");
   closure.set(`${manifest.name}@${manifest.version}`, { name: manifest.name, version: manifest.version, dir: real, license });
   for (const dep of Object.keys(manifest.dependencies ?? {})) queue.push({ name: dep, from: real });
-  // optionalDependencies that are installed also ship; missing ones are skipped
+  // PDF.js uses this optional native dependency only in NodeCanvasFactory.
+  // The browser bundle uses DOMCanvasFactory and ships neither the Node wrapper
+  // nor its platform binaries. Exclude that subtree so credits are host-independent.
   for (const dep of Object.keys(manifest.optionalDependencies ?? {})) {
+    if (manifest.name === "pdfjs-dist" && dep === "@napi-rs/canvas") continue;
     if (resolvePackage(dep, real) !== null) queue.push({ name: dep, from: real });
   }
 }

@@ -24,7 +24,7 @@ concurrency:
 
 env:
   FIREFOX_VERSION: latest
-  TESTCAFE_VERSION: 3.7.4
+  TESTCAFE_VERSION: 3.7.6
   # Historical test recipes call this MINIO_VERSION. The release gate uses the
   # maintained SILO server; upstream MinIO is probed separately as best effort.
   MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z

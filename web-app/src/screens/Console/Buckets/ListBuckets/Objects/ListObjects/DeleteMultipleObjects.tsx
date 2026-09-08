@@ -61,11 +61,17 @@ const DeleteObject = ({
     (state: AppState) => state.objectBrowser.retentionConfig,
   );
 
+  // A bucket default does not describe retention on individual versions.
+  // Keep bypass an explicit, permission-gated choice; SILO enforces the lock.
   const canBypass =
-    hasPermission(
-      [selectedBucket],
-      [IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION],
-    ) && retentionConfig?.mode === "governance";
+    hasPermission(selectedBucket, [
+      IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION,
+    ]) ||
+    selectedObjects?.some((object) =>
+      hasPermission(`${selectedBucket}/${object}`, [
+        IAM_SCOPES.S3_BYPASS_GOVERNANCE_RETENTION,
+      ]),
+    );
 
   if (!selectedObjects) {
     return null;

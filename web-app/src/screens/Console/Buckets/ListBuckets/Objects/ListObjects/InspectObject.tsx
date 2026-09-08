@@ -35,6 +35,8 @@ import { setErrorSnackMessage } from "../../../../../../systemSlice";
 import { useAppDispatch } from "../../../../../../store";
 import { interpolate, useT } from "i18n";
 
+import { inspectDownload } from "../../../../Tools/inspectDownload";
+
 interface IInspectObjectProps {
   closeInspectModalAndRefresh: (refresh: boolean) => void;
   inspectOpen: boolean;
@@ -58,30 +60,12 @@ const InspectObject = ({
   if (!inspectPath) {
     return null;
   }
-  const makeRequest = async (url: string) => {
-    return await fetch(url, { method: "GET" });
-  };
-
   const performInspect = async () => {
     let basename = document.baseURI.replace(window.location.origin, "");
     const urlOfInspectApi = `${window.location.origin}${basename}api/v1/admin/inspect?volume=${encodeURIComponent(volumeName)}&file=${encodeURIComponent(inspectPath + "/xl.meta")}&encrypt=${isEncrypt}`;
 
-    makeRequest(urlOfInspectApi)
-      .then(async (res) => {
-        if (!res.ok) {
-          const resErr: any = await res.json();
-
-          dispatch(
-            setErrorSnackMessage({
-              errorMessage: resErr.message,
-              detailedError: resErr.code,
-            }),
-          );
-        }
-        const blob: Blob = await res.blob();
-
-        //@ts-ignore
-        const filename = res.headers.get("content-disposition").split('"')[1];
+    inspectDownload(urlOfInspectApi, t("An error occurred"))
+      .then(({ blob, filename }) => {
         const decryptKey = getCookieValue(filename) || "";
 
         performDownload(blob, filename);

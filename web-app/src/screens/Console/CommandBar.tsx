@@ -30,7 +30,9 @@ import {
   useRegisterActions,
 } from "kbar";
 import { Action } from "kbar/lib/types";
+import { AppState } from "../../store";
 import { routesAsKbarActions } from "./kbar-actions";
+import { hasCreateBucketPermission } from "../../common/SecureComponent/createBucketPermission";
 
 import { Box, MenuExpandedIcon } from "mds";
 import { useSelector } from "react-redux";
@@ -130,11 +132,15 @@ const CommandBar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const canCreateBucket = useSelector((state: AppState) =>
+    hasCreateBucketPermission(state.console.session?.permissions),
+  );
   const initialActions: Action[] = routesAsKbarActions(
     buckets,
     navigate,
     features,
     t,
+    canCreateBucket,
   );
 
   // language is a dependency so a toggle re-registers translated actions.

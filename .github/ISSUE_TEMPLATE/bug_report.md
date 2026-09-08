@@ -7,9 +7,14 @@ assignees: ''
 
 ---
 
-## NOTE
-
-This is just a fork for my own personal educational purposes, therefore no real support but thanks anyway.
+Report bugs in PGSTY SILO Console (`pgsty/silo-console`) here. Community
+maintainers handle reports on a best-effort basis. SILO Console is maintained
+and tested with SILO; compatibility with upstream MinIO is best effort.
+Report suspected vulnerabilities privately through
+[SECURITY.md](https://github.com/pgsty/silo-console/blob/main/SECURITY.md).
+If private reporting is unavailable, ask the maintainers to establish a private
+channel before sharing details.
+For patches, see the [contribution guide](https://github.com/pgsty/silo-console/blob/main/CONTRIBUTING.md).
 
 <!--- Provide a general summary of the issue in the title above -->
 
@@ -28,6 +33,7 @@ This is just a fork for my own personal educational purposes, therefore no real 
 ## Steps to Reproduce (for bugs)
 <!--- Provide a link to a live example, or an unambiguous set of steps to -->
 <!--- reproduce this bug. Include code to reproduce, if relevant -->
+<!--- Remove credentials, tokens, and other secrets from logs and screenshots. -->
 
 1.
 2.
@@ -40,10 +46,13 @@ This is just a fork for my own personal educational purposes, therefore no real 
 
 ## Regression
 <!-- Is this issue a regression? (Yes / No) -->
-<!-- If Yes, optionally please include the MinIO version or commit id or PR# that caused this regression, if you have these details. -->
+<!-- If Yes, include the SILO Console version, commit id, or PR that caused the regression, if known. -->
 
 ## Your Environment
 <!--- Include as many relevant details about the environment you experienced the bug in -->
-* MinIO version used (`minio --version`):
+* SILO Console version (release, image tag, or commit):
+* Deployment mode (embedded in SILO or standalone):
+* SILO server version (`silo --version`), or other server and version:
+* Browser and version:
 * Server setup and configuration:
 * Operating System and version (`uname -a`):

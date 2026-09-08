@@ -43,6 +43,7 @@ import (
 
 var (
 	minioListObjectsMock        func(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo
+	minioGetBucketLocationMock  func(ctx context.Context, bucketName string) (string, error)
 	minioGetObjectLegalHoldMock func(ctx context.Context, bucketName, objectName string, opts minio.GetObjectLegalHoldOptions) (status *minio.LegalHoldStatus, err error)
 	minioGetObjectRetentionMock func(ctx context.Context, bucketName, objectName, versionID string) (mode *minio.RetentionMode, retainUntilDate *time.Time, err error)
 	minioPutObjectMock          func(ctx context.Context, bucketName, objectName string, reader io.Reader, objectSize int64, opts minio.PutObjectOptions) (info minio.UploadInfo, err error)
@@ -56,6 +57,14 @@ var (
 // mock functions for minioClientMock
 func (ac minioClientMock) listObjects(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo {
 	return minioListObjectsMock(ctx, bucket, opts)
+}
+
+// getBucketLocation answers with an unknown region unless a test scripts it.
+func (ac minioClientMock) getBucketLocation(ctx context.Context, bucketName string) (string, error) {
+	if minioGetBucketLocationMock == nil {
+		return "", nil
+	}
+	return minioGetBucketLocationMock(ctx, bucketName)
 }
 
 func (ac minioClientMock) getObjectLegalHold(ctx context.Context, bucketName, objectName string, opts minio.GetObjectLegalHoldOptions) (status *minio.LegalHoldStatus, err error) {

@@ -28,9 +28,18 @@ const FilterObjectsSB = () => {
   const searchObjects = useSelector(
     (state: AppState) => state.objectBrowser.searchObjects,
   );
+  // The filter matches the loaded page in memory: the whole directory when
+  // the first page held all of it, otherwise the page on screen.
+  const pageComplete = useSelector(
+    (state: AppState) => state.objectBrowser.objectPage.complete,
+  );
   return (
     <SearchBox
-      placeholder={t("Start typing to filter objects in the bucket")}
+      placeholder={
+        pageComplete
+          ? t("Start typing to filter objects in the bucket")
+          : t("Start typing to filter objects on this page")
+      }
       onChange={(value) => {
         dispatch(setSearchObjects(value));
       }}

@@ -243,9 +243,8 @@ func wsConnectionLimitsFromEnvironment(lookup func(string) (string, bool)) (wsCo
 }
 
 // ConfigureWebSocketLimits reads the connection caps from the environment and
-// installs them. Standalone Console calls it before serving and refuses to
-// start on an invalid value; the embedded path logs and keeps the defaults,
-// which are bounded.
+// installs them. Standalone Console and the embedding SILO Server call it
+// before serving Console requests and propagate invalid configuration errors.
 func ConfigureWebSocketLimits() error {
 	limits, err := wsConnectionLimitsFromEnvironment(os.LookupEnv)
 	if err != nil {

@@ -101,6 +101,8 @@ const (
 	errWSDuplicateRequest errWSProtocol = "request_id is already in flight"
 	errWSTooManyRequests  errWSProtocol = "too many in-flight requests"
 	errWSListingOptions   errWSProtocol = "invalid listing options"
+	errWSPageSize         errWSProtocol = "page_size must be between 1 and 1000"
+	errWSContinuationTkn  errWSProtocol = "invalid continuation_token"
 )
 
 // parseObjectsRequest decodes and validates one inbound frame. It returns the
@@ -134,6 +136,13 @@ func parseObjectsRequest(messageType int, message []byte) (ObjectsRequest, error
 	}
 	if len(request.Prefix) > wsMaxPrefixLength {
 		return request, errWSPrefixTooLong
+	}
+	// Page options are validated for both modes; only "objects" acts on them.
+	if request.PageSize < 0 || request.PageSize > objectPageMaxSize {
+		return request, errWSPageSize
+	}
+	if !validContinuationToken(request.ContinuationToken) {
+		return request, errWSContinuationTkn
 	}
 	if request.Mode == "rewind" {
 		if _, err := time.Parse(time.RFC3339, request.Date); err != nil {
@@ -433,10 +442,13 @@ func (b *wsBatcher) flush() {
 	b.buffer = nil
 }
 
-func (b *wsBatcher) end() {
+// end flushes the last frame and sends request_end. next names the page that
+// follows an objects page; truncated marks a rewind listing that was cut
+// short.
+func (b *wsBatcher) end(next string, truncated bool) {
 	b.flush()
 	if !b.stopped {
-		b.session.send(b.listing, WSResponse{RequestID: b.listing.id, RequestEnd: true})
+		b.session.send(b.listing, WSResponse{RequestID: b.listing.id, RequestEnd: true, NextContinuationToken: next, Truncated: truncated})
 	}
 }
 
@@ -450,34 +462,27 @@ func (s *wsObjectSession) runListing(listing *wsListing, request ObjectsRequest)
 	}
 	batcher := &wsBatcher{session: s, listing: listing}
 	failed := WSResponse{RequestID: request.RequestID, Prefix: request.Prefix, BucketName: request.BucketName}
+	// Every listing that is not canceled ends with request_end, after any
+	// error frame; next and truncated travel on that frame.
+	var next string
+	truncated := false
 
 	switch request.Mode {
 	case "objects":
-		// The listing channel must be drained to its close even after
-		// cancellation, or the producer goroutine leaks; nothing is emitted
-		// for a canceled listing.
-		for object := range startObjectsListing(listing.ctx, s.client, options) {
+		// One bounded page; the directory is never drained. Nothing is
+		// emitted for a canceled listing.
+		page, token, err := s.listObjectPage(listing, options)
+		if err != nil {
 			if listing.ctx.Err() != nil {
-				continue
+				return
 			}
-			if object.Err != nil {
-				failed.Error = ErrorWithContext(listing.ctx, object.Err)
-				s.send(listing, failed)
-				continue
-			}
-			// The prefix itself lists as a nested directory object; skip it and
-			// show only the objects under it.
-			if request.Prefix == object.Key {
-				continue
-			}
-			batcher.add(ObjectResponse{
-				Name:         object.Key,
-				Size:         object.Size,
-				LastModified: object.LastModified.Format(time.RFC3339),
-				VersionID:    object.VersionID,
-				IsLatest:     object.IsLatest,
-				DeleteMarker: object.IsDeleteMarker,
-			})
+			failed.Error = ErrorWithContext(listing.ctx, err)
+			s.send(listing, failed)
+			break
+		}
+		next = token
+		for _, item := range page {
+			batcher.add(item)
 		}
 	case "rewind":
 		client, err := newRewindClient(s.session, options.BucketName, options.Prefix, s.clientIP)
@@ -486,9 +491,21 @@ func (s *wsObjectSession) runListing(listing *wsListing, request ObjectsRequest)
 			s.send(listing, failed)
 			return
 		}
+		// A rewind listing has no cursor; it is bounded by a row cap and a
+		// time budget instead. Reaching either cancels the producer's
+		// context and labels the result truncated. The channel must still be
+		// drained to its close, or the producer goroutine leaks; nothing
+		// more is emitted once the listing is canceled or truncated.
+		ctx, cancel := context.WithTimeout(listing.ctx, wsRewindTimeout.get())
+		defer cancel()
 		bucketPrefix := fmt.Sprintf("/%s/", options.BucketName)
-		for content := range startRewindListing(listing.ctx, client, options) {
-			if listing.ctx.Err() != nil {
+		count := 0
+		for content := range startRewindListing(ctx, client, options) {
+			if listing.ctx.Err() != nil || truncated {
+				continue
+			}
+			if ctx.Err() != nil {
+				truncated = true
 				continue
 			}
 			if content.Err != nil {
@@ -504,9 +521,18 @@ func (s *wsObjectSession) runListing(listing *wsListing, request ObjectsRequest)
 				IsLatest:     content.IsLatest,
 				DeleteMarker: content.IsDeleteMarker,
 			})
+			if count++; count >= wsRewindMaxItems {
+				truncated = true
+				cancel()
+			}
+		}
+		// A producer that stalls until the budget expires closes the channel
+		// without another item; the expired budget still marks the result.
+		if ctx.Err() != nil {
+			truncated = true
 		}
 	}
 	if listing.ctx.Err() == nil {
-		batcher.end()
+		batcher.end(next, truncated)
 	}
 }

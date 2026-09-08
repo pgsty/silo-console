@@ -32,14 +32,48 @@ import {
   setMaxShareLinkExpTime,
   setNewObject,
   setPreviewOpen,
+  setRequestInProgress,
   setSelectedPreview,
   setShareFileModalOpen,
   updateProgress,
 } from "./objectBrowserSlice";
+import { ObjectListingRequest, ObjectPageRequest } from "./objectPaging";
 import { setSnackBarMessage } from "../../../systemSlice";
 import { DateTime } from "luxon";
 import { api } from "api";
 import { translate } from "i18n/lang";
+
+// One page of the committed listing, asked for by the pager: first, previous,
+// next, or the first page at another size. The listing's bucket, directory
+// and mode come from the store, so the page belongs to what is on screen; the
+// rows and the page number change only once the page has arrived.
+export const requestObjectPage = createAsyncThunk(
+  "objectBrowser/requestObjectPage",
+  async (request: ObjectPageRequest, { getState, dispatch }) => {
+    const { objectBrowser } = getState() as AppState;
+    if (
+      objectBrowser.selectedBucket === "" ||
+      objectBrowser.simplePath === null
+    ) {
+      return;
+    }
+    const { rewindEnabled, dateToRewind } = objectBrowser.rewind;
+    const payload: ObjectListingRequest = {
+      bucketName: objectBrowser.selectedBucket,
+      path: objectBrowser.simplePath,
+      rewindMode: rewindEnabled || objectBrowser.showDeleted,
+      date:
+        dateToRewind !== null && rewindEnabled
+          ? dateToRewind
+          : new Date().toISOString(),
+      page: request,
+    };
+    dispatch(setRequestInProgress(true));
+    // The previous listing is stale the moment a new one is requested.
+    dispatch({ type: "socket/OBCancelLast" });
+    dispatch({ type: "socket/OBRequest", payload });
+  },
+);
 
 export const downloadSelected = createAsyncThunk(
   "objectBrowser/downloadSelected",

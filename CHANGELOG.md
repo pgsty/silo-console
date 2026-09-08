@@ -2,6 +2,20 @@
 
 ## Release v2.3.1
 
+Correctness and usability:
+
+- Restores local-proxy source addresses in embedded SILO Console when Server explicitly enables the embedded trust policy. Loopback TCP peers are trusted unless the policy is `none`/`off`; forwarded-chain hops still require explicit list membership. Standalone defaults and rejection of untrusted remote headers are unchanged ([silo#147](https://github.com/pgsty/silo/issues/147)).
+- Loads object-browser directories in bounded cursor pages, with explicit page-scoped sorting, filtering and selection; rewind results disclose their row and time limits
+- Restricts object-version deletion to the selected key, keeps directory deletion within its trailing-slash prefix, reports listing failures, and isolates each batch item's version ID
+- Preserves independent current/noncurrent lifecycle actions, date-based rules and unexposed settings during edits; reads legacy prefixes and removes stale filter representations when saving
+- Saves replication-rule deletions as one configuration update, retains shared targets, and uses SILO's delete-configuration operation for the last rule
+- Offers an explicit, default-off Governance bypass to authorized users even when retention is set on individual objects rather than as a bucket default
+- Aligns create-bucket menus, command actions and forms with session capabilities, retaining resource-scoped and wildcard action grants
+- Encodes Watch filters correctly, handles Inspect errors without reading the response twice, and supplies a fallback download filename
+- Preserves login after network failures, timeouts and cancelled requests. The legacy API client now rejects transport errors to its caller instead of treating a missing HTTP status as session expiry. Browser regressions cover failed requests and real invalid-session responses; PDF preview tests now require the page to render before passing
+- Recovers from malformed sidebar preferences and tolerates cleared versioning state while leaving object details
+- Fixes shared dropdowns selecting a stale hovered item on quick clicks or touch; disabled items no longer select a different option, and keyboard selection is preserved
+
 Security and build maintenance:
 
 - Builds with Go 1.27.1 and GitHub Actions `setup-go` v7
@@ -9,7 +23,10 @@ Security and build maintenance:
 - Refreshes the compiled Go dependency closure, including `golang.org/x/crypto` v0.56.0 for the SSH channel denial-of-service fixes, gRPC-Go v1.83.2 for CVE-2026-84304, Protobuf v1.36.12, `klauspost/compress` v1.20.0, Prometheus libraries, JWX v3.2.0 and the current go-openapi line
 - Uses `silo-pkg` v3.13.2's strict policy API directly instead of duplicating it around an upstream compatibility floor. Any remaining `minio/pkg` package is transitive legacy code, not the maintained implementation; upstream MinIO/mc builds remain best-effort, non-blocking compatibility signals
 - Runs release-gating integration, permissions, replication, SSO, subpath and browser tests against the pinned SILO server and the exact released `pgsty/mc` source selected by `go.mod`; upstream server and client probes remain visible but advisory
-- Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, and structured-clone advisories; the remaining TestCafe `replicator` advisory is confined to the development-only browser test runner and has no patched release
+- Refreshes the embedded frontend dependency closure to remove the fixable Browserslist, fast-uri, qs, decode-uri-component, uuid, structured-clone, and fflate advisories; fflate 0.8.3 is selected throughout the runtime and test dependency graph
+- Updates the development SDK's stream-json dependency to 3.5.0 with a small MinIO JavaScript SDK compatibility patch and notification parser tests for its CommonJS and ESM builds
+- Updates TestCafe to 3.7.6 locally and in CI, removing its vulnerable `replicator` dependency
+- Excludes PDF.js's Node-only native canvas dependency from browser credits so regeneration is consistent across build platforms
 - Regenerates the embedded frontend and third-party notices from the final dependency graph; no Console route, API, configuration, or deployment migration is required
 - Marks verifier targets as phony so case-insensitive filesystems cannot mistake `CREDITS` for an already-completed `credits` check
 

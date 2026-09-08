@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/minio/console/pkg/utils"
@@ -33,6 +34,7 @@ import (
 	"github.com/minio/console/api/operations"
 	bucketApi "github.com/minio/console/api/operations/bucket"
 	"github.com/minio/console/models"
+	"github.com/minio/mc/pkg/probe"
 	"github.com/minio/minio-go/v7/pkg/replication"
 )
 
@@ -573,167 +575,98 @@ func listExternalBuckets(ctx context.Context, client MinioAdmin) (*models.ListBu
 	}, nil
 }
 
-func getARNFromID(conf *replication.Config, rule string) string {
-	for i := range conf.Rules {
-		if conf.Rules[i].ID == rule {
-			return conf.Rules[i].Destination.Bucket
-		}
-	}
-	return ""
-}
-
-func getARNsFromIDs(conf *replication.Config, rules []string) []string {
-	temp := make(map[string]string)
-	for i := range conf.Rules {
-		temp[conf.Rules[i].ID] = conf.Rules[i].Destination.Bucket
-	}
-	var retval []string
-	for i := range rules {
-		if val, ok := temp[rules[i]]; ok {
-			retval = append(retval, val)
-		}
-	}
-	return retval
-}
-
 func deleteReplicationRule(ctx context.Context, session *models.Principal, bucketName, ruleID string) error {
-	clientIP := utils.ClientIPFromContext(ctx)
-	mClient, err := newMinioClient(session, clientIP)
-	if err != nil {
-		return fmt.Errorf("error creating MinIO Client: %v", err)
-	}
-	// create a minioClient interface implementation
-	// defining the client to be used
-	minClient := minioClient{client: mClient}
-
-	cfg, err := minClient.getBucketReplication(ctx, bucketName)
-	if err != nil {
-		ErrorWithContext(ctx, fmt.Errorf("error versioning bucket: %v", err))
-	}
-
-	s3Client, err := newS3BucketClient(session, bucketName, "", clientIP)
-	if err != nil {
-		return fmt.Errorf("error creating S3Client: %v", err)
-	}
-	mAdmin, err := NewMinioAdminClient(ctx, session)
-	if err != nil {
-		return fmt.Errorf("error creating Admin Client: %v", err)
-	}
-	admClient := AdminClient{Client: mAdmin}
-
-	// create a mc S3Client interface implementation
-	// defining the client to be used
-	mcClient := mcClient{client: s3Client}
-
-	opts := replication.Options{
-		ID: ruleID,
-		Op: replication.RemoveOption,
-	}
-
-	err2 := mcClient.setReplication(ctx, &cfg, opts)
-	if err2 != nil {
-		return err2.Cause
-	}
-
-	// Replication rule was successfully deleted. We remove remote bucket
-	err3 := deleteRemoteBucket(ctx, admClient, bucketName, getARNFromID(&cfg, ruleID))
-	if err3 != nil {
-		return err3
-	}
-
-	return nil
+	return deleteReplicationRules(ctx, session, bucketName, []string{ruleID})
 }
 
 func deleteAllReplicationRules(ctx context.Context, session *models.Principal, bucketName string) error {
-	clientIP := utils.ClientIPFromContext(ctx)
-
-	s3Client, err := newS3BucketClient(session, bucketName, "", clientIP)
-	if err != nil {
-		return fmt.Errorf("error creating S3Client: %v", err)
-	}
-	// create a mc S3Client interface implementation
-	// defining the client to be used
-	mcClient := mcClient{client: s3Client}
-	mClient, err := newMinioClient(session, clientIP)
-	if err != nil {
-		return fmt.Errorf("error creating MinIO Client: %v", err)
-	}
-	// create a minioClient interface implementation
-	// defining the client to be used
-	minClient := minioClient{client: mClient}
-
-	cfg, err := minClient.getBucketReplication(ctx, bucketName)
-	if err != nil {
-		ErrorWithContext(ctx, fmt.Errorf("error versioning bucket: %v", err))
-	}
-
-	mAdmin, err := NewMinioAdminClient(ctx, session)
-	if err != nil {
-		return fmt.Errorf("error creating Admin Client: %v", err)
-	}
-	admClient := AdminClient{Client: mAdmin}
-
-	err2 := mcClient.deleteAllReplicationRules(ctx)
-
-	if err2 != nil {
-		return err2.ToGoError()
-	}
-
-	for i := range cfg.Rules {
-		err3 := deleteRemoteBucket(ctx, admClient, bucketName, cfg.Rules[i].Destination.Bucket)
-		if err3 != nil {
-			return err3
-		}
-	}
-
-	return nil
+	return deleteReplicationRules(ctx, session, bucketName, nil)
 }
 
 func deleteSelectedReplicationRules(ctx context.Context, session *models.Principal, bucketName string, rules []string) error {
+	if len(rules) == 0 {
+		return nil
+	}
+	return deleteReplicationRules(ctx, session, bucketName, rules)
+}
+
+func deleteReplicationRules(ctx context.Context, session *models.Principal, bucketName string, rules []string) error {
 	clientIP := utils.ClientIPFromContext(ctx)
 	mClient, err := newMinioClient(session, clientIP)
 	if err != nil {
-		return fmt.Errorf("error creating MinIO Client: %v", err)
+		return fmt.Errorf("error creating MinIO Client: %w", err)
 	}
-	// create a minioClient interface implementation
-	// defining the client to be used
-	minClient := minioClient{client: mClient}
-
-	cfg, err := minClient.getBucketReplication(ctx, bucketName)
+	cfg, err := (minioClient{client: mClient}).getBucketReplication(ctx, bucketName)
 	if err != nil {
-		ErrorWithContext(ctx, fmt.Errorf("error versioning bucket: %v", err))
+		return fmt.Errorf("error reading bucket replication: %w", err)
 	}
-
 	s3Client, err := newS3BucketClient(session, bucketName, "", clientIP)
 	if err != nil {
-		return fmt.Errorf("error creating S3Client: %v", err)
+		return fmt.Errorf("error creating S3Client: %w", err)
 	}
-	// create a mc S3Client interface implementation
-	// defining the client to be used
-	mcClient := mcClient{client: s3Client}
-
 	mAdmin, err := NewMinioAdminClient(ctx, session)
 	if err != nil {
-		return fmt.Errorf("error creating Admin Client: %v", err)
+		return fmt.Errorf("error creating Admin Client: %w", err)
 	}
-	admClient := AdminClient{Client: mAdmin}
+	return removeReplicationRules(ctx, mcClient{client: s3Client}, AdminClient{Client: mAdmin}, bucketName, cfg, rules)
+}
 
-	ARNs := getARNsFromIDs(&cfg, rules)
+type replicationRemovalClient interface {
+	setReplication(context.Context, *replication.Config, replication.Options) *probe.Error
+	deleteAllReplicationRules(context.Context) *probe.Error
+}
 
-	for i := range rules {
-		opts := replication.Options{
-			ID: rules[i],
-			Op: replication.RemoveOption,
+type remoteBucketRemover interface {
+	removeRemoteBucket(context.Context, string, string) error
+}
+
+// A nil selection means all rules. Save once, then release only unused remote
+// targets. Validation happens before any write so an invalid ID cannot cause a
+// partially applied selection or an out-of-bounds ARN lookup.
+func removeReplicationRules(ctx context.Context, client replicationRemovalClient, admin remoteBucketRemover, bucket string, cfg replication.Config, ids []string) error {
+	selected := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		selected[id] = false
+	}
+	remaining := make([]replication.Rule, 0, len(cfg.Rules))
+	retainedTargets := make(map[string]bool)
+	var removedTargets []string
+	for _, rule := range cfg.Rules {
+		arn := rule.Destination.Bucket
+		// Older configurations store the shared target in Role. Preserve their
+		// format while accounting for that reference during cleanup.
+		if strings.HasPrefix(cfg.Role, "arn:minio:replication:") {
+			arn = cfg.Role
 		}
-		err2 := mcClient.setReplication(ctx, &cfg, opts)
-		if err2 != nil {
-			return err2.Cause
+		if _, found := selected[rule.ID]; ids == nil || found {
+			selected[rule.ID] = true
+			removedTargets = append(removedTargets, arn)
+		} else {
+			remaining = append(remaining, rule)
+			retainedTargets[arn] = true
 		}
-
-		// In case replication rule was deleted successfully, we remove the remote bucket ARN
-		err3 := deleteRemoteBucket(ctx, admClient, bucketName, ARNs[i])
-		if err3 != nil {
-			return err3
+	}
+	for _, id := range ids {
+		if !selected[id] {
+			return fmt.Errorf("rule with ID %s not found in replication configuration", id)
+		}
+	}
+	cfg.Rules = remaining
+	if len(remaining) == 0 {
+		// SILO's delete-config operation also removes the remote targets. A
+		// second admin cleanup would report NotFound after a successful delete.
+		return client.deleteAllReplicationRules(ctx).ToGoError()
+	}
+	if err := client.setReplication(ctx, &cfg, replication.Options{Op: replication.ImportOption}); err != nil {
+		return err.ToGoError()
+	}
+	for _, arn := range removedTargets {
+		if arn == "" || retainedTargets[arn] {
+			continue
+		}
+		retainedTargets[arn] = true // A shared target is removed only once.
+		if err := admin.removeRemoteBucket(ctx, bucket, arn); err != nil {
+			return fmt.Errorf("replication rules deleted, but remote target cleanup failed: %w", err)
 		}
 	}
 	return nil

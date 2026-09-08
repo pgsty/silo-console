@@ -19,6 +19,7 @@ import {
   BucketVersioningResponse,
   GetBucketRetentionConfig,
 } from "api/consoleApi";
+import { ObjectPageState } from "./objectPaging";
 
 interface RewindItem {
   rewindEnabled: boolean;
@@ -43,7 +44,10 @@ export interface ObjectBrowserState {
   objectDetailsOpen: boolean;
   selectedInternalPaths: string | null;
   simplePath: string | null;
+  // The committed page of the current listing and its paging state; both
+  // change together, only when a page arrives in full.
   records: BucketObjectItem[];
+  objectPage: ObjectPageState;
   loadingVersioning: boolean;
   versionInfo: BucketVersioningResponse;
   lockingEnabled: boolean | undefined;

@@ -44,6 +44,7 @@ import {
   isAbortError,
   ObjectRequestGuard,
 } from "../ListBuckets/Objects/requestGuard";
+import { ObjectListingRequest } from "../../ObjectBrowser/objectPaging";
 
 const BrowserHandler = () => {
   const dispatch = useAppDispatch();
@@ -81,7 +82,6 @@ const BrowserHandler = () => {
   const selectedBucket = useSelector(
     (state: AppState) => state.objectBrowser.selectedBucket,
   );
-  const records = useSelector((state: AppState) => state.objectBrowser.records);
 
   const bucketName = params.bucketName || "";
   // The route is the source of truth for the object identity; the pathname is
@@ -103,7 +103,10 @@ const BrowserHandler = () => {
         date = rewindDate;
       }
 
-      const payloadData = {
+      // No explicit page: the middleware refreshes the committed page when
+      // the listing is the same, and starts at the first page otherwise.
+      // Paging itself goes through requestObjectPage.
+      const payloadData: ObjectListingRequest = {
         bucketName,
         path,
         rewindMode: rewindEnabled || showDeleted,
@@ -193,12 +196,13 @@ const BrowserHandler = () => {
     pathLoad(false);
   }, [pathLoad]);
 
-  // Reload Handler
+  // Reload Handler: the committed page stays on screen while it is requested
+  // again, so the reload waits only for the request in flight, if any.
   useEffect(() => {
-    if (reloadObjectsList && records.length === 0 && !requestInProgress) {
+    if (reloadObjectsList && !requestInProgress) {
       pathLoad(true);
     }
-  }, [reloadObjectsList, records, requestInProgress, pathLoad]);
+  }, [reloadObjectsList, requestInProgress, pathLoad]);
 
   const displayListObjects =
     hasPermission(bucketName, [

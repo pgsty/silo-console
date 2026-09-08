@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: SILO Documentation
+    url: https://silo.pgsty.com/
+    about: Console setup, operations, and compatibility guidance
+  - name: Security Reporting
+    url: https://github.com/pgsty/silo-console/blob/main/SECURITY.md
+    about: Follow the security policy; ask maintainers for a private channel if reporting is unavailable
