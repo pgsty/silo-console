@@ -75,7 +75,7 @@ func equalAuthority(a, b string) bool {
 // single, unambiguous, syntactically valid value; anything else is no answer.
 func trustedProxiedHost(r *http.Request) (string, bool) {
 	peer := canonicalSourceIP(r.RemoteAddr)
-	if peer == "" || !currentSourceIPTrust().contains(peer) {
+	if peer == "" || !currentSourceIPTrust().peerTrusted(peer) {
 		return "", false
 	}
 	for _, header := range GetSecureHostsProxyHeaders() {

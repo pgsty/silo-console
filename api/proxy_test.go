@@ -182,7 +182,7 @@ func TestSourceIPTrustFromEnvironment(t *testing.T) {
 				calls = append(calls, key)
 				return tt.values[key], "", "", tt.errors[key]
 			}
-			policy, err := sourceIPTrustFromEnvironment(lookup)
+			policy, err := sourceIPTrustFromEnvironment(lookup, false)
 			if (err != nil) != tt.wantError {
 				t.Fatalf("error = %v, wantError = %v", err, tt.wantError)
 			}
@@ -194,6 +194,67 @@ func TestSourceIPTrustFromEnvironment(t *testing.T) {
 			}
 			if err != nil && len(policy.prefixes) != 0 {
 				t.Errorf("error did not fail closed: %#v", policy.prefixes)
+			}
+			if policy.loopbackPeers {
+				t.Fatal("standalone configuration enabled implicit loopback trust")
+			}
+			embeddedPolicy, embeddedErr := sourceIPTrustFromEnvironment(lookup, true)
+			if (embeddedErr != nil) != tt.wantError {
+				t.Fatalf("embedded error = %v, wantError = %v", embeddedErr, tt.wantError)
+			}
+			if embeddedErr != nil && (embeddedPolicy.peerTrusted("127.0.0.1") || len(embeddedPolicy.prefixes) != 0) {
+				t.Fatal("invalid embedded configuration did not fail closed")
+			}
+		})
+	}
+}
+
+func TestConfigureEmbeddedSourceIPTrust(t *testing.T) {
+	tests := []struct {
+		name, value, peer, chain, want string
+		wantError                      bool
+	}{
+		{name: "unset local proxy", peer: "127.0.0.1:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "blank local proxy", value: " \t", peer: "127.0.0.2:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "IPv6 loopback", peer: "[::1]:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "mapped loopback", peer: "[::ffff:127.0.0.1]:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "loopback header hop is not implicitly trusted", peer: "127.0.0.1:1234", chain: "198.51.100.23, 127.0.0.1", want: "127.0.0.1"},
+		{name: "explicit loopback header hop", value: "127.0.0.1", peer: "127.0.0.1:1234", chain: "198.51.100.23, 127.0.0.1", want: "198.51.100.23"},
+		{name: "list omits local peer", value: "192.0.2.10", peer: "127.0.0.1:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "listed remote proxy", value: "192.0.2.10", peer: "192.0.2.10:1234", chain: "198.51.100.23", want: "198.51.100.23"},
+		{name: "unlisted remote proxy", value: "192.0.2.10", peer: "192.0.2.11:1234", chain: "198.51.100.23"},
+		{name: "direct client cannot forge headers", peer: "192.0.2.10:1234", chain: "198.51.100.23"},
+		{name: "unreadable peer", peer: "localhost:1234", chain: "198.51.100.23"},
+		{name: "none disables local trust", value: " NoNe ", peer: "127.0.0.1:1234", chain: "198.51.100.23"},
+		{name: "off disables local trust", value: "OFF", peer: "[::1]:1234", chain: "198.51.100.23"},
+		{name: "invalid fails closed", value: "192.0.2.10,proxy.internal", peer: "127.0.0.1:1234", chain: "198.51.100.23", wantError: true},
+		{name: "separators fail closed", value: ", ; ,", peer: "127.0.0.1:1234", chain: "198.51.100.23", wantError: true},
+		{name: "catch-all fails closed", value: "0.0.0.0/0", peer: "127.0.0.1:1234", chain: "198.51.100.23", wantError: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			preserveSourceIPTrustState(t)
+			t.Setenv(EnvConsoleTrustedProxies, "")
+			t.Setenv(EnvMinIOTrustedProxies, tt.value)
+			if err := ConfigureEmbeddedSourceIPTrust(); (err != nil) != tt.wantError {
+				t.Fatalf("ConfigureEmbeddedSourceIPTrust() = %v, wantError = %v", err, tt.wantError)
+			}
+			// ConfigureAPI's fallback must retain the explicit embedded policy.
+			t.Setenv(EnvMinIOTrustedProxies, "none")
+			if err := ensureSourceIPTrustConfigured(); err != nil {
+				t.Fatal(err)
+			}
+			req := sourceIPRequest(tt.peer, http.Header{xForwardedFor: {tt.chain}})
+			if got := getSourceIPFromHeaders(req); got != tt.want {
+				t.Fatalf("source IP = %q, want %q", got, tt.want)
+			}
+			// A subsequent standalone initializer must not retain the exception.
+			t.Setenv(EnvMinIOTrustedProxies, "")
+			if err := ConfigureSourceIPTrust(); err != nil {
+				t.Fatal(err)
+			}
+			if currentSourceIPTrust().peerTrusted("127.0.0.1") {
+				t.Fatal("standalone initializer retained implicit loopback trust")
 			}
 		})
 	}

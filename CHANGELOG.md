@@ -4,6 +4,7 @@
 
 Correctness and usability:
 
+- Restores local-proxy source addresses in embedded SILO Console when Server explicitly enables the embedded trust policy. Loopback TCP peers are trusted unless the policy is `none`/`off`; forwarded-chain hops still require explicit list membership. Standalone defaults and rejection of untrusted remote headers are unchanged ([silo#147](https://github.com/pgsty/silo/issues/147)).
 - Loads object-browser directories in bounded cursor pages, with explicit page-scoped sorting, filtering and selection; rewind results disclose their row and time limits
 - Restricts object-version deletion to the selected key, keeps directory deletion within its trailing-slash prefix, reports listing failures, and isolates each batch item's version ID
 - Preserves independent current/noncurrent lifecycle actions, date-based rules and unexposed settings during edits; reads legacy prefixes and removes stale filter representations when saving

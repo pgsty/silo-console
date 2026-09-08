@@ -56,7 +56,19 @@ var (
 // sourceIPTrustPolicy is an allow-list of peers whose source-address headers
 // may be believed. The zero value trusts nobody.
 type sourceIPTrustPolicy struct {
-	prefixes []netip.Prefix
+	prefixes      []netip.Prefix
+	loopbackPeers bool
+}
+
+// peerTrusted applies the embedded Server's local-process trust boundary only
+// to the TCP peer. Forwarded-chain hops still require explicit list membership.
+func (p sourceIPTrustPolicy) peerTrusted(ip string) bool {
+	if p.loopbackPeers {
+		if addr, err := netip.ParseAddr(ip); err == nil && addr.Unmap().IsLoopback() {
+			return true
+		}
+	}
+	return p.contains(ip)
 }
 
 func (p sourceIPTrustPolicy) contains(ip string) bool {
@@ -92,11 +104,21 @@ var (
 func ConfigureSourceIPTrust() error {
 	sourceIPTrustConfigMu.Lock()
 	defer sourceIPTrustConfigMu.Unlock()
-	return configureSourceIPTrustLocked()
+	return configureSourceIPTrustLocked(false)
 }
 
-func configureSourceIPTrustLocked() error {
-	policy, err := sourceIPTrustFromEnvironment(env.LookupEnv)
+// ConfigureEmbeddedSourceIPTrust lets an embedding SILO Server trust local
+// proxy peers without adding implicit trusted hops to forwarded header chains.
+// Explicit none/off and invalid settings still trust nobody. Call at startup,
+// before ConfigureAPI; standalone Console must use ConfigureSourceIPTrust.
+func ConfigureEmbeddedSourceIPTrust() error {
+	sourceIPTrustConfigMu.Lock()
+	defer sourceIPTrustConfigMu.Unlock()
+	return configureSourceIPTrustLocked(true)
+}
+
+func configureSourceIPTrustLocked(embedded bool) error {
+	policy, err := sourceIPTrustFromEnvironment(env.LookupEnv, embedded)
 	if err != nil {
 		policy = sourceIPTrustPolicy{}
 	}
@@ -105,8 +127,8 @@ func configureSourceIPTrustLocked() error {
 	return err
 }
 
-// ensureSourceIPTrustConfigured supplies the embedded ConfigureAPI path without
-// replacing a policy already validated by the standalone startup path.
+// ensureSourceIPTrustConfigured supplies the ConfigureAPI fallback without
+// replacing a policy already validated by either explicit startup path.
 func ensureSourceIPTrustConfigured() error {
 	if sourceIPTrustConfigured.Load() {
 		return nil
@@ -116,7 +138,7 @@ func ensureSourceIPTrustConfigured() error {
 	if sourceIPTrustConfigured.Load() {
 		return nil
 	}
-	return configureSourceIPTrustLocked()
+	return configureSourceIPTrustLocked(false)
 }
 
 func currentSourceIPTrust() sourceIPTrustPolicy {
@@ -128,20 +150,29 @@ func currentSourceIPTrust() sourceIPTrustPolicy {
 
 // sourceIPTrustFromEnvironment implements the configuration precedence as a
 // pure helper so it can be tested without reconfiguring process-wide state.
-func sourceIPTrustFromEnvironment(lookup sourceIPEnvLookup) (sourceIPTrustPolicy, error) {
-	value, _, _, err := lookup(EnvConsoleTrustedProxies)
+func sourceIPTrustFromEnvironment(lookup sourceIPEnvLookup, embedded bool) (sourceIPTrustPolicy, error) {
+	setting := EnvConsoleTrustedProxies
+	value, _, _, err := lookup(setting)
 	if err != nil {
-		return sourceIPTrustPolicy{}, fmt.Errorf("%s could not be read: %w", EnvConsoleTrustedProxies, err)
+		return sourceIPTrustPolicy{}, fmt.Errorf("%s could not be read: %w", setting, err)
 	}
-	if strings.TrimSpace(value) != "" {
-		return parseSourceIPTrust(value, EnvConsoleTrustedProxies)
+	if strings.TrimSpace(value) == "" {
+		setting = EnvMinIOTrustedProxies
+		value, _, _, err = lookup(setting)
+		if err != nil {
+			return sourceIPTrustPolicy{}, fmt.Errorf("%s could not be read: %w", setting, err)
+		}
 	}
 
-	value, _, _, err = lookup(EnvMinIOTrustedProxies)
-	if err != nil {
-		return sourceIPTrustPolicy{}, fmt.Errorf("%s could not be read: %w", EnvMinIOTrustedProxies, err)
+	policy, err := parseSourceIPTrust(value, setting)
+	if err == nil && embedded {
+		switch strings.ToLower(strings.TrimSpace(value)) {
+		case trustNoProxies, "off":
+		default:
+			policy.loopbackPeers = true
+		}
 	}
-	return parseSourceIPTrust(value, EnvMinIOTrustedProxies)
+	return policy, err
 }
 
 func parseSourceIPTrust(value, setting string) (sourceIPTrustPolicy, error) {
@@ -200,7 +231,7 @@ func canonicalSourcePrefix(prefix netip.Prefix) (netip.Prefix, error) {
 }
 
 // getSourceIPFromHeaders returns a canonical client IP only when the direct TCP
-// peer is explicitly allow-listed. Otherwise callers must use RemoteAddr.
+// peer is trusted. Otherwise callers must use RemoteAddr.
 func getSourceIPFromHeaders(r *http.Request) string {
 	return sourceIPFromHeaders(r, currentSourceIPTrust())
 }
@@ -213,7 +244,7 @@ func getSourceIPFromHeaders(r *http.Request) string {
 // is attributed to the TCP peer.
 func sourceIPFromHeaders(r *http.Request, policy sourceIPTrustPolicy) string {
 	peer := canonicalSourceIP(r.RemoteAddr)
-	if peer == "" || !policy.contains(peer) {
+	if peer == "" || !policy.peerTrusted(peer) {
 		return ""
 	}
 
