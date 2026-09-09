@@ -195,6 +195,22 @@ Automatic self-update remains disabled until signed release artifacts and a
 tested rollback path are available; upgrade explicitly through a pinned binary
 or package version.
 
+### Go and TLS compatibility
+
+Go 1.27 builds require macOS 13 or later. On macOS, builds targeting Go 1.27
+replace Keychain trust with on-disk roots and Go's verifier when either
+`SSL_CERT_FILE` or `SSL_CERT_DIR` is set. Stale or incomplete CA paths can break
+previously trusted connections; unset inherited values to restore Keychain
+trust. Certificates in the configured `CAs` directory remain additive to the
+selected root pool.
+
+Outbound identity-provider, SILO/STS, and other HTTP connections use Go's default
+key exchanges. `GODEBUG=tlsmlkem=0` affects those defaults without disabling
+certificate verification; it does not disable ML-DSA signatures.
+`GODEBUG=tlssecpmlkem=0` disables only the SecP hybrids and retains X25519MLKEM768.
+Console's HTTPS listener explicitly uses P-256 and is unaffected by the hybrid-curve override
+change. See the [Go release notes](https://go.dev/doc/go1.27).
+
 ## Quick Start
 
 Install the Go version declared in [`go.mod`](go.mod), then build the standalone
