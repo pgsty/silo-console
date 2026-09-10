@@ -140,7 +140,8 @@ The retained Go module, import paths, environment variables, API fields, and
 protocol identifiers are compatibility interfaces, not product branding. Any
 future rename of those interfaces will require aliases and a migration period.
 
-Standalone Console directly requires `github.com/pgsty/silo-pkg/v3` v3.13.3
+Standalone Console directly requires `github.com/pgsty/silo-pkg/v3` at the
+revision selected by `go.mod` and recorded in `hack/deps-release.json`,
 and resolves `github.com/minio/minio-go/v7` upstream. The maintained mc source
 keeps the compatibility module path `github.com/minio/mc` and lives in
 `pgsty/mc`. Console pins an immutable Go pseudo-version: either a published
@@ -152,7 +153,7 @@ ignores replacements declared by dependency modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260910070158-fa22b40b4eb7
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260910093317-e6a60edf0952
 )
 ```
 <!-- silo-replacements:end -->
@@ -164,7 +165,7 @@ package is an ordinary direct requirement and needs no downstream replacement:
 
 | Module graph | Status |
 | :-- | :-- |
-| The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies `pgsty/silo-pkg` v3.13.3 is inherited directly |
+| The single maintained replacement above | Supported; `downstream-embedder-compat` builds a minimal embedder from the published block and verifies the exact `pgsty/silo-pkg` version selected by `go.mod` is inherited directly |
 | No mc replacement | Best-effort upstream compatibility signal, tested by the non-blocking `upstream-pkg-compat` job; it is neither the released SILO CLI behavior nor a dependency floor |
 | The retired three-replacement graph | Unsupported: do not replace `github.com/minio/pkg/v3` with silo-pkg v3.13.0 or later, whose declared module path is `github.com/pgsty/silo-pkg/v3` |
 
