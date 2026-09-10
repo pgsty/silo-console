@@ -30,11 +30,14 @@ scripts in unspecified map order. The build normalizes those source mtimes, and
 the stock Alpine package carries only its account-creation hook. Debian/RPM
 retain their systemd reload/removal hooks through format-specific overrides.
 
-SBOM creation timestamps and SPDX namespaces are normalized for binary, package
-and source SBOMs. Signatures, transparency-log entries, provenance statements
+SBOM creation timestamps, SPDX namespaces, package identifiers and graph ordering
+are normalized for binary, package and source SBOMs. Identifiers derive from all
+emitted package fields; identical records are deduplicated and their references
+updated. SBOMs are included in the reproducibility check, so the entire checksum
+manifest can be reproduced. Signatures, transparency-log entries, provenance statements
 and registry-generated metadata are evidence produced at signing time; they are
-not byte-reproducible release payloads. The reproducibility job excludes signing,
-SBOM generation and Docker publication; registry image digest reproducibility
+not byte-reproducible release payloads. The reproducibility job excludes signing
+and Docker publication; registry image digest reproducibility
 across BuildKit versions is not asserted by that job.
 
 ## CI dependency review
