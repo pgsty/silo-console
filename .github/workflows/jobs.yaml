@@ -23,8 +23,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FIREFOX_VERSION: latest
-  TESTCAFE_VERSION: 3.7.6
   # Historical test recipes call this MINIO_VERSION. The release gate uses the
   # maintained SILO server; upstream MinIO is probed separately as best effort.
   MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z
@@ -425,12 +423,8 @@ jobs:
         run: |
           (CONSOLE_SUBPATH=/console/subpath ./console server ) & (make test-initialize-minio-nginx)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
@@ -493,12 +487,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
@@ -559,12 +549,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
@@ -625,12 +611,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
@@ -691,12 +673,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
@@ -753,12 +731,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
@@ -815,12 +789,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
@@ -877,12 +847,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
@@ -939,12 +905,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
@@ -1001,12 +963,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
@@ -1066,12 +1024,8 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1.7.2
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.

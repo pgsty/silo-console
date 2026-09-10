@@ -46,6 +46,9 @@ transitive Python dependencies are hash-locked in `.github/requirements/semgrep.
 for Python 3.12 on Linux x86_64. Regenerate that file from `semgrep.in` with the
 command recorded in its header and review the complete change. Go tools use
 explicit module versions verified through the Go module checksum database.
+TestCafe uses Firefox **155.0.1** from Mozilla's release archive, verified against
+the SHA-512 digest in `.github/requirements/firefox.env`; the runner's system
+Firefox is not selected. Review that version and digest together when updating.
 
 Dependabot proposes reviewed updates for Actions, Go, Yarn, Python and Docker.
 There is no automatic merge policy. Cache keys use the lockfile/tool version or

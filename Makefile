@@ -92,8 +92,8 @@ swagger-typescript-api:
 	@(cd web-app && yarn swagger-typescript-api generate -p $(path) -o $(output) -n $(name) --custom-config ../generator.config.js)
 
 assets:
-	@(if [ -f "${NVM_DIR}/nvm.sh" ]; then \. "${NVM_DIR}/nvm.sh" && nvm install && nvm use && npm install -g yarn ; fi &&\
-	  cd web-app && corepack enable && yarn install && make build-static && yarn prettier --write . --log-level warn)
+	@(if [ -f "${NVM_DIR}/nvm.sh" ]; then \. "${NVM_DIR}/nvm.sh" && nvm install && nvm use ; fi &&\
+	  cd web-app && corepack enable && yarn install --immutable && make build-static && yarn prettier --write . --log-level warn)
 
 test-integration:
 	@(docker stop pgsqlcontainer || true)
