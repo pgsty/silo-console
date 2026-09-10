@@ -19,20 +19,27 @@ gh release download "$baseline" --repo pgsty/silo-console --dir "$work" \
 for family in deb rpm apk; do
   image="console-package-test:$family"
   docker build -t "$image" -f ".github/packaging/Dockerfile.$family" .github/packaging
-  container="$(docker run -d --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp "$image")"
   package="$(jq -r --arg family "$family" --arg arch "$architecture" '.[] | select(.type == "Linux Package" and .goarch == $arch and (.path | endswith("." + $family))) | .path' dist/artifacts.json)"
   test -n "$package"
-  docker exec "$container" mkdir -p /opt/package-test
-  docker cp "$package" "$container:/opt/package-test/current.$family"
-  docker cp "$work/silo-console_2.4.0_linux_${architecture}.$family" "$container:/opt/package-test/previous.$family"
-  docker cp "$repo/hack/test-package-lifecycle.sh" "$container:/opt/package-test/check-package.sh"
-  if [ "$family" != apk ]; then
-    for _ in $(seq 1 30); do
-      if docker exec "$container" systemctl show-environment >/dev/null 2>&1; then break; fi
-      sleep 1
-    done
-  fi
-  docker exec "$container" bash /opt/package-test/check-package.sh "/opt/package-test/current.$family" "/opt/package-test/previous.$family"
-  docker rm -f "$container" >/dev/null
-  container=""
+  for scenario in clean-install upgrade; do
+    # A fresh container for each scenario proves account/directory creation;
+    # an older package must not mask a missing preinstall hook.
+    container="$(docker run -d --privileged --cgroupns=host --tmpfs /run --tmpfs /tmp "$image")"
+    docker exec "$container" mkdir -p /opt/package-test
+    docker cp "$package" "$container:/opt/package-test/current.$family"
+    docker cp "$work/silo-console_2.4.0_linux_${architecture}.$family" "$container:/opt/package-test/previous.$family"
+    docker cp "$repo/hack/test-package-lifecycle.sh" "$container:/opt/package-test/check-package.sh"
+    if [ "$family" != apk ]; then
+      for _ in $(seq 1 30); do
+        if docker exec "$container" systemctl show-environment >/dev/null 2>&1; then break; fi
+        sleep 1
+      done
+    fi
+    previous="/opt/package-test/current.$family"
+    if [ "$scenario" = upgrade ]; then previous="/opt/package-test/previous.$family"; fi
+    echo "Testing $family $scenario"
+    docker exec "$container" bash /opt/package-test/check-package.sh "/opt/package-test/current.$family" "$previous"
+    docker rm -f "$container" >/dev/null
+    container=""
+  done
 done

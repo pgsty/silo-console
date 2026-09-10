@@ -64,7 +64,10 @@ export const Tooltip = ({
     >
       {cloneElement(children, {
         ...errorProps,
-        "aria-describedby": [children.props["aria-describedby"], bounds ? id : undefined]
+        "aria-describedby": [
+          children.props["aria-describedby"],
+          bounds ? id : undefined,
+        ]
           .filter(Boolean)
           .join(" "),
       })}
