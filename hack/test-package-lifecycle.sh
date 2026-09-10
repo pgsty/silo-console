@@ -32,13 +32,15 @@ certificate_hashes="$(sha256sum "$cert_dir/private.key" "$cert_dir/public.crt" "
 upgrade_log=$(mktemp)
 if ! install_package "$package" >"$upgrade_log" 2>&1; then cat "$upgrade_log"; exit 1; fi
 cat "$upgrade_log"
-if [ "$cert_dir" != /etc/silo-console/certs ]; then
+if [ "$cert_dir" != /etc/silo-console/certs ] && [ -d /run/systemd/system ]; then
   grep -F "existing certificates remain in $cert_dir" "$upgrade_log"
   grep -F 'Before restarting minio-console.service' "$upgrade_log"
   # Apply the documented operator choice to retain the old location. The
   # package does not restart the service or move private keys automatically.
   printf '\nCONSOLE_OPTS="--port 9090 --tls-port 9443 --certs-dir %s"\n' "$cert_dir" >> /etc/default/console
 fi
+# Stock Alpine has no systemd unit to activate and APK does not run a
+# pre-install hook during upgrades. Its chosen supervisor and HOME are unchanged.
 rm "$upgrade_log"
 test "$certificate_hashes" = "$(sha256sum "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt")"
 grep -q '^# lifecycle-test-kept$' /etc/default/console
