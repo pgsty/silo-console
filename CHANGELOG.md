@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Stream multi-selection ZIP downloads with cancellation, duplicate protection,
+  and native browser downloads when a file writer is unavailable.
+- Recover from invalid routes and rendering errors without clearing preferences.
+- Finish remaining screen labels and localize icon controls, sign-out and keyboard tooltips.
+- Lock CI Actions and test tools; make release timestamps and package metadata deterministic.
+- Generate signed checksums, SBOMs and provenance; promote `latest` only after a
+  published release passes signature, provenance and anonymous-access checks.
+- Bound systemd shutdown and define service state, certificate ownership and hardening.
+
 ## Release v2.4.0
 
 Correctness and usability:

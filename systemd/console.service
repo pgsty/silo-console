@@ -4,28 +4,34 @@ Documentation=https://github.com/pgsty/silo-console
 Wants=network-online.target
 After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/silo-console
+StartLimitBurst=2
+StartLimitIntervalSec=5
 
 [Service]
-WorkingDirectory=/usr/local/
-
 User=console-user
 Group=console-user
-
+WorkingDirectory=/var/lib/silo-console
+Environment=HOME=/var/lib/silo-console
 EnvironmentFile=/etc/default/console
-
-ExecStart=/usr/local/bin/silo-console server $CONSOLE_OPTS
-
-# Let systemd restart this service always
+StateDirectory=silo-console
+StateDirectoryMode=0750
+RuntimeDirectory=silo-console
+RuntimeDirectoryMode=0750
+ExecStart=/usr/local/bin/silo-console server --certs-dir /etc/silo-console/certs $CONSOLE_OPTS
 Restart=always
-StartLimitBurst=2
-StartLimitInterval=5
-
-# Specifies the maximum file descriptor number that can be opened by this process
+RestartSec=2
 LimitNOFILE=65536
-
-# Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
-SendSIGKILL=no
+TimeoutStopSec=90
+KillMode=control-group
+SendSIGKILL=yes
+UMask=0027
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
 
 [Install]
 WantedBy=multi-user.target

@@ -2,8 +2,11 @@ PWD := $(shell pwd)
 GOPATH := $(shell go env GOPATH)
 # Sets the build version based on the output of the following command, if we are building for a tag, that's the build else it uses the current git branch as the build
 BUILD_VERSION:=$(shell git describe --exact-match --tags $(git log -n1 --pretty='%h') 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null)
-BUILD_TIME:=$(shell date 2>/dev/null)
-TAG ?= "ghcr.io/pgsty/silo-console:$(BUILD_VERSION)-dev"
+BUILD_TIME:=$(shell TZ=UTC git show -s --format=%cd --date=format-local:%Y-%m-%dT%H:%M:%SZ HEAD)
+BUILD_COMMIT:=$(shell git rev-parse HEAD)
+BUILD_EPOCH:=$(shell git show -s --format=%ct HEAD)
+IMAGE_VERSION := $(subst /,-,$(BUILD_VERSION))
+TAG ?= "ghcr.io/pgsty/silo-console:$(IMAGE_VERSION)-dev"
 #TAG ?= "ghcr.io/pgsty/silo-console:dev"
 # Retain the historical variable name for test-script compatibility. Release
 # gates run against a pinned SILO image; override it explicitly for an advisory
@@ -25,8 +28,7 @@ getdeps:
 	@mkdir -p ${GOPATH}/bin
 	@if ! ${GOPATH}/bin/golangci-lint --version 2>/dev/null | grep -qF " $(GOLANGCI_VERSION) "; then \
 		echo "Installing golangci-lint v$(GOLANGCI_VERSION)"; \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v$(GOLANGCI_VERSION)/install.sh | \
-			sh -s -- -b $(GOPATH)/bin v$(GOLANGCI_VERSION); \
+		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GOLANGCI_VERSION); \
 	fi
 
 verifiers: getdeps fmt lint replacements deps-release credits
@@ -364,7 +366,7 @@ clean:
 	@rm -vf console
 
 docker:
-	@docker buildx build --output=type=docker --platform linux/amd64 -t $(TAG) --build-arg build_version=$(BUILD_VERSION) --build-arg build_time='$(BUILD_TIME)' --build-arg NODE_VERSION='$(NODE_VERSION)' .
+	@docker buildx build --output=type=docker --platform linux/amd64 -t $(TAG) --build-arg build_version=$(BUILD_VERSION) --build-arg build_time='$(BUILD_TIME)' --build-arg build_commit='$(BUILD_COMMIT)' --build-arg build_short_commit='$(shell git show --format=%h HEAD --quiet)' --build-arg SOURCE_DATE_EPOCH='$(BUILD_EPOCH)' .
 
 release: swagger-gen
 	@echo "Generating Release: $(RELEASE)"
