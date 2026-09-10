@@ -33,6 +33,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDefaultSessionActionsSeparatesPasswordAndUserManagement(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		statements string
+		password   bool
+		createUser bool
+	}{
+		{"read-only", `{"Effect":"Allow","Action":"s3:GetObject","Resource":"arn:aws:s3:::*"}`, true, false},
+		{"legacy deny", `{"Effect":"Deny","Action":"admin:CreateUser","Resource":"arn:aws:s3:::*"}`, true, false},
+		{"password denied", `{"Effect":"Deny","Action":"admin:ChangeMyPassword"}`, false, false},
+		{"user admin with password denied", `{"Effect":"Allow","Action":"admin:CreateUser"},{"Effect":"Deny","Action":"admin:ChangeMyPassword"}`, false, true},
+		{"wildcard denied", `{"Effect":"Deny","Action":"admin:*"}`, false, false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{"Version":"2012-10-17","Statement":[` + tt.statements + `]}`))
+			if err != nil {
+				t.Fatal(err)
+			}
+			actions := defaultSessionActions(policy, nil)
+			assert.Equal(t, tt.password, actions.Contains(minioIAMPolicy.ChangeMyPasswordAdminAction))
+			assert.Equal(t, tt.createUser, actions.Contains(minioIAMPolicy.CreateUserAdminAction))
+		})
+	}
+}
+
 func TestDefaultSessionActionsKeepsRequestScopedServiceAccountCapability(t *testing.T) {
 	policy, err := minioIAMPolicy.ParseConfig(bytes.NewBufferString(`{
 		"Version":"2012-10-17",

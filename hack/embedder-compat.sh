@@ -9,6 +9,7 @@ set -euo pipefail
 
 console_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$console_root"
+pkg_version="$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)"
 
 embedder="$(mktemp -d)"
 go run ./hack/replacements readme-block > "$embedder/readme-block.txt"
@@ -50,5 +51,5 @@ while read -r old new version; do
   got="$(go list -m -f '{{if .Replace}}{{.Replace.Path}} {{.Replace.Version}}{{end}}' "$old")"
   test "$got" = "$new $version" || { echo "$old resolved to '$got', README says '$new $version'" >&2; exit 1; }
 done < tuples.txt
-test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "v3.13.3" || { echo "embedder did not inherit silo-pkg v3.13.3" >&2; exit 1; }
+test "$(go list -m -f '{{.Version}}' github.com/pgsty/silo-pkg/v3)" = "$pkg_version" || { echo "embedder did not inherit silo-pkg $pkg_version" >&2; exit 1; }
 echo "embedder graph matches the README block"

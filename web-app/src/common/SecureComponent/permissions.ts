@@ -63,6 +63,7 @@ export const IAM_SCOPES = {
   ADMIN_GET_POLICY: "admin:GetPolicy",
   ADMIN_LIST_USERS: "admin:ListUsers",
   ADMIN_CREATE_USER: "admin:CreateUser",
+  ADMIN_CHANGE_MY_PASSWORD: "admin:ChangeMyPassword",
   ADMIN_DELETE_USER: "admin:DeleteUser",
   ADMIN_ENABLE_USER: "admin:EnableUser",
   ADMIN_DISABLE_USER: "admin:DisableUser",
