@@ -4,6 +4,7 @@
 
 - Uses `admin:ChangeMyPassword` for the Change Password button and session capability; user creation remains governed by `admin:CreateUser`. Deploy with the matching SILO Server and silo-pkg changes. Existing policies that use a CreateUser deny to lock the caller's password must also deny ChangeMyPassword.
 - Pins upstream minio-go to `78bfa91607c2`, including streaming Content-Type signing and RDMA TLS trust fixes, and updates the maintained package/client dependency pins. The upstream region-whitespace fix (#2274) remains pending.
+- Updates knip's indirect smol-toml dependency to 1.7.1 for CVE-2026-85730.
 
 ## Release v2.4.0
 
