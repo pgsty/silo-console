@@ -20,6 +20,7 @@ before:
   hooks:
     - go mod download
     - go mod verify
+    - python3 hack/normalize-package-inputs.py
 
 builds:
   - goos:
@@ -152,11 +153,21 @@ nfpms:
           mode: 0750
           owner: root
           group: console-user
+    # Stock Alpine has no systemd. A single APK account-creation hook also
+    # avoids nFPM's nondeterministic map iteration for multiple APK scripts.
     scripts:
       preinstall: systemd/preinstall.sh
-      postinstall: systemd/reload.sh
-      postremove: systemd/reload.sh
-      preremove: systemd/preremove.sh
+    overrides:
+      deb:
+        scripts:
+          postinstall: systemd/reload.sh
+          postremove: systemd/reload.sh
+          preremove: systemd/preremove.sh
+      rpm:
+        scripts:
+          postinstall: systemd/reload.sh
+          postremove: systemd/reload.sh
+          preremove: systemd/preremove.sh
     rpm:
       group: Applications/File
       compression: gzip:9
@@ -229,19 +240,20 @@ docker_signs:
 sboms:
   - id: binary-sbom
     artifacts: binary
-    cmd: hack/generate-sbom.sh
-    args: ["${artifact}", "${document}"]
-    documents: ["${artifact}.spdx.json"]
+    ids: [binaries]
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
+    documents: ["{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}.spdx.json"]
   - id: package-sbom
     artifacts: package
-    cmd: hack/generate-sbom.sh
-    args: ["${artifact}", "${document}"]
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
     documents: ["${artifact}.spdx.json"]
 
   - id: source-sbom
     artifacts: source
-    cmd: hack/generate-sbom.sh
-    args: ["${artifact}", "${document}"]
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
     documents: ["${artifact}.spdx.json"]
 
 source:

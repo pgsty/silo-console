@@ -25,6 +25,11 @@ archives, then compares their sorted SHA-256 manifests. `hack/check-container-eq
 runs after a GoReleaser snapshot on Linux amd64 and checks source-image metadata
 and every frontend asset against the release inputs. Both checks run in CI.
 
+nFPM 2.47.0 embeds the source mtime of APK lifecycle scripts and iterates multiple
+scripts in unspecified map order. The build normalizes those source mtimes, and
+the stock Alpine package carries only its account-creation hook. Debian/RPM
+retain their systemd reload/removal hooks through format-specific overrides.
+
 SBOM creation timestamps and SPDX namespaces are normalized for binary, package
 and source SBOMs. Signatures, transparency-log entries, provenance statements
 and registry-generated metadata are evidence produced at signing time; they are

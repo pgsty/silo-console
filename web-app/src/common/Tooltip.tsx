@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import type { Tooltip as MDSTooltip } from "mds";
 
 // Preserve the MDS call-site API while providing keyboard focus, a stable
-// accessible description, Escape dismissal and a hoverable tooltip.
+// accessible description while open, Escape dismissal and a hoverable tooltip.
 export const Tooltip = ({
   children,
   tooltip,
@@ -64,15 +64,10 @@ export const Tooltip = ({
     >
       {cloneElement(children, {
         ...errorProps,
-        "aria-describedby": [children.props["aria-describedby"], id]
+        "aria-describedby": [children.props["aria-describedby"], bounds ? id : undefined]
           .filter(Boolean)
           .join(" "),
       })}
-      {!bounds && (
-        <span id={id} hidden>
-          {tooltip}
-        </span>
-      )}
       {bounds &&
         createPortal(
           <div

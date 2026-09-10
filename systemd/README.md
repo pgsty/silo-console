@@ -54,7 +54,9 @@ sudo systemctl restart minio-console.service
 sudo systemctl status minio-console.service
 ```
 
-Removal stops/disables the compatibility unit and reloads systemd. User state,
+DEB/RPM removal stops/disables the compatibility unit and reloads systemd.
+The stock Alpine APK creates its service account at installation and does not
+run systemd lifecycle hooks. User state,
 configuration and certificates are retained for explicit operator cleanup.
 For source/manual installs, run `systemd/preinstall.sh` as root to create the
 account/directories, install the binary as `/usr/local/bin/silo-console`, install
