@@ -29,10 +29,17 @@ cp "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
 chown root:console-user "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
 chmod 0640 "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
 certificate_hashes="$(sha256sum "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt")"
+if [ "$cert_dir" != /etc/silo-console/certs ]; then
+  # Operators also symlink the complete legacy certificate directory. The
+  # warning and explicit path override must work without replacing that link.
+  mv "$cert_dir" "$cert_dir.saved"
+  ln -s "$cert_dir.saved" "$cert_dir"
+fi
 upgrade_log=$(mktemp)
 if ! install_package "$package" >"$upgrade_log" 2>&1; then cat "$upgrade_log"; exit 1; fi
 cat "$upgrade_log"
 if [ "$cert_dir" != /etc/silo-console/certs ] && [ -d /run/systemd/system ]; then
+  test -L "$cert_dir"
   grep -F "existing certificates remain in $cert_dir" "$upgrade_log"
   grep -F 'Before restarting minio-console.service' "$upgrade_log"
   # Apply the documented operator choice to retain the old location. The

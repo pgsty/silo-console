@@ -24,7 +24,7 @@ install -d -m 0750 -o root -g console-user /etc/silo-console /etc/silo-console/c
 # Keep private files in place and warn before the operator restarts the service.
 legacy_home=$(getent passwd console-user | cut -d: -f6)
 legacy_certs="$legacy_home/.console/certs"
-if [ -n "$legacy_home" ] && [ -d "$legacy_certs" ] && [ -n "$(find "$legacy_certs" -mindepth 1 ! -type d -print -quit)" ]; then
+if [ -n "$legacy_home" ] && [ -d "$legacy_certs" ] && [ -n "$(find "$legacy_certs/." -mindepth 1 ! -type d -print -quit)" ]; then
     echo "WARNING: SILO Console service now uses /etc/silo-console/certs; existing certificates remain in $legacy_certs. Before restarting minio-console.service, migrate the certificates and CAs or set --certs-dir $legacy_certs in CONSOLE_OPTS. See /usr/share/doc/silo-console/service.md. No certificates were moved." >&2
 fi
 
