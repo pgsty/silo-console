@@ -28,6 +28,27 @@ sudoedit /etc/default/console
 sudo systemctl enable --now minio-console.service
 ```
 
+### Upgrading an installation with existing certificates
+
+Packages before this change used the service account's home directory, normally
+`/usr/local/.console/certs`. The new unit uses `/etc/silo-console/certs`.
+When the old directory contains certificates, installation prints a warning
+with both paths. It preserves the old files, private keys, symlinks and passwd
+entry, and does not restart the service. Complete one of these steps **before
+restarting**:
+
+- Keep the old location by adding `--certs-dir /usr/local/.console/certs` to
+  `CONSOLE_OPTS` in `/etc/default/console`, retaining your other options. Use the
+  actual old path printed by the installer. A path under `/home`, `/root` or
+  `/run/user` is hidden by `ProtectHome`; migrate it to `/etc` instead.
+- Install your serving certificate, private key and private CAs into the new
+  directory using the ownership and modes above. Preserve any domain-specific
+  certificate subdirectories, and check symlink targets remain readable by
+  `console-user`. Remove the old files only after verifying TLS and login.
+
+Directory ownership/modes declared by the package are reapplied on upgrade;
+operator-managed certificate files are not recursively modified.
+
 Set `CONSOLE_MINIO_SERVER` to the maintained SILO endpoint. Stable
 `CONSOLE_PBKDF_PASSPHRASE` and `CONSOLE_PBKDF_SALT` preserve sessions across
 restarts; unset values invalidate sessions on restart. Keep `/etc/default/console`

@@ -175,6 +175,38 @@ test("cancel aborts a running ZIP file writer", async ({ page }) => {
   );
 });
 
+test("cancelling a queued save dialog settles without waiting for a download slot", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/session", async (route) => {
+    const response = await route.fetch();
+    const json = await response.json();
+    json.envConstants = { ...json.envConstants, maxConcurrentDownloads: 1 };
+    await route.fulfill({ response, json });
+  });
+  await page.addInitScript(() => {
+    let calls = 0;
+    (window as any).showSaveFilePicker = () => {
+      if (++calls === 1) return new Promise(() => {});
+      return Promise.reject(new DOMException("Cancelled", "AbortError"));
+    };
+  });
+  await select(page, ["data.bin", "zero.txt"]);
+  await page.getByRole("button", { name: "Download", exact: true }).click();
+  for (const name of ["zero.txt", "nested/"]) {
+    const checkbox = page.locator(`input[type="checkbox"][value="${name}"]`);
+    await page.locator("label").filter({ has: checkbox }).click();
+  }
+  await page.getByRole("button", { name: "Download", exact: true }).click();
+  await openManager(page);
+  await expect(
+    page.getByRole("button", { name: "Cancel transfer", exact: true }),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Remove transfer", exact: true }),
+  ).toHaveCount(1);
+});
+
 test("server failure aborts the selected file without a successful download", async ({
   page,
 }) => {
@@ -196,4 +228,62 @@ test("server failure aborts the selected file without a successful download", as
       exact: true,
     }),
   ).toBeVisible();
+});
+
+for (const blocked of [false, true]) {
+  test(`native ZIP reports an error when the response ${blocked ? "cannot" : "can"} be framed`, async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      (window as any).showSaveFilePicker = undefined;
+    });
+    await select(page, ["data.bin", "zero.txt"]);
+    await page.route("**/objects/download-multiple", (route) =>
+      blocked
+        ? route.fulfill({
+            status: 403,
+            headers: { "X-Frame-Options": "DENY" },
+            body: "forbidden",
+          })
+        : route.continue({ postData: "objects=%5B%5D" }),
+    );
+    await page.getByRole("button", { name: "Download", exact: true }).click();
+    await openManager(page);
+    await expect(
+      page.getByText(
+        blocked
+          ? "Error: Unexpected response, download incomplete."
+          : "Error: invalid download selection",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        "Track or cancel this download in your browser's download manager.",
+        { exact: true },
+      ),
+    ).toHaveCount(0);
+  });
+}
+
+test("native ZIP checks an expired session before handing off to the browser", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    (window as any).showSaveFilePicker = undefined;
+  });
+  await select(page, ["data.bin", "zero.txt"]);
+  await page.route("**/api/v1/session", (route) =>
+    route.fulfill({ status: 401, json: { message: "invalid session" } }),
+  );
+  let downloads = 0;
+  let requests = 0;
+  page.on("download", () => downloads++);
+  page.on("request", (request) => {
+    if (request.url().endsWith("/objects/download-multiple")) requests++;
+  });
+  await page.getByRole("button", { name: "Download", exact: true }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  expect(downloads).toBe(0);
+  expect(requests).toBe(0);
 });

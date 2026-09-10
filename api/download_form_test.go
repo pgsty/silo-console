@@ -40,6 +40,9 @@ func TestDownloadForm(t *testing.T) {
 			if response.Code != http.StatusNoContent {
 				t.Fatalf("status=%d: %s", response.Code, response.Body.String())
 			}
+			if response.Header().Get("X-Frame-Options") != "SAMEORIGIN" {
+				t.Fatal("native form responses must be readable by the same-origin frame")
+			}
 		})
 	}
 	for _, body := range []string{"objects=null", "objects=%7B", "objects=%5B%5D", "objects=%5B1%5D", url.Values{"objects": {`[""]`}}.Encode()} {
@@ -73,6 +76,9 @@ func TestDownloadFormBoundaries(t *testing.T) {
 			if response.Code != tc.status {
 				t.Fatalf("status=%d", response.Code)
 			}
+			if response.Header().Get("X-Frame-Options") != "SAMEORIGIN" {
+				t.Fatal("native form error responses must remain readable")
+			}
 		})
 	}
 	t.Run("JSON clients unchanged", func(t *testing.T) {
@@ -82,6 +88,9 @@ func TestDownloadFormBoundaries(t *testing.T) {
 			b, _ := io.ReadAll(r.Body)
 			if string(b) != `["a"]` {
 				t.Fatal(string(b))
+			}
+			if w.Header().Get("X-Frame-Options") != "" {
+				t.Fatal("JSON clients must retain the configured framing policy")
 			}
 		})).ServeHTTP(httptest.NewRecorder(), request)
 	})

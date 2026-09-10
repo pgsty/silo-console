@@ -85,10 +85,25 @@ for (const lang of ["en", "zh"]) {
         );
         await refresh.focus();
         await expect(page.getByRole("tooltip")).toBeVisible();
+        await expect(refresh).toHaveAccessibleDescription(
+          lang === "zh" ? "刷新" : "Refresh",
+        );
         await page.keyboard.press("Escape");
         await expect(page.getByRole("tooltip")).toHaveCount(0);
       });
     }
+    test("sign-out stays localized across a responsive relayout", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`${SERVER_ENDPOINT}/buckets`);
+      for (const width of [390, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await expect(page.locator("#sign-out")).toHaveAccessibleName(
+          lang === "zh" ? "登出" : "Sign Out",
+        );
+      }
+    });
     test("root render failure has a localized recovery action", async ({
       page,
     }) => {

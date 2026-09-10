@@ -16,7 +16,31 @@ install_package "${2:-$package}"
 printf '\n# lifecycle-test-kept\n' >> /etc/default/console
 install -d -m 0750 -o console-user -g console-user /var/lib/silo-console
 touch /var/lib/silo-console/keep-state
-install_package "$package"
+# Seed real certificates before the upgrade, including the old default path.
+cert_dir=/etc/silo-console/certs
+if [ "${2:-$package}" != "$package" ]; then
+  cert_dir="$(getent passwd console-user | cut -d: -f6)/.console/certs"
+fi
+install -d -m 0750 -o root -g console-user "$cert_dir" "$cert_dir/CAs"
+openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=localhost \
+  -addext subjectAltName=DNS:localhost,IP:127.0.0.1 \
+  -keyout "$cert_dir/private.key" -out "$cert_dir/public.crt" >/dev/null 2>&1
+cp "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
+chown root:console-user "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
+chmod 0640 "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt"
+certificate_hashes="$(sha256sum "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt")"
+upgrade_log=$(mktemp)
+if ! install_package "$package" >"$upgrade_log" 2>&1; then cat "$upgrade_log"; exit 1; fi
+cat "$upgrade_log"
+if [ "$cert_dir" != /etc/silo-console/certs ]; then
+  grep -F "existing certificates remain in $cert_dir" "$upgrade_log"
+  grep -F 'Before restarting minio-console.service' "$upgrade_log"
+  # Apply the documented operator choice to retain the old location. The
+  # package does not restart the service or move private keys automatically.
+  printf '\nCONSOLE_OPTS="--port 9090 --tls-port 9443 --certs-dir %s"\n' "$cert_dir" >> /etc/default/console
+fi
+rm "$upgrade_log"
+test "$certificate_hashes" = "$(sha256sum "$cert_dir/private.key" "$cert_dir/public.crt" "$cert_dir/CAs/test.crt")"
 grep -q '^# lifecycle-test-kept$' /etc/default/console
 test -f /var/lib/silo-console/keep-state
 test "$(stat -c %U /var/lib/silo-console)" = console-user
@@ -54,20 +78,13 @@ UNIT
   rm /etc/systemd/system/minio-console.service.d/stop-test.conf
   systemctl daemon-reload
   systemctl reset-failed minio-console.service
-  # Test certificate ownership with a real private-CA TLS listener.
-  openssl req -x509 -nodes -newkey rsa:2048 -days 1 -subj /CN=localhost \
-    -addext subjectAltName=DNS:localhost,IP:127.0.0.1 \
-    -keyout /etc/silo-console/certs/private.key -out /etc/silo-console/certs/public.crt >/dev/null 2>&1
-  cp /etc/silo-console/certs/public.crt /etc/silo-console/certs/CAs/test.crt
-  chown root:console-user /etc/silo-console/certs/private.key /etc/silo-console/certs/public.crt /etc/silo-console/certs/CAs/test.crt
-  chmod 0640 /etc/silo-console/certs/private.key /etc/silo-console/certs/public.crt /etc/silo-console/certs/CAs/test.crt
-  printf '\nCONSOLE_OPTS="--port 9090 --tls-port 9443"\n' >> /etc/default/console
+  # The listener must use the same private certificate seeded before upgrade.
   systemctl start minio-console.service
   for _ in $(seq 1 30); do
-    if curl --cacert /etc/silo-console/certs/public.crt -fsS https://localhost:9443/ >/dev/null; then break; fi
+    if curl --cacert "$cert_dir/CAs/test.crt" -fsS https://localhost:9443/ >/dev/null; then break; fi
     sleep 1
   done
-  curl --cacert /etc/silo-console/certs/public.crt -fsS https://localhost:9443/ >/dev/null
+  curl --cacert "$cert_dir/CAs/test.crt" -fsS https://localhost:9443/ >/dev/null
 fi
 case "$package" in
   *.deb) dpkg --remove silo-console ;;

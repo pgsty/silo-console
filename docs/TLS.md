@@ -1,5 +1,12 @@
 ## Start Console service with TLS:
 
+For packaged Linux services, the unit explicitly uses `/etc/silo-console/certs`,
+with private CAs under `/etc/silo-console/certs/CAs`. See the
+[package upgrade instructions](../systemd/README.md#upgrading-an-installation-with-existing-certificates)
+before restarting an installation whose certificates are in the old default
+directory. The `~/.console/certs` examples below apply to manual standalone
+invocations without `--certs-dir`.
+
 Copy your `public.crt` and `private.key` to `~/.console/certs`, then:
 
 ```sh

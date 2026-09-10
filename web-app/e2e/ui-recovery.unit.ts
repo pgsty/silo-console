@@ -4,6 +4,9 @@ import { expect, test } from "@playwright/test";
 import { isValidPathname } from "../src/utils/routePath";
 import { getStoredSidebarOpen } from "../src/utils/sidebarState";
 import { uiSourceViolations } from "../hack/ui-source-guard.mjs";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 for (const raw of [
   "{",
@@ -45,4 +48,16 @@ for (const value of [
 }
 test("UI literals and icon controls respect localization and accessible names", () => {
   expect(uiSourceViolations()).toEqual([]);
+});
+test("literal accessible labels fail the guard while localized labels and ID references pass", () => {
+  const dir = mkdtempSync(join(tmpdir(), "console-ui-labels-"));
+  try {
+    writeFileSync(
+      join(dir, "Example.tsx"),
+      '<><button aria-label="delete-selected-users"/><button aria-label={"Delete"}/><button aria-label={t("Delete")}/><button aria-labelledby="existing-label"/></>',
+    );
+    expect(uiSourceViolations(dir)).toHaveLength(2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

@@ -50,7 +50,7 @@ jobs:
           cosign verify-attestation --type spdxjson --certificate-identity "$identity" --certificate-oidc-issuer "$issuer" "$image@$digest"
           gh attestation verify "oci://$image@$digest" --repo "$GITHUB_REPOSITORY"
           mkdir verification
-          gh release download "$TAG" --dir verification --pattern '*_checksums.txt*'
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir verification --pattern '*_checksums.txt*'
           for checksum in verification/*_checksums.txt; do
             cosign verify-blob --bundle "${checksum}.sigstore.json" --certificate-identity "$identity" --certificate-oidc-issuer "$issuer" "$checksum"
             gh attestation verify "$checksum" --repo "$GITHUB_REPOSITORY"

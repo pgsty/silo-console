@@ -24,6 +24,10 @@ func downloadFormMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+		// This endpoint renders no UI. Allow the same-origin download frame to
+		// read error responses, including rejected origins/selections; retain
+		// the framing restriction for every other API and Console page.
+		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
 		// Reuse the Console origin policy, including configured external origins
 		// and explicitly trusted proxies for embedded/subpath installations.
 		if !wsCheckOrigin(r) {

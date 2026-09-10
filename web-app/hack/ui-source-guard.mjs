@@ -55,9 +55,9 @@ const walk = (dir) =>
         ? walk(path.join(dir, entry.name))
         : [path.join(dir, entry.name)],
     );
-export function uiSourceViolations() {
+export function uiSourceViolations(sourceRoot = root) {
   const errors = [];
-  for (const file of walk(root).filter((f) => f.endsWith(".tsx"))) {
+  for (const file of walk(sourceRoot).filter((f) => f.endsWith(".tsx"))) {
     // Internal component/icon catalogues display API identifiers as examples.
     if (/\/(IconsScreen|ComponentsScreen)\.tsx$/.test(file)) continue;
     const source = ts.createSourceFile(
@@ -84,6 +84,26 @@ export function uiSourceViolations() {
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tag = node.tagName.getText(source);
         const attributes = node.attributes.properties;
+        for (const attr of attributes) {
+          if (
+            !ts.isJsxAttribute(attr) ||
+            attr.name.getText(source) !== "aria-label" ||
+            !attr.initializer
+          )
+            continue;
+          const value = ts.isJsxExpression(attr.initializer)
+            ? attr.initializer.expression
+            : attr.initializer;
+          if (
+            value &&
+            ts.isStringLiteral(value) &&
+            (!value.text.trim() || !technical.has(value.text))
+          )
+            report(
+              attr,
+              "Accessible labels must be localized, not literal UI text",
+            );
+        }
         if (
           [
             "Button",

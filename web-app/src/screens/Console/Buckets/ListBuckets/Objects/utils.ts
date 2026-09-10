@@ -30,6 +30,7 @@ import { streamZipResponse } from "./zipDownload";
 import { store } from "../../../../../store";
 import { ContentType } from "api/consoleApi";
 import { api } from "../../../../../api";
+import { expireSession } from "../../../../../api/session";
 import { setSnackBarMessage } from "../../../../../systemSlice";
 import { translate } from "i18n";
 import { attachDownloadRequestHandlers } from "./downloadRequest";
@@ -108,6 +109,7 @@ export const downloadSelectedAsZip = (
     if (settled && !frame) return;
     settled = true;
     removeTrace(ID);
+    if (frame) store.dispatch(setSnackBarMessage(""));
     frame?.remove();
     frame = null;
     if (controller.signal.aborted || error?.name === "AbortError") {
@@ -176,14 +178,37 @@ export const downloadSelectedAsZip = (
           removeTrace(ID);
           store.dispatch(completeObject(instanceID));
         } else {
+          if (!state.system.anonymousMode) {
+            try {
+              await api.session.sessionCheck({ signal: controller.signal });
+            } catch (error: any) {
+              // Session probes intentionally do not redirect anonymous pages;
+              // this probe belongs to a known authenticated download.
+              if (error?.status === 401) expireSession();
+              throw error;
+            }
+            if (controller.signal.aborted || settled) return;
+          }
           // Native POST attachments stream to the browser's download manager;
           // it owns progress, cancellation and any network/partial ZIP errors.
           frame = document.createElement("iframe");
           frame.name = `download-${ID}`;
           frame.hidden = true;
           frame.onload = () => {
-            const body = frame?.contentDocument?.body?.textContent?.trim();
-            if (body) fail(new Error(body.slice(0, 500)));
+            if (!frame) return;
+            try {
+              const doc = frame.contentDocument;
+              // Attachments do not navigate the frame. A blocked error page
+              // (for example a proxy's DENY response) is opaque, not success.
+              if (!doc) {
+                fail(new Error(t("Unexpected response, download incomplete.")));
+                return;
+              }
+              const body = doc.body?.textContent?.trim();
+              if (body) fail(new Error(body.slice(0, 500)));
+            } catch {
+              fail(new Error(t("Unexpected response, download incomplete.")));
+            }
           };
           document.body.appendChild(frame);
           const form = document.createElement("form");
@@ -240,6 +265,11 @@ export const downloadSelectedAsZip = (
       errorMessage: "",
     }),
   );
+  // The OS picker can be cancelled before the scheduler grants a slot.
+  // Settle its entry immediately instead of waiting for unrelated downloads.
+  void picked?.then((result) => {
+    if (result.error) fail(result.error);
+  });
   if (needsSizeAdvice) {
     store.dispatch(
       setSnackBarMessage(

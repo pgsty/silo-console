@@ -117,6 +117,11 @@ nfpms:
         file_info:
           mtime: "{{ .CommitDate }}"
           mode: 0644
+      - src: systemd/README.md
+        dst: /usr/share/doc/silo-console/service.md
+        file_info:
+          mtime: "{{ .CommitDate }}"
+          mode: 0644
       - src: packaging/debian/copyright
         dst: /usr/share/doc/silo-console/copyright
         packager: deb

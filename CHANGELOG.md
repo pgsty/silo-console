@@ -10,6 +10,8 @@
 - Generate signed checksums, SBOMs and provenance; promote `latest` only after a
   published release passes signature, provenance and anonymous-access checks.
 - Bound systemd shutdown and define service state, certificate ownership and hardening.
+- Warn before the packaged certificate-directory transition; preserve old keys
+  and document retaining the previous path through `CONSOLE_OPTS` before restart.
 
 ## Release v2.4.0
 
