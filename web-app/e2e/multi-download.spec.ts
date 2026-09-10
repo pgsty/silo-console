@@ -22,6 +22,8 @@ const files = {
   "zero.txt": Buffer.alloc(0),
   "nested/中文.txt": Buffer.from("nested content"),
 };
+const sizeAdvice =
+  "For selections above 5 GiB or of unknown size, MCLI is recommended. This ZIP will stream without buffering in memory.";
 test.beforeAll(async () => {
   await client.makeBucket(bucket);
   for (const [key, body] of Object.entries(files))
@@ -95,6 +97,9 @@ test("native multi-selection and recursive prefixes produce a real ZIP", async (
   expect(new TextDecoder().decode(zipped["nested/中文.txt"])).toBe(
     "nested content",
   );
+  // A recursive prefix has an unknown total; native handoff must not replace
+  // its advisory with the normal browser-manager toast.
+  await expect(page.getByText(sizeAdvice, { exact: true })).toBeVisible();
   await openManager(page);
   await expect(
     page
@@ -105,6 +110,27 @@ test("native multi-selection and recursive prefixes produce a real ZIP", async (
       .last(),
   ).toBeVisible();
   await download.delete();
+});
+
+test("large selection keeps its MCLI advisory while streaming", async ({
+  page,
+}) => {
+  await picker(page);
+  await page.routeWebSocket("**/ws/objectManager", (socket) => {
+    const server = socket.connectToServer();
+    server.onMessage((message) => {
+      const json = JSON.parse(message.toString());
+      // Test the size decision without uploading gigabytes of fixture data.
+      for (const object of json.data || []) object.size = 6 * 1024 ** 3;
+      socket.send(JSON.stringify(json));
+    });
+  });
+  await select(page, ["data.bin", "zero.txt"]);
+  await page.getByRole("button", { name: "Download", exact: true }).click();
+  await expect(page.getByText(sizeAdvice, { exact: true })).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => (window as any).__zipState.closed))
+    .toBe(true);
 });
 
 test("file writer streams multiple files and blocks duplicate clicks", async ({

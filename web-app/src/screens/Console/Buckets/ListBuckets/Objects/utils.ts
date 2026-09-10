@@ -62,6 +62,7 @@ export const downloadSelectedAsZip = (
   selectedSize: number | null = null,
 ) => {
   if (objectList.length === 0) return;
+  const needsSizeAdvice = selectedSize === null || selectedSize > 5 * 1024 ** 3;
   const state = store.getState();
   const selectionKey = JSON.stringify([
     bucketName,
@@ -204,13 +205,17 @@ export const downloadSelectedAsZip = (
           form.remove();
           settled = true;
           store.dispatch(completeObject(instanceID));
-          store.dispatch(
-            setSnackBarMessage(
-              t(
-                "Track or cancel this download in your browser's download manager.",
+          // Keep the size advisory visible instead of immediately replacing it
+          // on native handoff. The transfer entry always explains browser control.
+          if (!needsSizeAdvice) {
+            store.dispatch(
+              setSnackBarMessage(
+                t(
+                  "Track or cancel this download in your browser's download manager.",
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
       } catch (error) {
         fail(error);
@@ -235,7 +240,7 @@ export const downloadSelectedAsZip = (
       errorMessage: "",
     }),
   );
-  if (selectedSize === null || selectedSize > 5 * 1024 ** 3) {
+  if (needsSizeAdvice) {
     store.dispatch(
       setSnackBarMessage(
         t(
