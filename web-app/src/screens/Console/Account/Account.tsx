@@ -259,7 +259,7 @@ const Account = () => {
                 />
               </TooltipWrapper>
               <SecureComponent
-                scopes={[IAM_SCOPES.ADMIN_CREATE_USER]}
+                scopes={[IAM_SCOPES.ADMIN_CHANGE_MY_PASSWORD]}
                 resource={CONSOLE_UI_RESOURCE}
                 matchAll
                 errorProps={{ disabled: true }}
