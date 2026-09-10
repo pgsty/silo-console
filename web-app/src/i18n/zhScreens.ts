@@ -12,6 +12,54 @@
 // then reconciled for glossary consistency; keep keys byte-identical to code.
 
 export const zhScreens: Record<string, string> = {
+  "Sign Out": "登出",
+  "Manage bucket": "管理存储桶",
+  "Remove transfer": "移除传输记录",
+  "Cancel transfer": "取消传输",
+  "This download has already started. Dismiss its transfer entry to start it again.":
+    "此下载已开始。如需重新下载，请先移除对应的传输记录。",
+  "Track or cancel this download in your browser's download manager.":
+    "请在浏览器的下载管理器中查看进度或取消下载。",
+  "For selections above 5 GiB or of unknown size, MCLI is recommended. This ZIP will stream without buffering in memory.":
+    "超过 5 GiB 或大小未知的下载建议使用 MCLI。此 ZIP 将以流式传输，不会整包缓存在内存中。",
+
+  "Unable to display this page.": "无法显示此页面。",
+  "Reload the page or return home. Your preferences will be kept.":
+    "请重新加载页面或返回首页。你的偏好设置将保留。",
+  "Reload page": "重新加载页面",
+  "Return home": "返回首页",
+  "404 Error": "404 错误",
+  "Sorry, the page could not be found.": "抱歉，找不到此页面。",
+  "Select multiple buckets": "选择多个存储桶",
+  "Select all buckets": "选择所有存储桶",
+  "Set lifecycle": "设置生命周期",
+  "Set replication": "设置复制",
+  "Refresh buckets": "刷新存储桶",
+  "Close details": "关闭详情",
+  "Copy share URL": "复制分享链接",
+  "Select multiple versions": "选择多个版本",
+  "Delete selected versions": "删除所选版本",
+  "Delete non-current versions": "删除非当前版本",
+  "Copy code": "复制代码",
+  "Delete group": "删除组",
+  "Refresh list": "刷新列表",
+  "Copy path": "复制路径",
+  "Delete user": "删除用户",
+  "Change password": "修改密码",
+  "Copy {label}": "复制{label}",
+  "Add site": "添加站点",
+  "Remove site": "移除站点",
+  "Delete selected users": "删除所选用户",
+  "View All": "查看全部",
+  "Deployment ID:": "部署 ID：",
+  "Request ID:": "请求 ID：",
+  "Remote host:": "远程主机：",
+  "User agent:": "用户代理：",
+  "Backtrace:": "调用栈：",
+  "Time:": "时间：",
+  "API:": "API：",
+  "Not available": "不可用",
+
   " and ": " ",
   "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'":
     "'namespace' 反映当前的存储桶/对象列表，'access' 反映对象操作的流水记录，默认为 'namespace'",

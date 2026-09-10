@@ -205,7 +205,10 @@ const BucketListItem = ({
         </span>
       </Box>
       <Box className={"bucketMetrics"}>
-        <Link to={`/buckets/${bucket.name}/admin`}>
+        <Link
+          to={`/buckets/${bucket.name}/admin`}
+          aria-label={`${t("Manage bucket")}: ${bucket.name}`}
+        >
           <BucketsIcon
             className={"bucketIcon"}
             style={{

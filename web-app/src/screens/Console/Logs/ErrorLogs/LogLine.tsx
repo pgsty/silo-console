@@ -65,7 +65,10 @@ const messageForConsoleMsg = (log: LogMessage) => {
     </div>
   );
 };
-const messageForError = (log: LogMessage) => {
+export const messageForError = (
+  log: LogMessage,
+  t: (text: string) => string,
+) => {
   const dataStyle = {
     color: "#C83B51",
     fontWeight: 400,
@@ -91,36 +94,36 @@ const messageForError = (log: LogMessage) => {
   return (
     <Fragment>
       <div>
-        <b style={labelStyle}>API:&nbsp;</b>
+        <b style={labelStyle}>{t("API:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("api.name")}</span>
       </div>
       <div>
-        <b style={labelStyle}>Time:&nbsp;</b>
+        <b style={labelStyle}>{t("Time:")} &nbsp;</b>
         <span style={dataStyle}>{logTime.toFormat(timestampDisplayFmt)}</span>
       </div>
       <div>
-        <b style={labelStyle}>DeploymentID:&nbsp;</b>
+        <b style={labelStyle}>{t("Deployment ID:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("deploymentid")}</span>
       </div>
       <div>
-        <b style={labelStyle}>RequestID:&nbsp;</b>
+        <b style={labelStyle}>{t("Request ID:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("requestID")}</span>
       </div>
       <div>
-        <b style={labelStyle}>RemoteHost:&nbsp;</b>
+        <b style={labelStyle}>{t("Remote host:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("remotehost")}</span>
       </div>
       <div>
-        <b style={labelStyle}>UserAgent:&nbsp;</b>
+        <b style={labelStyle}>{t("User agent:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("userAgent")}</span>
       </div>
       <div>
-        <b style={labelStyle}>Error:&nbsp;</b>
+        <b style={labelStyle}>{t("Error:")} &nbsp;</b>
         <span style={dataStyle}>{getLogEntryKey("error.message")}</span>
       </div>
       <br />
       <div>
-        <b style={labelStyle}>Backtrace:&nbsp;</b>
+        <b style={labelStyle}>{t("Backtrace:")} &nbsp;</b>
       </div>
 
       {(log.error.source || []).map((e: any, i: number) => {
@@ -164,7 +167,7 @@ const LogLine = (props: { log: LogMessage }) => {
   if (consoleMsg !== "") {
     fullMessage = messageForConsoleMsg(log);
   } else if (errMsg !== "") {
-    fullMessage = messageForError(log);
+    fullMessage = messageForError(log, t);
   }
 
   titleLogMessage = (titleLogMessage || "").replace(tColorRegex, "");
@@ -181,7 +184,7 @@ const LogLine = (props: { log: LogMessage }) => {
   let dateStr = <Fragment>{logTime.toFormat(timestampDisplayFmt)}</Fragment>;
 
   if (dateOfLine.getFullYear() === 1) {
-    dateStr = <Fragment>n/a</Fragment>;
+    dateStr = <Fragment>{t("Not available")}</Fragment>;
   }
 
   return (

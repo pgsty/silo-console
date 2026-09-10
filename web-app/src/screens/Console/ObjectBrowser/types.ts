@@ -75,6 +75,9 @@ interface ObjectManager {
 }
 
 export interface IFileItem {
+  selectionKey?: string;
+  browserManaged?: boolean;
+  receivedBytes?: number;
   type: "download" | "upload";
   ID: string;
   instanceID: string;

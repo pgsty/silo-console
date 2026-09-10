@@ -25,9 +25,9 @@ import {
   ProgressBar,
   ReadBox,
   Switch,
-  Tooltip,
   WebhookIcon,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import {

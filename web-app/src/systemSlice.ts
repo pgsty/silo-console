@@ -95,10 +95,14 @@ const systemSlice = createSlice({
     },
     menuOpen: (state, action: PayloadAction<boolean>) => {
       // persist preference to local storage
-      localStorage.setItem(
-        "sidebarOpen",
-        JSON.stringify({ open: action.payload }),
-      );
+      try {
+        localStorage.setItem(
+          "sidebarOpen",
+          JSON.stringify({ open: action.payload }),
+        );
+      } catch {
+        // A blocked or full storage area must not break the sidebar toggle.
+      }
       state.sidebarOpen = action.payload;
     },
     setServerNeedsRestart: (state, action: PayloadAction<boolean>) => {

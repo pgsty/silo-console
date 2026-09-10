@@ -25,10 +25,10 @@ import {
   RecoverIcon,
   ShareIcon,
   IconButton,
-  Tooltip,
   Grid,
   Checkbox,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { niceBytes } from "../../../../../../common/utils";
 import SpecificVersionPill from "./SpecificVersionPill";
 import { BucketObject } from "api/consoleApi";
@@ -292,6 +292,7 @@ const FileVersionItem = ({
                         }-${index.toString()}`}
                       >
                         <IconButton
+                          aria-label={button.tooltip}
                           size={"small"}
                           id={`version-action-${
                             button.name

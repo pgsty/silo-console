@@ -16,7 +16,8 @@
 
 export const minioadminFile = "playwright/.auth/admin.json";
 
-export const SERVER_ENDPOINT = "http://localhost:9090";
+export const SERVER_ENDPOINT =
+  process.env.CONSOLE_TEST_ENDPOINT || "http://localhost:9090";
 export const BUCKET_LIST_PAGE = `${SERVER_ENDPOINT}/buckets`;
 
 export const adminAccessKey = "minioadmin";

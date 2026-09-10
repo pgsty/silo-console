@@ -14,11 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { removeTrace } from "../../../ObjectBrowser/transferManager";
+import {
+  makeid,
+  removeTrace,
+  storeCallForObjectWithID,
+} from "../../../ObjectBrowser/transferManager";
+import {
+  cancelObjectInList,
+  completeObject,
+  failObject,
+  setNewObject,
+  updateDownloadProgress,
+} from "../../../ObjectBrowser/objectBrowserSlice";
+import { streamZipResponse } from "./zipDownload";
 import { store } from "../../../../../store";
 import { ContentType } from "api/consoleApi";
 import { api } from "../../../../../api";
-import { setErrorSnackMessage } from "../../../../../systemSlice";
+import { setSnackBarMessage } from "../../../../../systemSlice";
 import { translate } from "i18n";
 import { attachDownloadRequestHandlers } from "./downloadRequest";
 export { isPreviewAvailable, previewObjectType } from "./Preview/previewType";
@@ -27,55 +39,209 @@ export type { AllowedPreviews } from "./Preview/previewType";
 // This module is not a component, so it reads the active language off the
 // store the same way it already reads anonymousMode.
 const t = (text: string) => translate(store.getState().system.language, text);
-const downloadWithLink = (href: string, downloadFileName: string) => {
+// Individual bounded downloads still use the existing XHR/Blob path.
+const downloadBlob = (blob: Blob, name: string) => {
+  const href = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = href;
-  link.download = downloadFileName;
+  link.download = name;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(href), 1000);
 };
 
-const downloadBlob = (blob: Blob, downloadFileName: string) => {
-  const href = window.URL.createObjectURL(blob);
-  downloadWithLink(href, downloadFileName);
-  window.setTimeout(() => window.URL.revokeObjectURL(href), 1000);
-};
+type SaveFilePicker = (options: {
+  suggestedName: string;
+}) => Promise<FileSystemFileHandle>;
 
-export const downloadSelectedAsZip = async (
+export const downloadSelectedAsZip = (
   bucketName: string,
   objectList: string[],
   resultFileName: string,
+  selectedSize: number | null = null,
 ) => {
+  if (objectList.length === 0) return;
   const state = store.getState();
-  const anonymousMode = state.system.anonymousMode;
-
-  try {
-    const resp = await api.buckets.downloadMultipleObjects(
-      bucketName,
-      objectList,
-      {
-        type: ContentType.Json,
-        headers: anonymousMode
-          ? {
-              "X-Anonymous": "1",
-            }
-          : undefined,
-      },
-    );
-    const blob = await resp.blob();
-    downloadBlob(blob, resultFileName);
-  } catch (err: any) {
-    const detail =
-      err?.error?.detailedMessage ||
-      err?.detailedError ||
-      err?.statusText ||
-      t("Unexpected response, download incomplete.");
+  const selectionKey = JSON.stringify([
+    bucketName,
+    [...new Set(objectList)].sort(),
+  ]);
+  if (
+    state.objectBrowser.objectManager.objectsToManage.some(
+      (item) =>
+        item.selectionKey === selectionKey &&
+        !item.failed &&
+        !item.cancelled &&
+        (!item.done || item.browserManaged),
+    )
+  ) {
     store.dispatch(
-      setErrorSnackMessage({
-        errorMessage: `${t("Download of multiple files failed.")} ${detail}`,
-        detailedError: "",
-      }),
+      setSnackBarMessage(
+        t(
+          "This download has already started. Dismiss its transfer entry to start it again.",
+        ),
+      ),
+    );
+    return;
+  }
+  const picker = (window as Window & { showSaveFilePicker?: SaveFilePicker })
+    .showSaveFilePicker;
+  // Open the picker in the click's user activation, before entering the queue.
+  // Capture rejection immediately, even when other transfers keep it queued.
+  const picked = picker
+    ? Promise.resolve()
+        .then(() => picker.call(window, { suggestedName: resultFileName }))
+        .then(
+          (handle) => ({ handle, error: null }),
+          (error) => ({ handle: null, error }),
+        )
+    : null;
+  const ID = makeid(16);
+  const instanceID = `zip-${ID}`;
+  const controller = new AbortController();
+  let started = false;
+  let settled = false;
+  let frame: HTMLIFrameElement | null = null;
+  const fail = (error: any) => {
+    if (settled && !frame) return;
+    settled = true;
+    removeTrace(ID);
+    frame?.remove();
+    frame = null;
+    if (controller.signal.aborted || error?.name === "AbortError") {
+      store.dispatch(cancelObjectInList(instanceID));
+    } else {
+      store.dispatch(
+        failObject({
+          instanceID,
+          msg:
+            error?.error?.detailedMessage ||
+            error?.message ||
+            t("Unexpected response, download incomplete."),
+        }),
+      );
+    }
+  };
+  const control = {
+    abort() {
+      controller.abort();
+      if (frame) {
+        frame.remove();
+        frame = null;
+        removeTrace(ID);
+      }
+      if (!settled) fail(new DOMException("Cancelled", "AbortError"));
+    },
+    async send() {
+      if (started || settled) return;
+      started = true;
+      await Promise.resolve();
+      if (controller.signal.aborted || settled) return;
+      try {
+        if (picked) {
+          const result = await picked;
+          if (result.error) throw result.error;
+          if (controller.signal.aborted || !result.handle) return;
+          const writable = await result.handle.createWritable();
+          // The writer must also be aborted if HTTP setup fails before pipeTo.
+          try {
+            const response = await api.buckets.downloadMultipleObjects(
+              bucketName,
+              objectList,
+              {
+                type: ContentType.Json,
+                signal: controller.signal,
+                headers: state.system.anonymousMode
+                  ? { "X-Anonymous": "1" }
+                  : undefined,
+              },
+            );
+            await streamZipResponse(
+              response,
+              writable,
+              controller.signal,
+              (bytes, total) => {
+                store.dispatch(
+                  updateDownloadProgress({ instanceID, bytes, total }),
+                );
+              },
+            );
+          } catch (error) {
+            await writable.abort().catch(() => {});
+            throw error;
+          }
+          settled = true;
+          removeTrace(ID);
+          store.dispatch(completeObject(instanceID));
+        } else {
+          // Native POST attachments stream to the browser's download manager;
+          // it owns progress, cancellation and any network/partial ZIP errors.
+          frame = document.createElement("iframe");
+          frame.name = `download-${ID}`;
+          frame.hidden = true;
+          frame.onload = () => {
+            const body = frame?.contentDocument?.body?.textContent?.trim();
+            if (body) fail(new Error(body.slice(0, 500)));
+          };
+          document.body.appendChild(frame);
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = `${api.baseUrl}/buckets/${encodeURIComponent(bucketName)}/objects/download-multiple`;
+          form.target = frame.name;
+          for (const [name, value] of Object.entries({
+            objects: JSON.stringify(objectList),
+            anonymous: state.system.anonymousMode ? "1" : "0",
+          })) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+          }
+          document.body.appendChild(form);
+          form.submit();
+          form.remove();
+          settled = true;
+          store.dispatch(completeObject(instanceID));
+          store.dispatch(
+            setSnackBarMessage(
+              t(
+                "Track or cancel this download in your browser's download manager.",
+              ),
+            ),
+          );
+        }
+      } catch (error) {
+        fail(error);
+      }
+    },
+  };
+  storeCallForObjectWithID(ID, control);
+  store.dispatch(
+    setNewObject({
+      ID,
+      instanceID,
+      bucketName,
+      prefix: resultFileName,
+      selectionKey,
+      browserManaged: !picker,
+      type: "download",
+      percentage: 0,
+      done: false,
+      waitingForFile: true,
+      failed: false,
+      cancelled: false,
+      errorMessage: "",
+    }),
+  );
+  if (selectedSize === null || selectedSize > 5 * 1024 ** 3) {
+    store.dispatch(
+      setSnackBarMessage(
+        t(
+          "For selections above 5 GiB or of unknown size, MCLI is recommended. This ZIP will stream without buffering in memory.",
+        ),
+      ),
     );
   }
 };

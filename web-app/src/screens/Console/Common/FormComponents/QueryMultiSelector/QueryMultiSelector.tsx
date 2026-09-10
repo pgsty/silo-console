@@ -24,15 +24,8 @@ import React, {
 } from "react";
 import get from "lodash/get";
 import debounce from "lodash/debounce";
-import {
-  AddIcon,
-  Box,
-  Grid,
-  HelpIcon,
-  InputBox,
-  InputLabel,
-  Tooltip,
-} from "mds";
+import { AddIcon, Box, Grid, HelpIcon, InputBox, InputLabel } from "mds";
+import { Tooltip } from "common/Tooltip";
 
 interface IQueryMultiSelector {
   elements: string;

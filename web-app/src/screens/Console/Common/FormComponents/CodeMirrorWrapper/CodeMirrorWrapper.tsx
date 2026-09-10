@@ -60,6 +60,7 @@ const CodeMirrorWrapper = ({
           <TooltipWrapper tooltip={t("Copy to Clipboard")}>
             <CopyToClipboard text={value}>
               <Button
+                aria-label={t("Copy code")}
                 type={"button"}
                 id={"copy-code-mirror"}
                 icon={<CopyIcon />}

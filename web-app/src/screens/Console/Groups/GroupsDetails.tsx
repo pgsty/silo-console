@@ -446,6 +446,7 @@ const GroupsDetails = () => {
 
                 <TooltipWrapper tooltip={t("Delete Group")}>
                   <Button
+                    aria-label={t("Delete group")}
                     id={"delete-user-group"}
                     variant="secondary"
                     icon={<TrashIcon />}

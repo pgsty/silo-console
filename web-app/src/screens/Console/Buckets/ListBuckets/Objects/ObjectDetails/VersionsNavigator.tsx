@@ -548,6 +548,7 @@ const VersionsNavigator = ({
                   <Fragment>
                     <TooltipWrapper tooltip={t("Select Multiple Versions")}>
                       <Button
+                        aria-label={t("Select multiple versions")}
                         id={"select-multiple-versions"}
                         onClick={() => {
                           setSelectEnabled(!selectEnabled);
@@ -560,6 +561,7 @@ const VersionsNavigator = ({
                     {selectEnabled && (
                       <TooltipWrapper tooltip={t("Delete Selected Versions")}>
                         <Button
+                          aria-label={t("Delete selected versions")}
                           id={"delete-multiple-versions"}
                           onClick={openDeleteSelectedVersions}
                           icon={<DeleteIcon />}
@@ -571,6 +573,7 @@ const VersionsNavigator = ({
                     )}
                     <TooltipWrapper tooltip={t("Delete Non Current Versions")}>
                       <Button
+                        aria-label={t("Delete non-current versions")}
                         id={"delete-non-current"}
                         onClick={() => {
                           setDeleteNonCurrentLocation(location);

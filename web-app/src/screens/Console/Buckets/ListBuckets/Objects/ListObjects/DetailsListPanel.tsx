@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { useT } from "i18n";
 import React from "react";
 import { Box, Button, ClosePanelIcon } from "mds";
 
@@ -30,6 +31,7 @@ const DetailsListPanel = ({
   className = "",
   children,
 }: IDetailsListPanel) => {
+  const t = useT();
   return (
     <Box
       id={"details-panel"}
@@ -64,6 +66,7 @@ const DetailsListPanel = ({
       className={`${open ? "open" : ""} ${className}`}
     >
       <Button
+        aria-label={t("Close details")}
         variant={"text"}
         id={"close-details-list"}
         onClick={closePanel}

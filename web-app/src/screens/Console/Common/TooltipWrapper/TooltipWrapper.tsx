@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { cloneElement } from "react";
-import { Tooltip } from "mds";
+import { Tooltip } from "common/Tooltip";
 
 interface ITooltipWrapperProps {
   tooltip: string;
