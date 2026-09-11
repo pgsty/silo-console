@@ -15,7 +15,7 @@ tool github.com/go-swagger/go-swagger/cmd/swagger
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260908140805-c8aa5d25a63a
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260910093317-e6a60edf0952
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -45,11 +45,11 @@ require (
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	// Keep upstream master: v7.3.0 predates checksum and S3 Express fixes
 	// already included in this pseudo-version.
-	github.com/minio/minio-go/v7 v7.3.1-0.20260828014306-0e78d3f18efe
+	github.com/minio/minio-go/v7 v7.3.1-0.20260909183557-78bfa91607c2
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pgsty/silo-pkg/v3 v3.13.3
+	github.com/pgsty/silo-pkg/v3 v3.13.4-0.20260910091716-2d8fd3cbbf07
 	github.com/rs/xid v1.6.0
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.12.1
