@@ -347,6 +347,7 @@ const UserDetails = () => {
                     }
                   >
                     <Button
+                      aria-label={t("Delete user")}
                       id={"delete-user"}
                       onClick={deleteUser}
                       icon={<TrashIcon />}
@@ -362,6 +363,7 @@ const UserDetails = () => {
 
                   <TooltipWrapper tooltip={t("Change Password")}>
                     <Button
+                      aria-label={t("Change password")}
                       id={"change-user-password"}
                       onClick={changeUserPassword}
                       icon={<PasswordKeyIcon />}

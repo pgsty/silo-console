@@ -20,7 +20,8 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Box, HelpIcon, InputLabel, Select, Tooltip } from "mds";
+import { Box, HelpIcon, InputLabel, Select } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { days, months, validDate, years } from "./utils";
 import { useT } from "i18n";
 

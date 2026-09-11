@@ -30,11 +30,11 @@ import {
   RefreshIcon,
   ScreenTitle,
   Switch,
-  Tooltip,
   TrashIcon,
   ValuePair,
   WarnIcon,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { useNavigate, useParams } from "react-router-dom";
 import { useT } from "i18n";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";

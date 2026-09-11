@@ -23,9 +23,9 @@ import {
   ShareIcon,
   Grid,
   ProgressBar,
-  Tooltip,
   Switch,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import CopyToClipboard from "react-copy-to-clipboard";
 import ModalWrapper from "../../../../Common/ModalWrapper/ModalWrapper";
 import DaysSelector from "../../../../Common/FormComponents/DaysSelector/DaysSelector";
@@ -367,6 +367,7 @@ const ShareFile = ({
                 actionButton={
                   <CopyToClipboard text={shareURL}>
                     <Button
+                      aria-label={t("Copy share URL")}
                       id={"copy-share-url"}
                       variant="regular"
                       onClick={() => {

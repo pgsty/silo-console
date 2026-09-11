@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from "react";
+import { useT } from "i18n";
 import { EditIcon, IconButton } from "mds";
 
 type EditActionButtonProps = {
@@ -28,8 +29,10 @@ const EditActionButton = ({
   onClick,
   ...restProps
 }: EditActionButtonProps) => {
+  const t = useT();
   return (
     <IconButton
+      aria-label={t("Edit")}
       size={"small"}
       disabled={disabled}
       onClick={onClick}

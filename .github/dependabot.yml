@@ -87,3 +87,20 @@ updates:
     schedule:
       interval: "monthly"
       day: "thursday"
+
+  # Semgrep and its hash-locked Python dependencies require reviewed PRs.
+  - package-ecosystem: "pip"
+    directory: "/.github/requirements"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+  - package-ecosystem: "docker"
+    directory: "/.github/packaging"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5

@@ -42,6 +42,7 @@ const CredentialItem = ({
         actionButton={
           <CopyToClipboard text={value}>
             <Button
+              aria-label={t("Copy {label}").replace("{label}", () => label)}
               id={id}
               variant="regular"
               onClick={() => {

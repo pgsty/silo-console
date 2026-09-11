@@ -17,7 +17,8 @@
 import React from "react";
 import styled from "styled-components";
 import get from "lodash/get";
-import { Box, breakPoints, Loader, Tooltip } from "mds";
+import { Box, breakPoints, Loader } from "mds";
+import { Tooltip } from "common/Tooltip";
 
 const StatCardMain = styled.div(({ theme }) => ({
   display: "flex",

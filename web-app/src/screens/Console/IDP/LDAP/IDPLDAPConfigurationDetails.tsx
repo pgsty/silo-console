@@ -29,11 +29,11 @@ import {
   RefreshIcon,
   Switch,
   Tabs,
-  Tooltip,
   ValuePair,
   WarnIcon,
   ScreenTitle,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { api } from "api";
 import { ConfigurationKV } from "api/consoleApi";
 import { errorToHandler } from "api/errors";

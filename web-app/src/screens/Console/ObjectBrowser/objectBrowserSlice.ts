@@ -148,6 +148,26 @@ const objectBrowserSlice = createSlice({
         action.payload.progress;
       state.objectManager.objectsToManage[itemUpdate].waitingForFile = false;
     },
+    updateDownloadProgress: (
+      state,
+      action: PayloadAction<{
+        instanceID: string;
+        bytes: number;
+        total: number | null;
+      }>,
+    ) => {
+      const item = state.objectManager.objectsToManage.find(
+        (item) => item.instanceID === action.payload.instanceID,
+      );
+      if (!item || item.done) return;
+      item.receivedBytes = action.payload.bytes;
+      item.waitingForFile = action.payload.total === null;
+      if (action.payload.total !== null)
+        item.percentage = Math.min(
+          99,
+          Math.floor((action.payload.bytes / action.payload.total) * 100),
+        );
+    },
     completeObject: (state, action: PayloadAction<string>) => {
       const objectToComplete = state.objectManager.objectsToManage.findIndex(
         (item) => item.instanceID === action.payload,
@@ -443,6 +463,7 @@ export const {
   setVersionsModeEnabled,
   setNewObject,
   updateProgress,
+  updateDownloadProgress,
   completeObject,
   failObject,
   deleteFromList,

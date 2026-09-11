@@ -22,8 +22,8 @@ import {
   DataTable,
   IColumns,
   ItemActions,
-  Tooltip,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import styled from "styled-components";
 import get from "lodash/get";
 import { ReplicationSite } from "./SiteReplication";

@@ -284,7 +284,12 @@ export const generateOverrideTheme = (overrideVars: IEmbeddedCustomStyles) => {
 };
 
 export const isDarkModeOn = () => {
-  const darkMode = localStorage.getItem("dark-mode");
+  let darkMode: string | null = null;
+  try {
+    darkMode = localStorage.getItem("dark-mode");
+  } catch {
+    // Fall back to the system theme when storage is unavailable.
+  }
 
   if (!darkMode) {
     const systemDarkMode = window.matchMedia("(prefers-color-scheme: dark)");
@@ -295,5 +300,9 @@ export const isDarkModeOn = () => {
 };
 
 export const storeDarkMode = (mode: "on" | "off") => {
-  localStorage.setItem("dark-mode", mode);
+  try {
+    localStorage.setItem("dark-mode", mode);
+  } catch {
+    // Theme changes still apply for the current session.
+  }
 };

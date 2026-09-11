@@ -15,11 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import LoadingComponent from "./common/LoadingComponent";
 import AppConsole from "./screens/Console/ConsoleKBar";
 import { baseUrl } from "./history";
+import { isValidPathname } from "./utils/routePath";
+import NotFoundPage from "./screens/NotFoundPage";
 
 const Login = React.lazy(() => import("./screens/LoginPage/Login"));
 const Logout = React.lazy(() => import("./screens/LogoutPage/LogoutPage"));
@@ -28,47 +30,58 @@ const LoginCallback = React.lazy(
 );
 const SSOLogin = React.lazy(() => import("./screens/LoginPage/SSOLogin"));
 
+const ValidRoute: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const location = useLocation();
+  return isValidPathname(location.pathname) ? (
+    <>{children}</>
+  ) : (
+    <NotFoundPage />
+  );
+};
+
 const MainRouter = () => {
   return (
     <BrowserRouter basename={baseUrl}>
-      <Routes>
-        <Route
-          path="/oauth_callback"
-          element={
-            <Suspense fallback={<LoadingComponent />}>
-              <LoginCallback />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/logout"
-          element={
-            <Suspense fallback={<LoadingComponent />}>
-              <Logout />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <Suspense fallback={<LoadingComponent />}>
-              <Login />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/sso"
-          element={
-            <Suspense fallback={<LoadingComponent />}>
-              <SSOLogin />
-            </Suspense>
-          }
-        />
-        <Route
-          path={"/*"}
-          element={<ProtectedRoute Component={AppConsole} />}
-        />
-      </Routes>
+      <ValidRoute>
+        <Routes>
+          <Route
+            path="/oauth_callback"
+            element={
+              <Suspense fallback={<LoadingComponent />}>
+                <LoginCallback />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/logout"
+            element={
+              <Suspense fallback={<LoadingComponent />}>
+                <Logout />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <Suspense fallback={<LoadingComponent />}>
+                <Login />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/sso"
+            element={
+              <Suspense fallback={<LoadingComponent />}>
+                <SSOLogin />
+              </Suspense>
+            }
+          />
+          <Route
+            path={"/*"}
+            element={<ProtectedRoute Component={AppConsole} />}
+          />
+        </Routes>
+      </ValidRoute>
     </BrowserRouter>
   );
 };

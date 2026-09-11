@@ -130,6 +130,7 @@ const SRSiteInputRow = ({
             <React.Fragment>
               <TooltipWrapper tooltip={t("Add a Row")}>
                 <Button
+                  aria-label={t("Add site")}
                   id={`add-row-${index}`}
                   variant="regular"
                   disabled={!canAdd}
@@ -147,6 +148,7 @@ const SRSiteInputRow = ({
               </TooltipWrapper>
               <TooltipWrapper tooltip={t("Remove Row")}>
                 <Button
+                  aria-label={t("Remove site")}
                   id={`remove-row-${index}`}
                   variant="regular"
                   disabled={!canRemove}

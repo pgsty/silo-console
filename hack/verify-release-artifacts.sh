@@ -56,7 +56,7 @@ case "$mode" in
     else
       have goreleaser
       log "building a snapshot"
-      goreleaser release --snapshot --clean >"$work/goreleaser.log" 2>&1 || { tail -50 "$work/goreleaser.log" >&2; fail "goreleaser snapshot failed"; }
+      goreleaser release --snapshot --clean --skip=sign >"$work/goreleaser.log" 2>&1 || { tail -50 "$work/goreleaser.log" >&2; fail "goreleaser snapshot failed"; }
     fi
     assets_dir="dist"; metadata_dir="dist"; tag=""
     ;;

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { Fragment } from "react";
+import { useT } from "i18n";
 import styled from "styled-components";
 import get from "lodash/get";
 import { Box } from "mds";
@@ -86,6 +87,7 @@ const CommonCard = ({
   rightComponent,
   extraMargin = false,
 }: ICommonCard) => {
+  const t = useT();
   const SubHeader = () => {
     return (
       <Fragment>
@@ -121,7 +123,7 @@ const CommonCard = ({
           {moreLink && (
             <Fragment>
               <span className={"viewAll"}>
-                <Link to={moreLink}>View All</Link>
+                <Link to={moreLink}>{t("View All")}</Link>
               </span>
             </Fragment>
           )}

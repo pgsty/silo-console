@@ -167,6 +167,7 @@ const OBListBuckets = () => {
           >
             <TooltipWrapper tooltip={t("Refresh")}>
               <Button
+                aria-label={t("Refresh buckets")}
                 id={"refresh-buckets"}
                 onClick={() => {
                   setLoading(true);

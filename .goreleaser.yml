@@ -7,8 +7,9 @@ release:
   github:
     owner: pgsty
     name: silo-console
-  # Keep the release private until the maintainer reviews its notes and assets.
+  # Keep GitHub release metadata in draft until verification is complete.
   draft: true
+  replace_existing_artifacts: true
   prerelease: false
   extra_files:
     - glob: LICENSE
@@ -19,6 +20,7 @@ before:
   hooks:
     - go mod download
     - go mod verify
+    - python3 hack/normalize-package-inputs.py
 
 builds:
   - goos:
@@ -38,12 +40,13 @@ builds:
         goarch: arm
     env:
       - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
     main: ./cmd/console/
     flags:
       - -trimpath
       - --tags=kqueue,operator
     ldflags:
-      - -s -w -X github.com/minio/console/pkg.ReleaseTag={{.Tag}} -X github.com/minio/console/pkg.CommitID={{.FullCommit}} -X github.com/minio/console/pkg.Version={{.Version}} -X github.com/minio/console/pkg.ShortCommitID={{.ShortCommit}} -X github.com/minio/console/pkg.ReleaseTime={{.Date}}
+      - -s -w -X github.com/minio/console/pkg.ReleaseTag={{.Tag}} -X github.com/minio/console/pkg.CommitID={{.FullCommit}} -X github.com/minio/console/pkg.Version={{.Version}} -X github.com/minio/console/pkg.ShortCommitID={{.ShortCommit}} -X github.com/minio/console/pkg.ReleaseTime={{.CommitDate}}
 
 archives:
   # Bare executables keep their historical asset names; each executable also
@@ -59,9 +62,12 @@ archives:
       - goos: windows
         formats: ["zip"]
     files:
-      - LICENSE
-      - NOTICE
-      - CREDITS
+      - src: LICENSE
+        info: { owner: root, group: root, mode: 0644, mtime: "{{ .CommitDate }}" }
+      - src: NOTICE
+        info: { owner: root, group: root, mode: 0644, mtime: "{{ .CommitDate }}" }
+      - src: CREDITS
+        info: { owner: root, group: root, mode: 0644, mtime: "{{ .CommitDate }}" }
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
@@ -82,7 +88,8 @@ changelog:
       - "Merge branch"
 
 nfpms:
-  - vendor: PGSTY
+  - mtime: "{{ .CommitDate }}"
+    vendor: PGSTY
     homepage: https://silo.pgsty.com
     maintainer: "Ruohang Feng (@Vonng) <rh@vonng.com>"
     description: SILO object storage console, community-maintained MinIO Console fork.
@@ -98,24 +105,34 @@ nfpms:
       - src: LICENSE
         dst: /usr/share/licenses/silo-console/LICENSE
         file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0644
       - src: NOTICE
         dst: /usr/share/licenses/silo-console/NOTICE
         file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0644
       - src: CREDITS
         dst: /usr/share/doc/silo-console/CREDITS
         file_info:
+          mtime: "{{ .CommitDate }}"
+          mode: 0644
+      - src: systemd/README.md
+        dst: /usr/share/doc/silo-console/service.md
+        file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0644
       - src: packaging/debian/copyright
         dst: /usr/share/doc/silo-console/copyright
         packager: deb
         file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0644
       # DEB/RPM packages retain the compatibility unit name, see systemd/README.md
       - src: systemd/console.service
         dst: /etc/systemd/system/minio-console.service
         file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0644
           owner: root
           group: root
@@ -123,11 +140,39 @@ nfpms:
         dst: /etc/default/console
         type: config|noreplace
         file_info:
+          mtime: "{{ .CommitDate }}"
           mode: 0600
           owner: root
           group: root
+      - dst: /var/lib/silo-console
+        type: dir
+        file_info:
+          mtime: "{{ .CommitDate }}"
+          mode: 0750
+          owner: console-user
+          group: console-user
+      - dst: /etc/silo-console/certs/CAs
+        type: dir
+        file_info:
+          mtime: "{{ .CommitDate }}"
+          mode: 0750
+          owner: root
+          group: console-user
+    # Stock Alpine has no systemd. A single APK account-creation hook also
+    # avoids nFPM's nondeterministic map iteration for multiple APK scripts.
     scripts:
       preinstall: systemd/preinstall.sh
+    overrides:
+      deb:
+        scripts:
+          postinstall: systemd/reload.sh
+          postremove: systemd/reload.sh
+          preremove: systemd/preremove.sh
+      rpm:
+        scripts:
+          postinstall: systemd/reload.sh
+          postremove: systemd/reload.sh
+          preremove: systemd/preremove.sh
     rpm:
       group: Applications/File
       compression: gzip:9
@@ -147,9 +192,9 @@ dockers_v2:
       - linux/arm64
     tags:
       - "{{ if .IsSnapshot }}snapshot-{{ .ShortCommit }}{{ else }}{{ .Tag }}{{ end }}"
-      - "{{ if not .IsSnapshot }}latest{{ end }}"
     build_args:
       TAG: "{{ .Tag }}"
+      SOURCE_DATE_EPOCH: "{{ .CommitTimestamp }}"
     extra_files:
       - LICENSE
       - NOTICE
@@ -160,7 +205,7 @@ dockers_v2:
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
       "org.opencontainers.image.description": "The SILO object storage console; AGPL-3.0-or-later, license and attribution in /usr/share/licenses/silo-console"
-      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.created": "{{.CommitDate}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}"
       "org.opencontainers.image.url": "https://github.com/pgsty/silo-console"
@@ -175,7 +220,7 @@ dockers_v2:
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.title": "{{.ProjectName}}"
       "org.opencontainers.image.description": "The SILO object storage console; AGPL-3.0-or-later, license and attribution in /usr/share/licenses/silo-console"
-      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.created": "{{.CommitDate}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}"
       "org.opencontainers.image.url": "https://github.com/pgsty/silo-console"
@@ -184,3 +229,38 @@ dockers_v2:
       "org.opencontainers.image.licenses": "AGPL-3.0-or-later"
       "org.opencontainers.image.base.name": "scratch"
       "io.pgsty.silo-console.source": "{{ if .IsSnapshot }}https://github.com/pgsty/silo-console/commit/{{ .FullCommit }}{{ else }}https://github.com/pgsty/silo-console/tree/{{ .Tag }}{{ end }}"
+
+# Keyless identities bind the release workflow and tag; no signing key is stored.
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args: ["sign-blob", "--yes", "--bundle", "${signature}", "${artifact}"]
+
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    args: ["sign", "--yes", "${artifact}"]
+
+sboms:
+  - id: binary-sbom
+    artifacts: binary
+    ids: [binaries]
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
+    documents: ["{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}.spdx.json"]
+  - id: package-sbom
+    artifacts: package
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
+    documents: ["${artifact}.spdx.json"]
+
+  - id: source-sbom
+    artifacts: source
+    cmd: bash
+    args: ["../hack/generate-sbom.sh", "${artifact}", "${document}"]
+    documents: ["${artifact}.spdx.json"]
+
+source:
+  enabled: true
+  name_template: "{{ .ProjectName }}-{{ .Version }}-source"

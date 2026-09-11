@@ -17,7 +17,8 @@
 import React from "react";
 import get from "lodash/get";
 import styled from "styled-components";
-import { Box, breakPoints, Tooltip } from "mds";
+import { Box, breakPoints } from "mds";
+import { Tooltip } from "common/Tooltip";
 
 const CounterCardMain = styled.div(({ theme }) => ({
   display: "flex",

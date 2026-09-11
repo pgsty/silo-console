@@ -211,6 +211,7 @@ const EnableBucketEncryption = ({
                 >
                   <TooltipWrapper tooltip={t("Add key")}>
                     <Button
+                      aria-label={t("Add key")}
                       id={"import-key"}
                       variant={"regular"}
                       icon={<AddIcon />}

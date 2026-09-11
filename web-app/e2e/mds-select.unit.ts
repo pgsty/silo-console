@@ -12,6 +12,10 @@ let browser: Browser;
 let script: string;
 
 test.beforeAll(async () => {
+  // Other fixture servers leave NODE_ENV=development in this worker. JSX
+  // transformation and React's runtime must both use production for this bundle.
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = "production";
   // Bundle the installed MDS distribution, as Console does. The regression is
   // an event-ordering bug; checking source text would miss actual selection.
   const result = await build({
@@ -29,6 +33,8 @@ test.beforeAll(async () => {
       },
     },
   });
+  if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+  else process.env.NODE_ENV = previousNodeEnv;
   const output = Array.isArray(result) ? result[0] : result;
   if (!("output" in output)) throw new Error("MDS harness build has no output");
   const chunk = output.output.find((item) => item.type === "chunk");

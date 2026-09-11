@@ -20,11 +20,22 @@ export const DEFAULT_LANG: Lang = "en";
 const LANGUAGE_STORAGE_KEY = "language";
 
 // Default is always English by design — no browser-language detection.
-export const getStoredLanguage = (): Lang =>
-  localStorage.getItem(LANGUAGE_STORAGE_KEY) === "zh" ? "zh" : DEFAULT_LANG;
+export const getStoredLanguage = (): Lang => {
+  try {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "zh"
+      ? "zh"
+      : DEFAULT_LANG;
+  } catch {
+    return DEFAULT_LANG;
+  }
+};
 
 export const storeLanguage = (lang: Lang) => {
-  localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  try {
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  } catch {
+    // The current session still works when persistent storage is unavailable.
+  }
 };
 
 // Precedence on duplicate keys: curated chrome (zh) > feature screens

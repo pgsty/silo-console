@@ -26,7 +26,7 @@ const objectNames = [folderObject, folderZeroObject, knownObject, zeroObject];
 
 const minioClient = new Minio.Client({
   endPoint: "localhost",
-  port: 9000,
+  port: Number(process.env.SILO_TEST_PORT || 9000),
   useSSL: false,
   accessKey: "minioadmin",
   secretKey: "minioadmin",

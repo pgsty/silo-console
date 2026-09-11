@@ -17,8 +17,11 @@
 import React from "react";
 import { PageLayout, Box } from "mds";
 import Copyright from "../common/Copyright";
+import { useT } from "../i18n";
+import { Link } from "react-router-dom";
 
 const NotFound: React.FC = () => {
+  const t = useT();
   return (
     <PageLayout>
       <Box
@@ -39,7 +42,7 @@ const NotFound: React.FC = () => {
             color: "#909090",
           }}
         >
-          404 Error
+          {t("404 Error")}
         </Box>
         <Box
           sx={{
@@ -48,7 +51,10 @@ const NotFound: React.FC = () => {
             fontWeight: 700,
           }}
         >
-          Sorry, the page could not be found.
+          {t("Sorry, the page could not be found.")}
+        </Box>
+        <Box sx={{ marginTop: 20 }}>
+          <Link to="/">{t("Return home")}</Link>
         </Box>
         <Box sx={{ marginTop: 20 }}>
           <Copyright />

@@ -295,7 +295,7 @@ const ErrorLogs = () => {
               }}
             >
               <Box withBorders customBorderPadding={"0px"} useBackground>
-                <Table aria-label="collapsible table">
+                <Table aria-label={t("Logs")}>
                   <TableBody>
                     {filteredMessages.map((m) => {
                       return <LogLine log={m} />;

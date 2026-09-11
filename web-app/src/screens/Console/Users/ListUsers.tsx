@@ -233,7 +233,7 @@ const ListUsers = () => {
                   icon={<DeleteIcon />}
                   disabled={checkedUsers.length === 0}
                   variant={"secondary"}
-                  aria-label="delete-selected-users"
+                  aria-label={t("Delete selected users")}
                 />
               </TooltipWrapper>
             </SecureComponent>

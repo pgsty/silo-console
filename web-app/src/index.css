@@ -275,16 +275,7 @@ html[lang="zh-CN"] #root .consoleTag {
   padding-left: 0.08em;
 }
 
-/* Vendor-string overrides for zh: mds hardcodes a few labels ("Sign Out" in
-   the menu, "Actions:" in the object ActionsList). Their text nodes cannot be
-   reached via props, so swap them with CSS scoped to the zh locale. */
-html[lang="zh-CN"] #sign-out .labelContainer {
-  font-size: 0;
-}
-html[lang="zh-CN"] #sign-out .labelContainer::after {
-  content: "登出";
-  font-size: 14px;
-}
+/* MDS ActionsList still exposes its heading only as a vendor string. */
 html[lang="zh-CN"] #root ul.objectActions > li:first-of-type {
   font-size: 0;
 }
@@ -292,4 +283,16 @@ html[lang="zh-CN"] #root ul.objectActions > li:first-of-type::after {
   content: "可用操作：";
   font-size: 14px;
   font-weight: bold;
+}
+
+.recovery-page {
+  max-width: 44rem;
+  margin: 10vh auto;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+.recovery-page button,
+.recovery-page a {
+  font: inherit;
+  padding: 0.6rem;
 }

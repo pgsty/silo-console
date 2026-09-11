@@ -49,6 +49,15 @@ const MenuWrapper = () => {
   const allowedMenuItems = validRoutes(features, t);
 
   useLayoutEffect(() => {
+    // MDS has no sign-out label prop. Update the actual text and accessible
+    // name after it renders, rather than substituting text with CSS content.
+    const signOut = document.querySelector<HTMLElement>("#sign-out");
+    const signOutLabel = signOut?.querySelector(".labelContainer");
+    if (signOut && signOutLabel) {
+      signOut.setAttribute("aria-label", t("Sign Out"));
+      signOutLabel.textContent = t("Sign Out");
+    }
+
     const menuToggle = document.querySelector<HTMLElement>(
       ".menuBox .menuHeaderContainer",
     );
@@ -176,9 +185,7 @@ const MenuWrapper = () => {
       callPathAction={(path) => {
         navigate(path);
       }}
-      signOutAction={() => {
-        navigate("/logout");
-      }}
+      signOutAction={() => navigate("/logout")}
       collapseAction={() => {
         dispatch(menuOpen(!sidebarOpen));
       }}

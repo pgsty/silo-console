@@ -17,7 +17,8 @@
 import React, { Fragment } from "react";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../store";
-import { Box, RemoveAllIcon, IconButton, Tooltip } from "mds";
+import { Box, RemoveAllIcon, IconButton } from "mds";
+import { Tooltip } from "common/Tooltip";
 import ObjectHandled from "./ObjectHandled";
 import {
   cleanList,
@@ -25,6 +26,7 @@ import {
 } from "../../ObjectBrowser/objectBrowserSlice";
 import VirtualizedList from "../VirtualizedList/VirtualizedList";
 import { useT } from "i18n";
+import { cancelTransfer } from "../../ObjectBrowser/transferManager";
 
 const ObjectManager = () => {
   const dispatch = useAppDispatch();
@@ -91,7 +93,12 @@ const ObjectManager = () => {
             <Tooltip tooltip={t("Clean Completed Objects")} placement="bottom">
               <IconButton
                 aria-label={t("Clear Completed List")}
-                onClick={() => dispatch(cleanList())}
+                onClick={() => {
+                  objects
+                    .filter((item) => item.done)
+                    .forEach((item) => cancelTransfer(item.ID));
+                  dispatch(cleanList());
+                }}
               >
                 <RemoveAllIcon />
               </IconButton>

@@ -319,7 +319,8 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
                     >
                       {t("Mode:")} {serverHealthInfo.minio.info.mode}
                       <br></br>
-                      deploymentID: {serverHealthInfo.minio.info.deploymentID}
+                      {t("Deployment ID:")}{" "}
+                      {serverHealthInfo.minio.info.deploymentID}
                       <br></br>
                       {t("Buckets:")}{" "}
                       {serverHealthInfo.minio.info.buckets.count}&emsp;

@@ -4,7 +4,17 @@
 
 - **Breaking authorization change:** uses `admin:ChangeMyPassword` for the Change Password button and session capability; user creation remains governed by `admin:CreateUser`. With the matching Server, a saved CreateUser deny no longer locks the caller's password, and a ChangeMyPassword deny now locks it. Preserve the old combined restriction by denying both actions before upgrading. The updated built-in `readonly` also permits self-service password changes and no longer overrides a separate CreateUser Allow; saved policy overrides retain their old statements. Deploy Server, silo-pkg and Console together. See the [migration guide](https://github.com/pgsty/silo/blob/420340bc142b7dec00c26c28dd78102e3ed9d0f3/docs/iam/password-permissions.md) for affected policies, mixed-version behavior and rollback limits. This change is independent of the SDK update.
 - Pins upstream minio-go to `78bfa91607c2`, including streaming Content-Type signing and RDMA TLS trust fixes, and updates the maintained package/client dependency pins. The upstream region-whitespace fix (#2274) remains pending.
-- Updates knip's indirect smol-toml dependency to 1.7.1 for CVE-2026-85730.
+- Updates knip's indirect smol-toml dependency to 1.8.0, retaining the fix for CVE-2026-85730.
+- Stream multi-selection ZIP downloads with cancellation, duplicate protection,
+  and native browser downloads when a file writer is unavailable.
+- Recover from invalid routes and rendering errors without clearing preferences.
+- Finish remaining screen labels and localize icon controls, sign-out and keyboard tooltips.
+- Lock CI Actions and test tools; make release timestamps and package metadata deterministic.
+- Generate signed checksums, SBOMs and provenance; promote `latest` only after a
+  published release passes signature, provenance and anonymous-access checks.
+- Bound systemd shutdown and define service state, certificate ownership and hardening.
+- Warn before the packaged certificate-directory transition; preserve old keys
+  and document retaining the previous path through `CONSOLE_OPTS` before restart.
 
 ## Release v2.4.0
 

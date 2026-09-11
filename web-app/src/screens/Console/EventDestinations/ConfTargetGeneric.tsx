@@ -23,8 +23,8 @@ import {
   InputBox,
   ReadBox,
   Switch,
-  Tooltip,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { IElementValue, IOverrideEnv, KVField } from "../Configurations/types";
 import CSVMultiSelector from "../Common/FormComponents/CSVMultiSelector/CSVMultiSelector";
 import { useT } from "i18n";

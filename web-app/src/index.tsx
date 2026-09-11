@@ -20,6 +20,7 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import MainRouter from "./MainRouter";
 import StyleHandler from "./StyleHandler";
+import RootErrorBoundary from "./common/RootErrorBoundary";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -27,10 +28,12 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <StyleHandler>
-        <MainRouter />
-      </StyleHandler>
-    </Provider>
+    <RootErrorBoundary>
+      <Provider store={store}>
+        <StyleHandler>
+          <MainRouter />
+        </StyleHandler>
+      </Provider>
+    </RootErrorBoundary>
   </React.StrictMode>,
 );

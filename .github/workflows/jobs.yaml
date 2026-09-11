@@ -23,8 +23,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FIREFOX_VERSION: latest
-  TESTCAFE_VERSION: 3.7.6
   # Historical test recipes call this MINIO_VERSION. The release gate uses the
   # maintained SILO server; upstream MinIO is probed separately as best effort.
   MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z
@@ -39,10 +37,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -62,9 +60,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go 1.27.1
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 1.27.1
       - name: Remove the maintained mc replacement and probe compatibility
@@ -77,9 +75,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go 1.27.1
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 1.27.1
       - name: Verify the README block against go.mod
@@ -97,15 +95,18 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out source code
-        uses: actions/checkout@v6
-      - name: Scanning code on ${{ matrix.os }}
-        continue-on-error: false
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Set up the pinned Semgrep Python runtime
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12.12"
+          cache: pip
+          cache-dependency-path: .github/requirements/semgrep.txt
+      - name: Install and run the locked Semgrep tool graph
         run: |
-          # Install semgrep rather than using a container due to:
-          # https://github.com/actions/checkout/issues/334
-          sudo apt install -y python3-pip || apt install -y python3-pip
-          pip3 install semgrep
-          semgrep --config semgrep.yaml $(pwd)/web-app --error
+          python -m pip install --require-hashes -r .github/requirements/semgrep.txt
+          semgrep --config semgrep.yaml web-app --error --metrics off
+          python hack/check-ci-contract.py
 
   ui-assets:
     name: "React Code Has No Warnings & Prettified"
@@ -116,18 +117,18 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: assets-cache
         name: Assets Cache
         with:
@@ -155,7 +156,7 @@ jobs:
         run: |
           ./check-deadcode.sh
       - name: Set up Go for the credits check
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
       - name: Check the frontend section of CREDITS
@@ -168,24 +169,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
       - name: Set up Go 1.27.1
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: 1.27.1
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
         with:
           version: v0.36.1
       - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v7
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           version: v2.17.1
           install-only: true
+      - name: Install Syft for release SBOM validation
+        uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          syft-version: v1.51.1
       - name: Build a snapshot and verify every artifact
         run: hack/verify-release-artifacts.sh snapshot
+      - name: Compare source container metadata and frontend assets
+        run: hack/check-container-equivalence.sh
+      - name: Exercise Linux package install, upgrade, shutdown and certificate ownership
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: hack/check-package-lifecycle.sh
+      - name: Rebuild the same commit twice in independent checkouts
+        run: hack/check-reproducible.sh
 
   swagger-codegen:
     name: "Check for uncommitted changes through Swagger Codegen Changes."
@@ -199,9 +212,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
       - name: Read .nvmrc
@@ -210,7 +223,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
@@ -256,10 +269,10 @@ jobs:
     steps:
       # Clone Console Repo
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       # To build minio image, we need to clone the repository first
       - name: Clone github.com/minio/minio
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: minio/minio
           path: "minio_repository"
@@ -278,11 +291,11 @@ jobs:
           fi
           cd $GITHUB_WORKSPACE;
       - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go-minio
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: assets-cache
         name: Assets Cache
         with:
@@ -305,7 +318,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           cp $GITHUB_WORKSPACE/minio_repository/minio .
 
-      - uses: actions/cache/save@v5
+      - uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         # skip minio binary cache
         if: false
         id: minio-latest-cache
@@ -315,7 +328,7 @@ jobs:
             ./minio
           key: ${{ runner.os }}-minio-latest-${{  github.run_id  }}
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         # skip minio binary upload
         if: false
         with:
@@ -338,20 +351,20 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
             ./console
           key: ${{ runner.os }}-binary-${{ github.run_id }}
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: assets-cache
         name: Assets Cache
         with:
@@ -377,24 +390,24 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
+          yarn install --immutable
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -410,22 +423,15 @@ jobs:
         run: |
           (CONSOLE_SUBPATH=/console/subpath ./console server ) & (make test-initialize-minio-nginx)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -448,24 +454,24 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
+          yarn install --immutable
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -481,22 +487,15 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -518,23 +517,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -550,22 +549,15 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -587,23 +579,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -619,22 +611,15 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -656,23 +641,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -688,23 +673,16 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -721,23 +699,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -753,23 +731,16 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -786,23 +757,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -818,23 +789,16 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -851,23 +815,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -883,23 +847,16 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 10
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -916,23 +873,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -948,23 +905,16 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         timeout-minutes: 5
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -981,23 +931,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -1013,22 +963,15 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -1049,23 +992,23 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - name: Install MinIO JS
-        working-directory: ./
+      - name: Install locked browser dependencies
+        working-directory: ./web-app
         continue-on-error: false
         run: |
-          yarn add minio
-      - uses: actions/cache@v5
+          yarn install --immutable
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -1081,22 +1024,15 @@ jobs:
         run: |
           (./console server) & (make initialize-permissions)
 
-      - name: Setup firefox
-        if: false
-        id: setup-firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ env.FIREFOX_VERSION }}
-
-      - name: Install TestCafe
-        run: npm install testcafe@${{ env.TESTCAFE_VERSION }}
+      - name: Install the pinned and checksum-verified Firefox
+        run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
         # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: npx testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
       - name: Upload TestCafe screenshots
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
           path: testcafe-screenshots
@@ -1119,10 +1055,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1134,7 +1070,7 @@ jobs:
         run: |
           make test-pkg
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-pkg
         name: Coverage Cache Pkg
         with:
@@ -1155,10 +1091,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1170,7 +1106,7 @@ jobs:
         run: |
           make test
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-api
         name: Coverage Cache API
         with:
@@ -1193,14 +1129,14 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
           path: |
@@ -1220,7 +1156,7 @@ jobs:
 
           make test-integration MINIO_VERSION=$MINIO_VERSION TAG=$TAG;
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache
         name: Coverage Cache
         with:
@@ -1243,10 +1179,10 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1257,7 +1193,7 @@ jobs:
           echo $MINIO_VERSION;
 
           make test-replication MINIO_VERSION=$MINIO_VERSION;
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-replication
         name: Coverage Cache Replication
         with:
@@ -1280,10 +1216,10 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1294,7 +1230,7 @@ jobs:
           echo $MINIO_VERSION;
 
           make test-sso-integration MINIO_VERSION=$MINIO_VERSION;
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-sso
         name: Coverage Cache SSO
         with:
@@ -1317,19 +1253,19 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
       - name: Check out gocovmerge as a nested repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: wadey/gocovmerge
           path: gocovmerge
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache
         name: Coverage Cache
         with:
@@ -1337,7 +1273,7 @@ jobs:
             ./integration/coverage/
           key: ${{ runner.os }}-coverage-2-${{ github.run_id }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-sso
         name: Coverage Cache SSO
         with:
@@ -1345,7 +1281,7 @@ jobs:
             ./sso-integration/coverage/
           key: ${{ runner.os }}-sso-coverage-2-${{ github.run_id }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-replication
         name: Coverage Cache Replication
         with:
@@ -1353,7 +1289,7 @@ jobs:
             ./replication/coverage/
           key: ${{ runner.os }}-replication-coverage-2-${{ github.run_id }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-api
         name: Coverage Cache API
         with:
@@ -1361,7 +1297,7 @@ jobs:
             ./api/coverage/
           key: ${{ runner.os }}-coverage-api-2-${{ github.run_id }}
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-pkg
         name: Coverage Cache Pkg
         with:
@@ -1404,7 +1340,7 @@ jobs:
 
       # To save our all.out and all-coverage.html file into an artifact.
       # By default, GitHub stores build logs and artifacts for 90 days.
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-artifact
           path: |
@@ -1421,18 +1357,18 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: assets-cache-istanbul-coverage
         name: Assets Cache Istanbul Coverage
         with:
@@ -1464,20 +1400,20 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache Istanbul Coverage
         with:
           path: |
             ./console
           key: ${{ runner.os }}-binary-istanbul-coverage-${{ github.run_id }}
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: assets-cache-istanbul-coverage
         name: Assets Cache Istanbul Coverage
         with:
@@ -1504,10 +1440,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1532,9 +1468,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1559,10 +1495,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1587,10 +1523,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1615,10 +1551,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -1636,13 +1572,13 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
         id: node_version
         run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
           node-version: ${{ env.NVMRC }}
           cache: "yarn"
@@ -1656,7 +1592,7 @@ jobs:
         working-directory: web-app
         run: yarn exec playwright install --with-deps chromium
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache Istanbul Coverage
         with:
           path: |

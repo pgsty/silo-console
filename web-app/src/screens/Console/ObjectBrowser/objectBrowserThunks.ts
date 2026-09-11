@@ -180,7 +180,19 @@ export const downloadSelected = createAsyncThunk(
             return dwList;
           }, []);
 
-          await downloadSelectedAsZip(bucketName, multiObjList, fileName);
+          downloadSelectedAsZip(
+            bucketName,
+            multiObjList,
+            fileName,
+            itemsToDownload.some(
+              (item) => item.name.endsWith("/") || item.size == null,
+            )
+              ? null
+              : itemsToDownload.reduce(
+                  (size, item) => size + (item.size || 0),
+                  0,
+                ),
+          );
           return;
         }
       }

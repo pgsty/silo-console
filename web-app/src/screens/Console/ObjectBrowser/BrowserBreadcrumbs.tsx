@@ -24,11 +24,11 @@ import {
   Button,
   CopyIcon,
   NewPathIcon,
-  Tooltip,
   Breadcrumbs,
   breakPoints,
   Box,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import { hasPermission } from "../../../common/SecureComponent";
 import {
   IAM_SCOPES,
@@ -260,6 +260,7 @@ const BrowserBreadcrumbs = ({
             <Fragment>
               <CopyToClipboard text={`${bucketName}/${splitPaths.join("/")}`}>
                 <Button
+                  aria-label={t("Copy path")}
                   id={"copy-path"}
                   icon={
                     <CopyIcon

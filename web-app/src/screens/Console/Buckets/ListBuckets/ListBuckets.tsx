@@ -255,6 +255,7 @@ const ListBuckets = () => {
                   }
                 >
                   <Button
+                    aria-label={t("Select multiple buckets")}
                     id={"multiple-bucket-seection"}
                     onClick={() => {
                       setBulkSelect(!bulkSelect);
@@ -277,6 +278,7 @@ const ListBuckets = () => {
                     }
                   >
                     <Button
+                      aria-label={t("Select all buckets")}
                       id={"select-all-buckets"}
                       onClick={selectAllBuckets}
                       icon={<SelectAllIcon />}
@@ -306,6 +308,7 @@ const ListBuckets = () => {
                   }
                 >
                   <Button
+                    aria-label={t("Set lifecycle")}
                     id={"set-lifecycle"}
                     onClick={() => {
                       setLifecycleModalOpen(true);
@@ -332,6 +335,7 @@ const ListBuckets = () => {
                   }
                 >
                   <Button
+                    aria-label={t("Set replication")}
                     id={"set-replication"}
                     onClick={() => {
                       setReplicationModalOpen(true);
@@ -346,6 +350,7 @@ const ListBuckets = () => {
 
             <TooltipWrapper tooltip={t("Refresh")}>
               <Button
+                aria-label={t("Refresh buckets")}
                 id={"refresh-buckets"}
                 onClick={() => {
                   setLoading(true);
@@ -368,6 +373,7 @@ const ListBuckets = () => {
               >
                 <Button
                   id={"create-bucket"}
+                  aria-label={t("Create Bucket")}
                   onClick={() => {
                     navigate(IAM_PAGES.ADD_BUCKETS);
                   }}

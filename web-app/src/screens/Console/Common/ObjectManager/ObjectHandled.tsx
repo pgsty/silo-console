@@ -24,8 +24,8 @@ import {
   DownloadStatIcon,
   EnabledIcon,
   UploadStatIcon,
-  Tooltip,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import clsx from "clsx";
 import { cancelTransfer } from "../../ObjectBrowser/transferManager";
 import styled from "styled-components";
@@ -145,12 +145,16 @@ const ObjectHandled = ({ objectToDisplay, deleteFromList }: IObjectHandled) => {
           }}
         >
           <ObjectHandledCloseButton
+            aria-label={
+              objectToDisplay.done ? t("Remove transfer") : t("Cancel transfer")
+            }
             onClick={() => {
               if (!objectToDisplay.done) {
                 // Uploads settle even when queued and never sent; downloads
                 // abort their request.
                 cancelTransfer(objectToDisplay.ID);
               } else {
+                cancelTransfer(objectToDisplay.ID);
                 deleteFromList(objectToDisplay.instanceID);
               }
             }}
@@ -233,7 +237,16 @@ const ObjectHandled = ({ objectToDisplay, deleteFromList }: IObjectHandled) => {
             marginTop: 5,
           }}
         >
-          {objectToDisplay.waitingForFile ? (
+          {objectToDisplay.browserManaged &&
+          objectToDisplay.done &&
+          !objectToDisplay.failed &&
+          !objectToDisplay.cancelled ? (
+            <p>
+              {t(
+                "Track or cancel this download in your browser's download manager.",
+              )}
+            </p>
+          ) : objectToDisplay.waitingForFile ? (
             <ProgressBarWrapper indeterminate value={0} ready={false} />
           ) : (
             <ProgressBarWrapper

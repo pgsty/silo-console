@@ -129,6 +129,7 @@ const ListKeys = () => {
             >
               <TooltipWrapper tooltip={t("Refresh")}>
                 <Button
+                  aria-label={t("Refresh list")}
                   id={"refresh-keys"}
                   variant="regular"
                   icon={<RefreshIcon />}

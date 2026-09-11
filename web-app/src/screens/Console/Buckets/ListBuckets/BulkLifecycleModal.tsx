@@ -25,10 +25,10 @@ import {
   ReadBox,
   Select,
   Switch,
-  Tooltip,
   WarnIcon,
   Wizard,
 } from "mds";
+import { Tooltip } from "common/Tooltip";
 import get from "lodash/get";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import QueryMultiSelector from "../../Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
