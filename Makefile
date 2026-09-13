@@ -235,7 +235,7 @@ test-sso-integration-run:
 	-e MINIO_UPDATE=off \
 	-e MINIO_ROOT_PASSWORD=minio123 $(MINIO_VERSION) server /data{1...4} --address :9000 --console-address :9001)
 	@echo "run mc commands to set the policy"
-	@(docker run -e MC_UPDATE=off --name minio-client --network my-net -dit --entrypoint=/bin/sh docker.io/pgsty/mc:RELEASE.2026-09-03T07-13-05Z)
+	@(docker run -e MC_UPDATE=off --name minio-client --network my-net -dit --entrypoint=/bin/sh docker.io/pgsty/mc:RELEASE.2026-09-13T00-00-00Z)
 	@(ready=0; \
 	  for attempt in $$(seq 1 30); do \
 	    if docker exec minio-client mc alias set myminio/ http://minio:9000 minio minio123; then ready=1; break; fi; \
