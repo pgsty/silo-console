@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+As of 2026-09-13, the latest published version remains
+[v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0).
+The changes below are on main and selected by Server main; they are not in
+that release or the embedded Console of Server 20260903. The
+[component matrix](https://silo.pgsty.com/compatibility/versions/) records exact pins.
+
 - **Breaking authorization change:** uses `admin:ChangeMyPassword` for the Change Password button and session capability; user creation remains governed by `admin:CreateUser`. With the matching Server, a saved CreateUser deny no longer locks the caller's password, and a ChangeMyPassword deny now locks it. Preserve the old combined restriction by denying both actions before upgrading. The updated built-in `readonly` also permits self-service password changes and no longer overrides a separate CreateUser Allow; saved policy overrides retain their old statements. Deploy Server, silo-pkg and Console together. See the [migration guide](https://github.com/pgsty/silo/blob/420340bc142b7dec00c26c28dd78102e3ed9d0f3/docs/iam/password-permissions.md) for affected policies, mixed-version behavior and rollback limits. This change is independent of the SDK update.
 - Pins upstream minio-go to `60bd07042d49`, including streaming Content-Type signing, RDMA TLS trust, listing checksum and restore-status fixes. Uses released silo-pkg v3.14.0 and the September 13 mcli release, and refreshes the Go official x/* dependencies. The upstream region-whitespace fix (#2274) remains pending.
 - Updates knip's indirect smol-toml dependency to 1.8.0, retaining the fix for CVE-2026-85730.

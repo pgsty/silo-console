@@ -2,8 +2,14 @@
 
 This is the checklist for publishing a SILO Console release. Pushing an
 annotated `v*` tag starts `.github/workflows/release.yaml`; the workflow creates
-a draft GitHub release and publishes the versioned and `latest` container tags.
-The maintainer reviews and publishes the draft manually.
+a draft GitHub release and a versioned candidate image. It does not advance
+`latest`. The maintainer publishes the verified draft; `promote-image.yaml`
+then verifies the current stable release, signatures, SBOM, provenance and
+anonymous image access before promoting that digest to `latest`.
+
+This is the main-branch procedure as of 2026-09-13. Console v2.4.0 was built
+with the earlier workflow. Older assets do not acquire the new verification
+contract retroactively; see [release-contract.md](release-contract.md).
 
 ## 1. Prepare one candidate commit
 
@@ -61,19 +67,23 @@ Before GoReleaser runs, the tag workflow checks:
 - that rebuilding `web-app/build` and `src/version.tsx` produces no diff.
 
 GoReleaser then uploads binaries, archives, packages, checksums, legal files,
-and a **draft** GitHub release. It publishes the multi-platform image directly
-to `ghcr.io/pgsty/silo-console` under the release tag and `latest`.
+and a **draft** GitHub release. It publishes the multi-platform candidate image
+to `ghcr.io/pgsty/silo-console` under the release tag. The workflow verifies
+checksum/image signatures, SBOM attestations and provenance before declaring
+the draft ready. Only the separate post-publication workflow advances `latest`.
 
 ## 4. Review and publish the draft
 
 Review the generated notes and asset list, then publish the draft in GitHub.
-The draft is the manual approval boundary; no separate environment or staging
-package is required.
+After publication, require `promote-image.yaml` to succeed and verify anonymous
+pulls of both the release tag and `latest`. A published GitHub release alone
+is not proof that image promotion completed.
 
 If GoReleaser fails while uploading assets, the release remains an unpublished
 draft. Delete that partial draft and rerun the tag workflow. The container tags
-may already point at the correctly labelled release image; rerunning with the
-same tag replaces them with the completed build.
+for the candidate version may already exist. Retry only while the GitHub
+release is still a draft; the workflow refuses to overwrite a published release.
+`latest` stays at the previous verified release until promotion succeeds.
 
 ## 5. Version metadata
 

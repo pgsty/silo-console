@@ -34,6 +34,15 @@
 > sponsored by MinIO, Inc. The MinIO name is used only to identify the upstream
 > project and compatibility lineage.
 
+## Current release and development source
+
+The latest published Console is [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0)
+(2026-09-08). It uses silo-pkg v3.13.3 and MC source `c8aa5d25a63a`.
+The main branch now uses pkg v3.14.0, mcli 20260913 and upstream minio-go
+`60bd07042d49`; the password-permission split, streaming ZIP downloads and new
+release-promotion contract are **unreleased** as of 2026-09-13. See
+[CHANGELOG.md](CHANGELOG.md) and the [component matrix](https://silo.pgsty.com/compatibility/versions/).
+
 ## Overview
 
 SILO Console is the browser-based administration interface for

@@ -1,5 +1,11 @@
 # Embedding Console in a SILO server
 
+This page describes the main-branch source as of 2026-09-13, including pkg
+v3.14.0 and the released mcli 20260913 source. For the published Console v2.4.0
+use [its embedding documentation](https://github.com/pgsty/silo-console/blob/v2.4.0/docs/Embedding.md)
+and its own README replacement block. The Server 20260903 binary embeds Console
+source `464a59d73ada` with the v2.3.0 version identity, not this newer source.
+
 SILO embeds this module (`github.com/minio/console`) as a Go dependency.
 Console directly requires `github.com/pgsty/silo-pkg/v3`; that requirement is
 inherited normally and needs no downstream replacement. Console has one
@@ -35,8 +41,13 @@ compile. `minio-go` is the explicit exception and resolves upstream by policy.
 
 This Console line has completed the migration described by silo-pkg v3.13.0:
 its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires the
-current v3.14.0 release directly. A SILO server adopting this Console release must make the same source
+current v3.14.0 release directly. A SILO server adopting this Console revision must make the same source
 import migration. Keeping old `github.com/minio/pkg/v3`
 imports while replacing that path with silo-pkg v3.13.0 or later produces
 `used for two different module paths`. Update the embedding server's imports
-and module graph when it adopts this Console release.
+and module graph when it adopts this Console revision.
+
+The single maintained-component replacement is separate from compatibility
+pins: go-systemd remains v22.6.0 for NetBSD, and Console retains tablewriter
+v0.0.5 for the MC API it imports. Inspect the root module's full effective graph;
+Go does not inherit these other replacements either.

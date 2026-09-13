@@ -1,5 +1,10 @@
 # Browser downloads, recovery and UI text
 
+> Release boundary (2026-09-13): this describes unreleased main-branch behavior.
+> Console v2.4.0 does not contain these changes. See
+> [the changelog](../CHANGELOG.md#unreleased) and [component matrix](https://silo.pgsty.com/compatibility/versions/).
+
+
 Multi-selection ZIPs use a file writer when the browser offers the File System
 Access API. The response is streamed with backpressure, and cancelling a queued
 or active transfer aborts the request and file writer. A failed or incomplete
