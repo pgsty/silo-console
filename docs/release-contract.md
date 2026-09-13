@@ -1,5 +1,10 @@
 # Release and verification contract
 
+> Release boundary (2026-09-13): this describes unreleased main-branch behavior.
+> Console v2.4.0 does not contain these changes. See
+> [the changelog](../CHANGELOG.md#unreleased) and [component matrix](https://silo.pgsty.com/compatibility/versions/).
+
+
 This contract applies to releases built from this source revision onward. Older
 releases do not retroactively acquire signatures or provenance.
 

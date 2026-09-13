@@ -1,5 +1,10 @@
 # Packaged Linux service
 
+> Release boundary (2026-09-13): this is the main-branch unit and package contract.
+> The certificate-directory transition and service hardening below are unreleased;
+> Console v2.4.0 retains its earlier unit. See [the changelog](../CHANGELOG.md#unreleased).
+
+
 DEB and RPM retain `/etc/systemd/system/minio-console.service` and
 `/etc/default/console`. Existing service names and configuration files continue
 to work. APK installs the same files for compatibility, but stock Alpine uses

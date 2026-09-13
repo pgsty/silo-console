@@ -1,5 +1,10 @@
 # Docs
 
+These pages describe the checked-out source. The latest published version is
+v2.4.0; main-branch features marked Unreleased require a source build until the
+next Console release. See [CHANGELOG.md](../CHANGELOG.md) and the
+[component matrix](https://silo.pgsty.com/compatibility/versions/).
+
 More documentation to read
 
 - [OIDC](OIDC.md)
