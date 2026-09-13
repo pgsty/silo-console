@@ -25,7 +25,7 @@ concurrency:
 env:
   # Historical test recipes call this MINIO_VERSION. The release gate uses the
   # maintained SILO server; upstream MinIO is probed separately as best effort.
-  MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z
+  MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-09-03T13-18-01Z
 
 jobs:
   lint-job:
@@ -276,20 +276,6 @@ jobs:
         with:
           repository: minio/minio
           path: "minio_repository"
-      - name: Check-out matching MinIO branch
-        env:
-          GH_BRANCH: ${{ github.head_ref || github.ref_name }}
-          GH_PR_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-        run: |
-          cd $GITHUB_WORKSPACE/minio_repository; 
-          GH_PR_ACCOUNT=`echo $GH_PR_REPO | sed "s/\\/.*//"`
-          if [ ! -z "$GH_PR_ACCOUNT" ] && [ ! "$GH_PR_ACCOUNT" = "minio" ]; then
-            ALTREPO="https://github.com/$GH_PR_ACCOUNT/minio.git"
-            echo "Attempting to fetch $ALTREPO..."
-            git remote add alt $ALTREPO
-            (git fetch alt && git checkout "alt/$GH_BRANCH") || echo "$ALTREPO ($GH_BRANCH) not available, so keeping default repository/branch"
-          fi
-          cd $GITHUB_WORKSPACE;
       - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
@@ -308,7 +294,7 @@ jobs:
           cd $GITHUB_WORKSPACE/minio_repository;
 
           echo "Replace Console with local repo"
-          echo "replace github.com/minio/console => ../" >> go.mod
+          go mod edit -replace=github.com/minio/console=../
 
           echo "updates to go.mod needed; to update it: go mod tidy"
           go mod tidy

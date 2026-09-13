@@ -153,7 +153,7 @@ ignores replacements declared by dependency modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260910093317-e6a60edf0952
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
 )
 ```
 <!-- silo-replacements:end -->

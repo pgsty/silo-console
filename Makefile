@@ -11,7 +11,7 @@ TAG ?= "ghcr.io/pgsty/silo-console:$(IMAGE_VERSION)-dev"
 # Retain the historical variable name for test-script compatibility. Release
 # gates run against a pinned SILO image; override it explicitly for an advisory
 # upstream compatibility probe.
-MINIO_VERSION ?= "docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z"
+MINIO_VERSION ?= "docker.io/pgsty/silo:RELEASE.2026-09-03T13-18-01Z"
 
 TARGET_BUCKET ?= "target"
 NODE_VERSION := $(shell cat .nvmrc)
