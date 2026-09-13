@@ -15,7 +15,7 @@ tool github.com/go-swagger/go-swagger/cmd/swagger
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260910093317-e6a60edf0952
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
