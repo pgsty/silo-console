@@ -25,7 +25,7 @@ concurrency:
 env:
   # Historical test recipes call this MINIO_VERSION. The release gate uses the
   # maintained SILO server; upstream MinIO is probed separately as best effort.
-  MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-08-06T00-00-00Z
+  MINIO_VERSION: docker.io/pgsty/silo:RELEASE.2026-09-03T13-18-01Z
 
 jobs:
   lint-job:
