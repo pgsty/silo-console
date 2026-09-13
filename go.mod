@@ -45,18 +45,18 @@ require (
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	// Keep upstream master: v7.3.0 predates checksum and S3 Express fixes
 	// already included in this pseudo-version.
-	github.com/minio/minio-go/v7 v7.3.1-0.20260909183557-78bfa91607c2
+	github.com/minio/minio-go/v7 v7.3.1-0.20260910142817-60bd07042d49
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pgsty/silo-pkg/v3 v3.13.4-0.20260910091716-2d8fd3cbbf07
+	github.com/pgsty/silo-pkg/v3 v3.14.0
 	github.com/rs/xid v1.6.0
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.12.1
 	github.com/unrolled/secure v1.17.0
-	golang.org/x/crypto v0.56.0
-	golang.org/x/net v0.58.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/crypto v0.57.0
+	golang.org/x/net v0.59.0
+	golang.org/x/oauth2 v0.37.0
 )
 
 require (
@@ -201,14 +201,14 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/mod v0.40.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
 	// Added to include security fix for
 	// https://github.com/golang/go/issues/56152
-	golang.org/x/text v0.41.0 // indirect
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/tools v0.50.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260831171406-18b4a7587f8a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260831171406-18b4a7587f8a // indirect
 	google.golang.org/grpc v1.83.2 // indirect
