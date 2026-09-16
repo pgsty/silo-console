@@ -34,14 +34,14 @@
 > sponsored by MinIO, Inc. The MinIO name is used only to identify the upstream
 > project and compatibility lineage.
 
-## Current release and development source
+## Current release
 
-The latest published Console is [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0)
-(2026-09-08). It uses silo-pkg v3.13.3 and MC source `c8aa5d25a63a`.
-The main branch now uses pkg v3.14.0, mcli 20260913 and upstream minio-go
-`60bd07042d49`; the password-permission split, streaming ZIP downloads and new
-release-promotion contract are **unreleased** as of 2026-09-13. See
-[CHANGELOG.md](CHANGELOG.md) and the [component matrix](https://silo.pgsty.com/compatibility/versions/).
+[Console v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) uses
+silo-pkg v3.14.1, mcli 20260916 and upstream minio-go `32e1f32cb176`.
+It includes streaming ZIP downloads, the password-permission split, hardened
+object sharing and signed release metadata. See [CHANGELOG.md](CHANGELOG.md),
+the [password-policy migration](https://silo.pgsty.com/compatibility/password-permissions/)
+and the [component matrix](https://silo.pgsty.com/compatibility/versions/).
 
 ## Overview
 
@@ -93,7 +93,7 @@ consistent spacing and motion, and accessible focus states.
 
 ### Small, clean, and quiet
 
-The embedded payload went from roughly 10 MB to **under 3 MB**, reproducible byte
+The embedded payload went from roughly 10 MB to **about 3 MB**, reproducible byte
 for byte and enforced by a release gate. There is **no telemetry** — no
 analytics, no beacons, no external scripts or fonts, and no call-home. Automatic
 self-update is disabled, and a release catalog is contacted only when one is
@@ -162,7 +162,7 @@ ignores replacements declared by dependency modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a
 )
 ```
 <!-- silo-replacements:end -->

@@ -7,7 +7,7 @@ a draft GitHub release and a versioned candidate image. It does not advance
 then verifies the current stable release, signatures, SBOM, provenance and
 anonymous image access before promoting that digest to `latest`.
 
-This is the main-branch procedure as of 2026-09-13. Console v2.4.0 was built
+This procedure applies to v2.4.1 and later. Console v2.4.0 was built
 with the earlier workflow. Older assets do not acquire the new verification
 contract retroactively; see [release-contract.md](release-contract.md).
 

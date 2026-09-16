@@ -1,10 +1,8 @@
 # Embedding Console in a SILO server
 
-This page describes the main-branch source as of 2026-09-13, including pkg
-v3.14.0 and the released mcli 20260913 source. For the published Console v2.4.0
-use [its embedding documentation](https://github.com/pgsty/silo-console/blob/v2.4.0/docs/Embedding.md)
-and its own README replacement block. The Server 20260903 binary embeds Console
-source `464a59d73ada` with the v2.3.0 version identity, not this newer source.
+Console v2.4.1 uses silo-pkg v3.14.1 and the mcli 20260916 source.
+Use the README replacement block from the same Console release when embedding
+it in a SILO server.
 
 SILO embeds this module (`github.com/minio/console`) as a Go dependency.
 Console directly requires `github.com/pgsty/silo-pkg/v3`; that requirement is
@@ -18,7 +16,7 @@ that one directive from the authoritative README block between the
 
 | Module graph | Status |
 | :-- | :-- |
-| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.14.0 requirement |
+| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.14.1 requirement |
 | No mc replacement | Best-effort compatibility probe, tested by the non-blocking `upstream-pkg-compat` job; this is not the released SILO graph and does not constrain maintained dependency versions |
 | The retired `minio/pkg => silo-pkg` or `minio-go => silo-go` replacements | Unsupported. silo-pkg v3.13.0 and later own `github.com/pgsty/silo-pkg/v3`, and minio-go now resolves upstream |
 
@@ -41,7 +39,7 @@ compile. `minio-go` is the explicit exception and resolves upstream by policy.
 
 This Console line has completed the migration described by silo-pkg v3.13.0:
 its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires the
-current v3.14.0 release directly. A SILO server adopting this Console revision must make the same source
+current v3.14.1 release directly. A SILO server adopting this Console revision must make the same source
 import migration. Keeping old `github.com/minio/pkg/v3`
 imports while replacing that path with silo-pkg v3.13.0 or later produces
 `used for two different module paths`. Update the embedding server's imports
