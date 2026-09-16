@@ -1,8 +1,8 @@
 # Packaged Linux service
 
-> Release boundary (2026-09-13): this is the main-branch unit and package contract.
-> The certificate-directory transition and service hardening below are unreleased;
-> Console v2.4.0 retains its earlier unit. See [the changelog](../CHANGELOG.md#unreleased).
+> This unit and package contract applies to Console v2.4.1 and later, including
+> the certificate-directory transition and service hardening below. See
+> [the changelog](../CHANGELOG.md#release-v241).
 
 
 DEB and RPM retain `/etc/systemd/system/minio-console.service` and

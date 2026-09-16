@@ -1,8 +1,8 @@
 # Browser downloads, recovery and UI text
 
-> Release boundary (2026-09-13): this describes unreleased main-branch behavior.
-> Console v2.4.0 does not contain these changes. See
-> [the changelog](../CHANGELOG.md#unreleased) and [component matrix](https://silo.pgsty.com/compatibility/versions/).
+> These download and recovery behaviors are released in Console v2.4.1. See
+> [the changelog](../CHANGELOG.md#release-v241) and
+> [component matrix](https://silo.pgsty.com/compatibility/versions/).
 
 
 Multi-selection ZIPs use a file writer when the browser offers the File System

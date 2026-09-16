@@ -1,8 +1,10 @@
 # Docs
 
-These pages describe the checked-out source. The latest published version is
-v2.4.0; main-branch features marked Unreleased require a source build until the
-next Console release. See [CHANGELOG.md](../CHANGELOG.md) and the
+These pages describe the checked-out source. The current release is
+[v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1). See the release
+notes in [English](https://silo.pgsty.com/blog/release/console-2.4.1/) and
+[中文](https://silo.pgsty.com/zh/blog/release/console-2.4.1/),
+[CHANGELOG.md](../CHANGELOG.md), and the
 [component matrix](https://silo.pgsty.com/compatibility/versions/).
 
 More documentation to read
