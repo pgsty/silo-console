@@ -15,7 +15,7 @@ tool github.com/go-swagger/go-swagger/cmd/swagger
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5 // needed for github.com/minio/mc
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -31,7 +31,7 @@ require (
 	github.com/go-openapi/loads v0.25.2
 	github.com/go-openapi/runtime v0.33.1
 	github.com/go-openapi/spec v1.0.0
-	github.com/go-openapi/strfmt v0.27.0
+	github.com/go-openapi/strfmt v0.27.2
 	github.com/go-openapi/swag v0.29.1
 	github.com/go-openapi/validate v0.26.5
 	github.com/golang-jwt/jwt/v4 v4.5.2
@@ -45,11 +45,11 @@ require (
 	github.com/minio/mc v0.0.0-20251106162529-77f82e18b540
 	// Keep upstream master: v7.3.0 predates checksum and S3 Express fixes
 	// already included in this pseudo-version.
-	github.com/minio/minio-go/v7 v7.3.1-0.20260910142817-60bd07042d49
+	github.com/minio/minio-go/v7 v7.3.1-0.20260915093545-32e1f32cb176
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pgsty/silo-pkg/v3 v3.14.0
+	github.com/pgsty/silo-pkg/v3 v3.14.1
 	github.com/rs/xid v1.6.0
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.12.1
@@ -129,7 +129,7 @@ require (
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
-	github.com/lestrrat-go/jwx/v3 v3.2.0 // indirect
+	github.com/lestrrat-go/jwx/v3 v3.3.0 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 // indirect

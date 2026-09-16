@@ -1637,7 +1637,9 @@ jobs:
       - name: Build SILO embedding this Console checkout
         working-directory: .sharing-silo
         run: |
+          mc_version=$(go -C "$GITHUB_WORKSPACE" list -m -f '{{.Replace.Version}}' github.com/minio/mc)
           go mod edit -replace=github.com/minio/console="$GITHUB_WORKSPACE"
+          go mod edit -replace="github.com/minio/mc=github.com/pgsty/mc@$mc_version"
           CGO_ENABLED=0 go build -mod=mod -o "$RUNNER_TEMP/sharing-silo" .
       - name: Check URL and HTTP boundaries with the race detector
         run: go test -race ./api -run '^TestSharedObject(URLScope|HTTPBoundary|Cancellation)$' -count=1
