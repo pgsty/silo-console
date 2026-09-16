@@ -16,7 +16,7 @@
 | `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256; WebSocket connections one client address holds at once |
 | `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64; anonymous WebSocket connections for the process (must be less than the total) |
 | `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8; anonymous WebSocket connections from one client address (must be less than the per-client cap and not exceed the anonymous budget) |
-| `CONSOLE_SHARE_MINIO_URL` | "off"
+| `CONSOLE_SHARE_MINIO_URL` | "off"; selects the generated URL format, does not disable sharing |
 | `CONSOLE_SECURE_ALLOWED_HOSTS` | "" |
 | `CONSOLE_SECURE_ALLOWED_HOSTS_ARE_REGEX` | "off" |
 | `CONSOLE_SECURE_FRAME_DENY` | "on" |
