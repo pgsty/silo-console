@@ -18,3 +18,9 @@ import compatibility where practical, and describe it as best effort.
 
 Do not treat a local build, tag, draft release, image, documentation preview, or
 another repository's CI result as proof that this repository has been released.
+
+Official Console images are published only to Docker Hub as
+`docker.io/pgsty/silo-console`, alongside `docker.io/pgsty/silo` and
+`docker.io/pgsty/mc`. Keep build defaults, release/promotion workflows, update
+hints and documentation on that registry. Use `DOCKERHUB_USERNAME` and
+`DOCKERHUB_TOKEN` for publishing; verify anonymous pulls before advancing `latest`.
