@@ -12,7 +12,7 @@
 #       workflows call snapshot mode only:
 #       <assets-dir> holds the draft release's downloaded assets, <metadata-dir>
 #       holds dist/artifacts.json and dist/metadata.json from the GoReleaser run,
-#       and the multi-platform image is inspected in the private staging package
+#       and the multi-platform image is inspected in Docker Hub
 #       by tag. Writes release-verification.json for manual inspection.
 #
 # Every check fails closed. Requirements: goreleaser (snapshot mode), docker
@@ -34,7 +34,7 @@ if cpio --help 2>&1 | grep -q -- '--no-absolute-filenames'; then
 fi
 
 repository_url="https://github.com/pgsty/silo-console"
-staging_image="ghcr.io/pgsty/silo-console-staging"
+release_image="docker.io/pgsty/silo-console"
 expected_binaries=6 expected_bundles=6 expected_packages=9 expected_platforms=2
 
 license_sha="$(sha LICENSE)"; notice_sha="$(sha NOTICE)"; credits_sha="$(sha CREDITS)"
@@ -268,7 +268,7 @@ if [ "$mode" = snapshot ]; then
   done
   log "images: ${#images[@]} platform images carry exact labels and the legal files"
 else
-  index_ref="$staging_image:$tag"
+  index_ref="$release_image:$tag"
   raw="$(docker buildx imagetools inspect "$index_ref" --raw)" || fail "cannot inspect $index_ref"
   index_digest="$(docker buildx imagetools inspect "$index_ref" --format '{{json .Manifest.Digest}}' | tr -d '"')"
   manifests="$(jq -c '[.manifests[] | select(.platform.os == "linux" and (.platform.architecture == "amd64" or .platform.architecture == "arm64"))]' <<<"$raw")"
@@ -278,16 +278,16 @@ else
   for arch in amd64 arm64; do
     digest="$(jq -r --arg a "$arch" '.[] | select(.platform.architecture == $a) | .digest' <<<"$manifests")"
     [ -n "$digest" ] || fail "$index_ref: no linux/$arch manifest"
-    config="$(docker buildx imagetools inspect "$staging_image@$digest" --format '{{json .Image}}')"
+    config="$(docker buildx imagetools inspect "$release_image@$digest" --format '{{json .Image}}')"
     check_labels "$(jq -c '.config.Labels' <<<"$config")" "$index_ref linux/$arch labels"
-    docker pull -q --platform "linux/$arch" "$staging_image@$digest" >/dev/null
-    check_filesystem "$staging_image@$digest" "linux/$arch" "$index_ref linux/$arch"
+    docker pull -q --platform "linux/$arch" "$release_image@$digest" >/dev/null
+    check_filesystem "$release_image@$digest" "linux/$arch" "$index_ref linux/$arch"
     digests="$(jq -c --arg a "$arch" --arg d "$digest" '. + {($a): $d}' <<<"$digests")"
   done
-  log "staging image $index_ref ($index_digest): index with 2 platform manifests, exact labels, legal files present"
+  log "release image $index_ref ($index_digest): index with 2 platform manifests, exact labels, legal files present"
   assets_json="$(for name in "${archives[@]}" "${packages[@]}" "${checksums[@]}" LICENSE NOTICE CREDITS; do p="$(asset "$name")"; jq -n --arg n "$name" --arg s "$(sha "$p")" --argjson b "$(stat -c %s "$p" 2>/dev/null || stat -f %z "$p")" '{name: $n, sha256: $s, size: $b}'; done | jq -s '.')"
-  jq -n --arg tag "$tag" --arg commit "$head_commit" --arg index "$index_digest" --arg image "$staging_image" --argjson platforms "$digests" --argjson assets "$assets_json" \
-    '{tag: $tag, commit: $commit, staging_image: $image, index_digest: $index, platform_digests: $platforms, assets: $assets}' > release-verification.json
+  jq -n --arg tag "$tag" --arg commit "$head_commit" --arg index "$index_digest" --arg image "$release_image" --argjson platforms "$digests" --argjson assets "$assets_json" \
+    '{tag: $tag, commit: $commit, release_image: $image, index_digest: $index, platform_digests: $platforms, assets: $assets}' > release-verification.json
   log "wrote release-verification.json"
 fi
 

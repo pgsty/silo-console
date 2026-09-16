@@ -7,6 +7,10 @@ a draft GitHub release and a versioned candidate image. It does not advance
 then verifies the current stable release, signatures, SBOM, provenance and
 anonymous image access before promoting that digest to `latest`.
 
+The official image is `docker.io/pgsty/silo-console`. Create that public
+Docker Hub repository and configure the Actions secrets `DOCKERHUB_USERNAME`
+and `DOCKERHUB_TOKEN` with push access before running a publishing workflow.
+
 This procedure applies to v2.4.1 and later. Console v2.4.0 was built
 with the earlier workflow. Older assets do not acquire the new verification
 contract retroactively; see [release-contract.md](release-contract.md).
@@ -68,7 +72,7 @@ Before GoReleaser runs, the tag workflow checks:
 
 GoReleaser then uploads binaries, archives, packages, checksums, legal files,
 and a **draft** GitHub release. It publishes the multi-platform candidate image
-to `ghcr.io/pgsty/silo-console` under the release tag. The workflow verifies
+to `docker.io/pgsty/silo-console` under the release tag. The workflow verifies
 checksum/image signatures, SBOM attestations and provenance before declaring
 the draft ready. Only the separate post-publication workflow advances `latest`.
 
@@ -84,6 +88,27 @@ draft. Delete that partial draft and rerun the tag workflow. The container tags
 for the candidate version may already exist. Retry only while the GitHub
 release is still a draft; the workflow refuses to overwrite a published release.
 `latest` stays at the previous verified release until promotion succeeds.
+
+### Publish an image for an existing signed release
+
+`publish-image.yaml` packages the already-published Linux amd64/arm64 binaries
+into the tagged source's scratch image. This is the Docker Hub publication path
+for v2.4.1. It verifies the original checksum signature, GitHub provenance and
+source commit, checks the binaries and legal files, then signs and attests the
+new image. Binary, package, source and checksum assets retain their original
+bytes and tag. The image SBOM is updated to describe the Docker Hub image;
+an existing versioned image is never overwritten.
+
+```sh
+gh workflow run publish-image.yaml --repo pgsty/silo-console --ref main -f tag=v2.4.1
+# Wait for successful publication and verification, then promote the same tag.
+gh workflow run promote-image.yaml --repo pgsty/silo-console --ref main -f tag=v2.4.1
+```
+
+The image's signing identity is `publish-image.yaml@refs/heads/main`; the
+original binaries retain `release.yaml@refs/tags/v2.4.1`. Image provenance
+records both the packaging workflow commit and the signed release inputs.
+See [release-contract.md](release-contract.md) for verification commands.
 
 ## 5. Version metadata
 

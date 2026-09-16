@@ -182,7 +182,7 @@ func updateInplace(_ *cli.Context) error {
 	// Check if we are docker environment, return docker update command
 	if IsDocker() {
 		fmt.Println("You are running SILO Console inside a container. Use:")
-		fmt.Printf("docker pull ghcr.io/pgsty/silo-console:%s\n", rel)
+		fmt.Printf("docker pull docker.io/pgsty/silo-console:%s\n", rel)
 		return nil
 	}
 

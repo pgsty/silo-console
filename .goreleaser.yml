@@ -182,11 +182,11 @@ nfpms:
         License: AGPL-3.0-or-later
 
 dockers_v2:
-  # Release images go directly to the public package. Snapshot tags stay local
+  # Release images go directly to the public Docker Hub repository. Snapshot tags stay local
   # and include the commit so the artifact verifier cannot reuse a stale image.
   - dockerfile: Dockerfile.goreleaser
     images:
-      - "ghcr.io/pgsty/silo-console"
+      - "docker.io/pgsty/silo-console"
     platforms:
       - linux/amd64
       - linux/arm64

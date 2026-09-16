@@ -6,8 +6,7 @@ BUILD_TIME:=$(shell TZ=UTC git show -s --format=%cd --date=format-local:%Y-%m-%d
 BUILD_COMMIT:=$(shell git rev-parse HEAD)
 BUILD_EPOCH:=$(shell git show -s --format=%ct HEAD)
 IMAGE_VERSION := $(subst /,-,$(BUILD_VERSION))
-TAG ?= "ghcr.io/pgsty/silo-console:$(IMAGE_VERSION)-dev"
-#TAG ?= "ghcr.io/pgsty/silo-console:dev"
+TAG ?= "docker.io/pgsty/silo-console:$(IMAGE_VERSION)-dev"
 # Retain the historical variable name for test-script compatibility. Release
 # gates run against a pinned SILO image; override it explicitly for an advisory
 # upstream compatibility probe.
