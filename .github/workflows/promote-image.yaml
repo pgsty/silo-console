@@ -51,6 +51,10 @@ jobs:
           issuer="https://token.actions.githubusercontent.com"
           digest=$(docker buildx imagetools inspect "$image:$TAG" --format '{{.Manifest.Digest}}')
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          # The packaging workflow signs on main; bind its signed image to this
+          # release so a retagged image from another version cannot be promoted.
+          docker buildx imagetools inspect "$image@$digest" --raw \
+            | jq -e --arg tag "$TAG" '.annotations["org.opencontainers.image.version"] == $tag'
           checksum_identity="$identity"
           if ! cosign verify --certificate-identity "$identity" --certificate-oidc-issuer "$issuer" "$image@$digest"; then
             identity="https://github.com/${GITHUB_REPOSITORY}/.github/workflows/publish-image.yaml@refs/heads/main"
