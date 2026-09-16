@@ -24,6 +24,7 @@ import (
 )
 
 func Test_decodeMinIOStringURL(t *testing.T) {
+	t.Setenv(ConsoleMinIOServer, "http://localhost:9000")
 	tAssert := assert.New(t)
 	type args struct {
 		encodedURL string
@@ -77,12 +78,12 @@ func Test_decodeMinIOStringURL(t *testing.T) {
 			expected:  nil,
 		},
 		{
-			test: "plain url",
+			test: "different scheme is forbidden even on the same host and port",
 			args: args{
 				encodedURL: "aHR0cHM6Ly9sb2NhbGhvc3Q6OTAwMC9jZXN0ZXN0L0F1ZGlvJTIwaWNvbi5zdmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTY",
 			},
-			wantError: nil,
-			expected:  swag.String("https://localhost:9000/cestest/Audio%20icon.svg?X-Amz-Algorithm=AWS4-HMAC-SHA256"),
+			wantError: swag.String("403 Forbidden"),
+			expected:  nil,
 		},
 	}
 

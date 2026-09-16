@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restricts the anonymous share proxy to object-content GETs at the configured S3 origin and rejects all redirects. Normal public, signed and versioned object downloads remain available without a new setting. Thanks to [Jiri Pejchal (@jiri-pejchal)](https://github.com/jiri-pejchal) for reporting the internal-metrics exposure in [#52](https://github.com/pgsty/silo-console/issues/52).
+
 As of 2026-09-13, the latest published version remains
 [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0).
 The changes below are on main and selected by Server main; they are not in

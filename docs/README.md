@@ -1,10 +1,5 @@
 # Docs
 
-These pages describe the checked-out source. The latest published version is
-v2.4.0; main-branch features marked Unreleased require a source build until the
-next Console release. See [CHANGELOG.md](../CHANGELOG.md) and the
-[component matrix](https://silo.pgsty.com/compatibility/versions/).
-
 More documentation to read
 
 - [OIDC](OIDC.md)
@@ -14,6 +9,7 @@ More documentation to read
 - [Debug Logging](Debug.md)
 - [Environment Variables](Environment.md)
 - [Object Browser](ObjectBrowser.md)
+- Object sharing and proxy boundaries: [English](https://silo.pgsty.com/reference/minio-server/settings/console/#object-sharing) · [中文](https://silo.pgsty.com/zh/reference/minio-server/settings/console/#object-sharing)
 - [Embedding Console in SILO](Embedding.md)
 - [Release procedure](Release.md)
 - **Development**
@@ -26,6 +22,9 @@ The compatibility environment variable `CONSOLE_SHARE_MINIO_URL=on` changes
 the default shared-object URL from the Console URL to the configured SILO or
 MinIO-compatible server URL when the Console endpoint is not exposed. The UI
 also provides a toggle between the two.
+
+The public proxy enforces its [object download boundary](https://silo.pgsty.com/reference/minio-server/settings/console/#object-sharing) without
+additional configuration. Link format does not change that boundary.
 
 ## FAQ
 

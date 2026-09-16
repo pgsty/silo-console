@@ -1595,6 +1595,62 @@ jobs:
           yarn exec playwright test --reporter=github
           yarn exec nyc report
 
+  sharing-boundary:
+    name: Shared downloads in standalone and embedded SILO
+    needs:
+      - compile-binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GOWORK: "off"
+    steps:
+      - name: Check out Console
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Check out the maintained SILO fixture
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: pgsty/silo
+          ref: 9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99
+          path: .sharing-silo
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: 1.27.1
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+          cache-dependency-path: web-app/yarn.lock
+      - name: Install browser dependencies
+        working-directory: web-app
+        run: |
+          yarn install --immutable
+          yarn exec playwright install --with-deps chromium
+      - name: Restore the tested Console binary
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ./console
+          key: ${{ runner.os }}-binary-${{ github.run_id }}
+      - name: Build SILO embedding this Console checkout
+        working-directory: .sharing-silo
+        run: |
+          go mod edit -replace=github.com/minio/console="$GITHUB_WORKSPACE"
+          CGO_ENABLED=0 go build -mod=mod -o "$RUNNER_TEMP/sharing-silo" .
+      - name: Check URL and HTTP boundaries with the race detector
+        run: go test -race ./api -run '^TestSharedObject(URLScope|HTTPBoundary|Cancellation)$' -count=1
+      - name: Verify real API and browser sharing in both deployments
+        run: python3 hack/test-sharing-local.py --silo "$RUNNER_TEMP/sharing-silo" --console "$GITHUB_WORKSPACE/console" --output "$RUNNER_TEMP/sharing-results"
+      - name: Retain sharing test evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sharing-results
+          path: ${{ runner.temp }}/sharing-results
+          if-no-files-found: warn
+
   required-matrix:
     # The release gate (release.yaml) and branch protection look at this one
     # job. It lists every release-gating job explicitly and fails unless each
@@ -1635,6 +1691,7 @@ jobs:
       - cross-compile-4
       - cross-compile-5
       - playwright
+      - sharing-boundary
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to succeed
