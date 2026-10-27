@@ -66,6 +66,146 @@ export enum BucketEncryptionType {
   SseKms = "sse-kms",
 }
 
+export interface BucketUsageRequest {
+  /** @maxItems 1000 */
+  buckets: string[];
+}
+
+export interface BucketUsageTotals {
+  /** @pattern ^[0-9]+$ */
+  current_bytes: string;
+  /**
+   * @format int64
+   * @min 0
+   */
+  current_objects: number;
+  /** @pattern ^[0-9]+$ */
+  retained_bytes?: string | null;
+  /**
+   * @format int64
+   * @min 0
+   */
+  retained_versions?: number | null;
+  /**
+   * @format int64
+   * @min 0
+   */
+  delete_markers?: number | null;
+}
+
+export interface BucketUsageSnapshot {
+  totals: BucketUsageTotals;
+  /**
+   * Counts only visible current objects when the caller lacks version-list permission.
+   * @format int64
+   * @min 0
+   */
+  scanned_entries: number;
+  /** @format date-time */
+  started_at: string;
+  /** @format date-time */
+  updated_at: string;
+}
+
+export interface BucketUsageRecord {
+  bucket: string;
+  state:
+    | "not_scanned"
+    | "queued"
+    | "running"
+    | "complete"
+    | "error"
+    | "limited"
+    | "forbidden"
+    | "missing"
+    | "unavailable";
+  versions_visible: boolean;
+  /** @format date-time */
+  requested_at?: string | null;
+  /** @format date-time */
+  last_event_at?: string | null;
+  /** @format date-time */
+  last_completed_at?: string | null;
+  last_good?: BucketUsageSnapshot;
+  progress?: BucketUsageSnapshot;
+  error_code?: string;
+  message?: string;
+}
+
+export interface BucketUsageCoverage {
+  observer_alive: boolean;
+  connected: boolean;
+  reconciled: boolean;
+  /** @format date-time */
+  last_connected_at?: string | null;
+  /** @format date-time */
+  last_disconnect_at?: string | null;
+  /** @format date-time */
+  last_reconciled_at?: string | null;
+}
+
+export interface BucketUsageResponse {
+  enabled: boolean;
+  /**
+   * @format int64
+   * @min 250
+   * @max 60000
+   */
+  poll_after_ms: number;
+  coverage?: BucketUsageCoverage;
+  buckets: BucketUsageRecord[];
+}
+
+export interface PrefixUsageStats {
+  /**
+   * Decimal bytes preserve precision above JavaScript's exact integer range.
+   * @pattern ^[0-9]+$
+   */
+  current_bytes: string;
+  /**
+   * @format int64
+   * @min 0
+   */
+  current_objects: number;
+  /** @pattern ^[0-9]+$ */
+  retained_bytes: string;
+  /**
+   * @format int64
+   * @min 0
+   */
+  retained_versions: number;
+  /**
+   * @format int64
+   * @min 0
+   */
+  delete_markers: number;
+}
+
+export interface PrefixUsageFolder {
+  prefix: string;
+  usage: PrefixUsageStats;
+}
+
+export interface PrefixUsageFrame {
+  status: "scanning" | "complete" | "limited" | "failed";
+  bucket: string;
+  prefix: string;
+  mode: "current" | "versions";
+  /** @format date-time */
+  started_at: string;
+  /** @format date-time */
+  updated_at: string;
+  /**
+   * @format int64
+   * @min 0
+   */
+  scanned_entries: number;
+  totals: PrefixUsageStats;
+  folders: PrefixUsageFolder[];
+  reason?: "duration" | "entries" | "folders" | "upstream";
+  message?: string;
+}
+
 export interface AccountChangePasswordRequest {
   current_secret_key: string;
   new_secret_key: string;
@@ -1861,6 +2001,50 @@ export class Api<
         ...params,
       }),
   };
+  bucketUsage = {
+    /**
+     * No description
+     *
+     * @tags Bucket
+     * @name BucketUsageStatus
+     * @summary Read authorized live bucket usage and refresh status
+     * @request POST:/bucket-usage/status
+     * @secure
+     */
+    bucketUsageStatus: (body: BucketUsageRequest, params: RequestParams = {}) =>
+      this.request<BucketUsageResponse, ApiError>({
+        path: `/bucket-usage/status`,
+        method: "POST",
+        body: body,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Repeated requests join existing work. Cached usage is disclosed only after checking the caller's current S3 listing permissions.
+     *
+     * @tags Bucket
+     * @name BucketUsageRefresh
+     * @summary Request an on-demand prioritized bucket usage refresh
+     * @request POST:/bucket-usage/refresh
+     * @secure
+     */
+    bucketUsageRefresh: (
+      body: BucketUsageRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<BucketUsageResponse, ApiError>({
+        path: `/bucket-usage/refresh`,
+        method: "POST",
+        body: body,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+  };
   buckets = {
     /**
      * No description
@@ -1976,6 +2160,44 @@ export class Api<
         body: body,
         secure: true,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Explicit, cancellable metadata scan using the signed-in user's S3 listing permissions. Streams newline-delimited prefixUsageFrame snapshots. Only a complete frame is a total; limited, failed, or interrupted scans are partial. Current and retained-version bytes are logical object sizes, not physical drive allocation. Contents can change during the scan.
+     *
+     * @tags Object
+     * @name PrefixUsage
+     * @summary Calculate live folder usage
+     * @request GET:/buckets/{bucket_name}/prefix-usage
+     * @secure
+     */
+    prefixUsage: (
+      bucketName: string,
+      query: {
+        /**
+         * Empty for bucket root, otherwise a folder prefix ending in slash.
+         * @maxLength 1024
+         */
+        prefix: string;
+        /**
+         * Include retained object versions and delete markers; requires version-list permission.
+         * @default false
+         */
+        versions?: boolean;
+        /**
+         * Include immediate child-folder summaries; false calculates only this prefix.
+         * @default true
+         */
+        folders?: boolean;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<File, ApiError>({
+        path: `/buckets/${encodeURIComponent(bucketName)}/prefix-usage`,
+        method: "GET",
+        query: query,
+        secure: true,
         ...params,
       }),
 

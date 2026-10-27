@@ -288,6 +288,7 @@ export type ObjectSortField = "name" | "last_modified" | "size";
 
 const compareObjects = (
   field: ObjectSortField,
+  folderBytes?: ReadonlyMap<string, string>,
 ): ((a: BucketObjectItem, b: BucketObjectItem) => number) => {
   switch (field) {
     case "last_modified":
@@ -295,7 +296,21 @@ const compareObjects = (
         new Date(a.last_modified).getTime() -
         new Date(b.last_modified).getTime();
     case "size":
-      return (a, b) => (a.size ?? -1) - (b.size ?? -1);
+      return (a, b) => {
+        const size = (item: BucketObjectItem) => {
+          const calculated = folderBytes?.get(item.name);
+          return calculated !== undefined
+            ? BigInt(calculated)
+            : BigInt(item.size ?? -1);
+        };
+        const left = size(a),
+          right = size(b);
+        return left < right
+          ? -1
+          : left > right
+            ? 1
+            : a.name.localeCompare(b.name);
+      };
     default:
       return (a, b) => a.name.localeCompare(b.name);
   }
@@ -309,12 +324,13 @@ export const visiblePageObjects = (
   search: string,
   field: ObjectSortField,
   direction: "ASC" | "DESC" | undefined,
+  folderBytes?: ReadonlyMap<string, string>,
 ): BucketObjectItem[] => {
   const needle = search.toLowerCase();
   const visible = records.filter(
     (item) => needle === "" || item.name.toLowerCase().includes(needle),
   );
-  visible.sort(compareObjects(field));
+  visible.sort(compareObjects(field, folderBytes));
   if (direction === "DESC") {
     visible.reverse();
   }

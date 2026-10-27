@@ -5,7 +5,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-import type { Bucket } from "../../../../api/consoleApi";
+import type { Bucket, BucketUsageRecord } from "../../../../api/consoleApi";
 import { bucketStatistic } from "../bucketMetadata";
 
 export type BucketSort = "name" | "objects" | "size" | "created";
@@ -64,13 +64,22 @@ export const filterSortBuckets = (
   query: BucketQuery,
   canReadUsage: boolean,
   at?: string | null,
+  usage?: Record<string, BucketUsageRecord>,
 ) => {
   const needle = query.q.trim().toLocaleLowerCase();
-  const value = (bucket: Bucket): string | number | undefined => {
+  const value = (bucket: Bucket): string | number | bigint | undefined => {
     if (query.sort === "name") return bucket.name;
     if (query.sort === "created") {
       const date = Date.parse(bucket.creation_date || "");
       return Number.isFinite(date) ? date : undefined;
+    }
+    if (usage) {
+      const totals = usage[bucket.name]?.last_good?.totals;
+      return totals
+        ? query.sort === "size"
+          ? BigInt(totals.current_bytes)
+          : totals.current_objects
+        : undefined;
     }
     return listBucketStatistic(bucket, query.sort, canReadUsage, at);
   };

@@ -46,6 +46,8 @@ import (
 )
 
 func registerBucketsHandlers(api *operations.ConsoleAPI) {
+	api.BucketBucketUsageStatusHandler = bucketApi.BucketUsageStatusHandlerFunc(bucketUsageStatus)
+	api.BucketBucketUsageRefreshHandler = bucketApi.BucketUsageRefreshHandlerFunc(bucketUsageRefresh)
 	// list buckets
 	api.BucketListBucketsHandler = bucketApi.ListBucketsHandlerFunc(func(params bucketApi.ListBucketsParams, session *models.Principal) middleware.Responder {
 		listBucketsResponse, err := getListBucketsResponse(session, params)

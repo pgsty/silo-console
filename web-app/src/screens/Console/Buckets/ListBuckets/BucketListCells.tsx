@@ -23,6 +23,8 @@ import { OverflowMenu, StatusBadge } from "../../../../common/ui";
 import { Hint } from "../../../../common/ui/shared";
 import { niceBytesInt } from "../../../../common/utils";
 import { hasUsageTimestamp, listBucketStatistic } from "./bucketList";
+import { useBucketUsageView } from "./useBucketUsage";
+import { formatUsageBytes } from "../../ObjectBrowser/prefixUsage";
 
 export const bucketCapabilities = (name: string, obOnly: boolean) => ({
   browse: hasPermission(name, browseBucketPermissions),
@@ -60,6 +62,28 @@ export const BucketUsage = ({
 }) => {
   const t = useT();
   const language = useLanguage();
+  const usage = useBucketUsageView();
+  const row = usage?.records[bucket.name];
+  const totals = row?.last_good?.totals;
+  if (totals)
+    return field === "objects" ? (
+      <>{totals.current_objects.toLocaleString(language)}</>
+    ) : (
+      <>
+        <span title={`${totals.current_bytes} B`}>
+          {formatUsageBytes(totals.current_bytes)}
+        </span>
+        {totals.retained_bytes != null && (
+          <small
+            style={{ display: "block" }}
+            title={`${totals.retained_bytes} B`}
+          >
+            {t("Retained")}: {formatUsageBytes(totals.retained_bytes)}
+          </small>
+        )}
+      </>
+    );
+  if (usage) return <span>—</span>;
   const value = listBucketStatistic(
     bucket,
     field,

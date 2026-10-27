@@ -32,6 +32,7 @@
 //	  - application/zip
 //	  - application/octet-stream
 //	  - application/json
+//	  - application/x-ndjson
 //
 // swagger:meta
 package api

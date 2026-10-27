@@ -720,6 +720,83 @@ func init() {
         }
       }
     },
+    "/bucket-usage/refresh": {
+      "post": {
+        "description": "Repeated requests join existing work. Cached usage is disclosed only after checking the caller's current S3 listing permissions.",
+        "tags": [
+          "Bucket"
+        ],
+        "summary": "Request an on-demand prioritized bucket usage refresh",
+        "operationId": "BucketUsageRefresh",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/bucketUsageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Current prioritized queue state; this is not a completed scan.",
+            "schema": {
+              "$ref": "#/definitions/bucketUsageResponse"
+            }
+          },
+          "default": {
+            "description": "Refresh request unavailable.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
+          }
+        ]
+      }
+    },
+    "/bucket-usage/status": {
+      "post": {
+        "tags": [
+          "Bucket"
+        ],
+        "summary": "Read authorized live bucket usage and refresh status",
+        "operationId": "BucketUsageStatus",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/bucketUsageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved observations and current queue state for permitted buckets.",
+            "schema": {
+              "$ref": "#/definitions/bucketUsageResponse"
+            }
+          },
+          "default": {
+            "description": "Usage status unavailable.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
+          }
+        ]
+      }
+    },
     "/bucket-users/{bucket}": {
       "get": {
         "tags": [
@@ -2098,6 +2175,69 @@ func init() {
           },
           {
             "anonymous": []
+          }
+        ]
+      }
+    },
+    "/buckets/{bucket_name}/prefix-usage": {
+      "get": {
+        "description": "Explicit, cancellable metadata scan using the signed-in user's S3 listing permissions. Streams newline-delimited prefixUsageFrame snapshots. Only a complete frame is a total; limited, failed, or interrupted scans are partial. Current and retained-version bytes are logical object sizes, not physical drive allocation. Contents can change during the scan.",
+        "produces": [
+          "application/x-ndjson"
+        ],
+        "tags": [
+          "Object"
+        ],
+        "summary": "Calculate live folder usage",
+        "operationId": "PrefixUsage",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bucket_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "maxLength": 1024,
+            "type": "string",
+            "description": "Empty for bucket root, otherwise a folder prefix ending in slash.",
+            "name": "prefix",
+            "in": "query",
+            "required": true,
+            "allowEmptyValue": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "description": "Include retained object versions and delete markers; requires version-list permission.",
+            "name": "versions",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Include immediate child-folder summaries; false calculates only this prefix.",
+            "name": "folders",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newline-delimited prefixUsageFrame snapshots ending in complete, limited, or failed.",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "default": {
+            "description": "Generic error response before streaming begins.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
           }
         ]
       }
@@ -5499,6 +5639,205 @@ func init() {
         }
       }
     },
+    "bucketUsageCoverage": {
+      "type": "object",
+      "required": [
+        "observer_alive",
+        "connected",
+        "reconciled"
+      ],
+      "properties": {
+        "connected": {
+          "type": "boolean"
+        },
+        "last_connected_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_disconnect_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_reconciled_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "observer_alive": {
+          "type": "boolean"
+        },
+        "reconciled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bucketUsageRecord": {
+      "type": "object",
+      "required": [
+        "bucket",
+        "state",
+        "versions_visible"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "error_code": {
+          "type": "string"
+        },
+        "last_completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_event_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_good": {
+          "$ref": "#/definitions/bucketUsageSnapshot"
+        },
+        "message": {
+          "type": "string"
+        },
+        "progress": {
+          "$ref": "#/definitions/bucketUsageSnapshot"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_scanned",
+            "queued",
+            "running",
+            "complete",
+            "error",
+            "limited",
+            "forbidden",
+            "missing",
+            "unavailable"
+          ]
+        },
+        "versions_visible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bucketUsageRequest": {
+      "type": "object",
+      "required": [
+        "buckets"
+      ],
+      "properties": {
+        "buckets": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "string",
+            "maxLength": 63,
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "bucketUsageResponse": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "poll_after_ms",
+        "buckets"
+      ],
+      "properties": {
+        "buckets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/bucketUsageRecord"
+          }
+        },
+        "coverage": {
+          "$ref": "#/definitions/bucketUsageCoverage"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "poll_after_ms": {
+          "type": "integer",
+          "format": "int64",
+          "maximum": 60000,
+          "minimum": 250
+        }
+      }
+    },
+    "bucketUsageSnapshot": {
+      "type": "object",
+      "required": [
+        "totals",
+        "scanned_entries",
+        "started_at",
+        "updated_at"
+      ],
+      "properties": {
+        "scanned_entries": {
+          "description": "Counts only visible current objects when the caller lacks version-list permission.",
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "totals": {
+          "$ref": "#/definitions/bucketUsageTotals"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "bucketUsageTotals": {
+      "type": "object",
+      "required": [
+        "current_bytes",
+        "current_objects"
+      ],
+      "properties": {
+        "current_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "current_objects": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "delete_markers": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "retained_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "x-nullable": true
+        },
+        "retained_versions": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "x-nullable": true
+        }
+      }
+    },
     "bucketVersioningResponse": {
       "type": "object",
       "properties": {
@@ -6984,6 +7323,129 @@ func init() {
         },
         "prefix": {
           "type": "string"
+        }
+      }
+    },
+    "prefixUsageFolder": {
+      "type": "object",
+      "required": [
+        "prefix",
+        "usage"
+      ],
+      "properties": {
+        "prefix": {
+          "type": "string"
+        },
+        "usage": {
+          "$ref": "#/definitions/prefixUsageStats"
+        }
+      }
+    },
+    "prefixUsageFrame": {
+      "type": "object",
+      "required": [
+        "status",
+        "bucket",
+        "prefix",
+        "mode",
+        "started_at",
+        "updated_at",
+        "scanned_entries",
+        "totals",
+        "folders"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "folders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/prefixUsageFolder"
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "current",
+            "versions"
+          ]
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "duration",
+            "entries",
+            "folders",
+            "upstream"
+          ]
+        },
+        "scanned_entries": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "scanning",
+            "complete",
+            "limited",
+            "failed"
+          ]
+        },
+        "totals": {
+          "$ref": "#/definitions/prefixUsageStats"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "prefixUsageStats": {
+      "type": "object",
+      "required": [
+        "current_bytes",
+        "current_objects",
+        "retained_bytes",
+        "retained_versions",
+        "delete_markers"
+      ],
+      "properties": {
+        "current_bytes": {
+          "description": "Decimal bytes preserve precision above JavaScript's exact integer range.",
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "current_objects": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "delete_markers": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "retained_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "retained_versions": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
         }
       }
     },
@@ -9166,6 +9628,83 @@ func init() {
         }
       }
     },
+    "/bucket-usage/refresh": {
+      "post": {
+        "description": "Repeated requests join existing work. Cached usage is disclosed only after checking the caller's current S3 listing permissions.",
+        "tags": [
+          "Bucket"
+        ],
+        "summary": "Request an on-demand prioritized bucket usage refresh",
+        "operationId": "BucketUsageRefresh",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/bucketUsageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Current prioritized queue state; this is not a completed scan.",
+            "schema": {
+              "$ref": "#/definitions/bucketUsageResponse"
+            }
+          },
+          "default": {
+            "description": "Refresh request unavailable.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
+          }
+        ]
+      }
+    },
+    "/bucket-usage/status": {
+      "post": {
+        "tags": [
+          "Bucket"
+        ],
+        "summary": "Read authorized live bucket usage and refresh status",
+        "operationId": "BucketUsageStatus",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/bucketUsageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved observations and current queue state for permitted buckets.",
+            "schema": {
+              "$ref": "#/definitions/bucketUsageResponse"
+            }
+          },
+          "default": {
+            "description": "Usage status unavailable.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
+          }
+        ]
+      }
+    },
     "/bucket-users/{bucket}": {
       "get": {
         "tags": [
@@ -10572,6 +11111,69 @@ func init() {
           },
           {
             "anonymous": []
+          }
+        ]
+      }
+    },
+    "/buckets/{bucket_name}/prefix-usage": {
+      "get": {
+        "description": "Explicit, cancellable metadata scan using the signed-in user's S3 listing permissions. Streams newline-delimited prefixUsageFrame snapshots. Only a complete frame is a total; limited, failed, or interrupted scans are partial. Current and retained-version bytes are logical object sizes, not physical drive allocation. Contents can change during the scan.",
+        "produces": [
+          "application/x-ndjson"
+        ],
+        "tags": [
+          "Object"
+        ],
+        "summary": "Calculate live folder usage",
+        "operationId": "PrefixUsage",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bucket_name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "maxLength": 1024,
+            "type": "string",
+            "description": "Empty for bucket root, otherwise a folder prefix ending in slash.",
+            "name": "prefix",
+            "in": "query",
+            "required": true,
+            "allowEmptyValue": true
+          },
+          {
+            "type": "boolean",
+            "default": false,
+            "description": "Include retained object versions and delete markers; requires version-list permission.",
+            "name": "versions",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "default": true,
+            "description": "Include immediate child-folder summaries; false calculates only this prefix.",
+            "name": "folders",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newline-delimited prefixUsageFrame snapshots ending in complete, limited, or failed.",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "default": {
+            "description": "Generic error response before streaming begins.",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        },
+        "security": [
+          {
+            "key": []
           }
         ]
       }
@@ -14167,6 +14769,205 @@ func init() {
         }
       }
     },
+    "bucketUsageCoverage": {
+      "type": "object",
+      "required": [
+        "observer_alive",
+        "connected",
+        "reconciled"
+      ],
+      "properties": {
+        "connected": {
+          "type": "boolean"
+        },
+        "last_connected_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_disconnect_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_reconciled_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "observer_alive": {
+          "type": "boolean"
+        },
+        "reconciled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bucketUsageRecord": {
+      "type": "object",
+      "required": [
+        "bucket",
+        "state",
+        "versions_visible"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "error_code": {
+          "type": "string"
+        },
+        "last_completed_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_event_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "last_good": {
+          "$ref": "#/definitions/bucketUsageSnapshot"
+        },
+        "message": {
+          "type": "string"
+        },
+        "progress": {
+          "$ref": "#/definitions/bucketUsageSnapshot"
+        },
+        "requested_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_scanned",
+            "queued",
+            "running",
+            "complete",
+            "error",
+            "limited",
+            "forbidden",
+            "missing",
+            "unavailable"
+          ]
+        },
+        "versions_visible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bucketUsageRequest": {
+      "type": "object",
+      "required": [
+        "buckets"
+      ],
+      "properties": {
+        "buckets": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "string",
+            "maxLength": 63,
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "bucketUsageResponse": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "poll_after_ms",
+        "buckets"
+      ],
+      "properties": {
+        "buckets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/bucketUsageRecord"
+          }
+        },
+        "coverage": {
+          "$ref": "#/definitions/bucketUsageCoverage"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "poll_after_ms": {
+          "type": "integer",
+          "format": "int64",
+          "maximum": 60000,
+          "minimum": 250
+        }
+      }
+    },
+    "bucketUsageSnapshot": {
+      "type": "object",
+      "required": [
+        "totals",
+        "scanned_entries",
+        "started_at",
+        "updated_at"
+      ],
+      "properties": {
+        "scanned_entries": {
+          "description": "Counts only visible current objects when the caller lacks version-list permission.",
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "totals": {
+          "$ref": "#/definitions/bucketUsageTotals"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "bucketUsageTotals": {
+      "type": "object",
+      "required": [
+        "current_bytes",
+        "current_objects"
+      ],
+      "properties": {
+        "current_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "current_objects": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "delete_markers": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "x-nullable": true
+        },
+        "retained_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "x-nullable": true
+        },
+        "retained_versions": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "x-nullable": true
+        }
+      }
+    },
     "bucketVersioningResponse": {
       "type": "object",
       "properties": {
@@ -15647,6 +16448,129 @@ func init() {
         },
         "prefix": {
           "type": "string"
+        }
+      }
+    },
+    "prefixUsageFolder": {
+      "type": "object",
+      "required": [
+        "prefix",
+        "usage"
+      ],
+      "properties": {
+        "prefix": {
+          "type": "string"
+        },
+        "usage": {
+          "$ref": "#/definitions/prefixUsageStats"
+        }
+      }
+    },
+    "prefixUsageFrame": {
+      "type": "object",
+      "required": [
+        "status",
+        "bucket",
+        "prefix",
+        "mode",
+        "started_at",
+        "updated_at",
+        "scanned_entries",
+        "totals",
+        "folders"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "folders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/prefixUsageFolder"
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "current",
+            "versions"
+          ]
+        },
+        "prefix": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "duration",
+            "entries",
+            "folders",
+            "upstream"
+          ]
+        },
+        "scanned_entries": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "scanning",
+            "complete",
+            "limited",
+            "failed"
+          ]
+        },
+        "totals": {
+          "$ref": "#/definitions/prefixUsageStats"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "prefixUsageStats": {
+      "type": "object",
+      "required": [
+        "current_bytes",
+        "current_objects",
+        "retained_bytes",
+        "retained_versions",
+        "delete_markers"
+      ],
+      "properties": {
+        "current_bytes": {
+          "description": "Decimal bytes preserve precision above JavaScript's exact integer range.",
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "current_objects": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "delete_markers": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
+        },
+        "retained_bytes": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "retained_versions": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0
         }
       }
     },
