@@ -1,6 +1,6 @@
 # Docs
 
-These pages describe Console v2.5.1. Published binaries, packages and
+These pages describe the Console v2.6.0 release candidate. Published binaries, packages and
 release status are available on [GitHub Releases](https://github.com/pgsty/silo-console/releases).
 See [CHANGELOG.md](../CHANGELOG.md) and the
 [component matrix](https://silo.pgsty.com/compatibility/versions/) for the selected
