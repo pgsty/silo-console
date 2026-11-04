@@ -32,6 +32,7 @@ type Stats struct {
 func (c Counts) Stats() Stats {
 	return Stats{strconv.FormatUint(c.CurrentBytes, 10), c.CurrentObjects, strconv.FormatUint(c.RetainedBytes, 10), c.RetainedVersions, c.DeleteMarkers}
 }
+
 func (s Stats) Validate() error {
 	for _, value := range []string{s.CurrentBytes, s.RetainedBytes} {
 		number, err := strconv.ParseUint(value, 10, 64)
@@ -107,7 +108,7 @@ func OpenStore(ctx context.Context, dsn, endpoint string, maxConnections int32) 
 func (s *Store) Close()                         { s.pool.Close() }
 func (s *Store) Ping(ctx context.Context) error { return s.pool.Ping(ctx) }
 
-// Only the worker migrates. Web replicas use the same durable store without
+// Migrate applies the worker-owned schema. Web replicas use the durable store without
 // doing schema administration in response to an operator request.
 func (s *Store) Migrate(ctx context.Context) error {
 	tx, err := s.pool.Begin(ctx)
@@ -213,9 +214,11 @@ func readRecord(row pgx.Row) (Record, error) {
 	}
 	return r, nil
 }
+
 func (s *Store) Get(ctx context.Context, bucket string) (Record, error) {
 	return readRecord(s.pool.QueryRow(ctx, `SELECT `+recordColumns+` FROM console_usage_buckets WHERE scope=$1 AND bucket=$2`, s.scope, bucket))
 }
+
 func (s *Store) Claim(ctx context.Context, lease time.Duration) (Record, error) {
 	if lease <= 0 {
 		return Record{}, errors.New("usage lease must be positive")
@@ -231,6 +234,7 @@ func (s *Store) Claim(ctx context.Context, lease time.Duration) (Record, error) 
  ORDER BY priority DESC,next_run_at,bucket FOR UPDATE SKIP LOCKED LIMIT 1)
  RETURNING `+recordColumns, s.scope, hex.EncodeToString(token), lease.Milliseconds()))
 }
+
 func (s *Store) Progress(ctx context.Context, job Record, observation *Snapshot, lease time.Duration) error {
 	if lease <= 0 {
 		return errors.New("usage lease must be positive")
@@ -256,6 +260,7 @@ func (s *Store) Progress(ctx context.Context, job Record, observation *Snapshot,
 	}
 	return nil
 }
+
 func (s *Store) Complete(ctx context.Context, job Record, observation Snapshot, spacing ...time.Duration) error {
 	delay := time.Duration(0)
 	if len(spacing) > 0 {
@@ -285,6 +290,7 @@ func (s *Store) Complete(ctx context.Context, job Record, observation Snapshot, 
 	}
 	return nil
 }
+
 func (s *Store) Fail(ctx context.Context, job Record, code string, limited bool, retry time.Duration) error {
 	if retry < 0 {
 		return errors.New("usage retry delay must not be negative")

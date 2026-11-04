@@ -30,6 +30,7 @@ func (c Config) NewS3Client() (*minio.Client, error) {
 	}
 	return minio.New(endpoint.Host, &minio.Options{Secure: endpoint.Scheme == "https", Creds: credentials.NewStaticV4(c.AccessKey, c.SecretKey, c.SessionToken)})
 }
+
 func (s Stats) counts() (Counts, error) {
 	if err := s.Validate(); err != nil {
 		return Counts{}, err
@@ -38,6 +39,7 @@ func (s Stats) counts() (Counts, error) {
 	retained, _ := strconv.ParseUint(s.RetainedBytes, 10, 64)
 	return Counts{CurrentBytes: current, RetainedBytes: retained, CurrentObjects: s.CurrentObjects, RetainedVersions: s.RetainedVersions, DeleteMarkers: s.DeleteMarkers}, nil
 }
+
 func scanFailure(err error) *ScanFailure {
 	switch minio.ToErrorResponse(err).Code {
 	case "NoSuchBucket":
@@ -75,7 +77,16 @@ func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, 
 	safe := func() Checkpoint {
 		return Checkpoint{Generation: generation, LastKey: safeKey, Snapshot: Snapshot{Totals: safeCounts.Stats(), ScannedEntries: safeCounts.CurrentObjects + safeCounts.RetainedVersions + safeCounts.DeleteMarkers, StartedAt: started, UpdatedAt: time.Now().UTC()}}
 	}
-	scanCtx, cancel := context.WithTimeout(ctx, c.ScanTimeout)
+	// A fair slice resumes the same scan, including its original wall-clock
+	// budget. Starting a fresh timeout here lets large buckets run indefinitely.
+	deadline := started.Add(c.ScanTimeout)
+	if ctx.Err() != nil {
+		return &ScanFailure{Code: "worker_shutdown"}
+	}
+	if !time.Now().Before(deadline) {
+		return &ScanFailure{Code: "duration", Limited: true}
+	}
+	scanCtx, cancel := context.WithDeadline(ctx, deadline)
 	objects := client.ListObjects(scanCtx, job.Bucket, minio.ListObjectsOptions{Recursive: true, WithVersions: true, StartAfter: lastKey, MaxKeys: 1000})
 	defer func() {
 		cancel()

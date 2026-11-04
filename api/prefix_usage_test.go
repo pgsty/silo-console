@@ -97,6 +97,7 @@ func prefixUsageFixture(t *testing.T, objects []minio.ObjectInfo) {
 		return out, nil
 	}
 }
+
 func prefixUsageRequest() objectAPI.PrefixUsageParams {
 	params := objectAPI.NewPrefixUsageParams()
 	params.BucketName = "test"
@@ -104,9 +105,11 @@ func prefixUsageRequest() objectAPI.PrefixUsageParams {
 	params.HTTPRequest = httptest.NewRequest("GET", "/", nil)
 	return params
 }
+
 func prefixUsagePrincipal() *models.Principal {
 	return &models.Principal{STSAccessKeyID: "caller", STSSecretAccessKey: "private"}
 }
+
 func prefixUsageFrames(t *testing.T, record *httptest.ResponseRecorder) []models.PrefixUsageFrame {
 	t.Helper()
 	decoder := json.NewDecoder(record.Body)
@@ -151,14 +154,17 @@ func TestPrefixUsageStream(t *testing.T) {
 		})
 	}
 }
+
 func TestPrefixUsageRejectsUnsafeRequests(t *testing.T) {
 	for _, tc := range []struct {
 		name, prefix string
 		session      *models.Principal
 		code         int
 	}{
-		{"anonymous", "", nil, 401}, {"invalid session", "", &models.Principal{}, 401},
-		{"ambiguous prefix", "abc", prefixUsagePrincipal(), 400}, {"oversized prefix", strings.Repeat("x", 1024) + "/", prefixUsagePrincipal(), 400},
+		{"anonymous", "", nil, 401},
+		{"invalid session", "", &models.Principal{}, 401},
+		{"ambiguous prefix", "abc", prefixUsagePrincipal(), 400},
+		{"oversized prefix", strings.Repeat("x", 1024) + "/", prefixUsagePrincipal(), 400},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			params := prefixUsageRequest()
@@ -171,6 +177,7 @@ func TestPrefixUsageRejectsUnsafeRequests(t *testing.T) {
 		})
 	}
 }
+
 func TestPrefixUsageFirstPageFailureKeepsHTTPStatus(t *testing.T) {
 	prefixUsageFixture(t, []minio.ObjectInfo{{Err: minio.ErrorResponse{Code: "AccessDenied", Message: "Denied", StatusCode: 403}}})
 	record := httptest.NewRecorder()
@@ -179,6 +186,7 @@ func TestPrefixUsageFirstPageFailureKeepsHTTPStatus(t *testing.T) {
 		t.Fatalf("wrong permission status %d", record.Code)
 	}
 }
+
 func TestPrefixUsageBoundedScanAndDisconnect(t *testing.T) {
 	t.Run("entry budget", func(t *testing.T) {
 		t.Setenv("CONSOLE_PREFIX_USAGE_MAX_ENTRIES", "1")
@@ -236,6 +244,7 @@ func TestPrefixUsageBoundedScanAndDisconnect(t *testing.T) {
 		}
 	})
 }
+
 func TestPrefixUsageConfiguration(t *testing.T) {
 	for _, tc := range []struct{ key, value string }{{"CONSOLE_PREFIX_USAGE_MAX_ENTRIES", "-1"}, {"CONSOLE_PREFIX_USAGE_MAX_FOLDERS", "10001"}, {"CONSOLE_PREFIX_USAGE_MAX_CONCURRENT", "0"}, {"CONSOLE_PREFIX_USAGE_TIMEOUT", "1ms"}, {"CONSOLE_PREFIX_USAGE_PROGRESS_INTERVAL", "invalid"}} {
 		t.Run(tc.key, func(t *testing.T) {

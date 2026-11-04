@@ -26,6 +26,7 @@ func (t *eventTransport) changed() {
 	default:
 	}
 }
+
 func (t *eventTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	response, err := t.base.RoundTrip(request)
 	if !request.URL.Query().Has("events") {
@@ -61,4 +62,5 @@ func (b *observedBody) Read(p []byte) (int, error) {
 	}
 	return n, err
 }
+
 func (b *observedBody) Close() error { err := b.ReadCloser.Close(); b.once.Do(b.closed); return err }

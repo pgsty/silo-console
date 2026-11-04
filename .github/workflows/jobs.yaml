@@ -1778,6 +1778,65 @@ jobs:
           path: ${{ runner.temp }}/sharing-results
           if-no-files-found: warn
 
+  usage-integration:
+    name: Usage worker with PostgreSQL and maintained SILO
+    needs:
+      - compile-silo
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: usage_test
+          POSTGRES_PASSWORD: usage_test
+          POSTGRES_DB: usage_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usage_test -d usage_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Restore the maintained SILO fixture
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/silo-fixture/silo
+          key: ${{ runner.os }}-silo-fixture-${{ github.run_id }}
+          fail-on-cache-miss: true
+      - name: Test leases, checkpoints, live events and caller permissions
+        env:
+          TEST_USAGE_DATABASE_URL: postgres://usage_test:usage_test@127.0.0.1:5432/usage_test?sslmode=disable
+          TEST_USAGE_S3_ENDPOINT: http://127.0.0.1:19000
+          TEST_USAGE_S3_ACCESS_KEY: usage-test-root
+          TEST_USAGE_S3_SECRET_KEY: usage-test-disposable-secret
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/usage-data"
+          MINIO_ROOT_USER="$TEST_USAGE_S3_ACCESS_KEY" MINIO_ROOT_PASSWORD="$TEST_USAGE_S3_SECRET_KEY" MINIO_BROWSER=off \
+            "$RUNNER_TEMP/silo-fixture/silo" server --address 127.0.0.1:19000 "$RUNNER_TEMP/usage-data" > "$RUNNER_TEMP/usage-silo.log" 2>&1 &
+          silo_pid=$!
+          trap 'kill "$silo_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent "$TEST_USAGE_S3_ENDPOINT/minio/health/live" >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat "$RUNNER_TEMP/usage-silo.log"; exit 1; fi
+          go test -race -tags=integration,storageintegration ./pkg/usage ./api -count=1 -timeout=10m
+      - name: Retain storage fixture diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-storage-log
+          path: ${{ runner.temp }}/usage-silo.log
+
   required-matrix:
     # The release gate (release.yaml) and branch protection look at this one
     # job. It lists every release-gating job explicitly and fails unless each
@@ -1821,6 +1880,7 @@ jobs:
       - cross-compile-5
       - playwright
       - sharing-boundary
+      - usage-integration
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to succeed

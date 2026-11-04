@@ -26,12 +26,18 @@ func TestConfigOptInAndOperatorOverrides(t *testing.T) {
 		t.Fatalf("operator settings ignored: %+v", c)
 	}
 }
+
 func TestConfigRejectsUnsafeBudgetsAndNeverEchoesSecrets(t *testing.T) {
 	for _, tc := range []struct{ key, value string }{
-		{"CONSOLE_MINIO_SERVER", "https://user:private-fixture@storage/"}, {"CONSOLE_MINIO_SERVER", "https://storage/other"},
-		{"CONSOLE_USAGE_CONCURRENT_SCANS", "0"}, {"CONSOLE_USAGE_POOL_MAX_CONNECTIONS", "100000"}, {"CONSOLE_USAGE_MAX_ENTRIES", "-1"},
-		{"CONSOLE_USAGE_SCAN_TIMEOUT", "invalid-private-fixture"}, {"CONSOLE_USAGE_EVENT_DEBOUNCE", "-1s"},
-		{"CONSOLE_USAGE_LEASE", "1s"}, {"CONSOLE_USAGE_MAX_RETRY_INTERVAL", "1ms"},
+		{"CONSOLE_MINIO_SERVER", "https://user:private-fixture@storage/"},
+		{"CONSOLE_MINIO_SERVER", "https://storage/other"},
+		{"CONSOLE_USAGE_CONCURRENT_SCANS", "0"},
+		{"CONSOLE_USAGE_POOL_MAX_CONNECTIONS", "100000"},
+		{"CONSOLE_USAGE_MAX_ENTRIES", "-1"},
+		{"CONSOLE_USAGE_SCAN_TIMEOUT", "invalid-private-fixture"},
+		{"CONSOLE_USAGE_EVENT_DEBOUNCE", "-1s"},
+		{"CONSOLE_USAGE_LEASE", "1s"},
+		{"CONSOLE_USAGE_MAX_RETRY_INTERVAL", "1ms"},
 	} {
 		t.Run(tc.key+tc.value, func(t *testing.T) {
 			_, err := ParseConfig(map[string]string{tc.key: tc.value}, false)

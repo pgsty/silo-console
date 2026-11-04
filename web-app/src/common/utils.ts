@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IBytesCalc } from "./types";
-import { calculateBytes as calculateByteSize } from "mds";
+import { calculateBytes as calculateByteSize } from "../../packages/mds/src/global/utils";
 
 import get from "lodash/get.js";
 import { i18nKey, getStoredLanguage, translate } from "../i18n/lang";

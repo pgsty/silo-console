@@ -10,7 +10,11 @@ import React, {
   useState,
 } from "react";
 import { api } from "api";
-import type { BucketUsageRecord, BucketUsageResponse } from "api/consoleApi";
+import type {
+  BucketUsageRecord,
+  BucketUsageResponse,
+  BucketUsageSnapshot,
+} from "api/consoleApi";
 import { hasPermission } from "common/SecureComponent";
 import { IAM_SCOPES } from "common/SecureComponent/permissions";
 import { useTaskSession } from "../../Common/ObjectManager/useTaskSession";
@@ -27,7 +31,7 @@ export type UsageView = {
 const UsageContext = createContext<UsageView | undefined>(undefined);
 export const BucketUsageProvider = UsageContext.Provider;
 export const useBucketUsageView = () => useContext(UsageContext);
-export const usagePending = (row: BucketUsageRecord) =>
+const usagePending = (row: BucketUsageRecord) =>
   row.state === "queued" || row.state === "running";
 
 // One bounded request loop per view. Requests and direct scans stop on logout,
@@ -79,12 +83,30 @@ export function useBucketUsage(names: string[]): UsageView {
           };
           const publish = () =>
             current() &&
-            setView((previous) => ({
-              ...previous,
-              records: { ...previous.records, [bucket]: { ...row } },
-            }));
+            setView((previous) => {
+              const old = previous.records[bucket];
+              const keep =
+                old?.versions_visible === versions &&
+                row.state !== "forbidden" &&
+                row.state !== "missing";
+              return {
+                ...previous,
+                records: {
+                  ...previous.records,
+                  [bucket]: {
+                    ...row,
+                    last_good:
+                      row.last_good ?? (keep ? old?.last_good : undefined),
+                    last_completed_at:
+                      row.last_completed_at ??
+                      (keep ? old?.last_completed_at : undefined),
+                  },
+                },
+              };
+            });
           publish();
           try {
+            let completed: BucketUsageSnapshot | undefined;
             const response = await api.buckets.prefixUsage(
               bucket,
               { prefix: "", versions, folders: false },
@@ -113,24 +135,39 @@ export function useBucketUsage(names: string[]): UsageView {
                 row = {
                   ...row,
                   state:
-                    frame.status === "scanning"
+                    frame.status === "scanning" || frame.status === "complete"
                       ? "running"
                       : frame.status === "failed"
                         ? "error"
                         : frame.status,
                   progress: snapshot,
-                  ...(frame.status === "complete"
-                    ? {
-                        last_good: snapshot,
-                        last_completed_at: frame.updated_at,
-                      }
-                    : {}),
                 };
+                if (frame.status === "complete") completed = snapshot;
                 publish();
               },
             );
-          } catch {
-            row = { ...row, state: "error" };
+            // Only replace last-good after the entire stream validates. A
+            // malformed trailer or disconnect must not publish new totals.
+            if (completed) {
+              row = {
+                ...row,
+                state: "complete",
+                last_good: completed,
+                last_completed_at: completed.updated_at,
+              };
+              publish();
+            }
+          } catch (error) {
+            const status = error instanceof Response ? error.status : 0;
+            row = {
+              ...row,
+              state:
+                status === 401 || status === 403
+                  ? "forbidden"
+                  : status === 404
+                    ? "missing"
+                    : "error",
+            };
             publish();
           }
         }
@@ -173,12 +210,16 @@ export function useBucketUsage(names: string[]): UsageView {
           if (!enabled) break;
         }
         if (!current()) return;
-        setView({
+        setView((previous) => ({
           enabled,
           requesting: false,
-          records: Object.fromEntries(rows.map((row) => [row.bucket, row])),
+          records: enabled
+            ? Object.fromEntries(rows.map((row) => [row.bucket, row]))
+            : previous.enabled === false
+              ? previous.records
+              : {},
           coverage,
-        });
+        }));
         if (!enabled) {
           if (queue) await direct();
           return;

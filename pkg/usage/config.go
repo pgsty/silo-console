@@ -50,6 +50,7 @@ func LoadConfig(worker bool) (Config, error) {
 	}
 	return ParseConfig(values, worker)
 }
+
 func ParseConfig(values map[string]string, worker bool) (Config, error) {
 	c := Config{DatabaseURL: values["CONSOLE_USAGE_DATABASE_URL"], Endpoint: values["CONSOLE_MINIO_SERVER"], AccessKey: values["CONSOLE_USAGE_S3_ACCESS_KEY"], SecretKey: values["CONSOLE_USAGE_S3_SECRET_KEY"], SessionToken: values["CONSOLE_USAGE_S3_SESSION_TOKEN"], HTTPAddress: values["CONSOLE_USAGE_HTTP_ADDRESS"]}
 	if c.Endpoint == "" {
@@ -71,8 +72,11 @@ func ParseConfig(values map[string]string, worker bool) (Config, error) {
 		key                string
 		fallback, min, max int64
 	}{
-		{"POOL_MAX_CONNECTIONS", 4, 1, 64}, {"CONCURRENT_SCANS", 1, 1, 16}, {"MAX_ENTRIES", 100_000_000, 1, 1_000_000_000_000},
-		{"AUTH_CONCURRENCY", 4, 1, 32}, {"API_MAX_REQUESTS", 8, 1, 64},
+		{"POOL_MAX_CONNECTIONS", 4, 1, 64},
+		{"CONCURRENT_SCANS", 1, 1, 16},
+		{"MAX_ENTRIES", 100_000_000, 1, 1_000_000_000_000},
+		{"AUTH_CONCURRENCY", 4, 1, 32},
+		{"API_MAX_REQUESTS", 8, 1, 64},
 	} {
 		value := setting.fallback
 		if raw, ok := values["CONSOLE_USAGE_"+setting.key]; ok {

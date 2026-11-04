@@ -33,6 +33,7 @@ func (c Checkpoint) Validate() error {
 	}
 	return nil
 }
+
 func validateCheckpointProgress(checkpoint Checkpoint, progress Snapshot) error {
 	if err := checkpoint.Validate(); err != nil {
 		return err
@@ -45,6 +46,7 @@ func validateCheckpointProgress(checkpoint Checkpoint, progress Snapshot) error 
 	}
 	return nil
 }
+
 func (s *Store) SaveCheckpoint(ctx context.Context, job Record, checkpoint Checkpoint, progress Snapshot, lease time.Duration) error {
 	if err := validateCheckpointProgress(checkpoint, progress); err != nil {
 		return err

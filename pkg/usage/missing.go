@@ -6,10 +6,11 @@ package usage
 import (
 	"context"
 	"errors"
+
 	"github.com/jackc/pgx/v5"
 )
 
-// A deleted bucket is not an endless retry incident. A mutation arriving after
+// MissingBucket removes a deleted bucket from the queue. A mutation arriving after
 // the missing response wins: retain its request, discard old scan state and
 // verify the newly requested generation instead of deleting it.
 func (s *Store) MissingBucket(ctx context.Context, job Record) error {

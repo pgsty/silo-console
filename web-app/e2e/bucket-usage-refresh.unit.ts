@@ -234,3 +234,91 @@ test("without the persistent service, Refresh calculates current totals and neve
   await expect(row).toContainText("Updated");
   expect(scans).toBe(1);
 });
+
+for (const outcome of [
+  "outage",
+  "limited",
+  "malformed",
+  "forbidden",
+  "missing",
+] as const) {
+  test(`a second foreground refresh handles ${outcome} without losing or disclosing old totals`, async () => {
+    let scans = 0;
+    let release: (() => void) | undefined;
+    await page.route("**/api/v1/bucket-usage/*", (route) =>
+      route.fulfill({
+        json: { enabled: false, poll_after_ms: 250, buckets: [] },
+      }),
+    );
+    await page.route(
+      "**/api/v1/buckets/fixture-bucket/prefix-usage*",
+      async (route) => {
+        scans++;
+        const frame = {
+          ...snapshot,
+          bucket: "fixture-bucket",
+          prefix: "",
+          mode: "versions",
+          status: "complete",
+          folders: [],
+        };
+        if (scans === 1)
+          return route.fulfill({
+            contentType: "application/x-ndjson",
+            body: JSON.stringify(frame) + "\n",
+          });
+        await new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        if (outcome === "limited")
+          return route.fulfill({
+            contentType: "application/x-ndjson",
+            body: JSON.stringify({ ...frame, status: "limited" }) + "\n",
+          });
+        if (outcome === "malformed")
+          return route.fulfill({
+            contentType: "application/x-ndjson",
+            body:
+              JSON.stringify({
+                ...frame,
+                totals: { ...snapshot.totals, current_bytes: "3072" },
+              }) + "\ninvalid\n",
+          });
+        return route.fulfill({
+          status:
+            outcome === "forbidden" ? 403 : outcome === "missing" ? 404 : 503,
+          json: { message: "unavailable" },
+        });
+      },
+    );
+    await page.goto(base);
+    await expect(page.getByRole("status")).toContainText(
+      "Automatic updates are not configured",
+    );
+    const row = page.getByRole("region", { name: "fixture-bucket" });
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await expect(row).toContainText("Updated");
+    await expect(row).toContainText("1.5 KiB");
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await expect.poll(() => scans).toBe(2);
+    await expect(row).toContainText("Updating usage…");
+    await expect(row).toContainText("1.5 KiB");
+    release!();
+    await expect(row).toContainText(
+      outcome === "forbidden"
+        ? "Usage listing not permitted"
+        : outcome === "missing"
+          ? "Bucket no longer exists"
+          : outcome === "limited"
+            ? "Scan limit reached"
+            : "Update failed",
+    );
+    if (outcome === "forbidden" || outcome === "missing") {
+      await expect(row).not.toContainText("1.5 KiB");
+      await expect(row).toContainText("—");
+    } else {
+      await expect(row).toContainText("1.5 KiB");
+      await expect(row).not.toContainText("3.0 KiB");
+    }
+  });
+}

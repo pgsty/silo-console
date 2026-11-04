@@ -34,10 +34,13 @@ var bucketUsageConnection struct {
 	sync.Mutex
 	store *usage.Store
 }
-var bucketUsageActive atomic.Int64
-var newBucketUsageAuthorizationClient = func(session *models.Principal, request *http.Request) (usage.ListingClient, error) {
-	return newMinioClient(session, getClientIP(request))
-}
+var (
+	bucketUsageActive                 atomic.Int64
+	newBucketUsageAuthorizationClient = func(session *models.Principal, request *http.Request) (usage.ListingClient, error) {
+		return newMinioClient(session, getClientIP(request))
+	}
+)
+
 var openBucketUsageStore = func(ctx context.Context, c usage.Config) (bucketUsageStore, error) {
 	bucketUsageConnection.Lock()
 	defer bucketUsageConnection.Unlock()
@@ -59,6 +62,7 @@ func bucketUsageDate(value *time.Time) *strfmt.DateTime {
 	stamp := strfmt.DateTime(*value)
 	return &stamp
 }
+
 func bucketUsageSnapshot(value *usage.Snapshot, versions bool) *models.BucketUsageSnapshot {
 	if value == nil {
 		return nil
@@ -73,6 +77,7 @@ func bucketUsageSnapshot(value *usage.Snapshot, versions bool) *models.BucketUsa
 	}
 	return &models.BucketUsageSnapshot{Totals: totals, ScannedEntries: swag.Int64(entries), StartedAt: bucketUsageDate(&value.StartedAt), UpdatedAt: bucketUsageDate(&value.UpdatedAt)}
 }
+
 func bucketUsageRecord(record usage.Record, versions bool) *models.BucketUsageRecord {
 	response := &models.BucketUsageRecord{Bucket: swag.String(record.Bucket), State: swag.String(record.State), VersionsVisible: swag.Bool(versions), RequestedAt: bucketUsageDate(&record.RequestedAt), LastCompletedAt: bucketUsageDate(record.LastCompletedAt), LastGood: bucketUsageSnapshot(record.LastGood, versions), Progress: bucketUsageSnapshot(record.Progress, versions), ErrorCode: record.ErrorCode}
 	if versions {
@@ -80,6 +85,7 @@ func bucketUsageRecord(record usage.Record, versions bool) *models.BucketUsageRe
 	}
 	return response
 }
+
 func bucketUsageState(bucket, state, message string) *models.BucketUsageRecord {
 	return &models.BucketUsageRecord{Bucket: swag.String(bucket), State: swag.String(state), VersionsVisible: swag.Bool(false), Message: message}
 }
@@ -105,6 +111,7 @@ func authorizeBucketUsage(ctx context.Context, client usage.ListingClient, bucke
 		return nil
 	}
 }
+
 func getBucketUsageResponse(request *http.Request, body *models.BucketUsageRequest, session *models.Principal, refresh bool) (*models.BucketUsageResponse, *CodedAPIError) {
 	apiError := func(code int, message string) (*models.BucketUsageResponse, *CodedAPIError) {
 		return nil, &CodedAPIError{Code: code, APIError: &models.APIError{Message: message}}
@@ -214,6 +221,7 @@ func privateBucketUsage(responder middleware.Responder) middleware.Responder {
 		responder.WriteResponse(w, p)
 	})
 }
+
 func bucketUsageStatus(params bucketAPI.BucketUsageStatusParams, session *models.Principal) middleware.Responder {
 	response, err := getBucketUsageResponse(params.HTTPRequest, params.Body, session, false)
 	if err != nil {
@@ -221,6 +229,7 @@ func bucketUsageStatus(params bucketAPI.BucketUsageStatusParams, session *models
 	}
 	return privateBucketUsage(bucketAPI.NewBucketUsageStatusOK().WithPayload(response))
 }
+
 func bucketUsageRefresh(params bucketAPI.BucketUsageRefreshParams, session *models.Principal) middleware.Responder {
 	response, err := getBucketUsageResponse(params.HTTPRequest, params.Body, session, true)
 	if err != nil {

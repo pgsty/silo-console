@@ -31,6 +31,7 @@ func wait(ctx context.Context, duration time.Duration) bool {
 		return false
 	}
 }
+
 func (c Config) retry(attempts int) time.Duration {
 	power := min(max(attempts-1, 0), 20)
 	delay := float64(c.RetryInterval) * math.Pow(2, float64(power))
@@ -83,6 +84,7 @@ func RunWorker(parent context.Context, c Config) error {
 	}
 	return nil
 }
+
 func runScanWorker(ctx context.Context, s *Store, client ListingClient, c Config) {
 	for ctx.Err() == nil {
 		operation, cancel := context.WithTimeout(ctx, c.Heartbeat)
@@ -126,6 +128,7 @@ func runScanWorker(ctx context.Context, s *Store, client ListingClient, c Config
 		}
 	}
 }
+
 func reconcile(ctx context.Context, s *Store, client *minio.Client, c Config, full bool) error {
 	buckets, err := client.ListBuckets(ctx)
 	if err != nil {
@@ -145,6 +148,7 @@ func reconcile(ctx context.Context, s *Store, client *minio.Client, c Config, fu
 	}
 	return nil
 }
+
 func runObserver(ctx context.Context, s *Store, c Config) {
 	owner := uuid.NewString()
 	for ctx.Err() == nil {
@@ -163,11 +167,36 @@ func runObserver(ctx context.Context, s *Store, c Config) {
 		}
 	}
 }
+
 func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	streamCtx, cancel := context.WithCancel(ctx)
+	ctx = streamCtx
+	// Inventory may take longer than a lease. Renew independently of the event
+	// loop, and cancel all of this observer's work as soon as renewal fails.
+	renewed := make(chan struct{})
+	go func() {
+		defer close(renewed)
+		ticker := time.NewTicker(c.Heartbeat)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				operation, stop := context.WithTimeout(ctx, c.Heartbeat)
+				err := s.RenewObserver(operation, owner, c.Lease)
+				stop()
+				if err != nil {
+					cancel()
+					return
+				}
+			}
+		}
+	}()
 	var events <-chan notification.Info
 	defer func() {
 		cancel()
+		<-renewed
 		operation, stop := context.WithTimeout(context.Background(), c.Heartbeat)
 		_ = s.ReleaseObserver(operation, owner)
 		stop()
@@ -307,6 +336,7 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 		}
 	}
 }
+
 func changedBucket(event notification.Event) (string, time.Time, bool) {
 	if event.S3.Bucket.Name == "" {
 		return "", time.Time{}, false

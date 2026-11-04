@@ -17,7 +17,7 @@ type Coverage struct {
 	LastReconciledAt *time.Time `json:"last_reconciled_at,omitempty"`
 }
 
-// A single leased observer subscribes to the storage change stream. Scan
+// AcquireObserver claims the single storage change observer lease. Scan
 // workers can scale independently; a replacement observer reconciles gaps.
 func (s *Store) AcquireObserver(ctx context.Context, id string, lease time.Duration) (bool, error) {
 	if id == "" || lease <= 0 {
@@ -33,6 +33,7 @@ func (s *Store) AcquireObserver(ctx context.Context, id string, lease time.Durat
 	}
 	return command.RowsAffected() == 1, nil
 }
+
 func (s *Store) Observe(ctx context.Context, id string, connected bool, lease time.Duration) error {
 	if lease <= 0 {
 		return errors.New("invalid usage observer lease")
@@ -50,6 +51,25 @@ func (s *Store) Observe(ctx context.Context, id string, connected bool, lease ti
 	}
 	return nil
 }
+
+// RenewObserver keeps inventory requests and queue writes from blocking lease
+// renewal. Connection transitions remain owned by the event loop.
+func (s *Store) RenewObserver(ctx context.Context, id string, lease time.Duration) error {
+	if lease <= 0 {
+		return errors.New("invalid usage observer lease")
+	}
+	command, err := s.pool.Exec(ctx, `UPDATE console_usage_coverage
+ SET observer_until=clock_timestamp()+$3::bigint*interval '1 millisecond'
+ WHERE scope=$1 AND observer_id=$2 AND observer_until>clock_timestamp()`, s.scope, id, lease.Milliseconds())
+	if err != nil {
+		return err
+	}
+	if command.RowsAffected() != 1 {
+		return ErrLeaseLost
+	}
+	return nil
+}
+
 func (s *Store) Reconciled(ctx context.Context, id string) error {
 	command, err := s.pool.Exec(ctx, `UPDATE console_usage_coverage SET last_reconciled_at=clock_timestamp()
  WHERE scope=$1 AND observer_id=$2 AND observer_until>clock_timestamp()`, s.scope, id)
@@ -61,6 +81,7 @@ func (s *Store) Reconciled(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
 func (s *Store) Coverage(ctx context.Context) (Coverage, error) {
 	var c Coverage
 	err := s.pool.QueryRow(ctx, `SELECT observer_until>clock_timestamp(),connected AND observer_until>clock_timestamp(),last_connected_at,last_disconnect_at,last_reconciled_at

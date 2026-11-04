@@ -57,6 +57,7 @@ func TestEventTransportTracksActualStreamsAndIgnoresMetadataRequests(t *testing.
 	}
 	second.Body.Close()
 }
+
 func TestChangeEventsQueueBucketsWithoutCollectingRequestOrObjectData(t *testing.T) {
 	var event notification.Event
 	if err := json.Unmarshal([]byte(`{"eventName":"s3:ObjectCreated:Put","eventTime":"2026-10-26T00:00:00Z","s3":{"bucket":{"name":"changed"},"object":{"key":"private-object-key"}},"requestParameters":{"authorization":"private-token"}}`), &event); err != nil {
@@ -76,6 +77,7 @@ func TestChangeEventsQueueBucketsWithoutCollectingRequestOrObjectData(t *testing
 		t.Fatal("bad source timestamp silently dropped a real deletion")
 	}
 }
+
 func TestRetryBackoffIsBounded(t *testing.T) {
 	c, err := ParseConfig(nil, false)
 	if err != nil {

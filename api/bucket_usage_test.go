@@ -30,6 +30,7 @@ func (s *bucketUsageStoreMock) Ping(context.Context) error { return s.err }
 func (s *bucketUsageStoreMock) Coverage(context.Context) (usage.Coverage, error) {
 	return usage.Coverage{}, nil
 }
+
 func (s *bucketUsageStoreMock) Get(_ context.Context, bucket string) (usage.Record, error) {
 	s.Lock()
 	defer s.Unlock()
@@ -38,6 +39,7 @@ func (s *bucketUsageStoreMock) Get(_ context.Context, bucket string) (usage.Reco
 	record.Bucket = bucket
 	return record, s.err
 }
+
 func (s *bucketUsageStoreMock) Queue(_ context.Context, bucket string, _ bool, _, _ time.Duration, _ *time.Time) error {
 	s.Lock()
 	defer s.Unlock()
@@ -50,6 +52,7 @@ type usageListingMock func(context.Context, string, minio.ListObjectsOptions) <-
 func (f usageListingMock) ListObjects(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo {
 	return f(ctx, bucket, opts)
 }
+
 func usageAPIFixture(t *testing.T, deniedRoot, deniedVersions bool) *bucketUsageStoreMock {
 	t.Helper()
 	t.Setenv("CONSOLE_USAGE_DATABASE_URL", "postgres://fixture-unused")
@@ -74,6 +77,7 @@ func usageAPIFixture(t *testing.T, deniedRoot, deniedVersions bool) *bucketUsage
 	}
 	return store
 }
+
 func TestBucketUsageNeverDisclosesOrQueuesForAnUnprivilegedCaller(t *testing.T) {
 	store := usageAPIFixture(t, true, true)
 	response, err := getBucketUsageResponse(httptest.NewRequest("POST", "/bucket-usage/refresh", nil), &models.BucketUsageRequest{Buckets: []string{"private-bucket"}}, prefixUsagePrincipal(), true)
@@ -87,6 +91,7 @@ func TestBucketUsageNeverDisclosesOrQueuesForAnUnprivilegedCaller(t *testing.T) 
 		t.Fatal("worker credentials bypassed caller authorization")
 	}
 }
+
 func TestBucketUsageRedactsRetainedMetadataAndPrivateJobState(t *testing.T) {
 	usageAPIFixture(t, false, true)
 	response, err := getBucketUsageResponse(httptest.NewRequest("POST", "/bucket-usage/status", nil), &models.BucketUsageRequest{Buckets: []string{"visible-bucket"}}, prefixUsagePrincipal(), false)
@@ -110,6 +115,7 @@ func TestBucketUsageRedactsRetainedMetadataAndPrivateJobState(t *testing.T) {
 		}
 	}
 }
+
 func TestBucketUsageRefreshReturnsPrioritizedPendingWorkAndDeduplicatesNames(t *testing.T) {
 	store := usageAPIFixture(t, false, false)
 	store.record.State = "queued"
@@ -124,6 +130,7 @@ func TestBucketUsageRefreshReturnsPrioritizedPendingWorkAndDeduplicatesNames(t *
 		t.Fatal(err)
 	}
 }
+
 func TestBucketUsageDisabledModeIsExplicitAndDoesNotOpenDatabase(t *testing.T) {
 	t.Setenv("CONSOLE_USAGE_DATABASE_URL", "")
 	original := openBucketUsageStore
@@ -137,6 +144,7 @@ func TestBucketUsageDisabledModeIsExplicitAndDoesNotOpenDatabase(t *testing.T) {
 		t.Fatal("optional persistent mode is not explicit")
 	}
 }
+
 func TestBucketUsageFailuresDoNotExposeDatabaseCredentials(t *testing.T) {
 	store := usageAPIFixture(t, false, false)
 	store.err = errors.New("postgres://private-password@internal-database")
@@ -145,6 +153,7 @@ func TestBucketUsageFailuresDoNotExposeDatabaseCredentials(t *testing.T) {
 		t.Fatal("state store failure was hidden or exposed credentials")
 	}
 }
+
 func TestBucketUsageRequiresSignedInSession(t *testing.T) {
 	response, err := getBucketUsageResponse(httptest.NewRequest("POST", "/bucket-usage/refresh", nil), &models.BucketUsageRequest{Buckets: []string{"visible-bucket"}}, nil, true)
 	if response != nil || err == nil || err.Code != 401 {

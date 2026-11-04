@@ -227,8 +227,10 @@ func getPrefixUsageResponse(params objectAPI.PrefixUsageParams, session *models.
 		cleanup()
 		return prefixUsageError(http.StatusGatewayTimeout, "The folder listing did not respond in time.")
 	}
-	scan := &prefixUsageScan{bucket: params.BucketName, prefix: params.Prefix, versions: versions,
-		includeFolders: params.Folders == nil || *params.Folders, started: started, folders: map[string]prefixUsageCounts{}}
+	scan := &prefixUsageScan{
+		bucket: params.BucketName, prefix: params.Prefix, versions: versions,
+		includeFolders: params.Folders == nil || *params.Folders, started: started, folders: map[string]prefixUsageCounts{},
+	}
 	return middleware.ResponderFunc(func(writer http.ResponseWriter, _ runtime.Producer) {
 		defer cleanup()
 		writer.Header().Set("Content-Type", "application/x-ndjson")

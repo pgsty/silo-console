@@ -42,6 +42,7 @@ func (s *Store) WorkerHealth(ctx context.Context) (WorkerHealth, error) {
 	health.Ready = coverage.ObserverAlive && coverage.Connected && coverage.LastConnectedAt != nil && coverage.LastReconciledAt != nil && !coverage.LastReconciledAt.Before(*coverage.LastConnectedAt)
 	return health, nil
 }
+
 func workerHTTP(s *Store, c Config) *http.Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
