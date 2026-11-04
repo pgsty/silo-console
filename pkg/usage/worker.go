@@ -198,15 +198,18 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	defer func() {
 		cancel()
 		<-renewed
-		if streamDone != nil {
-			<-streamDone
-		}
+		// Release first: the SDK's reconnect backoff sleeps without watching
+		// the context, so waiting for the stream could hold the lease for up
+		// to its maximum backoff and delay a replacement observer.
 		operation, stop := context.WithTimeout(context.Background(), c.Heartbeat)
 		_ = s.ReleaseObserver(operation, owner)
 		stop()
 		if events != nil {
 			for range events {
 			}
+		}
+		if streamDone != nil {
+			<-streamDone
 		}
 	}()
 	base, err := minio.DefaultTransport(strings.HasPrefix(c.Endpoint, "https://"))

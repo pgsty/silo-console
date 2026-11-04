@@ -19,14 +19,11 @@ export const UsageCaption = styled.small`
   color: var(--muted-foreground);
 `;
 
-export const usageLocale = (language: string) =>
-  language === "zh" ? "zh-CN" : "en";
-
 export function BucketUsageStatus({ bucket }: { bucket: string }) {
   const usage = useBucketUsageView();
   const row = usage?.records[bucket];
   const t = useT();
-  const locale = usageLocale(useLanguage());
+  const locale = useLanguage() === "zh" ? "zh-CN" : "en";
   if (!usage || (!row && !usage.enabled)) return null;
   const labels = {
     not_scanned: t("Not scanned"),
