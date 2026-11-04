@@ -5,12 +5,15 @@ import type { PrefixUsageFrame, PrefixUsageStats } from "api/consoleApi";
 
 const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-const count = (value: unknown): value is number =>
+export const usageCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
-const bytes = (value: unknown): value is string =>
+const count = usageCount;
+// An exact unsigned 64-bit decimal, as produced by the usage APIs.
+export const usageBytes = (value: unknown): value is string =>
   typeof value === "string" &&
   /^(0|[1-9][0-9]{0,19})$/.test(value) &&
   BigInt(value) <= 18446744073709551615n;
+const bytes = usageBytes;
 const stats = (value: unknown): value is PrefixUsageStats =>
   record(value) &&
   bytes(value.current_bytes) &&

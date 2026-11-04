@@ -18,7 +18,11 @@ import type {
 import { hasPermission } from "common/SecureComponent";
 import { IAM_SCOPES } from "common/SecureComponent/permissions";
 import { useTaskSession } from "../../Common/ObjectManager/useTaskSession";
-import { readPrefixUsageStream } from "../../ObjectBrowser/prefixUsage";
+import {
+  readPrefixUsageStream,
+  usageBytes,
+  usageCount,
+} from "../../ObjectBrowser/prefixUsage";
 
 export type UsageView = {
   enabled?: boolean;
@@ -33,6 +37,73 @@ export const BucketUsageProvider = UsageContext.Provider;
 export const useBucketUsageView = () => useContext(UsageContext);
 const usagePending = (row: BucketUsageRecord) =>
   row.state === "queued" || row.state === "running";
+const usageStates: readonly string[] = [
+  "not_scanned",
+  "queued",
+  "running",
+  "complete",
+  "error",
+  "limited",
+  "forbidden",
+  "missing",
+  "unavailable",
+];
+const optional = (value: unknown, valid: (value: unknown) => boolean) =>
+  value === undefined || value === null || valid(value);
+const validSnapshot = (value: unknown): value is BucketUsageSnapshot => {
+  if (typeof value !== "object" || value === null) return false;
+  const snapshot = value as Partial<BucketUsageSnapshot>;
+  const totals = snapshot.totals;
+  return (
+    !!totals &&
+    usageBytes(totals.current_bytes) &&
+    usageCount(totals.current_objects) &&
+    optional(totals.retained_bytes, usageBytes) &&
+    optional(totals.retained_versions, usageCount) &&
+    optional(totals.delete_markers, usageCount) &&
+    usageCount(snapshot.scanned_entries)
+  );
+};
+// Sorting and formatting use exact integer arithmetic. A malformed saved
+// observation is unknown, never a crash or a zero.
+const sanitizeRecord = (
+  row: BucketUsageRecord,
+): BucketUsageRecord | undefined => {
+  if (!row || typeof row.bucket !== "string") return undefined;
+  if (!usageStates.includes(row.state))
+    return {
+      bucket: row.bucket,
+      state: "unavailable",
+      versions_visible: false,
+    };
+  return {
+    ...row,
+    last_good: validSnapshot(row.last_good) ? row.last_good : undefined,
+    progress: validSnapshot(row.progress) ? row.progress : undefined,
+  };
+};
+const currentOnly = (snapshot: BucketUsageSnapshot): BucketUsageSnapshot => ({
+  ...snapshot,
+  totals: {
+    current_bytes: snapshot.totals.current_bytes,
+    current_objects: snapshot.totals.current_objects,
+  },
+});
+// A transient outage keeps the totals this view already showed; permission
+// and existence answers never do. Retained data needs current authorization.
+const mergeRecord = (
+  row: BucketUsageRecord,
+  old: BucketUsageRecord | undefined,
+): BucketUsageRecord =>
+  row.state === "unavailable" && !row.last_good && old?.last_good
+    ? {
+        ...row,
+        last_good: row.versions_visible
+          ? old.last_good
+          : currentOnly(old.last_good),
+        last_completed_at: old.last_completed_at,
+      }
+    : row;
 
 // One bounded request loop per view. Requests and direct scans stop on logout,
 // navigation or a newer refresh; persistent jobs continue independently.
@@ -59,12 +130,22 @@ export function useBucketUsage(names: string[]): UsageView {
     const current = () => !controller.signal.aborted && currentSession();
     const explicitlyRequested = manual.current;
     manual.current = false;
+    // A bucket-list reload can restart this effect before an explicit refresh
+    // was delivered. Carry that request into the next run instead of losing it.
+    let consumed = !explicitlyRequested;
     setView((previous) => ({
       ...previous,
       records: Object.fromEntries(
-        Object.entries(previous.records).filter(([name]) =>
-          buckets.includes(name),
-        ),
+        Object.entries(previous.records)
+          .filter(([name]) => buckets.includes(name))
+          // Foreground scans end with their effect; none is running any more.
+          .flatMap(([name, row]) =>
+            previous.enabled === false && row.state === "running"
+              ? row.last_good
+                ? [[name, { ...row, state: "complete", progress: undefined }]]
+                : []
+              : [[name, row]],
+          ),
       ),
     }));
     const direct = async () => {
@@ -210,18 +291,34 @@ export function useBucketUsage(names: string[]): UsageView {
           if (!enabled) break;
         }
         if (!current()) return;
+        if (enabled && queue) consumed = true;
         setView((previous) => ({
           enabled,
           requesting: false,
           records: enabled
-            ? Object.fromEntries(rows.map((row) => [row.bucket, row]))
+            ? Object.fromEntries(
+                rows.flatMap((received) => {
+                  const row = sanitizeRecord(received);
+                  return row
+                    ? [
+                        [
+                          row.bucket,
+                          mergeRecord(row, previous.records[row.bucket]),
+                        ],
+                      ]
+                    : [];
+                }),
+              )
             : previous.enabled === false
               ? previous.records
               : {},
           coverage,
         }));
         if (!enabled) {
-          if (queue) await direct();
+          if (queue) {
+            await direct();
+            if (current()) consumed = true;
+          }
           return;
         }
         const pending = rows.some(usagePending);
@@ -231,6 +328,7 @@ export function useBucketUsage(names: string[]): UsageView {
         );
       } catch {
         if (current()) {
+          consumed = true;
           setView((previous) => ({
             ...previous,
             requesting: false,
@@ -242,6 +340,7 @@ export function useBucketUsage(names: string[]): UsageView {
     };
     void load(explicitlyRequested);
     return () => {
+      if (!consumed && currentSession()) manual.current = true;
       controller.abort();
       clearTimeout(timer);
     };
