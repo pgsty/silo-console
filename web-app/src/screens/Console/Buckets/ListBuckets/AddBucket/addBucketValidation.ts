@@ -1,21 +1,27 @@
 // Copyright (c) 2026 PGSTY
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { getBytes } from "../../../../../common/utils";
-
 const quotaPattern = /^\d*(?:\.\d{1,2})?$/;
-const maxQuotaBytes = 2 ** 63;
+const quotaUnits = ["B", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei"];
 
-export const getQuotaBytes = (size: string, unit: string): number =>
-  Math.trunc(Number(getBytes(size, unit, true)));
+// Preserve decimal input through scaling and truncate only fractional bytes.
+// JSON numbers are exact only through MAX_SAFE_INTEGER; larger quotas must be
+// managed with mcli until the API has a decimal-string quota contract.
+export const getQuotaBytes = (size: string, unit: string): number => {
+  const exponent = quotaUnits.indexOf(unit);
+  if (!size || size.length > 32 || !quotaPattern.test(size) || exponent < 0) {
+    return NaN;
+  }
+  const [whole, fraction = ""] = size.split(".");
+  const scale = 10n ** BigInt(fraction.length);
+  const scalar = BigInt(whole || "0") * scale + BigInt(fraction || "0");
+  const amount = (scalar * 1024n ** BigInt(exponent)) / scale;
+  return amount <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(amount) : NaN;
+};
 
 export const isValidQuota = (size: string, unit: string): boolean => {
-  if (size.trim() === "" || !quotaPattern.test(size)) {
-    return false;
-  }
-
   const amount = getQuotaBytes(size, unit);
-  return Number.isFinite(amount) && amount > 0 && amount < maxQuotaBytes;
+  return Number.isSafeInteger(amount) && amount > 0;
 };
 
 export const isValidRetentionValidity = (value: number): boolean =>

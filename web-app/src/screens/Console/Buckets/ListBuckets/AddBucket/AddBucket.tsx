@@ -630,7 +630,9 @@ const AddBucket = () => {
                       }
                       error={
                         invalidFields.includes("quotaSize")
-                          ? t("Please enter a valid quota")
+                          ? t(
+                              "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
+                            )
                           : ""
                       }
                     />

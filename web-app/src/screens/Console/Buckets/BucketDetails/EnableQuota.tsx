@@ -50,11 +50,14 @@ const quotaUnits = [
 
 // An editor must retain bytes; display-only rounding is unsuitable here.
 const editableQuota = (bytes: number) => {
+  // An unsafe JSON number may already be rounded. Never populate an editable
+  // value or CLI command that pretends to reproduce those bytes exactly.
+  if (!Number.isSafeInteger(bytes)) return { size: "", unit: "B" };
   for (const { value: unit } of [...quotaUnits].reverse()) {
     const value = bytes / Number(getBytes("1", unit, true));
     if (value < 1 && unit !== "B") continue;
     const size = Number(value.toFixed(2)).toString();
-    if (Number(getBytes(size, unit, true)) === bytes) return { size, unit };
+    if (getQuotaBytes(size, unit) === bytes) return { size, unit };
   }
   return { size: bytes.toString(), unit: "B" };
 };
@@ -172,7 +175,13 @@ const EnableQuota = ({
                   disabled={false}
                 />
               }
-              error={!validInput ? t("Please enter a valid quota") : ""}
+              error={
+                !validInput
+                  ? t(
+                      "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
+                    )
+                  : ""
+              }
             />
           )}
           <Grid item xs={12} sx={modalStyleUtils.modalButtonBar}>
@@ -201,11 +210,15 @@ const EnableQuota = ({
             </Grid>
           )}
           <FormCliEquivalent
-            commands={bucketQuotaCommands({
-              bucket: selectedBucket,
-              enabled: quotaEnabled,
-              size: quotaSize ? `${quotaSize}${quotaUnit}` : undefined,
-            })}
+            commands={
+              !validInput
+                ? []
+                : bucketQuotaCommands({
+                    bucket: selectedBucket,
+                    enabled: quotaEnabled,
+                    size: quotaSize ? `${quotaSize}${quotaUnit}` : undefined,
+                  })
+            }
           />
         </FormLayout>
       </form>

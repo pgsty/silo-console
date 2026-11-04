@@ -81,7 +81,7 @@ export const addBucketAsync = createAsyncThunk(
           return rejectWithValue({
             message: "Invalid bucket quota.",
             detailedMessage:
-              "The bucket quota must be a positive supported value.",
+              "The bucket quota must be positive and below 8 PiB. Use mcli for larger quotas.",
           });
         }
         request.quota = {

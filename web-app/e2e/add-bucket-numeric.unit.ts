@@ -114,32 +114,43 @@ test("create quota accepts fractional scalars and sends complete bytes", async (
   }
 });
 
-test("create quota rejects values outside the supported browser range", async () => {
-  const { page, requests } = await mount();
-  try {
-    const result = await page.evaluate(async () => {
-      const harness = (window as any).addBucketNumericHarness;
-      const { setName, setQuota, setQuotaSize, setQuotaUnit } =
-        harness.addBucketActions;
-      harness.store.dispatch(setName("test-bucket"));
-      harness.store.dispatch(setQuota(true));
-      harness.store.dispatch(setQuotaSize("1000"));
-      harness.store.dispatch(setQuotaUnit("Ei"));
-      const state = harness.store.getState().addBucket;
-      const action = await harness.store.dispatch(harness.addBucketAsync());
-      return {
-        action: action.type,
-        invalidFields: state.invalidFields,
-      };
-    });
+for (const [size, unit] of [
+  ["1000", "Ei"],
+  ["7", "Ei"],
+  ["9007199254740992", "B"],
+  ["9007199254740993", "B"],
+  ["9223372036854775807", "B"],
+]) {
+  test(`create quota rejects ${size} ${unit} outside the supported browser range`, async () => {
+    const { page, requests } = await mount();
+    try {
+      const result = await page.evaluate(
+        async ({ size, unit }) => {
+          const harness = (window as any).addBucketNumericHarness;
+          const { setName, setQuota, setQuotaSize, setQuotaUnit } =
+            harness.addBucketActions;
+          harness.store.dispatch(setName("test-bucket"));
+          harness.store.dispatch(setQuota(true));
+          harness.store.dispatch(setQuotaSize(size));
+          harness.store.dispatch(setQuotaUnit(unit));
+          const state = harness.store.getState().addBucket;
+          const action = await harness.store.dispatch(harness.addBucketAsync());
+          return {
+            action: action.type,
+            invalidFields: state.invalidFields,
+          };
+        },
+        { size, unit },
+      );
 
-    expect(result.action).toBe("buckets/addBucketAsync/rejected");
-    expect(result.invalidFields).toEqual(["quotaSize"]);
-    expect(requests).toEqual([]);
-  } finally {
-    await page.close();
-  }
-});
+      expect(result.action).toBe("buckets/addBucketAsync/rejected");
+      expect(result.invalidFields).toEqual(["quotaSize"]);
+      expect(requests).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+}
 
 test("changing the quota unit revalidates the current scalar", async () => {
   const { page, requests } = await mount();
