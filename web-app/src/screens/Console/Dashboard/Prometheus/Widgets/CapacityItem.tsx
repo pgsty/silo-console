@@ -240,7 +240,7 @@ const CapacityItem = ({
         <Box>
           <Box className={"usedLabel"}>{t("Used:")}</Box>
           <Box className={"totalUsed"}>
-            <div className="value">{usedConvert.total}</div>
+            <div className="value">{usedConvert.total ?? t("N/A")}</div>
             <div className="unit">{usedConvert.unit}</div>
           </Box>
           <Box className={"ofUsed"}>

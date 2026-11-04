@@ -89,13 +89,10 @@ const SizeChart: FC<SizeChartProps> = ({
   }, []);
 
   useEffect(() => {
-    const val1 = usedBytes;
-    const val2 = totalBytes - usedBytes;
-
-    const total = val1 + val2;
-
-    const per1 = (val1 / total) * 100;
-    const per2 = (val2 / total) * 100;
+    const valid = Number.isFinite(usedBytes) && usedBytes >= 0 &&
+      Number.isFinite(totalBytes) && totalBytes > 0;
+    const per1 = valid ? Math.min(usedBytes / totalBytes, 1) * 100 : 0;
+    const per2 = valid ? 100 - per1 : 0;
     const offset = 25;
 
     if (val1D?.current && val2D?.current) {
@@ -111,7 +108,7 @@ const SizeChart: FC<SizeChartProps> = ({
     }
   }, [usedBytes, totalBytes]);
 
-  const usedSizeUnits = calculateBytes(usedBytes);
+  const usedSizeUnits = calculateBytes(usedBytes, true, false);
 
   return (
     <SizeChartBase
@@ -149,7 +146,7 @@ const SizeChart: FC<SizeChartProps> = ({
       {label && (
         <g className="chartText">
           <text x="50%" y="50%" className="chartNumber">
-            {usedSizeUnits.total}&nbsp;{usedSizeUnits.unit}
+            {usedSizeUnits.total ?? "N/A"}&nbsp;{usedSizeUnits.unit}
           </text>
           <text x="50%" y="50%" className="chartLabel">
             {chartLabel}

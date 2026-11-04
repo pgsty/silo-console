@@ -178,10 +178,10 @@ const STResults = ({ results, start }: ISTResults) => {
       itemJoin.getUnit = "-";
       itemJoin.getValue = "N/A";
     } else {
-      const niceGet = calculateBytes(item.throughputPerSec.toString());
+      const niceGet = calculateBytes(item.throughputPerSec, true, false);
 
       itemJoin.getUnit = niceGet.unit;
-      itemJoin.getValue = niceGet.total.toString();
+      itemJoin.getValue = niceGet.total?.toString() ?? "N/A";
     }
 
     if (putMetric) {
@@ -190,10 +190,10 @@ const STResults = ({ results, start }: ISTResults) => {
         itemJoin.putUnit = "-";
         itemJoin.putValue = "N/A";
       } else {
-        const nicePut = calculateBytes(putMetric.throughputPerSec.toString());
+        const nicePut = calculateBytes(putMetric.throughputPerSec, true, false);
 
         itemJoin.putUnit = nicePut.unit;
-        itemJoin.putValue = nicePut.total.toString();
+        itemJoin.putValue = nicePut.total?.toString() ?? "N/A";
       }
     }
 

@@ -1332,6 +1332,7 @@ export const zhScreens: Record<string, string> = {
     "请以{distributedMode}部署服务后再使用这些特性。",
   "Please deploy a server in {mode} to use this feature.":
     "请以 {mode} 部署服务后再使用此功能。",
+  "N/A": "不可用",
   "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.":
     "请输入大于 0 且小于 8 PiB 的配额，最多保留两位小数。更大的配额请使用 mcli 设置。",
   "Please Login via the configured external identity provider.":
