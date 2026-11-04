@@ -148,6 +148,9 @@ const ListObjectsTable = ({
     (state: AppState) => state.objectBrowser.rewind.rewindEnabled,
   );
   const records = useSelector((state: AppState) => state.objectBrowser.records);
+  const listingInProgress = useSelector(
+    (state: AppState) => state.objectBrowser.requestInProgress,
+  );
   const pageComplete = useSelector(
     (state: AppState) => state.objectBrowser.objectPage.complete,
   );
@@ -535,17 +538,20 @@ const ListObjectsTable = ({
 
   return (
     <Fragment>
-      {usageEnabled && (records.length > 0 || usage.scan) && (
-        <PrefixUsagePanel
-          usage={usage}
-          prefix={simplePath || ""}
-          versions={usageVersions}
-          setVersions={setUsageVersions}
-          canListVersions={hasPermission(bucketName, [
-            IAM_SCOPES.S3_LIST_BUCKET_VERSIONS,
-          ])}
-        />
-      )}
+      {/* Keep the panel while a listing loads so rows do not jump; hide it
+          only once the folder is known to be empty. */}
+      {usageEnabled &&
+        (listingInProgress || records.length > 0 || usage.scan) && (
+          <PrefixUsagePanel
+            usage={usage}
+            prefix={simplePath || ""}
+            versions={usageVersions}
+            setVersions={setUsageVersions}
+            canListVersions={hasPermission(bucketName, [
+              IAM_SCOPES.S3_LIST_BUCKET_VERSIONS,
+            ])}
+          />
+        )}
       <DataTable
         interaction={{
           activeId,

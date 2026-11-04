@@ -338,6 +338,65 @@ for (const width of [1440, 390]) {
   });
 }
 
+for (const width of [1440, 1024, 768, 390]) {
+  test(`usage rows keep long names, sort direction and retained bytes legible at ${width}px`, async ({
+    page,
+  }) => {
+    const longName = `z${"long-bucket-".repeat(5)}z9`;
+    const retained = usageRecord(longName, 3 * 1024 * 1024, 3);
+    retained.last_good!.totals.retained_bytes = String(9.5 * 1024 * 1024);
+    await mockUsage(page, () => [...completedUsage, retained]);
+    await page.route("**/api/v1/buckets", (route) =>
+      route.fulfill({
+        json: {
+          buckets: [...buckets, { ...buckets[0], name: longName }],
+          usageUpdatedAt: at,
+        },
+      }),
+    );
+    if (width === 390) await emulateCoarsePointer(page);
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${SERVER_ENDPOINT}/buckets?sort=size&dir=desc`);
+    const row = page.getByRole("row", { name: longName, exact: true });
+    const caption = row.getByText("Retained: 9.5 MiB", { exact: true });
+    await expect(caption).toBeVisible();
+    // Neither the retained value nor the bucket name is clipped mid-glyph.
+    expect(
+      await caption.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    ).toBe(true);
+    const name = row.locator(".bucketName");
+    await expect(name).toHaveAttribute("title", longName);
+    expect(
+      await name.evaluate((node) => getComputedStyle(node).textOverflow),
+    ).toBe("ellipsis");
+    // A narrow sorted header still shows its direction inside the cell.
+    const header = page.getByRole("columnheader", { name: "Current size" });
+    await expect(header).toHaveAttribute("aria-sort", "descending");
+    const arrow = header.locator("svg");
+    await expect(arrow).toBeVisible();
+    const headerBox = (await header.boundingBox())!;
+    const arrowBox = (await arrow.boundingBox())!;
+    expect(arrowBox.x + arrowBox.width).toBeLessThanOrEqual(
+      headerBox.x + headerBox.width + 0.5,
+    );
+    // Only two-line body rows are tall; the header keeps the control height.
+    const headerRow = page.getByRole("row").first();
+    expect((await headerRow.boundingBox())!.height).toBeLessThan(
+      (await row.boundingBox())!.height,
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    expect(
+      await page
+        .locator("main")
+        .evaluate((node) => node.scrollWidth <= node.clientWidth),
+    ).toBe(true);
+  });
+}
+
 test("usage separates unscanned, completed zero and forbidden totals from legacy metadata", async ({
   page,
 }) => {
