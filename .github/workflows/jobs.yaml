@@ -1880,7 +1880,10 @@ jobs:
             sleep 1
           done
           if [ "$ready" != true ]; then cat "$RUNNER_TEMP/usage-silo.log"; exit 1; fi
-          go test -race -tags=integration,storageintegration ./pkg/usage ./api -count=1 -timeout=10m
+          # Native packages share one disposable storage endpoint and queue.
+          # Keep their fixture lifetimes separate; concurrency within each
+          # worker/lease test remains enabled under the race detector.
+          go test -race -p 1 -tags=integration,storageintegration ./pkg/usage ./api -count=1 -timeout=10m
       - name: Retain storage fixture diagnostics
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -136,8 +136,11 @@ func TestNativeWorkerObservesChangesAndRecoversMissedEventsWithMetadataOnlyCrede
 	first := putNative(t, root, bucket, "parcel-metadata", 5)
 	c = metadataIdentity(t, c, admin)
 	c.HTTPAddress = "127.0.0.1:0"
-	c.Heartbeat = 100 * time.Millisecond
-	c.Lease = 2 * time.Second
+	// Native acceptance tests exercise live events and IAM, not subsecond lease
+	// expiry. Allow database fsync and race-instrumented CI scheduling headroom;
+	// the focused observer regressions separately exercise short lease fencing.
+	c.Heartbeat = time.Second
+	c.Lease = 10 * time.Second
 	c.ProgressInterval = 100 * time.Millisecond
 	c.PollInterval = 100 * time.Millisecond
 	c.EventDebounce = 0
@@ -178,6 +181,15 @@ func TestNativeWorkerObservesChangesAndRecoversMissedEventsWithMetadataOnlyCrede
 		return stop
 	}
 	stop := start()
+	t.Cleanup(func() {
+		if t.Failed() {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			health, err := store.WorkerHealth(ctx)
+			body, _ := json.Marshal(health)
+			t.Logf("worker health at failure: %s; error=%v", body, err)
+		}
+	})
 	awaitNative(t, "live reconciled event coverage", func() bool { h, err := store.WorkerHealth(context.Background()); return err == nil && h.Ready })
 	expect := func(current, retained string, objects, versions, markers int64) {
 		t.Helper()

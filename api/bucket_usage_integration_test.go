@@ -71,7 +71,8 @@ func TestNativeBucketUsageHonorsServerPermissionsAndRevocation(t *testing.T) {
 	if err = store.Queue(ctx, bucket, true, 0, 0, nil); err != nil {
 		t.Fatal(err)
 	}
-	// Inventory from other native tests has its own endpoint scope and is removed.
+	// Native packages share this disposable endpoint and queue. Run them with
+	// -p 1 so the usage worker cannot consume or replace this prepared snapshot.
 	job, err := store.Claim(ctx, time.Minute)
 	if err != nil {
 		t.Fatal(err)

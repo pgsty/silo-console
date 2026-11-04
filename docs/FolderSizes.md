@@ -18,7 +18,7 @@ PostgreSQL and maintained SILO fixtures configured through
 and `TEST_USAGE_S3_SECRET_KEY`, run:
 
 ```sh
-go test -race -tags=integration,storageintegration ./pkg/usage ./api -count=1
+go test -race -p 1 -tags=integration,storageintegration ./pkg/usage ./api -count=1
 ```
 
 From `web-app`, run `yarn typecheck` and
