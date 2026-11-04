@@ -30,13 +30,15 @@ import { api } from "api";
 import { errorToHandler } from "api/errors";
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import { BucketReplicationRule } from "../types";
-import { getBytes, k8sScalarUnitsExcluding } from "../../../../common/utils";
+import { k8sScalarUnitsExcluding } from "../../../../common/utils";
 import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
 import QueryMultiSelector from "../../Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
 import InputUnitMenu from "../../Common/FormComponents/InputUnitMenu/InputUnitMenu";
 import { useT } from "i18n";
+
+import { getReplicationBandwidth } from "../replicationValidation";
 
 interface IReplicationModal {
   open: boolean;
@@ -74,6 +76,11 @@ const AddReplicationModal = ({
   const [bandwidthScalar, setBandwidthScalar] = useState<string>("100");
   const [bandwidthUnit, setBandwidthUnit] = useState<string>("Gi");
   const [healthCheck, setHealthCheck] = useState<string>("60");
+  const bandwidth = getReplicationBandwidth(
+    bandwidthScalar,
+    bandwidthUnit,
+    replicationMode,
+  );
 
   useEffect(() => {
     if (setReplicationRules.length === 0) {
@@ -93,6 +100,8 @@ const AddReplicationModal = ({
   }, [setReplicationRules]);
 
   const addRecord = () => {
+    if (bandwidth === null) return;
+    setAddLoading(true);
     const replicate = [
       {
         originBucket: bucketName,
@@ -111,10 +120,7 @@ const AddReplicationModal = ({
       region: region,
       bucketsRelation: replicate,
       syncMode: replicationMode,
-      bandwidth:
-        replicationMode === "async"
-          ? parseInt(getBytes(bandwidthScalar, bandwidthUnit, true))
-          : 0,
+      bandwidth,
       healthCheckPeriod: hc,
       prefix: prefix,
       tags: tags,
@@ -178,7 +184,6 @@ const AddReplicationModal = ({
         autoComplete="off"
         onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
           e.preventDefault();
-          setAddLoading(true);
           addRecord();
         }}
       >
@@ -275,18 +280,21 @@ const AddReplicationModal = ({
           {replicationMode === "async" && (
             <Box className={"inputItem"}>
               <InputBox
-                type="number"
                 id="bandwidth_scalar"
                 name="bandwidth_scalar"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e.target.validity.valid) {
-                    setBandwidthScalar(e.target.value as string);
-                  }
+                  setBandwidthScalar(e.target.value);
                 }}
                 label={t("Bandwidth")}
                 value={bandwidthScalar}
                 min="0"
-                pattern={"[0-9]*"}
+                error={
+                  bandwidth === null
+                    ? t(
+                        "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).",
+                      )
+                    : ""
+                }
                 overlayObject={
                   <InputUnitMenu
                     id={"quota_unit"}
@@ -396,7 +404,7 @@ const AddReplicationModal = ({
               type="submit"
               variant="callAction"
               color="primary"
-              disabled={addLoading}
+              disabled={addLoading || bandwidth === null}
               label={t("Save")}
             />
           </Grid>

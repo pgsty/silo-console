@@ -29,7 +29,7 @@ import {
 import { Tooltip } from "common/Tooltip";
 import get from "lodash/get";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
-import { getBytes, k8sScalarUnitsExcluding } from "../../../../common/utils";
+import { k8sScalarUnitsExcluding } from "../../../../common/utils";
 import InputUnitMenu from "../../Common/FormComponents/InputUnitMenu/InputUnitMenu";
 import { setModalErrorSnackMessage } from "../../../../systemSlice";
 import { useAppDispatch } from "../../../../store";
@@ -38,6 +38,8 @@ import { MultiBucketResponseItem } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import { SelectorTypes } from "../../../../common/types";
 import { useT } from "i18n";
+
+import { getReplicationBandwidth } from "../replicationValidation";
 
 interface IBulkReplicationModal {
   open: boolean;
@@ -66,6 +68,11 @@ const AddBulkReplicationModal = ({
   const [bandwidthScalar, setBandwidthScalar] = useState<string>("100");
   const [bandwidthUnit, setBandwidthUnit] = useState<string>("Gi");
   const [healthCheck, setHealthCheck] = useState<string>("60");
+  const bandwidth = getReplicationBandwidth(
+    bandwidthScalar,
+    bandwidthUnit,
+    replicationMode,
+  );
   const [relationBuckets, setRelationBuckets] = useState<string[]>([]);
   const [remoteBucketsOpts, setRemoteBucketOpts] = useState<string[]>([]);
   const [responseItem, setResponseItem] = useState<
@@ -97,6 +104,7 @@ const AddBulkReplicationModal = ({
   }, [buckets, relationBuckets.length]);
 
   const addRecord = () => {
+    if (bandwidth === null) return;
     setAddLoading(true);
     const replicate = bucketsToAlter.map((bucketName, index) => {
       return {
@@ -115,10 +123,7 @@ const AddBulkReplicationModal = ({
       region: region,
       bucketsRelation: replicate,
       syncMode: replicationMode,
-      bandwidth:
-        replicationMode === "async"
-          ? parseInt(getBytes(bandwidthScalar, bandwidthUnit, true))
-          : 0,
+      bandwidth,
       healthCheckPeriod: hc,
     };
 
@@ -389,18 +394,21 @@ const AddBulkReplicationModal = ({
                   />
                   {replicationMode === "async" && (
                     <InputBox
-                      type="number"
                       id="bandwidth_scalar"
                       name="bandwidth_scalar"
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        if (e.target.validity.valid) {
-                          setBandwidthScalar(e.target.value as string);
-                        }
+                        setBandwidthScalar(e.target.value);
                       }}
                       label={t("Bandwidth")}
                       value={bandwidthScalar}
                       min="0"
-                      pattern={"[0-9]*"}
+                      error={
+                        bandwidth === null
+                          ? t(
+                              "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).",
+                            )
+                          : ""
+                      }
                       overlayObject={
                         <InputUnitMenu
                           id={"quota_unit"}
@@ -430,7 +438,7 @@ const AddBulkReplicationModal = ({
               {
                 type: "custom",
                 label: t("Next"),
-                enabled: !externalLoading,
+                enabled: !externalLoading && bandwidth !== null,
                 action: retrieveRemoteBuckets,
               },
             ],
@@ -510,7 +518,7 @@ const AddBulkReplicationModal = ({
               {
                 type: "next",
                 label: t("Create"),
-                enabled: !addLoading,
+                enabled: !addLoading && bandwidth !== null,
                 action: addRecord,
               },
             ],
