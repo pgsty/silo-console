@@ -53,7 +53,11 @@ test("mounted Overview hook preserves stale data, cancels generations and polls 
     const page = await browser.newPage();
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.clock.install();
+    // Keep polling independent of wall time spent building and asserting in CI.
+    // Advance it only at the explicit polling/visibility steps below.
+    const now = new Date("2026-01-01T00:00:00Z");
+    await page.clock.install({ time: now });
+    await page.clock.pauseAt(new Date(now.getTime() + 60 * 60 * 1000));
     await page.setContent('<div id="root"></div>');
     await page.addScriptTag({ content: chunk.code });
     const count = () =>
