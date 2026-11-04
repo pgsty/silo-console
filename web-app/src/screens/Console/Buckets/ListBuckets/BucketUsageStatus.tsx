@@ -9,7 +9,7 @@ import { useBucketUsageView } from "./useBucketUsage";
 
 // One caption line under a bucket name or size. It never wraps, so table rows
 // and cards keep a fixed rhythm; the full text remains available as a title.
-export const UsageCaption = styled.small`
+const UsageCaption = styled.small`
   ${typography.caption}
   display: block;
   min-width: 0;
@@ -17,6 +17,16 @@ export const UsageCaption = styled.small`
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--muted-foreground);
+`;
+
+// A secondary measurement under a number. It may wrap between its label and
+// value in a narrow column, but never clips the value itself.
+export const UsageDetail = styled(UsageCaption)`
+  white-space: normal;
+  text-overflow: clip;
+  .usageValue {
+    white-space: nowrap;
+  }
 `;
 
 export function BucketUsageStatus({ bucket }: { bucket: string }) {

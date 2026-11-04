@@ -43,11 +43,14 @@ const Shell = styled.div`
   font-variant-numeric: tabular-nums;
   --bucket-select-width: 28px;
   --bucket-menu-width: 36px;
+  /* Font-relative, so "Retained: 9.5 MiB" fits with wider fallback fonts
+     (e.g. DejaVu Sans on Linux); longer values wrap rather than clip. */
+  --bucket-size-min: 15ch;
   .bucketGrid {
     display: grid;
     grid-template-columns:
       minmax(120px, 1.8fr)
-      minmax(0, 0.7fr) minmax(0, 1.1fr) minmax(0, 1fr)
+      minmax(0, 0.7fr) minmax(var(--bucket-size-min), 1.1fr) minmax(0, 1fr)
       minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.1fr)
       minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
     align-items: center;
@@ -59,7 +62,7 @@ const Shell = styled.div`
   &[data-selection="true"] .bucketGrid {
     grid-template-columns:
       var(--bucket-select-width) minmax(120px, 1.8fr)
-      minmax(0, 0.7fr) minmax(0, 1.1fr) minmax(0, 1fr)
+      minmax(0, 0.7fr) minmax(var(--bucket-size-min), 1.1fr) minmax(0, 1fr)
       minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.1fr)
       minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
   }
@@ -133,15 +136,17 @@ const Shell = styled.div`
   @media (max-width: 1199.98px) {
     .bucketGrid {
       grid-template-columns:
-        minmax(100px, 1.6fr) minmax(0, 0.6fr) minmax(0, 1fr)
+        minmax(100px, 1.6fr) minmax(0, 0.6fr) minmax(
+          var(--bucket-size-min),
+          1fr
+        )
         minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
     }
     &[data-selection="true"] .bucketGrid {
       grid-template-columns:
         var(--bucket-select-width) minmax(100px, 1.6fr)
-        minmax(0, 0.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) var(
-          --bucket-menu-width
-        );
+        minmax(0, 0.6fr) minmax(var(--bucket-size-min), 1fr) minmax(0, 1fr)
+        minmax(0, 1fr) var(--bucket-menu-width);
     }
     .bucketLow {
       display: none;
@@ -149,15 +154,16 @@ const Shell = styled.div`
   }
   @media (max-width: 767.98px) {
     .bucketGrid {
-      /* Room for "Retained: 9.5 MiB" under the current size. */
-      grid-template-columns: minmax(0, 1fr) 104px var(--bucket-menu-width);
+      grid-template-columns: minmax(0, 1fr) var(--bucket-size-min) var(
+          --bucket-menu-width
+        );
       padding: 0 8px;
       gap: 4px;
     }
     &[data-selection="true"] .bucketGrid {
       grid-template-columns:
         var(--bucket-select-width) minmax(0, 1fr)
-        104px var(--bucket-menu-width);
+        var(--bucket-size-min) var(--bucket-menu-width);
     }
     .bucketMedium {
       display: none;
@@ -174,8 +180,12 @@ const Header = styled.div`
   z-index: 1;
   background: var(--surface-3);
   color: var(--foreground);
-  font-weight: var(--fw-semibold);
   border-bottom: 1px solid var(--border);
+  /* Weight the cells, not the grid row: font-relative tracks (ch) must
+     resolve against the same font as body rows to keep columns aligned. */
+  & > * {
+    font-weight: var(--fw-semibold);
+  }
   button {
     display: inline-flex;
     align-items: center;

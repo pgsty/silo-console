@@ -9,7 +9,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderIcon, SettingsIcon, TrashIcon } from "mds";
 import { DateTime } from "luxon";
-import { formatText, useLanguage, useT } from "i18n";
+import { formatText, interpolate, useLanguage, useT } from "i18n";
 import type { Bucket } from "../../../../api/consoleApi";
 import { hasPermission } from "../../../../common/SecureComponent";
 import {
@@ -24,7 +24,7 @@ import { Hint } from "../../../../common/ui/shared";
 import { niceBytesInt } from "../../../../common/utils";
 import { hasUsageTimestamp, listBucketStatistic } from "./bucketList";
 import { useBucketUsageView } from "./useBucketUsage";
-import { UsageCaption } from "./BucketUsageStatus";
+import { UsageDetail } from "./BucketUsageStatus";
 import { formatUsageBytes } from "../../ObjectBrowser/prefixUsage";
 
 export const bucketCapabilities = (name: string, obOnly: boolean) => ({
@@ -75,11 +75,15 @@ export const BucketUsage = ({
           {formatUsageBytes(totals.current_bytes)}
         </span>
         {totals.retained_bytes != null && (
-          <UsageCaption title={`${totals.retained_bytes} B`}>
-            {formatText(t("Retained: {size}"), {
-              size: formatUsageBytes(totals.retained_bytes),
+          <UsageDetail title={`${totals.retained_bytes} B`}>
+            {interpolate(t("Retained: {size}"), {
+              size: (
+                <span className="usageValue">
+                  {formatUsageBytes(totals.retained_bytes)}
+                </span>
+              ),
             })}
-          </UsageCaption>
+          </UsageDetail>
         )}
       </>
     );
