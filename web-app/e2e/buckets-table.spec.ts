@@ -6,7 +6,13 @@
 // (at your option) any later version.
 
 import { expect, test } from "@playwright/test";
-import type { Bucket, ListBucketsResponse } from "../src/api/consoleApi";
+import type { Page } from "@playwright/test";
+import type {
+  Bucket,
+  BucketUsageRecord,
+  BucketUsageResponse,
+  ListBucketsResponse,
+} from "../src/api/consoleApi";
 import { SERVER_ENDPOINT, adminAccessKey, adminSecretKey } from "./consts";
 import { emulateCoarsePointer } from "./fixtures/emulateCoarsePointer";
 import { browserExecutable } from "./fixtures/browserExecutable";
@@ -35,6 +41,66 @@ const buckets: Bucket[] = [
   },
   { name: "team-01", details: {}, creation_date: at },
 ];
+
+const usageRecord = (
+  bucket: string,
+  bytes: string | number,
+  objects: number,
+): BucketUsageRecord => ({
+  bucket,
+  state: "complete",
+  versions_visible: true,
+  last_good: {
+    totals: {
+      current_bytes: String(bytes),
+      current_objects: objects,
+      retained_bytes: "0",
+      retained_versions: 0,
+      delete_markers: 0,
+    },
+    scanned_entries: objects,
+    started_at: at,
+    updated_at: at,
+  },
+  last_completed_at: at,
+});
+
+const completedUsage = [
+  usageRecord("alpha", 1024, 2),
+  usageRecord("beta", 8192, 4),
+  usageRecord("team-01", 0, 0),
+];
+
+async function mockUsage(
+  page: Page,
+  records: () => BucketUsageRecord[] = () => completedUsage,
+) {
+  await page.route(/\/api\/v1\/bucket-usage\/(status|refresh)$/, (route) => {
+    expect(route.request().method()).toBe("POST");
+    const names: string[] = route.request().postDataJSON().buckets;
+    const available = new Map(records().map((row) => [row.bucket, row]));
+    const response: BucketUsageResponse = {
+      enabled: true,
+      poll_after_ms: 250,
+      coverage: { observer_alive: true, connected: true, reconciled: true },
+      buckets: names.map(
+        (bucket) =>
+          available.get(bucket) ?? {
+            bucket,
+            state: "not_scanned",
+            versions_visible: true,
+          },
+      ),
+    };
+    return route.fulfill({
+      status: route.request().url().endsWith("/refresh") ? 202 : 200,
+      json: response,
+    });
+  });
+}
+
+const selectionStatus = (page: Page) =>
+  page.getByRole("status").filter({ hasText: /^\d+ buckets? selected$/ });
 
 test("pending bucket search cannot replace navigation to an object workspace", async ({
   page,
@@ -83,6 +149,9 @@ test.beforeEach(async ({ page }) => {
       ? route.continue()
       : route.abort(),
   );
+  // Usage reads and refreshes are POSTs. Fulfill both locally so these tests
+  // exercise the current usage contract without queuing real storage scans.
+  await mockUsage(page);
 });
 
 test("URL sort/filter, history and selection retain bucket identities", async ({
@@ -110,7 +179,7 @@ test("URL sort/filter, history and selection retain bucket identities", async ({
   await page
     .getByRole("checkbox", { name: "Select all visible buckets" })
     .check();
-  await expect(page.getByRole("status")).toContainText("2 buckets selected");
+  await expect(selectionStatus(page)).toHaveText("2 buckets selected");
   await page.locator("#bucket-search").fill("absent");
   await expect(page.getByText("No buckets match “absent”")).toBeVisible();
   await page.locator("#clear-bucket-filter").click();
@@ -147,10 +216,10 @@ test("header checkbox paint follows no, partial and full selection", async ({
     .getByRole("checkbox")
     .check();
   await expect(header).not.toBeChecked();
-  await expect(page.getByRole("status")).toContainText("1 bucket selected");
+  await expect(selectionStatus(page)).toHaveText("1 bucket selected");
   expect((await paint()).fill).toBe("none");
   await header.check();
-  await expect(page.getByRole("status")).toContainText("3 buckets selected");
+  await expect(selectionStatus(page)).toHaveText("3 buckets selected");
   await expect.poll(async () => (await paint()).offset).toBe(0);
   await header.uncheck();
   await expect(header).not.toBeChecked();
@@ -269,33 +338,33 @@ for (const width of [1440, 390]) {
   });
 }
 
-test("freshness separates unknown administrator usage, omitted zero and non-admin values", async ({
+test("usage separates unscanned, completed zero and forbidden totals from legacy metadata", async ({
   page,
 }) => {
-  let response: ListBucketsResponse = { buckets };
+  let usage: BucketUsageRecord[] = buckets.map(({ name }) => ({
+    bucket: name,
+    state: "not_scanned",
+    versions_visible: true,
+  }));
+  await mockUsage(page, () => usage);
   await page.route("**/api/v1/buckets", (route) =>
-    route.fulfill({ json: response }),
+    route.fulfill({ json: { buckets, usageUpdatedAt: at } }),
   );
   await page.goto(`${SERVER_ENDPOINT}/buckets`);
   const alpha = page.getByRole("row", { name: "alpha", exact: true });
-  await expect(
-    alpha.getByRole("cell").nth(2).locator("span[tabindex]"),
-  ).toHaveText("—");
-  await expect(
-    alpha.getByRole("cell").nth(3).locator("span[tabindex]"),
-  ).toHaveText("—");
-  await expect(
-    page.getByText("Calculating…", { exact: true }).filter({ visible: true }),
-  ).toBeVisible();
-  response = { buckets, usageUpdatedAt: at };
+  await expect(alpha).toContainText("Not scanned");
+  await expect(alpha.getByRole("cell").nth(2)).toHaveText("—");
+  await expect(alpha.getByRole("cell").nth(3)).toHaveText("—");
+  usage = completedUsage;
   await page.locator("#refresh-buckets").click();
+  await expect(alpha).toContainText("Updated");
   await expect(alpha.getByRole("cell").nth(2)).toHaveText("2");
+  await expect(alpha.locator('span[title="1024 B"]')).toBeVisible();
+  const empty = page.getByRole("row", { name: "team-01", exact: true });
+  await expect(empty.getByRole("cell").nth(2)).toHaveText("0");
   await expect(
-    page
-      .getByRole("row", { name: "team-01", exact: true })
-      .getByRole("cell")
-      .nth(2),
-  ).toHaveText("0");
+    empty.getByRole("cell").nth(3).locator('span[title="0 B"]'),
+  ).toHaveText("0 B");
   // Bob's account administration grants do not authorize DataUsageInfo/ListBucket.
   await page.route("**/api/v1/session", async (route) => {
     const result = await route.fetch();
@@ -314,10 +383,18 @@ test("freshness separates unknown administrator usage, omitted zero and non-admi
       },
     });
   });
-  response = { buckets };
+  usage = buckets.map(({ name }) => ({
+    bucket: name,
+    state: "forbidden",
+    versions_visible: false,
+  }));
   await page.reload();
-  await expect(page.getByText("Calculating…", { exact: true })).toHaveCount(0);
-  await expect(alpha.getByRole("cell").nth(1)).toHaveText("2");
+  await expect(alpha).toContainText("Usage listing not permitted");
+  // The listing still contains old scanner totals; neither those nor the
+  // completed administrator snapshot may appear for an unauthorized caller.
+  await expect(alpha.getByRole("cell").nth(1)).toHaveText("—");
+  await expect(alpha.getByRole("cell").nth(2)).toHaveText("—");
+  await expect(alpha.getByText("Retained:", { exact: false })).toHaveCount(0);
   await expect(alpha.getByRole("link")).toHaveCount(0);
   await expect(page.locator("#set-lifecycle")).toHaveCount(0);
   await page
@@ -380,6 +457,9 @@ test("2,000 buckets virtualize with a stationary header and identity-safe sortin
     name: `bucket-${String(index).padStart(4, "0")}`,
     size: index,
   }));
+  await mockUsage(page, () =>
+    many.map((bucket) => usageRecord(bucket.name, bucket.size, 2)),
+  );
   await page.route("**/api/v1/buckets", (route) =>
     route.fulfill({ json: { buckets: many, usageUpdatedAt: at } }),
   );
@@ -414,13 +494,13 @@ test("2,000 buckets virtualize with a stationary header and identity-safe sortin
     .getByRole("row", { name: "bucket-1999", exact: true })
     .getByRole("checkbox")
     .check();
-  await page.getByRole("button", { name: "Size", exact: true }).click();
+  await page.getByRole("button", { name: "Current size", exact: true }).click();
   await expect(
-    page.getByRole("columnheader", { name: "Size", exact: true }),
+    page.getByRole("columnheader", { name: "Current size", exact: true }),
   ).toHaveAttribute("aria-sort", "ascending");
-  await page.getByRole("button", { name: "Size", exact: true }).click();
+  await page.getByRole("button", { name: "Current size", exact: true }).click();
   await expect(
-    page.getByRole("columnheader", { name: "Size", exact: true }),
+    page.getByRole("columnheader", { name: "Current size", exact: true }),
   ).toHaveAttribute("aria-sort", "descending");
   await body.evaluate((element) => {
     element.scrollTop = 0;
@@ -460,8 +540,24 @@ test("compact cards persist across navigation and fit every target width", async
       await page.evaluate(() => localStorage.getItem("sidebarOpen")),
     ).toBeNull();
     await expect(page.locator(".bucket-card")).toHaveCount(3);
-    for (const card of await page.locator(".bucket-card").all())
-      expect((await card.boundingBox())!.height).toBeLessThanOrEqual(120);
+    for (const card of await page.locator(".bucket-card").all()) {
+      await expect(card).toContainText("Updated");
+      await expect(
+        card.getByText("Current size", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        card.getByText("Retained: 0 B", { exact: true }),
+      ).toBeVisible();
+      // The compact card includes scan status and a second line of size data.
+      expect((await card.boundingBox())!.height).toBeLessThanOrEqual(148);
+      expect(
+        await card.evaluate(
+          (element) =>
+            element.scrollHeight <= element.clientHeight &&
+            element.scrollWidth <= element.clientWidth,
+        ),
+      ).toBe(true);
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -528,13 +624,16 @@ for (const expanded of [true, false]) {
 
 test.describe("coarse bucket selection", () => {
   test.use({ hasTouch: true });
-  test("40px row targets select once without navigation and match virtualizer spacing", async ({
+  test("40px touch targets select once within correctly spaced usage rows", async ({
     page,
   }) => {
     const many = Array.from({ length: 2000 }, (_, index) => ({
       ...buckets[0],
       name: `touch-${String(index).padStart(4, "0")}`,
     }));
+    await mockUsage(page, () =>
+      many.map((bucket) => usageRecord(bucket.name, 1024, 2)),
+    );
     await page.route("**/api/v1/buckets", (route) =>
       route.fulfill({ json: { buckets: many, usageUpdatedAt: at } }),
     );
@@ -545,13 +644,14 @@ test.describe("coarse bucket selection", () => {
       await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
     ).toBe(true);
     const first = page.getByRole("row", { name: "touch-0000", exact: true });
+    await expect(first).toContainText("Updated");
     const checkbox = first.getByRole("checkbox");
     const box = await checkbox.boundingBox();
     expect(box!.width).toBe(40);
     expect(box!.height).toBe(40);
     await checkbox.click({ position: { x: 1, y: 1 } });
     await expect(checkbox).toBeChecked();
-    await expect(page.getByRole("status")).toContainText("1 bucket selected");
+    await expect(selectionStatus(page)).toHaveText("1 bucket selected");
     await checkbox.click({ position: { x: 39, y: 39 } });
     await expect(checkbox).not.toBeChecked();
     await expect(page).toHaveURL(`${SERVER_ENDPOINT}/buckets`);
@@ -564,8 +664,8 @@ test.describe("coarse bucket selection", () => {
     const secondBox = await page
       .getByRole("row", { name: "touch-0001", exact: true })
       .boundingBox();
-    expect(firstBox!.height).toBe(40);
-    expect(secondBox!.y - firstBox!.y).toBe(40);
+    expect(firstBox!.height).toBe(64);
+    expect(secondBox!.y - firstBox!.y).toBe(64);
     expect(box!.x + box!.width).toBeLessThanOrEqual(
       (await first.locator(".bucketHigh").first().boundingBox())!.x,
     );
@@ -578,7 +678,7 @@ test.describe("coarse bucket selection", () => {
     });
     const last = page.getByRole("row", { name: "touch-1999", exact: true });
     await expect(last).toBeVisible();
-    expect((await last.boundingBox())!.height).toBe(40);
+    expect((await last.boundingBox())!.height).toBe(64);
     expect(await page.locator(".bucketRow").count()).toBeLessThanOrEqual(60);
   });
 });
