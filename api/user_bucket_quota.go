@@ -18,8 +18,6 @@ package api
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/minio/console/api/operations"
@@ -67,23 +65,13 @@ func setBucketQuotaResponse(session *models.Principal, params bucketApi.SetBucke
 }
 
 func setBucketQuota(ctx context.Context, ac *AdminClient, bucket *string, bucketQuota *models.SetBucketQuota) error {
-	if bucketQuota == nil {
-		return errors.New("nil bucket quota was provided")
+	if err := validateBucketQuota(bucketQuota); err != nil {
+		return err
 	}
 	if *bucketQuota.Enabled {
-		if bucketQuota.Amount < 0 {
-			return ErrBadRequest
-		}
-		var quotaType madmin.QuotaType
-		switch bucketQuota.QuotaType {
-		case models.SetBucketQuotaQuotaTypeHard:
-			quotaType = madmin.HardQuota
-		default:
-			return fmt.Errorf("unsupported quota type %s", bucketQuota.QuotaType)
-		}
 		if err := ac.setBucketQuota(ctx, *bucket, &madmin.BucketQuota{
 			Size: uint64(bucketQuota.Amount),
-			Type: quotaType,
+			Type: madmin.HardQuota,
 		}); err != nil {
 			return err
 		}
@@ -91,6 +79,17 @@ func setBucketQuota(ctx context.Context, ac *AdminClient, bucket *string, bucket
 		if err := ac.Client.SetBucketQuota(ctx, *bucket, &madmin.BucketQuota{}); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Validate before creating a bucket as well as before changing an existing quota.
+func validateBucketQuota(quota *models.SetBucketQuota) error {
+	if quota == nil || quota.Enabled == nil {
+		return ErrBadRequest
+	}
+	if *quota.Enabled && (quota.Amount < 0 || quota.QuotaType != models.SetBucketQuotaQuotaTypeHard) {
+		return ErrBadRequest
 	}
 	return nil
 }

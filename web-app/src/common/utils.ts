@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IBytesCalc } from "./types";
+import { calculateBytes as calculateByteSize } from "../../packages/mds/src/global/utils";
 
 import get from "lodash/get.js";
 import { i18nKey, getStoredLanguage, translate } from "../i18n/lang";
@@ -303,37 +304,13 @@ export const calculateBytes = (
   showDecimals = false,
   roundFloor = true,
   k8sUnit = false,
-): IBytesCalc => {
-  let bytes;
-
-  if (typeof x === "string") {
-    bytes = parseInt(x, 10);
-  } else {
-    bytes = x;
-  }
-
-  if (bytes === 0) {
-    return { total: 0, unit: units[0] };
-  }
-
-  // Gi : GiB
-  const k = 1024;
-
-  // Get unit for measure
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  const fractionDigits = showDecimals ? 1 : 0;
-
-  const bytesUnit = bytes / Math.pow(k, i);
-
-  const roundedUnit = roundFloor ? Math.floor(bytesUnit) : bytesUnit;
-
-  // Get Unit parsed
-  const unitParsed = parseFloat(roundedUnit.toFixed(fractionDigits));
-  const finalUnit = k8sUnit ? k8sCalcUnits[i] : units[i];
-
-  return { total: unitParsed, unit: finalUnit };
-};
+): IBytesCalc =>
+  calculateByteSize(
+    x,
+    showDecimals,
+    roundFloor,
+    k8sUnit ? k8sCalcUnits : units,
+  );
 
 export const nsToSeconds = (nanoseconds: number) => {
   const conversion = nanoseconds * 0.000000001;

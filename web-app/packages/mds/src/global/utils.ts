@@ -55,34 +55,33 @@ export const calculateBytes = (
   x: string | number,
   showDecimals = false,
   roundFloor = true,
+  displayUnits: readonly string[] = units,
 ): IBytesCalc => {
-  let bytes;
-
-  if (typeof x === "string") {
-    bytes = parseInt(x, 10);
-  } else {
-    bytes = x;
+  if (
+    typeof x === "string" &&
+    !/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(x.trim())
+  ) {
+    return { total: null, unit: "" };
   }
-
+  const bytes = Number(x);
+  if (!Number.isFinite(bytes) || bytes < 0 || displayUnits.length === 0) {
+    return { total: null, unit: "" };
+  }
   if (bytes === 0) {
-    return { total: 0, unit: units[0] };
+    return { total: 0, unit: displayUnits[0] };
   }
-
-  // Gi : GiB
-  const k = 1024;
-
-  // Get unit for measure
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
+  // Bound both ends: fractional rates stay in bytes, very large measurements
+  // stay in the largest supported unit. Parse the entire decimal/exponent input.
+  let i = 0;
+  let bytesUnit = bytes;
+  while (bytesUnit >= 1024 && i < displayUnits.length - 1) {
+    bytesUnit /= 1024;
+    i++;
+  }
   const fractionDigits = showDecimals ? 1 : 0;
-
-  const bytesUnit = bytes / Math.pow(k, i);
-
   const roundedUnit = roundFloor ? Math.floor(bytesUnit) : bytesUnit;
-
-  // Get Unit parsed
-  const unitParsed = parseFloat(roundedUnit.toFixed(fractionDigits));
-  const finalUnit = units[i];
-
-  return { total: unitParsed, unit: finalUnit };
+  return {
+    total: Number(roundedUnit.toFixed(fractionDigits)),
+    unit: displayUnits[i],
+  };
 };

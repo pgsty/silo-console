@@ -159,6 +159,11 @@ const acceptDnDStyle = {
 
 const ListObjects = () => {
   const mobile = useMobile();
+  const [usageRefresh, setUsageRefresh] = useState<{
+    bucket: string;
+    prefix: string;
+    id: number;
+  }>();
   const [selectionSheetOpen, setSelectionSheetOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const dispatch = useAppDispatch();
@@ -1081,6 +1086,11 @@ const ListObjects = () => {
           disabledReason: refreshState.reason,
           onClick: () => {
             refreshBucketMetadata();
+            setUsageRefresh({
+              bucket: bucketName,
+              prefix: simplePath || "",
+              id: Date.now(),
+            });
             if (versionsMode) dispatch(setLoadingVersions(true));
             else dispatch(setReloadObjectsList(true));
           },
@@ -1231,6 +1241,7 @@ const ListObjects = () => {
                       </Grid>
                     )}
                     <ListObjectsTable
+                      usageRefresh={usageRefresh}
                       filterRef={filterInput}
                       emptyActions={() => [
                         {
@@ -1253,6 +1264,11 @@ const ListObjects = () => {
                           state: refreshState,
                           action: () => {
                             refreshBucketMetadata();
+                            setUsageRefresh({
+                              bucket: bucketName,
+                              prefix: simplePath || "",
+                              id: Date.now(),
+                            });
                             dispatch(setReloadObjectsList(true));
                           },
                         },

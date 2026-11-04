@@ -53,6 +53,8 @@ const (
 )
 
 func registerObjectsHandlers(api *operations.ConsoleAPI) {
+	api.RegisterProducer("application/x-ndjson", runtime.JSONProducer())
+	api.ObjectPrefixUsageHandler = objectApi.PrefixUsageHandlerFunc(getPrefixUsageResponse)
 	// list objects
 	api.ObjectListObjectsHandler = objectApi.ListObjectsHandlerFunc(func(params objectApi.ListObjectsParams, session *models.Principal) middleware.Responder {
 		resp, err := getListObjectsResponse(session, params)

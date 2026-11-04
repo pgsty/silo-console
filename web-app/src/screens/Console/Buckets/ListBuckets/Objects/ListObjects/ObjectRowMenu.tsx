@@ -50,6 +50,7 @@ export function ObjectRowMenu({
   onVersions,
   onPreviewReady,
   onAnonymousPreview,
+  onCalculateSize,
 }: {
   object: BucketObjectItem;
   bucket: string;
@@ -58,6 +59,7 @@ export function ObjectRowMenu({
   onVersions: () => void;
   onPreviewReady: () => void;
   onAnonymousPreview: () => void;
+  onCalculateSize?: (prefix: string) => void;
 }) {
   const t = useT();
   const dispatch = useAppDispatch();
@@ -134,6 +136,16 @@ export function ObjectRowMenu({
   // A prefix is a grouping, never a fabricated concrete object version.
   const resource = [bucket, `${bucket}/${object.name}`];
   const items: ContextAction[] = [
+    ...(onCalculateSize && !rewind
+      ? [
+          {
+            label: t("Calculate size"),
+            icon: <InspectMenuIcon />,
+            action: () => onCalculateSize(object.name),
+            state: { disabled: false },
+          },
+        ]
+      : []),
     {
       label: t("Download"),
       icon: <DownloadIcon />,

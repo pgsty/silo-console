@@ -18,6 +18,7 @@ import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import { Checkbox, BucketsIcon } from "mds";
 import { formatText, useT } from "i18n";
+import { BucketUsageStatus } from "./BucketUsageStatus";
 import { typography } from "../../../../common/ui/typography";
 import {
   BucketAccess,
@@ -29,7 +30,7 @@ import {
 
 const Card = styled.div`
   ${typography.body}
-  height: 112px;
+  min-height: 148px;
   box-sizing: border-box;
   min-width: 0;
   padding: 8px 12px 12px;
@@ -153,6 +154,7 @@ const BucketListItem = (props: BucketDisplayProps) => {
         </h2>
         <BucketRowActions {...props} />
       </div>
+      <BucketUsageStatus bucket={bucket.name} />
       <div className="cardMetrics">
         <div>
           <span className="metricLabel">{t("Objects")}</span>
@@ -161,7 +163,7 @@ const BucketListItem = (props: BucketDisplayProps) => {
           </span>
         </div>
         <div>
-          <span className="metricLabel">{t("Size")}</span>
+          <span className="metricLabel">{t("Current size")}</span>
           <span className="metricValue">
             <BucketUsage {...props} field="size" />
           </span>

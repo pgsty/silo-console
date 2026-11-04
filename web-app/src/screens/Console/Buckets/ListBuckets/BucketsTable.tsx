@@ -22,6 +22,7 @@ import { formatText, useT } from "i18n";
 import { niceBytesInt } from "../../../../common/utils";
 import { typography } from "../../../../common/ui/typography";
 import { BucketQuery, BucketSort } from "./bucketList";
+import { BucketUsageStatus } from "./BucketUsageStatus";
 import {
   BucketAccess,
   BucketCreated,
@@ -331,17 +332,21 @@ export default function BucketsTable({
       id: "name",
       label: t("Name"),
       sort: "name",
-      render: ({ bucket, obOnly }) =>
-        bucketCapabilities(bucket.name, obOnly).browse ? (
-          <Link
-            to={`/browser/${encodeURIComponent(bucket.name)}`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            {bucket.name}
-          </Link>
-        ) : (
-          bucket.name
-        ),
+      render: ({ bucket, obOnly }) => (
+        <div>
+          {bucketCapabilities(bucket.name, obOnly).browse ? (
+            <Link
+              to={`/browser/${encodeURIComponent(bucket.name)}`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {bucket.name}
+            </Link>
+          ) : (
+            bucket.name
+          )}
+          <BucketUsageStatus bucket={bucket.name} />
+        </div>
+      ),
     },
     {
       id: "objects",
@@ -353,7 +358,7 @@ export default function BucketsTable({
     },
     {
       id: "size",
-      label: t("Size"),
+      label: t("Current size"),
       number: true,
       sort: "size",
       render: (props) => <BucketUsage {...props} field="size" />,
@@ -429,7 +434,11 @@ export default function BucketsTable({
       aria-rowcount={records.length + 1}
       aria-colcount={columns.length + (common.onSelect ? 1 : 0)}
       data-selection={Boolean(common.onSelect)}
-      style={{ "--bucket-row-height": `${rowHeight}px` } as React.CSSProperties}
+      style={
+        {
+          "--bucket-row-height": `${Math.max(rowHeight, 64)}px`,
+        } as React.CSSProperties
+      }
     >
       <Header role="row" className="bucketGrid" aria-rowindex={1}>
         {common.onSelect && (
@@ -496,7 +505,7 @@ export default function BucketsTable({
             role="rowgroup"
             aria-label={t("Bucket rows")}
             rowCount={records.length}
-            rowHeight={rowHeight}
+            rowHeight={Math.max(rowHeight, 64)}
             rowComponent={BucketRow}
             rowProps={rows}
             overscanCount={6}

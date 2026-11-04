@@ -42,7 +42,7 @@ for (const [bytes, size, unit] of [
   [110 * 1024 ** 3, "110", "Gi"],
   [1025 * 1024 ** 3, "1025", "Gi"],
   [1024 ** 5, "1", "Pi"],
-  [1024 ** 6, "1", "Ei"],
+  [Number.MAX_SAFE_INTEGER, "9007199254740991", "B"],
 ] as const) {
   test(`unchanged quota ${bytes} B keeps ${size} ${unit} without writing`, async ({
     configPage: page,
@@ -63,6 +63,10 @@ for (const [size, unit] of [
   ["1.234", "Gi"],
   ["1000", "Ei"],
   ["8", "Ei"],
+  ["7", "Ei"],
+  ["9007199254740992", "B"],
+  ["9007199254740993", "B"],
+  ["9223372036854775807", "B"],
   ["0.5", "B"],
 ] as const) {
   test(`enabled quota rejects ${JSON.stringify(size)} ${unit}`, async ({
@@ -85,7 +89,8 @@ for (const [size, unit, amount] of [
   ["1.01", "Mi", 1059061],
   ["1025", "B", 1025],
   ["1", "Pi", 1024 ** 5],
-  ["7", "Ei", 7 * 1024 ** 6],
+  ["9007199254740991", "B", 9007199254740991],
+  ["7.99", "Pi", 8995940255672565],
 ] as const) {
   test(`enabled quota writes ${size} ${unit} as ${amount} bytes`, async ({
     configPage: page,
@@ -143,3 +148,31 @@ test("saving an already disabled quota does not write", async ({
   await expect(page.getByTestId("closed")).toHaveText("true");
   expect(requests).toEqual([]);
 });
+
+for (const bytes of [2 ** 53, 7 * 1024 ** 6, 2 ** 63]) {
+  test(`an existing unsafe quota ${bytes} cannot be silently rewritten`, async ({
+    configPage: page,
+  }) => {
+    const requests = await mount(page, bytes);
+    await expect(page.locator("#quota_size")).toHaveValue("");
+    await expect(page.locator("#save")).toBeDisabled();
+    await expect(
+      page.getByText(
+        "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
+      ),
+    ).toBeVisible();
+    await page.locator("form").dispatchEvent("submit");
+    expect(requests).toEqual([]);
+    // Clearing remains available, and does not serialize the rounded old value.
+    await page.locator("#bucket_quota").uncheck();
+    await page.locator("#save").click();
+    await expect(page.getByTestId("closed")).toHaveText("true");
+    expect(requests).toEqual([
+      {
+        method: "PUT",
+        path: "/api/v1/buckets/test-bucket/quota",
+        body: { enabled: false, amount: 0, quota_type: "hard" },
+      },
+    ]);
+  });
+}

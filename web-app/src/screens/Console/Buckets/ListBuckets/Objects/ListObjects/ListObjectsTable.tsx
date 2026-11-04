@@ -55,6 +55,10 @@ import { setSnackBarMessage } from "systemSlice";
 import { routeObjectIdentity } from "../objectIdentity";
 import { captureTaskSession } from "../../../../ObjectBrowser/transferManager";
 import { ObjectRowMenu } from "./ObjectRowMenu";
+import { usePrefixUsage } from "../../../../ObjectBrowser/usePrefixUsage";
+import { PrefixUsagePanel } from "../../../../ObjectBrowser/PrefixUsagePanel";
+import { formatUsageBytes } from "../../../../ObjectBrowser/prefixUsage";
+
 import {
   keyAction,
   moveIndex,
@@ -69,9 +73,11 @@ import {
 const ListObjectsTable = ({
   filterRef,
   emptyActions,
+  usageRefresh,
 }: {
   filterRef: React.RefObject<HTMLInputElement>;
   emptyActions: () => ContextAction[];
+  usageRefresh?: { bucket: string; prefix: string; id: number };
 }) => {
   const dispatch = useAppDispatch();
   const t = useT();
@@ -157,6 +163,73 @@ const ListObjectsTable = ({
   const anonymousMode = useSelector(
     (state: AppState) => state.system.anonymousMode,
   );
+  const usageEnabled =
+    !anonymousMode &&
+    !rewindEnabled &&
+    hasPermission(bucketName, [IAM_SCOPES.S3_LIST_BUCKET]);
+  const usage = usePrefixUsage(bucketName, simplePath || "", usageEnabled);
+  const [usageVersions, setUsageVersions] = useState(false);
+  const handledRefresh = useRef<number>();
+  useEffect(() => {
+    if (
+      !usageRefresh ||
+      handledRefresh.current === usageRefresh.id ||
+      usageRefresh.bucket !== bucketName ||
+      usageRefresh.prefix !== (simplePath || "")
+    )
+      return;
+    handledRefresh.current = usageRefresh.id;
+    if (usageEnabled)
+      void usage.start(
+        simplePath || "",
+        usageVersions &&
+          hasPermission(bucketName, [IAM_SCOPES.S3_LIST_BUCKET_VERSIONS]),
+        true,
+      );
+  }, [
+    usageRefresh,
+    bucketName,
+    simplePath,
+    usageEnabled,
+    usageVersions,
+    usage.start,
+  ]);
+  const folderUsage = (name: string) => {
+    const frame = usage.scan?.frame;
+    if (!usageEnabled || !frame) return undefined;
+    const stats =
+      frame.prefix === name
+        ? frame.totals
+        : frame.folders.find((folder) => folder.prefix === name)?.usage;
+    if (!stats) return undefined;
+    const complete =
+      frame.status === "complete" &&
+      !usage.scan?.outcome &&
+      !usage.scan?.running;
+    return {
+      stats,
+      complete,
+      at: frame.updated_at,
+      versions: frame.mode === "versions",
+    };
+  };
+  const folderSize = (name: string) => {
+    const value = folderUsage(name);
+    return value
+      ? `${value.complete ? "" : "≥ "}${formatUsageBytes(value.stats.current_bytes)}${value.complete ? "" : ` (${t("Partial")})`}`
+      : t("Size unavailable");
+  };
+
+  const folderBytes = useMemo(() => {
+    const frame = usageEnabled ? usage.scan?.frame : undefined;
+    const values = new Map<string, string>();
+    if (frame) {
+      for (const folder of frame.folders)
+        values.set(folder.prefix, folder.usage.current_bytes);
+      if (frame.prefix) values.set(frame.prefix, frame.totals.current_bytes);
+    }
+    return values;
+  }, [usageEnabled, usage.scan?.frame]);
 
   const displayListObjects = hasPermission(bucketName, [
     IAM_SCOPES.S3_LIST_BUCKET,
@@ -173,8 +246,9 @@ const ListObjectsTable = ({
         searchObjects,
         currentSortField,
         sortDirection,
+        folderBytes,
       ),
-    [records, searchObjects, currentSortField, sortDirection],
+    [records, searchObjects, currentSortField, sortDirection, folderBytes],
   );
 
   const openPath = async (object: BucketObject, previewOnly = false) => {
@@ -461,6 +535,17 @@ const ListObjectsTable = ({
 
   return (
     <Fragment>
+      {usageEnabled && (
+        <PrefixUsagePanel
+          usage={usage}
+          prefix={simplePath || ""}
+          versions={usageVersions}
+          setVersions={setUsageVersions}
+          canListVersions={hasPermission(bucketName, [
+            IAM_SCOPES.S3_LIST_BUCKET_VERSIONS,
+          ])}
+        />
+      )}
       <DataTable
         interaction={{
           activeId,
@@ -474,7 +559,7 @@ const ListObjectsTable = ({
             }
           },
           rowLabel: (item: BucketObjectItem) =>
-            `${item.name}, ${item.name.endsWith("/") ? t("Folder") : t("File")}, ${item.name.endsWith("/") ? t("Size unavailable") : niceBytes(String(item.size || 0))}`,
+            `${item.name}, ${item.name.endsWith("/") ? t("Folder") : t("File")}, ${item.name.endsWith("/") ? folderSize(item.name) : niceBytes(String(item.size || 0))}`,
           onKeyDown: handleKey,
           onPointerDown: () => {
             pointerOrigin.current = activeId;
@@ -509,10 +594,42 @@ const ListObjectsTable = ({
         itemActions={tableActions}
         columns={[
           ...(rewindEnabled ? rewindModeColumns(t) : listModeColumns(t)).map(
-            (column) =>
-              detailsOpen && column.priority === "medium"
-                ? { ...column, priority: "low" as const }
-                : column,
+            (column) => {
+              const adjusted =
+                detailsOpen && column.priority === "medium"
+                  ? { ...column, priority: "low" as const }
+                  : column;
+              if (rewindEnabled || column.elementKey !== "size")
+                return adjusted;
+              return {
+                ...adjusted,
+                width: 160,
+                renderFunction: (item: BucketObjectItem) => {
+                  if (!item.name.endsWith("/"))
+                    return item.size === undefined
+                      ? "-"
+                      : niceBytes(String(item.size));
+                  const value = folderUsage(item.name);
+                  if (!value) return "-";
+                  return (
+                    <span
+                      title={`${value.stats.current_bytes} B · ${value.stats.current_objects} ${t("Current objects")} · ${t("Calculated at")}: ${new Date(value.at).toLocaleString()}`}
+                    >
+                      {folderSize(item.name)}
+                      {value.versions && (
+                        <small
+                          style={{ display: "block" }}
+                          title={`${value.stats.retained_bytes} B`}
+                        >
+                          {t("Retained size")}:{" "}
+                          {formatUsageBytes(value.stats.retained_bytes)}
+                        </small>
+                      )}
+                    </span>
+                  );
+                },
+              };
+            },
           ),
           {
             label: t("Actions"),
@@ -591,6 +708,19 @@ const ListObjectsTable = ({
               object={menu.object}
               position={position}
               preview={menu.preview}
+              onCalculateSize={
+                usageEnabled && !usage.scan?.running
+                  ? (name) =>
+                      void usage.start(
+                        name,
+                        usageVersions &&
+                          hasPermission(bucketName, [
+                            IAM_SCOPES.S3_LIST_BUCKET_VERSIONS,
+                          ]),
+                        false,
+                      )
+                  : undefined
+              }
               onPreviewReady={() =>
                 setMenu((current) =>
                   current ? { ...current, pendingPreview: false } : null,

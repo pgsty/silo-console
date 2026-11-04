@@ -45,6 +45,7 @@ require (
 	github.com/go-openapi/validate v1.0.1
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
+	github.com/jackc/pgx/v5 v5.11.0
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/klauspost/compress v1.20.3
 	github.com/minio/cli v1.24.2
@@ -124,6 +125,9 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/huandu/xstrings v1.6.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.8.3 // indirect
 	github.com/juju/ratelimit v1.0.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.1 // indirect

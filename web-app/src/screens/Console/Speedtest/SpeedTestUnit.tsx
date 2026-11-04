@@ -69,12 +69,12 @@ const SpeedTestUnit = ({
   objects: number;
 }) => {
   const t = useT();
-  const avg = calculateBytes(throughput);
+  const avg = calculateBytes(throughput, true, false);
 
-  let total = "0";
+  let total = avg.total === null ? t("N/A") : "0";
   let unit = "";
 
-  if (avg.total !== 0) {
+  if (avg.total !== null && avg.total !== 0) {
     total = avg.total.toString();
     unit = `${avg.unit}/s`;
   }

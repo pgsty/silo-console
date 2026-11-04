@@ -82,3 +82,9 @@ small connection budget (`CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS`, per client
 handshake is refused and the browser falls back to retrying, while signed-in
 sessions are unaffected. See docs/Environment.md, "WebSocket connection
 limits".
+
+## Calculate folder sizes
+
+Use **Calculate folder sizes** in the object list, or **Calculate size** in a
+folder's actions menu. [Folder sizes](FolderSizes.md) explains retained versions,
+partial results, permissions, operator limits and the streaming API.

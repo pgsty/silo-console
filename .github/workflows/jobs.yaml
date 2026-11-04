@@ -1647,6 +1647,25 @@ jobs:
       - compile-binary-istanbul-coverage
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: usage_test
+          POSTGRES_PASSWORD: usage_test
+          POSTGRES_DB: usage_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usage_test -d usage_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      CONSOLE_USAGE_DATABASE_URL: postgres://usage_test:usage_test@127.0.0.1:5432/usage_test?sslmode=disable
+      CONSOLE_USAGE_UI_POLL_INTERVAL: 250ms
+      CONSOLE_USAGE_POLL_INTERVAL: 100ms
+      CONSOLE_USAGE_EVENT_DEBOUNCE: 100ms
+      CONSOLE_USAGE_MIN_SCAN_INTERVAL: 0s
+      CONSOLE_USAGE_RECONCILE_INTERVAL: 1s
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Read .nvmrc
@@ -1678,9 +1697,32 @@ jobs:
       - name: Prepare the coordinated SILO fixture
         uses: ./.github/actions/test-silo
 
-      - name: Start Console, front-end app and initialize users/policies
+      - name: Initialize users/policies and start Console with its usage worker
         run: |
-          (./console server) & (make initialize-permissions)
+          set -euo pipefail
+          make initialize-permissions
+          CONSOLE_USAGE_S3_ACCESS_KEY=minioadmin CONSOLE_USAGE_S3_SECRET_KEY=minioadmin \
+            CONSOLE_USAGE_HTTP_ADDRESS=127.0.0.1:19091 \
+            ./console usage-worker > "$RUNNER_TEMP/playwright-usage-worker.log" 2>&1 &
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:19091/ready >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat "$RUNNER_TEMP/playwright-usage-worker.log"; exit 1; fi
+          ./console server > "$RUNNER_TEMP/playwright-console.log" 2>&1 &
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:9090/ >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat "$RUNNER_TEMP/playwright-console.log"; exit 1; fi
 
       - name: Run Playwright tests
         working-directory: web-app
@@ -1719,6 +1761,15 @@ jobs:
           name: group-status-results
           path: ${{ runner.temp }}/console-group-status-results
           if-no-files-found: warn
+
+      - name: Retain Console and usage worker diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-service-logs
+          path: |
+            ${{ runner.temp }}/playwright-console.log
+            ${{ runner.temp }}/playwright-usage-worker.log
 
   sharing-boundary:
     name: Shared downloads in standalone and embedded SILO
@@ -1778,6 +1829,68 @@ jobs:
           path: ${{ runner.temp }}/sharing-results
           if-no-files-found: warn
 
+  usage-integration:
+    name: Usage worker with PostgreSQL and maintained SILO
+    needs:
+      - compile-silo
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: usage_test
+          POSTGRES_PASSWORD: usage_test
+          POSTGRES_DB: usage_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usage_test -d usage_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: Restore the maintained SILO fixture
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ runner.temp }}/silo-fixture/silo
+          key: ${{ runner.os }}-silo-fixture-${{ github.run_id }}
+          fail-on-cache-miss: true
+      - name: Test leases, checkpoints, live events and caller permissions
+        env:
+          TEST_USAGE_DATABASE_URL: postgres://usage_test:usage_test@127.0.0.1:5432/usage_test?sslmode=disable
+          TEST_USAGE_S3_ENDPOINT: http://127.0.0.1:19000
+          TEST_USAGE_S3_ACCESS_KEY: usage-test-root
+          TEST_USAGE_S3_SECRET_KEY: usage-test-disposable-secret
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/usage-data"
+          MINIO_ROOT_USER="$TEST_USAGE_S3_ACCESS_KEY" MINIO_ROOT_PASSWORD="$TEST_USAGE_S3_SECRET_KEY" MINIO_BROWSER=off \
+            "$RUNNER_TEMP/silo-fixture/silo" server --address 127.0.0.1:19000 "$RUNNER_TEMP/usage-data" > "$RUNNER_TEMP/usage-silo.log" 2>&1 &
+          silo_pid=$!
+          trap 'kill "$silo_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent "$TEST_USAGE_S3_ENDPOINT/minio/health/live" >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat "$RUNNER_TEMP/usage-silo.log"; exit 1; fi
+          # Native packages share one disposable storage endpoint and queue.
+          # Keep their fixture lifetimes separate; concurrency within each
+          # worker/lease test remains enabled under the race detector.
+          go test -race -p 1 -tags=integration,storageintegration ./pkg/usage ./api -count=1 -timeout=10m
+      - name: Retain storage fixture diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-storage-log
+          path: ${{ runner.temp }}/usage-silo.log
+
   required-matrix:
     # The release gate (release.yaml) and branch protection look at this one
     # job. It lists every release-gating job explicitly and fails unless each
@@ -1821,6 +1934,7 @@ jobs:
       - cross-compile-5
       - playwright
       - sharing-boundary
+      - usage-integration
     runs-on: ubuntu-latest
     steps:
       - name: Require every job to succeed

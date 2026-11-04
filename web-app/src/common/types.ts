@@ -21,7 +21,7 @@ export interface ErrorResponseHandler {
 }
 
 export interface IBytesCalc {
-  total: number;
+  total: number | null;
   unit: string;
 }
 

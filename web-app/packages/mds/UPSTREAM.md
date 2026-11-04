@@ -438,3 +438,12 @@ after keyboard navigation. If the tab list has no focused tab, it reveals the
 selected tab as before. Manual activation and selection remain unchanged;
 regressions deliver a real resize after End and verify that focus remains visible
 without changing selection.
+
+### Byte measurements and unavailable values
+
+`calculateBytes` now consumes complete decimal/exponent strings and bounds its
+unit index for fractional rates and very large measurements. Invalid, negative
+and non-finite values return an explicit null total and empty unit. Console uses
+this same exported helper with its optional Kubernetes unit table. Speed and
+capacity consumers render unavailable measurements as N/A; Speedtest and
+SizeChart retain decimal rates instead of truncating them to whole units.

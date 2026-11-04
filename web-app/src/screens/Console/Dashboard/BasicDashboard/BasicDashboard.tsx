@@ -106,7 +106,7 @@ const getServersList = (usage: AdminInfoResponse | undefined) => {
 
 const prettyUsage = (usage: string | undefined) => {
   if (usage === undefined) {
-    return { total: "0", unit: "Mi" };
+    return { total: null, unit: "" };
   }
 
   return calculateBytes(usage);
@@ -132,7 +132,7 @@ const getClusterUptime = (servers: ServerProperties[]) => {
 const BasicDashboard = ({ usage }: IDashboardProps) => {
   const t = useT();
   const localize = useLocalizedLink();
-  const usageValue = usage && usage.usage ? usage.usage.toString() : "0";
+  const usageValue = usage?.usage?.toString() ?? "";
   const usageToRepresent = prettyUsage(usageValue);
   const serverList = getServersList(usage);
   const upTime = getClusterUptime(serverList);
@@ -264,7 +264,7 @@ const BasicDashboard = ({ usage }: IDashboardProps) => {
             >
               <ReportedUsage
                 usageValue={usageValue}
-                total={usageToRepresent.total}
+                total={usageToRepresent.total ?? t("N/A")}
                 unit={usageToRepresent.unit}
               />
 

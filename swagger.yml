@@ -174,6 +174,52 @@ paths:
       tags:
         - Account
 
+  /bucket-usage/status:
+    post:
+      summary: Read authorized live bucket usage and refresh status
+      operationId: BucketUsageStatus
+      security:
+        - key: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/bucketUsageRequest"
+      responses:
+        200:
+          description: Saved observations and current queue state for permitted buckets.
+          schema:
+            $ref: "#/definitions/bucketUsageResponse"
+        default:
+          description: Usage status unavailable.
+          schema:
+            $ref: "#/definitions/ApiError"
+      tags: [Bucket]
+  /bucket-usage/refresh:
+    post:
+      summary: Request an on-demand prioritized bucket usage refresh
+      description: Repeated requests join existing work. Cached usage is disclosed only after checking the caller's current S3 listing permissions.
+      operationId: BucketUsageRefresh
+      security:
+        - key: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/bucketUsageRequest"
+      responses:
+        202:
+          description: Current prioritized queue state; this is not a completed scan.
+          schema:
+            $ref: "#/definitions/bucketUsageResponse"
+        default:
+          description: Refresh request unavailable.
+          schema:
+            $ref: "#/definitions/ApiError"
+      tags: [Bucket]
+
   /buckets:
     get:
       summary: List Buckets
@@ -290,6 +336,54 @@ paths:
             $ref: "#/definitions/ApiError"
       tags:
         - Bucket
+
+  /buckets/{bucket_name}/prefix-usage:
+    get:
+      summary: Calculate live folder usage
+      description: >-
+        Explicit, cancellable metadata scan using the signed-in user's S3 listing
+        permissions. Streams newline-delimited prefixUsageFrame snapshots. Only
+        a complete frame is a total; limited, failed, or interrupted scans are
+        partial. Current and retained-version bytes are logical object sizes,
+        not physical drive allocation. Contents can change during the scan.
+      operationId: PrefixUsage
+      security:
+        - key: []
+      produces:
+        - application/x-ndjson
+      parameters:
+        - name: bucket_name
+          in: path
+          required: true
+          type: string
+        - name: prefix
+          in: query
+          required: true
+          allowEmptyValue: true
+          type: string
+          maxLength: 1024
+          description: Empty for bucket root, otherwise a folder prefix ending in slash.
+        - name: versions
+          in: query
+          type: boolean
+          default: false
+          description: Include retained object versions and delete markers; requires version-list permission.
+        - name: folders
+          in: query
+          type: boolean
+          default: true
+          description: Include immediate child-folder summaries; false calculates only this prefix.
+      responses:
+        200:
+          description: Newline-delimited prefixUsageFrame snapshots ending in complete, limited, or failed.
+          schema:
+            type: file
+        default:
+          description: Generic error response before streaming begins.
+          schema:
+            $ref: "#/definitions/ApiError"
+      tags:
+        - Object
 
   /buckets/{bucket_name}/objects:
     get:
@@ -3222,6 +3316,196 @@ paths:
         - Public
 
 definitions:
+  bucketUsageRequest:
+    type: object
+    required: [buckets]
+    properties:
+      buckets:
+        type: array
+        maxItems: 1000
+        items:
+          type: string
+          minLength: 3
+          maxLength: 63
+  bucketUsageTotals:
+    type: object
+    required: [current_bytes, current_objects]
+    properties:
+      current_bytes:
+        type: string
+        pattern: "^[0-9]+$"
+      current_objects:
+        type: integer
+        format: int64
+        minimum: 0
+      retained_bytes:
+        type: string
+        pattern: "^[0-9]+$"
+        x-nullable: true
+      retained_versions:
+        type: integer
+        format: int64
+        minimum: 0
+        x-nullable: true
+      delete_markers:
+        type: integer
+        format: int64
+        minimum: 0
+        x-nullable: true
+  bucketUsageSnapshot:
+    type: object
+    required: [totals, scanned_entries, started_at, updated_at]
+    properties:
+      totals:
+        $ref: "#/definitions/bucketUsageTotals"
+      scanned_entries:
+        type: integer
+        format: int64
+        minimum: 0
+        description: Counts only visible current objects when the caller lacks version-list permission.
+      started_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
+  bucketUsageRecord:
+    type: object
+    required: [bucket, state, versions_visible]
+    properties:
+      bucket:
+        type: string
+      state:
+        type: string
+        enum: [not_scanned, queued, running, complete, error, limited, forbidden, missing, unavailable]
+      versions_visible:
+        type: boolean
+      requested_at:
+        type: string
+        format: date-time
+        x-nullable: true
+      last_event_at:
+        type: string
+        format: date-time
+        x-nullable: true
+      last_completed_at:
+        type: string
+        format: date-time
+        x-nullable: true
+      last_good:
+        $ref: "#/definitions/bucketUsageSnapshot"
+      progress:
+        $ref: "#/definitions/bucketUsageSnapshot"
+      error_code:
+        type: string
+      message:
+        type: string
+  bucketUsageCoverage:
+    type: object
+    required: [observer_alive, connected, reconciled]
+    properties:
+      observer_alive:
+        type: boolean
+      connected:
+        type: boolean
+      reconciled:
+        type: boolean
+      last_connected_at:
+        type: string
+        format: date-time
+        x-nullable: true
+      last_disconnect_at:
+        type: string
+        format: date-time
+        x-nullable: true
+      last_reconciled_at:
+        type: string
+        format: date-time
+        x-nullable: true
+  bucketUsageResponse:
+    type: object
+    required: [enabled, poll_after_ms, buckets]
+    properties:
+      enabled:
+        type: boolean
+      poll_after_ms:
+        type: integer
+        format: int64
+        minimum: 250
+        maximum: 60000
+      coverage:
+        $ref: "#/definitions/bucketUsageCoverage"
+      buckets:
+        type: array
+        items:
+          $ref: "#/definitions/bucketUsageRecord"
+  prefixUsageStats:
+    type: object
+    required: [current_bytes, current_objects, retained_bytes, retained_versions, delete_markers]
+    properties:
+      current_bytes:
+        type: string
+        pattern: "^[0-9]+$"
+        description: Decimal bytes preserve precision above JavaScript's exact integer range.
+      current_objects:
+        type: integer
+        format: int64
+        minimum: 0
+      retained_bytes:
+        type: string
+        pattern: "^[0-9]+$"
+      retained_versions:
+        type: integer
+        format: int64
+        minimum: 0
+      delete_markers:
+        type: integer
+        format: int64
+        minimum: 0
+  prefixUsageFolder:
+    type: object
+    required: [prefix, usage]
+    properties:
+      prefix:
+        type: string
+      usage:
+        $ref: "#/definitions/prefixUsageStats"
+  prefixUsageFrame:
+    type: object
+    required: [status, bucket, prefix, mode, started_at, updated_at, scanned_entries, totals, folders]
+    properties:
+      status:
+        type: string
+        enum: [scanning, complete, limited, failed]
+      bucket:
+        type: string
+      prefix:
+        type: string
+      mode:
+        type: string
+        enum: [current, versions]
+      started_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
+      scanned_entries:
+        type: integer
+        format: int64
+        minimum: 0
+      totals:
+        $ref: "#/definitions/prefixUsageStats"
+      folders:
+        type: array
+        items:
+          $ref: "#/definitions/prefixUsageFolder"
+      reason:
+        type: string
+        enum: [duration, entries, folders, upstream]
+      message:
+        type: string
+
   accountChangePasswordRequest:
     type: object
     required:
