@@ -2,13 +2,31 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from "react";
-import { useT, formatText } from "i18n";
+import styled from "styled-components";
+import { useT, formatText, useLanguage } from "i18n";
+import { typography } from "../../../../common/ui/typography";
 import { useBucketUsageView } from "./useBucketUsage";
+
+// One caption line under a bucket name or size. It never wraps, so table rows
+// and cards keep a fixed rhythm; the full text remains available as a title.
+export const UsageCaption = styled.small`
+  ${typography.caption}
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+`;
+
+export const usageLocale = (language: string) =>
+  language === "zh" ? "zh-CN" : "en";
 
 export function BucketUsageStatus({ bucket }: { bucket: string }) {
   const usage = useBucketUsageView();
   const row = usage?.records[bucket];
   const t = useT();
+  const locale = usageLocale(useLanguage());
   if (!usage || (!row && !usage.enabled)) return null;
   const labels = {
     not_scanned: t("Not scanned"),
@@ -21,34 +39,40 @@ export function BucketUsageStatus({ bucket }: { bucket: string }) {
     missing: t("Bucket no longer exists"),
     unavailable: t("Usage temporarily unavailable"),
   };
+  const completed = row?.last_completed_at
+    ? new Date(row.last_completed_at)
+    : undefined;
+  const text = [
+    row ? labels[row.state] : t("Checking usage…"),
+    row?.state === "running" && row.progress
+      ? formatText(t("{count} entries scanned"), {
+          count: row.progress.scanned_entries.toLocaleString(locale),
+        })
+      : "",
+    completed && Number.isFinite(completed.getTime())
+      ? completed.toLocaleTimeString(locale)
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
-    <small
-      style={{
-        display: "block",
-        fontWeight: 400,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
+    <UsageCaption
       title={
-        row?.last_completed_at
-          ? new Date(row.last_completed_at).toLocaleString()
-          : undefined
+        completed && Number.isFinite(completed.getTime())
+          ? `${text} (${completed.toLocaleString(locale)})`
+          : text
       }
     >
-      {row ? labels[row.state] : t("Checking usage…")}
-      {row?.state === "running" && row.progress
-        ? ` · ${formatText(t("{count} entries scanned"), { count: row.progress.scanned_entries.toLocaleString() })}`
-        : ""}
-      {row?.last_completed_at
-        ? ` · ${new Date(row.last_completed_at).toLocaleTimeString()}`
-        : ""}
-    </small>
+      {text}
+    </UsageCaption>
   );
 }
 
 export function BucketUsageNotice() {
   const usage = useBucketUsageView();
   const t = useT();
+  // Chinese sentences end in full-width punctuation and need no extra space.
+  const gap = useLanguage() === "zh" ? "" : " ";
   if (!usage) return null;
   const rows = Object.values(usage.records);
   const pending = rows.filter(
@@ -72,9 +96,8 @@ export function BucketUsageNotice() {
               ),
               { count: pending },
             )
-          : t(
-              "Refresh requests a new metadata scan of all listed buckets.",
-            )}{" "}
+          : t("Refresh requests a new metadata scan of all listed buckets.")}
+      {gap}
       {usage.error
         ? t("Usage status is unavailable. Retrying…")
         : usage.enabled
@@ -90,7 +113,7 @@ export function BucketUsageNotice() {
             : t("Checking automatic updates…")}
       {failed > 0 && (
         <>
-          {" "}
+          {gap}
           {formatText(
             t("{count} updates need attention. Use Refresh to retry."),
             { count: failed },

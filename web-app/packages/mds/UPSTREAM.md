@@ -447,3 +447,8 @@ and non-finite values return an explicit null total and empty unit. Console uses
 this same exported helper with its optional Kubernetes unit table. Speed and
 capacity consumers render unavailable measurements as N/A; Speedtest and
 SizeChart retain decimal rates instead of truncating them to whole units.
+
+The parser is exported as `parseByteMeasurement`, so Console's text formatter
+(`niceBytes`) treats blank, null, hexadecimal and negative input as N/A exactly
+as `calculateBytes` does. `scaleBytes` carries a value that rounds up to the
+next unit, so 1048575 bytes renders as 1 MiB rather than 1024 KiB.

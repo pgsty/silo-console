@@ -10,7 +10,7 @@
 // Untranslated strings simply fall back to English at runtime.
 
 export const zh: Record<string, string> = {
-  Retained: "保留版本",
+  "Retained: {size}": "保留：{size}",
   "Not scanned": "尚未扫描",
   "Update queued": "更新已排队",
   "Updating usage…": "正在更新用量…",

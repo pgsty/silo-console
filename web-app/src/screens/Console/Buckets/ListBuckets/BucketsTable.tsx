@@ -47,7 +47,7 @@ const Shell = styled.div`
     display: grid;
     grid-template-columns:
       minmax(120px, 1.8fr)
-      minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.1fr)
+      minmax(0, 0.7fr) minmax(0, 1.1fr) minmax(0, 1fr)
       minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.1fr)
       minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
     align-items: center;
@@ -59,7 +59,7 @@ const Shell = styled.div`
   &[data-selection="true"] .bucketGrid {
     grid-template-columns:
       var(--bucket-select-width) minmax(120px, 1.8fr)
-      minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.1fr)
+      minmax(0, 0.7fr) minmax(0, 1.1fr) minmax(0, 1fr)
       minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.1fr)
       minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
   }
@@ -72,6 +72,13 @@ const Shell = styled.div`
   .bucketCell a {
     color: inherit;
     text-decoration: none;
+  }
+  /* Text overflow applies per line; the name and its usage caption are blocks. */
+  .bucketName {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .bucketCell a:hover {
     text-decoration: underline;
@@ -126,13 +133,13 @@ const Shell = styled.div`
   @media (max-width: 1199.98px) {
     .bucketGrid {
       grid-template-columns:
-        minmax(100px, 1.6fr) minmax(0, 0.7fr) minmax(0, 0.8fr)
+        minmax(100px, 1.6fr) minmax(0, 0.6fr) minmax(0, 1fr)
         minmax(0, 1fr) minmax(0, 1fr) var(--bucket-menu-width);
     }
     &[data-selection="true"] .bucketGrid {
       grid-template-columns:
         var(--bucket-select-width) minmax(100px, 1.6fr)
-        minmax(0, 0.7fr) minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1fr) var(
+        minmax(0, 0.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) var(
           --bucket-menu-width
         );
     }
@@ -142,14 +149,15 @@ const Shell = styled.div`
   }
   @media (max-width: 767.98px) {
     .bucketGrid {
-      grid-template-columns: minmax(0, 1fr) 76px var(--bucket-menu-width);
+      /* Room for "Retained: 9.5 MiB" under the current size. */
+      grid-template-columns: minmax(0, 1fr) 104px var(--bucket-menu-width);
       padding: 0 8px;
       gap: 4px;
     }
     &[data-selection="true"] .bucketGrid {
-      grid-template-columns: var(--bucket-select-width) minmax(0, 1fr) 76px var(
-          --bucket-menu-width
-        );
+      grid-template-columns:
+        var(--bucket-select-width) minmax(0, 1fr)
+        104px var(--bucket-menu-width);
     }
     .bucketMedium {
       display: none;
@@ -192,7 +200,14 @@ const Header = styled.div`
   button > svg {
     width: 12px;
     height: 12px;
+    flex-shrink: 0;
     fill: currentColor;
+  }
+  /* A narrow column truncates its label, never the sort direction. */
+  .sortLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 const Body = styled.div`
@@ -333,19 +348,21 @@ export default function BucketsTable({
       label: t("Name"),
       sort: "name",
       render: ({ bucket, obOnly }) => (
-        <div>
-          {bucketCapabilities(bucket.name, obOnly).browse ? (
-            <Link
-              to={`/browser/${encodeURIComponent(bucket.name)}`}
-              onClick={(event) => event.stopPropagation()}
-            >
-              {bucket.name}
-            </Link>
-          ) : (
-            bucket.name
-          )}
+        <>
+          <span className="bucketName" title={bucket.name}>
+            {bucketCapabilities(bucket.name, obOnly).browse ? (
+              <Link
+                to={`/browser/${encodeURIComponent(bucket.name)}`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                {bucket.name}
+              </Link>
+            ) : (
+              bucket.name
+            )}
+          </span>
           <BucketUsageStatus bucket={bucket.name} />
-        </div>
+        </>
       ),
     },
     {
@@ -440,7 +457,15 @@ export default function BucketsTable({
         } as React.CSSProperties
       }
     >
-      <Header role="row" className="bucketGrid" aria-rowindex={1}>
+      <Header
+        role="row"
+        className="bucketGrid"
+        aria-rowindex={1}
+        // Two-line usage rows are taller; the header keeps the table height.
+        style={
+          { "--bucket-row-height": `${rowHeight}px` } as React.CSSProperties
+        }
+      >
         {common.onSelect && (
           <div role="columnheader" className="bucketCheck">
             <Checkbox
@@ -476,7 +501,7 @@ export default function BucketsTable({
                 aria-label={column.label}
                 onClick={() => onSort(column.sort!)}
               >
-                {column.label}
+                <span className="sortLabel">{column.label}</span>
                 {query.sort === column.sort &&
                   (query.dir === "asc" ? <ArrowDropUp /> : <ArrowDropDown />)}
               </button>

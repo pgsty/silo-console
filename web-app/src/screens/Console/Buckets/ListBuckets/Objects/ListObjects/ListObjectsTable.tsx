@@ -535,7 +535,7 @@ const ListObjectsTable = ({
 
   return (
     <Fragment>
-      {usageEnabled && (
+      {usageEnabled && (records.length > 0 || usage.scan) && (
         <PrefixUsagePanel
           usage={usage}
           prefix={simplePath || ""}

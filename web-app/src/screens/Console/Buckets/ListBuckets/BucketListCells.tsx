@@ -24,6 +24,7 @@ import { Hint } from "../../../../common/ui/shared";
 import { niceBytesInt } from "../../../../common/utils";
 import { hasUsageTimestamp, listBucketStatistic } from "./bucketList";
 import { useBucketUsageView } from "./useBucketUsage";
+import { UsageCaption } from "./BucketUsageStatus";
 import { formatUsageBytes } from "../../ObjectBrowser/prefixUsage";
 
 export const bucketCapabilities = (name: string, obOnly: boolean) => ({
@@ -74,12 +75,11 @@ export const BucketUsage = ({
           {formatUsageBytes(totals.current_bytes)}
         </span>
         {totals.retained_bytes != null && (
-          <small
-            style={{ display: "block" }}
-            title={`${totals.retained_bytes} B`}
-          >
-            {t("Retained")}: {formatUsageBytes(totals.retained_bytes)}
-          </small>
+          <UsageCaption title={`${totals.retained_bytes} B`}>
+            {formatText(t("Retained: {size}"), {
+              size: formatUsageBytes(totals.retained_bytes),
+            })}
+          </UsageCaption>
         )}
       </>
     );

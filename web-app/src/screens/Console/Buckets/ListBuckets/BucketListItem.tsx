@@ -79,10 +79,14 @@ const Card = styled.div`
     text-decoration: underline;
   }
   .cardMetrics {
-    display: flex;
-    justify-content: space-between;
+    /* Fixed tracks keep each metric aligned across every card. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
     gap: 12px;
     margin-top: 4px;
+  }
+  .cardMetrics > div {
+    min-width: 0;
   }
   .metricLabel {
     ${typography.caption} color: var(--muted-foreground);

@@ -2,10 +2,35 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import React from "react";
-import { Button } from "mds";
-import { useT } from "i18n";
+import styled from "styled-components";
+import { Button, Checkbox } from "mds";
+import { useLanguage, useT } from "i18n";
+import { typography } from "../../../common/ui/typography";
 import { formatUsageBytes } from "./prefixUsage";
 import type { usePrefixUsage } from "./usePrefixUsage";
+
+// A strip inside the listing card: it shares the card's border instead of
+// drawing a second box, and uses the caption scale for secondary text.
+const Panel = styled.section`
+  padding: var(--silo-space-12) var(--silo-space-16);
+  border-bottom: 1px solid var(--border);
+  .usageActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--silo-space-12);
+  }
+  .usageHint {
+    ${typography.caption}
+    margin: var(--silo-space-8) 0 0;
+    color: var(--muted-foreground);
+  }
+  .usageResult {
+    margin-top: var(--silo-space-8);
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+`;
 
 type Usage = ReturnType<typeof usePrefixUsage>;
 export function PrefixUsagePanel({
@@ -22,6 +47,7 @@ export function PrefixUsagePanel({
   canListVersions: boolean;
 }) {
   const t = useT();
+  const locale = useLanguage() === "zh" ? "zh-CN" : "en";
   const { scan } = usage;
   const frame = scan?.frame;
   const complete = !scan?.outcome && frame?.status === "complete";
@@ -37,23 +63,8 @@ export function PrefixUsagePanel({
             ? t("Completed")
             : "";
   return (
-    <section
-      aria-label={t("Folder sizes")}
-      style={{
-        padding: "var(--silo-space-12)",
-        border: "1px solid var(--silo-border)",
-        borderRadius: 6,
-        marginBottom: "var(--silo-space-12)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: "var(--silo-space-12)",
-        }}
-      >
+    <Panel aria-label={t("Folder sizes")}>
+      <div className="usageActions">
         <Button
           id="calculate-folder-sizes"
           label={t("Calculate folder sizes")}
@@ -63,15 +74,13 @@ export function PrefixUsagePanel({
             void usage.start(prefix, versions && canListVersions, true)
           }
         />
-        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <input
-            type="checkbox"
-            checked={versions && canListVersions}
-            disabled={!!scan?.running || !canListVersions}
-            onChange={(event) => setVersions(event.target.checked)}
-          />
-          {t("Include retained versions")}
-        </label>
+        <Checkbox
+          id="folder-sizes-versions"
+          label={t("Include retained versions")}
+          checked={versions && canListVersions}
+          disabled={!!scan?.running || !canListVersions}
+          onChange={(event) => setVersions(event.target.checked)}
+        />
         {scan?.running && (
           <Button
             id="cancel-folder-sizes"
@@ -81,23 +90,17 @@ export function PrefixUsagePanel({
           />
         )}
       </div>
-      <p
-        style={{
-          margin: "8px 0",
-          color: "var(--silo-text-muted)",
-          fontSize: 12,
-        }}
-      >
+      <p className="usageHint">
         {t(
           "Scans object metadata without downloading files. Contents can change during the scan. Sizes are logical bytes, not physical disk usage.",
         )}
       </p>
       {scan && (
         <div
+          className="usageResult"
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          style={{ overflowWrap: "anywhere" }}
         >
           <strong>{status}</strong>
           {" · "}
@@ -106,7 +109,7 @@ export function PrefixUsagePanel({
             <>
               <div>
                 {t("Current objects")}:{" "}
-                {frame.totals.current_objects.toLocaleString()}
+                {frame.totals.current_objects.toLocaleString(locale)}
                 {" · "}
                 {t("Current size")}:{" "}
                 <span title={`${frame.totals.current_bytes} B`}>
@@ -117,7 +120,7 @@ export function PrefixUsagePanel({
               {frame.mode === "versions" && (
                 <div>
                   {t("Retained versions")}:{" "}
-                  {frame.totals.retained_versions.toLocaleString()}
+                  {frame.totals.retained_versions.toLocaleString(locale)}
                   {" · "}
                   {t("Retained size")}:{" "}
                   <span title={`${frame.totals.retained_bytes} B`}>
@@ -126,21 +129,22 @@ export function PrefixUsagePanel({
                   </span>
                   {" · "}
                   {t("Delete markers")}:{" "}
-                  {frame.totals.delete_markers.toLocaleString()}
+                  {frame.totals.delete_markers.toLocaleString(locale)}
                 </div>
               )}
               <div>
-                {t("Entries scanned")}: {frame.scanned_entries.toLocaleString()}
+                {t("Entries scanned")}:{" "}
+                {frame.scanned_entries.toLocaleString(locale)}
                 {" · "}
                 {t("Calculated at")}:{" "}
                 <time dateTime={frame.updated_at}>
-                  {new Date(frame.updated_at).toLocaleString()}
+                  {new Date(frame.updated_at).toLocaleString(locale)}
                 </time>
               </div>
             </>
           )}
         </div>
       )}
-    </section>
+    </Panel>
   );
 }
