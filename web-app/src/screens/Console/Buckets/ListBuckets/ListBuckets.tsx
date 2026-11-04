@@ -45,7 +45,7 @@ import {
   IAM_SCOPES,
   permissionTooltipHelper,
 } from "../../../../common/SecureComponent/permissions";
-import { EmptyState, Freshness, SkeletonRows } from "../../../../common/ui";
+import { EmptyState, SkeletonRows } from "../../../../common/ui";
 import { ModalPresence } from "../../../../common/ui/ModalPresence";
 import { typography } from "../../../../common/ui/typography";
 import { useRecentBuckets } from "../../../../navigation/RecentBucketsProvider";
@@ -54,12 +54,13 @@ import withSuspense from "../../Common/Components/withSuspense";
 import SearchBox from "../../Common/SearchBox";
 import { formatText, useT } from "i18n";
 import BucketListItem from "./BucketListItem";
+import { BucketUsageProvider, useBucketUsage } from "./useBucketUsage";
+import { BucketUsageNotice } from "./BucketUsageStatus";
 import BucketsTable from "./BucketsTable";
 import { bucketCapabilities } from "./BucketListCells";
 import {
   BucketView,
   filterSortBuckets,
-  hasUsageTimestamp,
   parseBucketView,
   toggleVisibleBuckets,
 } from "./bucketList";
@@ -210,9 +211,20 @@ const ListBuckets = () => {
     }
   }, [view]);
   const records = listing?.buckets || [];
+  const usage = useBucketUsage(records.map((bucket) => bucket.name));
+  const refreshUsage = () => {
+    refresh();
+    usage.refresh();
+  };
   const filtered = useMemo(
     () =>
-      filterSortBuckets(records, query, canReadUsage, listing?.usageUpdatedAt),
+      filterSortBuckets(
+        records,
+        query,
+        canReadUsage,
+        listing?.usageUpdatedAt,
+        usage.records,
+      ),
     [
       records,
       query.sort,
@@ -220,6 +232,7 @@ const ListBuckets = () => {
       query.q,
       canReadUsage,
       listing?.usageUpdatedAt,
+      usage.records,
     ],
   );
   const canSelect =
@@ -283,7 +296,7 @@ const ListBuckets = () => {
     />
   ) : undefined;
   return (
-    <>
+    <BucketUsageProvider value={usage}>
       <ModalPresence open={bulk?.type === "replication"}>
         {bulk?.type === "replication" && (
           <BulkReplicationModal
@@ -334,15 +347,6 @@ const ListBuckets = () => {
               sx={{ width: "100%" }}
             />
           </div>
-          {canReadUsage && (
-            <div className="bucketFreshness">
-              <Freshness
-                at={listing?.usageUpdatedAt}
-                pending={!hasUsageTimestamp(listing?.usageUpdatedAt)}
-                prefix="Calculated"
-              />
-            </div>
-          )}
           <div className="bucketActions">
             <div
               className="bucketView"
@@ -370,8 +374,8 @@ const ListBuckets = () => {
               id="refresh-buckets"
               aria-label={t("Refresh buckets")}
               size="medium"
-              disabled={loading}
-              onClick={refresh}
+              disabled={loading || usage.requesting}
+              onClick={refreshUsage}
             >
               <RefreshIcon />
             </IconButton>
@@ -459,6 +463,7 @@ const ListBuckets = () => {
             )}
           </div>
         </Toolbar>
+        <BucketUsageNotice />
         {selected.length > 0 && (
           <Selection role="status">
             {formatText(
@@ -473,7 +478,7 @@ const ListBuckets = () => {
             )}
           </Selection>
         )}
-        {loading ? (
+        {loading && !listing ? (
           <Frame>
             <SkeletonRows rows={5} columns={4} />
           </Frame>
@@ -540,7 +545,7 @@ const ListBuckets = () => {
           </Cards>
         )}
       </PageLayout>
-    </>
+    </BucketUsageProvider>
   );
 };
 export default ListBuckets;

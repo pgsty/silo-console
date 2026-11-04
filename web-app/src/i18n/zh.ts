@@ -10,6 +10,54 @@
 // Untranslated strings simply fall back to English at runtime.
 
 export const zh: Record<string, string> = {
+  Retained: "保留版本",
+  "Not scanned": "尚未扫描",
+  "Update queued": "更新已排队",
+  "Updating usage…": "正在更新用量…",
+  Updated: "已更新",
+  "Update failed — retry with Refresh": "更新失败 — 请刷新重试",
+  "Scan limit reached — operator action required":
+    "达到扫描限制 — 需要管理员处理",
+  "Usage listing not permitted": "没有列出用量的权限",
+  "Bucket no longer exists": "存储桶已不存在",
+  "Usage temporarily unavailable": "用量暂时不可用",
+  "Checking usage…": "正在检查用量…",
+  "{count} entries scanned": "已扫描 {count} 个条目",
+  "Requesting usage updates…": "正在请求更新用量…",
+  "{count} usage updates queued or running. Last completed totals remain visible.":
+    "{count} 个用量更新已排队或正在运行。仍显示上次完成的统计。",
+  "Refresh requests a new metadata scan of all listed buckets.":
+    "刷新会请求重新扫描所有已列出存储桶的元数据。",
+  "Usage status is unavailable. Retrying…": "用量状态不可用。正在重试…",
+  "Automatic change monitoring is active.": "自动变更监控已启用。",
+  "Automatic change monitoring is recovering; totals may be out of date.":
+    "自动变更监控正在恢复；统计可能已过时。",
+  "Automatic updates are not configured. Refresh calculates usage while this page is open.":
+    "尚未配置自动更新。刷新会在此页面打开期间计算用量。",
+  "Checking automatic updates…": "正在检查自动更新…",
+  "{count} updates need attention. Use Refresh to retry.":
+    "{count} 个更新需要处理。请刷新重试。",
+
+  "Folder sizes": "文件夹大小",
+  "Calculate folder sizes": "计算文件夹大小",
+  "Calculate size": "计算大小",
+  "Include retained versions": "包含保留版本",
+  Calculating: "计算中",
+  "Canceled — totals are partial": "已取消 — 统计不完整",
+  "Calculation failed — totals are partial": "计算失败 — 统计不完整",
+  "Scan limit reached — totals are partial. Try a smaller folder.":
+    "已达到扫描限制 — 统计不完整。请尝试较小的文件夹。",
+  "Current objects": "当前对象",
+  "Current size": "当前大小",
+  "Retained versions": "保留版本",
+  "Retained size": "保留大小",
+  "Delete markers": "删除标记",
+  "Entries scanned": "已扫描条目",
+  "Calculated at": "计算时间",
+  Partial: "不完整",
+  "Scans object metadata without downloading files. Contents can change during the scan. Sizes are logical bytes, not physical disk usage.":
+    "仅扫描对象元数据，不下载文件。扫描期间内容可能变化。大小为逻辑字节数，而非磁盘实际占用。",
+
   "Keyboard shortcuts": "键盘快捷键",
   "Move through objects": "在对象之间移动",
   "Move one visible page": "移动一个可见页面",

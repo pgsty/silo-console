@@ -10,7 +10,7 @@ committer timestamp. Build execution time is not embedded in them. The same
 commit timestamp supplies `SOURCE_DATE_EPOCH` to OCI builds. Archive ownership,
 binary modification times and package file times are normalized.
 
-Use Go **1.27.3**, Node **24.22.1**, Yarn **4.13.0**, GoReleaser **2.19.0**,
+Use Go **1.27.3**, Node **24.22.1**, Yarn **4.18.1**, GoReleaser **2.19.0**,
 Docker Buildx **0.36.1** and the reviewed image digests in `Dockerfile`. Build
 from a clean checkout with `GOWORK=off`, `CGO_ENABLED=0`, `TZ=UTC` and `LC_ALL=C`.
 Use the committed `go.sum`, Yarn lockfile and Yarn patches without local module

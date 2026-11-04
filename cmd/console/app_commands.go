@@ -30,6 +30,7 @@ import (
 
 var appCmds = []cli.Command{
 	serverCmd,
+	usageWorkerCmd,
 	updateCmd,
 	versionCmd,
 	licenseCmd,
