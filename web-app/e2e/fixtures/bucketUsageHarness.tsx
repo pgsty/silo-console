@@ -28,6 +28,9 @@ function Workbench() {
     <BucketUsageProvider value={usage}>
       <button onClick={usage.refresh}>Refresh</button>
       <button onClick={() => setNames(["other-bucket"])}>Navigate</button>
+      <button onClick={() => setNames(["fixture-bucket", "other-bucket"])}>
+        Add bucket
+      </button>
       <BucketUsageNotice />
       {names.map((name) => (
         <section key={name} aria-label={name}>

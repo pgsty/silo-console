@@ -51,20 +51,49 @@ export const fractionToPerc = (fraction: "auto" | number | boolean) => {
   return `${percCalculate}%`;
 };
 
+// parseByteMeasurement accepts complete non-negative decimal/exponent strings
+// and finite numbers. Anything else, including hexadecimal, blank, null and
+// negative input, is unavailable rather than a misleading zero.
+export const parseByteMeasurement = (x: unknown): number | null => {
+  if (typeof x === "string") {
+    if (!/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(x.trim())) {
+      return null;
+    }
+  } else if (typeof x !== "number") {
+    return null;
+  }
+  const bytes = Number(x);
+  return Number.isFinite(bytes) && bytes >= 0 ? bytes : null;
+};
+
+// scaleBytes selects the largest bounded unit and carries a value that rounds
+// up to the next unit, so 1048575 bytes is "1 MiB" rather than "1024 KiB".
+export const scaleBytes = (
+  bytes: number,
+  displayUnits: readonly string[],
+  round: (value: number) => number,
+): { value: number; unit: number } => {
+  let unit = 0;
+  let value = bytes;
+  while (value >= 1024 && unit < displayUnits.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  if (round(value) >= 1024 && unit < displayUnits.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return { value, unit };
+};
+
 export const calculateBytes = (
   x: string | number,
   showDecimals = false,
   roundFloor = true,
   displayUnits: readonly string[] = units,
 ): IBytesCalc => {
-  if (
-    typeof x === "string" &&
-    !/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(x.trim())
-  ) {
-    return { total: null, unit: "" };
-  }
-  const bytes = Number(x);
-  if (!Number.isFinite(bytes) || bytes < 0 || displayUnits.length === 0) {
+  const bytes = parseByteMeasurement(x);
+  if (bytes === null || displayUnits.length === 0) {
     return { total: null, unit: "" };
   }
   if (bytes === 0) {
@@ -72,16 +101,12 @@ export const calculateBytes = (
   }
   // Bound both ends: fractional rates stay in bytes, very large measurements
   // stay in the largest supported unit. Parse the entire decimal/exponent input.
-  let i = 0;
-  let bytesUnit = bytes;
-  while (bytesUnit >= 1024 && i < displayUnits.length - 1) {
-    bytesUnit /= 1024;
-    i++;
-  }
   const fractionDigits = showDecimals ? 1 : 0;
-  const roundedUnit = roundFloor ? Math.floor(bytesUnit) : bytesUnit;
+  const round = (value: number) =>
+    Number((roundFloor ? Math.floor(value) : value).toFixed(fractionDigits));
+  const scaled = scaleBytes(bytes, displayUnits, round);
   return {
-    total: Number(roundedUnit.toFixed(fractionDigits)),
-    unit: displayUnits[i],
+    total: round(scaled.value),
+    unit: displayUnits[scaled.unit],
   };
 };

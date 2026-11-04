@@ -488,6 +488,14 @@ func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucke
 	if br.Retention != nil && *br.Retention.Validity <= 0 {
 		return nil, ErrorWithContext(ctx, ErrBadRequest)
 	}
+	// Object locking cannot exclude prefixes or folders from versioning. Reject
+	// the combination instead of creating a bucket without the exclusions.
+	if (br.Locking || br.Retention != nil) && br.Versioning != nil &&
+		(br.Versioning.ExcludeFolders || len(br.Versioning.ExcludePrefixes) > 0) {
+		apiErr := ErrorWithContext(ctx, ErrBadRequest)
+		apiErr.APIError.DetailedMessage = "versioning exclusions cannot be combined with object locking or retention"
+		return nil, apiErr
+	}
 	mClient, err := newMinioClient(session, getClientIP(params.HTTPRequest))
 	if err != nil {
 		return nil, ErrorWithContext(ctx, err)
@@ -538,6 +546,7 @@ func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucke
 		excludePrefixes := []string{}
 		excludeFolders := false
 
+		// Validation above rejects exclusions on a locked bucket.
 		if br.Versioning != nil && !br.Locking {
 			excludeFolders = br.Versioning.ExcludeFolders
 			excludePrefixes = br.Versioning.ExcludePrefixes

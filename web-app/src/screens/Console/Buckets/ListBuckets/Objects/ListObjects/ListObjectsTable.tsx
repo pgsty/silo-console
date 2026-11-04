@@ -535,6 +535,8 @@ const ListObjectsTable = ({
 
   return (
     <Fragment>
+      {/* Shown even when the current listing is empty: a versioned folder
+          whose objects were all deleted can still hold retained bytes. */}
       {usageEnabled && (
         <PrefixUsagePanel
           usage={usage}

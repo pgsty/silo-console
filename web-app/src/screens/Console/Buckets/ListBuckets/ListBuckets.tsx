@@ -109,12 +109,17 @@ const Toolbar = styled.div`
     }
     .bucketActions {
       flex-basis: 100%;
-      flex-wrap: nowrap;
+      /* Touch-sized controls and longer labels can exceed a phone's width;
+         wrap the primary action instead of scrolling the page sideways. */
+      flex-wrap: wrap;
       justify-content: flex-start;
       gap: 8px;
     }
     .bucketView {
       margin-right: auto;
+    }
+    .bucketActions > #create-bucket {
+      margin-left: auto;
     }
   }
 `;

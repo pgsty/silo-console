@@ -322,3 +322,154 @@ for (const outcome of [
     }
   });
 }
+
+test("malformed saved observations are unknown instead of crashing exact sorting", async () => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.route("**/api/v1/bucket-usage/*", (route) =>
+    route.fulfill({
+      json: {
+        enabled: true,
+        poll_after_ms: 250,
+        coverage: { observer_alive: true, connected: true, reconciled: true },
+        buckets: [
+          {
+            bucket: "fixture-bucket",
+            state: "complete",
+            versions_visible: true,
+            last_good: {
+              ...snapshot,
+              totals: { ...snapshot.totals, current_bytes: "1.5e3" },
+            },
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto(base);
+  const row = page.getByRole("region", { name: "fixture-bucket" });
+  await expect(row).toContainText("Updated");
+  await expect(row).toContainText("—");
+  await expect(row).not.toContainText("Retained");
+  expect(errors).toEqual([]);
+});
+
+test("a temporarily unavailable bucket keeps the current totals already shown", async () => {
+  let unavailable = false;
+  await page.route("**/api/v1/bucket-usage/*", (route) => {
+    if (route.request().url().endsWith("/refresh")) unavailable = true;
+    return route.fulfill({
+      json: {
+        enabled: true,
+        poll_after_ms: 250,
+        coverage: { observer_alive: true, connected: true, reconciled: true },
+        buckets: [
+          unavailable
+            ? {
+                bucket: "fixture-bucket",
+                state: "unavailable",
+                versions_visible: false,
+                message: "Usage checks timed out.",
+              }
+            : {
+                bucket: "fixture-bucket",
+                state: "complete",
+                versions_visible: true,
+                last_good: snapshot,
+                last_completed_at: snapshot.updated_at,
+              },
+        ],
+      },
+    });
+  });
+  await page.goto(base);
+  const row = page.getByRole("region", { name: "fixture-bucket" });
+  await expect(row).toContainText("Retained: 512 B");
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(row).toContainText("Usage temporarily unavailable");
+  await expect(row).toContainText("1.5 KiB");
+  // Retained data needs a current version-list authorization.
+  await expect(row).not.toContainText("Retained");
+});
+
+test("a bucket-list change during Refresh still requests the refresh", async () => {
+  const refreshed: string[][] = [];
+  await page.route("**/api/v1/bucket-usage/*", async (route) => {
+    const buckets: string[] = route.request().postDataJSON().buckets;
+    if (route.request().url().endsWith("/refresh")) {
+      refreshed.push(buckets);
+      // Hold the first refresh so the list change aborts it in flight.
+      if (refreshed.length === 1)
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    await route
+      .fulfill({
+        json: {
+          enabled: true,
+          poll_after_ms: 250,
+          buckets: buckets.map((bucket) => ({
+            bucket,
+            state: "queued",
+            versions_visible: true,
+          })),
+        },
+      })
+      .catch(() => {});
+  });
+  await page.goto(base);
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect.poll(() => refreshed.length).toBe(1);
+  await page.getByRole("button", { name: "Add bucket" }).click();
+  await expect
+    .poll(() => refreshed)
+    .toEqual([["fixture-bucket"], ["fixture-bucket", "other-bucket"]]);
+  await expect(
+    page.getByRole("region", { name: "other-bucket" }),
+  ).toContainText("Update queued");
+});
+
+test("a list change during a foreground Refresh restarts it instead of leaving rows running", async () => {
+  const scanned: string[] = [];
+  await page.route("**/api/v1/bucket-usage/*", (route) =>
+    route.fulfill({
+      json: { enabled: false, poll_after_ms: 250, buckets: [] },
+    }),
+  );
+  await page.route("**/api/v1/buckets/*/prefix-usage*", async (route) => {
+    const bucket = new URL(route.request().url()).pathname.split("/")[4];
+    scanned.push(bucket);
+    if (scanned.length === 1)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    await route
+      .fulfill({
+        contentType: "application/x-ndjson",
+        body:
+          JSON.stringify({
+            ...snapshot,
+            bucket,
+            prefix: "",
+            mode: "versions",
+            status: "complete",
+            folders: [],
+          }) + "\n",
+      })
+      .catch(() => {});
+  });
+  await page.goto(base);
+  await expect(page.getByRole("status")).toContainText(
+    "Automatic updates are not configured",
+  );
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect.poll(() => scanned.length).toBe(1);
+  await page.getByRole("button", { name: "Add bucket" }).click();
+  for (const name of ["fixture-bucket", "other-bucket"]) {
+    const row = page.getByRole("region", { name });
+    await expect(row).toContainText("Updated");
+    await expect(row).toContainText("1.5 KiB");
+  }
+  expect([...scanned].sort()).toEqual([
+    "fixture-bucket",
+    "fixture-bucket",
+    "other-bucket",
+  ]);
+});

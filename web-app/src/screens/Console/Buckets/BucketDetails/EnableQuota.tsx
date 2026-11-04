@@ -26,7 +26,7 @@ import {
   Grid,
   ProgressBar,
 } from "mds";
-import { getBytes, k8sScalarUnitsExcluding } from "../../../../common/utils";
+import { getBytes } from "../../../../common/utils";
 
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
@@ -41,12 +41,8 @@ import { errorToHandler } from "api/errors";
 import {
   getQuotaBytes,
   isValidQuota,
+  quotaUnitOptions as quotaUnits,
 } from "../ListBuckets/AddBucket/addBucketValidation";
-
-const quotaUnits = [
-  { label: "B", value: "B" },
-  ...k8sScalarUnitsExcluding(["Ki"]),
-];
 
 // An editor must retain bytes; display-only rounding is unsuitable here.
 const editableQuota = (bytes: number) => {
@@ -83,6 +79,9 @@ const EnableQuota = ({
   const [quotaEnabled, setQuotaEnabled] = useState<boolean>(false);
   const [quotaSize, setQuotaSize] = useState<string>("1");
   const [quotaUnit, setQuotaUnit] = useState<string>("Ti");
+  // An existing quota outside the exact JSON integer range is not editable.
+  const unsafeQuota =
+    enabled && !!cfg?.quota && !Number.isSafeInteger(cfg.quota);
   const quotaAmount = getQuotaBytes(quotaSize, quotaUnit);
   const validInput = !quotaEnabled || isValidQuota(quotaSize, quotaUnit);
 
@@ -102,9 +101,12 @@ const EnableQuota = ({
     if (loading || !validInput) {
       return;
     }
+    // Reject repeated submissions until this write settles.
+    setLoading(true);
 
     const amount = quotaEnabled ? quotaAmount : 0;
     if (quotaEnabled === enabled && (!quotaEnabled || amount === cfg?.quota)) {
+      setLoading(false);
       closeModalAndRefresh();
       return;
     }
@@ -176,11 +178,15 @@ const EnableQuota = ({
                 />
               }
               error={
-                !validInput
-                  ? t(
-                      "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
-                    )
-                  : ""
+                validInput
+                  ? ""
+                  : unsafeQuota && quotaSize === ""
+                    ? t(
+                        "The current quota is 8 PiB or larger, which the browser cannot edit exactly. Change it with mcli, enter a smaller quota, or disable it here.",
+                      )
+                    : t(
+                        "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
+                      )
               }
             />
           )}
