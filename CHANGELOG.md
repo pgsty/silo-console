@@ -21,6 +21,9 @@
 - Hide and disable object details and version controls while a new route is
   rendering, so navigation never leaves the previous object's panel actionable
   under the new URL, including on slow CPUs.
+- Apply the three-minute keep-alive default to embedded Console servers as well
+  as the CLI, allowing HTTP/2 assets to reuse one connection. Explicitly setting
+  `--keep-alive=0` continues to disable reuse.
 - Upgrade `golang.org/x/net` to v0.62.0 for GO-2026-6860 and GO-2026-6866, and
   select the `golang.org/x/crypto` revision containing the GO-2026-5932 fix.
   Retain the go-systemd v22.6.0 NetBSD portability pin and the existing
