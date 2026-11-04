@@ -63,8 +63,10 @@ require (
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.12.1
 	github.com/unrolled/secure v1.17.0
-	golang.org/x/crypto v0.58.0
-	golang.org/x/net v0.61.0
+	// Includes the GO-2026-5932 openpgp carve-out fix.
+	golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2
+	// Includes the GO-2026-6860 and GO-2026-6866 HTML parser fixes.
+	golang.org/x/net v0.62.0
 	golang.org/x/oauth2 v0.37.0
 )
 
