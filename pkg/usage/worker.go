@@ -194,9 +194,13 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 		}
 	}()
 	var events <-chan notification.Info
+	var streamDone chan struct{}
 	defer func() {
 		cancel()
 		<-renewed
+		if streamDone != nil {
+			<-streamDone
+		}
 		operation, stop := context.WithTimeout(context.Background(), c.Heartbeat)
 		_ = s.ReleaseObserver(operation, owner)
 		stop()
@@ -217,6 +221,29 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 		return
 	}
 	events = client.ListenNotification(streamCtx, "", "", []string{"s3:ObjectCreated:*", "s3:ObjectRemoved:*"})
+	// The storage server drops notifications for a subscriber that stops
+	// reading, without closing the stream. Consume the stream continuously, so
+	// reconciliation and database writes on the loop below cannot lose changes
+	// while coverage still reports a reconciled connection. Pending work is one
+	// entry per bucket, bounded by the inventory rather than the event rate.
+	pending := &pendingChanges{buckets: map[string]time.Time{}}
+	streamDone = make(chan struct{})
+	go func() {
+		defer close(streamDone)
+		for info := range events {
+			if info.Err != nil {
+				if ctx.Err() == nil {
+					log.Print("usage observer: change stream failed; coverage unavailable until recovery")
+				}
+				return
+			}
+			for _, event := range info.Records {
+				if bucket, at, ok := changedBucket(event); ok {
+					pending.add(bucket, at)
+				}
+			}
+		}
+	}()
 	heartbeat := time.NewTicker(c.Heartbeat)
 	defer heartbeat.Stop()
 	periodic := time.NewTicker(c.ReconcileInterval)
@@ -225,11 +252,11 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	defer full.Stop()
 	flush := time.NewTicker(c.PollInterval)
 	defer flush.Stop()
-	pending := map[string]time.Time{}
 	connected := false
 	var observedEpoch uint64
 	flushEvents := func() bool {
-		for bucket, at := range pending {
+		batch := pending.take()
+		for bucket, at := range batch {
 			parent := ctx
 			if ctx.Err() != nil {
 				parent = context.Background()
@@ -238,12 +265,13 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 			err := s.Queue(operation, bucket, false, c.EventDebounce, c.MinScanInterval, &at)
 			stop()
 			if err != nil {
+				pending.restore(batch)
 				if ctx.Err() == nil {
 					log.Print("usage observer: failed to persist changes; reconnect reconciliation required")
 				}
 				return false
 			}
-			delete(pending, bucket)
+			delete(batch, bucket)
 		}
 		return true
 	}
@@ -271,25 +299,10 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 		case <-ctx.Done():
 			flushEvents()
 			return
-		case info, open := <-events:
-			if !open {
-				return
-			}
-			if info.Err != nil {
-				if ctx.Err() == nil {
-					log.Print("usage observer: change stream failed; coverage unavailable until recovery")
-				}
-				return
-			}
-			for _, event := range info.Records {
-				bucket, at, ok := changedBucket(event)
-				if !ok {
-					continue
-				}
-				if previous, exists := pending[bucket]; !exists || at.After(previous) {
-					pending[bucket] = at
-				}
-			}
+		case <-streamDone:
+			// Persist what was received; the next observer reconciles the rest.
+			flushEvents()
+			return
 		case <-flush.C:
 			if !flushEvents() {
 				return
@@ -334,6 +347,36 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 			connected = active
 			observedEpoch = epoch
 		}
+	}
+}
+
+// pendingChanges coalesces received notifications into one invalidation per
+// bucket until the observer loop persists them.
+type pendingChanges struct {
+	sync.Mutex
+	buckets map[string]time.Time
+}
+
+func (p *pendingChanges) add(bucket string, at time.Time) {
+	p.Lock()
+	defer p.Unlock()
+	if previous, exists := p.buckets[bucket]; !exists || at.After(previous) {
+		p.buckets[bucket] = at
+	}
+}
+
+func (p *pendingChanges) take() map[string]time.Time {
+	p.Lock()
+	defer p.Unlock()
+	batch := p.buckets
+	p.buckets = map[string]time.Time{}
+	return batch
+}
+
+// restore returns unpersisted changes without discarding newer arrivals.
+func (p *pendingChanges) restore(batch map[string]time.Time) {
+	for bucket, at := range batch {
+		p.add(bucket, at)
 	}
 }
 
