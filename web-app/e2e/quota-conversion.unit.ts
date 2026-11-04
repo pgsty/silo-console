@@ -12,6 +12,9 @@ for (const [size, unit, exact] of [
   ["7.99", "Pi", "8995940255672565"],
   [".5", "Gi", "536870912"],
   ["1.01", "Mi", "1059061"],
+  ["1.25", "Gi", "1342177280"],
+  ["0.5", "Gi", "536870912"],
+  ["0001", "Ti", "1099511627776"],
 ]) {
   test(`quota ${size} ${unit} keeps exact bytes on the JSON wire`, () => {
     expect(isValidQuota(size, unit)).toBe(true);
@@ -29,6 +32,14 @@ for (const [size, unit] of [
   ["1", "unknown"],
   ["1e3", "Gi"],
   ["0.5", "B"],
+  ["8", "Pi"],
+  ["7.999", "Pi"],
+  ["-1", "Gi"],
+  [" 1", "Gi"],
+  ["1,5", "Gi"],
+  ["0x10", "B"],
+  ["", "Gi"],
+  ["0", "Gi"],
 ]) {
   test(`quota ${size} ${unit} cannot produce a supported write`, () => {
     expect(isValidQuota(size, unit)).toBe(false);

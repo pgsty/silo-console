@@ -15,7 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { IBytesCalc } from "./types";
-import { calculateBytes as calculateByteSize } from "../../packages/mds/src/global/utils";
+import {
+  calculateBytes as calculateByteSize,
+  parseByteMeasurement,
+  scaleBytes,
+} from "../../packages/mds/src/global/utils";
 
 import get from "lodash/get.js";
 import { i18nKey, getStoredLanguage, translate } from "../i18n/lang";
@@ -34,32 +38,25 @@ export const units = [
 const k8sUnits = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"];
 const k8sCalcUnits = ["B", ...k8sUnits];
 
+// niceBytes shares calculateBytes' parser, so Console and MDS agree on which
+// measurements are unavailable (blank, null, hexadecimal, negative, NaN).
 export const niceBytes = (
-  x: string | number,
+  x: string | number | null | undefined,
   showK8sUnits: boolean = false,
-) => {
-  if (typeof x === "string" && x.trim() === "") return "N/A";
-  const n = Number(x);
-
-  return niceBytesInt(n, showK8sUnits);
-};
+) => niceBytesInt(parseByteMeasurement(x) ?? NaN, showK8sUnits);
 
 export const niceBytesInt = (n: number, showK8sUnits: boolean = false) => {
-  if (!Number.isFinite(n)) return "N/A";
+  if (!Number.isFinite(n) || n < 0) return "N/A";
   if (n === 0) {
     return "0 B";
   }
-
-  let l = 0;
   const displayUnits = showK8sUnits ? ["B", ...k8sUnits] : units;
-
-  while (n >= 1024 && l < displayUnits.length - 1) {
-    l++;
-    n = n / 1024;
-  }
   // include a decimal point and a tenths-place digit if presenting
   // less than ten of KB or greater units
-  return n.toFixed(1) + " " + displayUnits[l];
+  const scaled = scaleBytes(n, displayUnits, (value) =>
+    Number(value.toFixed(1)),
+  );
+  return scaled.value.toFixed(1) + " " + displayUnits[scaled.unit];
 };
 
 export const deleteCookie = (name: string) => {

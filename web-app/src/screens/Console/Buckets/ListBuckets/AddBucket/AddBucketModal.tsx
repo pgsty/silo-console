@@ -33,7 +33,7 @@ import {
   SectionTitle,
   ProgressBar,
 } from "mds";
-import { k8sScalarUnitsExcluding } from "../../../../../common/utils";
+import { quotaUnitOptions } from "./addBucketValidation";
 import { AppState, useAppDispatch } from "../../../../../store";
 import { useSelector } from "react-redux";
 import {
@@ -573,7 +573,7 @@ const AddBucketModal = () => {
                             dispatch(setQuotaUnit(newValue));
                           }}
                           unitSelected={quotaUnit}
-                          unitsList={k8sScalarUnitsExcluding(["Ki"])}
+                          unitsList={quotaUnitOptions}
                           disabled={false}
                         />
                       }

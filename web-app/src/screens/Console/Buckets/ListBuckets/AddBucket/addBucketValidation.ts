@@ -19,6 +19,13 @@ export const getQuotaBytes = (size: string, unit: string): number => {
   return amount <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(amount) : NaN;
 };
 
+// Units offered by browser quota forms. Even 0.01 Ei exceeds the exact JSON
+// integer range, so an "Ei" option could never produce a valid write.
+export const quotaUnitOptions = ["B", "Mi", "Gi", "Ti", "Pi"].map((unit) => ({
+  label: unit,
+  value: unit,
+}));
+
 export const isValidQuota = (size: string, unit: string): boolean => {
   const amount = getQuotaBytes(size, unit);
   return Number.isSafeInteger(amount) && amount > 0;

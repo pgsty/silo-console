@@ -1335,6 +1335,8 @@ export const zhScreens: Record<string, string> = {
   "N/A": "不可用",
   "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.":
     "请输入大于 0 且小于 8 PiB 的配额，最多保留两位小数。更大的配额请使用 mcli 设置。",
+  "The current quota is 8 PiB or larger, which the browser cannot edit exactly. Change it with mcli, enter a smaller quota, or disable it here.":
+    "当前配额不小于 8 PiB，浏览器无法精确编辑。请使用 mcli 修改，或输入更小的配额，或在此停用配额。",
   "Please Login via the configured external identity provider.":
     "请通过已配置的外部身份提供方登录。",
   "Please note": "请注意",

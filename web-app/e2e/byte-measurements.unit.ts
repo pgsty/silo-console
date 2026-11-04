@@ -83,6 +83,54 @@ test("both byte helpers parse complete inputs and bound both unit tables", async
   }
 });
 
+test("Console text formatting rejects the same invalid inputs as calculateBytes", async () => {
+  const page = await browser.newPage();
+  try {
+    await page.setContent('<div id="root"></div>');
+    await page.addScriptTag({ content: script });
+    const results = await page.evaluate(() => {
+      const { calculateBytes, mdsBytes, niceBytes } = (window as any)
+        .byteMeasurements;
+      const invalid = [null, undefined, "", " ", "0x10", "1junk", "-1", -1];
+      return {
+        invalid: invalid.map((x) => niceBytes(x)),
+        invalidBytes: invalid.map((x) => calculateBytes(x)),
+        invalidMds: invalid.map((x) => mdsBytes(x)),
+        valid: ["0", "1", "1e+21", 0.5, "1048575", 1048575.9].map((x) =>
+          niceBytes(x),
+        ),
+        // A value that rounds up to the next unit must carry into it.
+        carried: [1048575, 1024 ** 3 - 1].map((x) =>
+          calculateBytes(x, true, false),
+        ),
+        floored: calculateBytes(1048575, true, true),
+      };
+    });
+    expect(results.invalid).toEqual(Array(8).fill("N/A"));
+    expect(results.invalidBytes).toEqual(
+      Array(8).fill({ total: null, unit: "" }),
+    );
+    expect(results.invalidMds).toEqual(
+      Array(8).fill({ total: null, unit: "" }),
+    );
+    expect(results.valid).toEqual([
+      "0 B",
+      "1.0 B",
+      "867.4 EiB",
+      "0.5 B",
+      "1.0 MiB",
+      "1.0 MiB",
+    ]);
+    expect(results.carried).toEqual([
+      { total: 1, unit: "MiB" },
+      { total: 1, unit: "GiB" },
+    ]);
+    expect(results.floored).toEqual({ total: 1023, unit: "KiB" });
+  } finally {
+    await page.close();
+  }
+});
+
 for (const [value, total, unit] of [
   ["1e+21", "867.4", "EiB"],
   ["0.5", "0.5", "B"],

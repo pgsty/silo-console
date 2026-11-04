@@ -10,14 +10,15 @@ import { expect, test } from "./fixtures/bucketConfigFixture";
 
 test.describe.configure({ mode: "default" });
 
-async function mount(page: Page, quota?: number) {
+async function mount(page: Page, quota?: number, delay = 0) {
   const requests: unknown[] = [];
-  await page.route("**/api/v1/**", (route) => {
+  await page.route("**/api/v1/**", async (route) => {
     requests.push({
       method: route.request().method(),
       path: new URL(route.request().url()).pathname,
       body: route.request().postDataJSON(),
     });
+    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
     return route.fulfill({ json: {} });
   });
   await page.goto(
@@ -61,9 +62,8 @@ for (const [size, unit] of [
   ["0", "Gi"],
   ["-1", "Gi"],
   ["1.234", "Gi"],
-  ["1000", "Ei"],
-  ["8", "Ei"],
-  ["7", "Ei"],
+  ["8", "Pi"],
+  ["8192", "Ti"],
   ["9007199254740992", "B"],
   ["9007199254740993", "B"],
   ["9223372036854775807", "B"],
@@ -117,7 +117,7 @@ test("changing only the unit revalidates the quota", async ({
   await mount(page, 1024 ** 3);
   await page.locator("#quota_size").fill("8");
   await expect(page.locator("#save")).toBeEnabled();
-  await selectUnit(page, "Ei");
+  await selectUnit(page, "Pi");
   await expect(page.locator("#save")).toBeDisabled();
   await selectUnit(page, "Gi");
   await expect(page.locator("#save")).toBeEnabled();
@@ -158,7 +158,7 @@ for (const bytes of [2 ** 53, 7 * 1024 ** 6, 2 ** 63]) {
     await expect(page.locator("#save")).toBeDisabled();
     await expect(
       page.getByText(
-        "Enter a positive quota below 8 PiB, with up to two decimal places. Use mcli for larger quotas.",
+        "The current quota is 8 PiB or larger, which the browser cannot edit exactly. Change it with mcli, enter a smaller quota, or disable it here.",
       ),
     ).toBeVisible();
     await page.locator("form").dispatchEvent("submit");
@@ -176,3 +176,38 @@ for (const bytes of [2 ** 53, 7 * 1024 ** 6, 2 ** 63]) {
     ]);
   });
 }
+
+test("the unit menu offers no unit that can never be written", async ({
+  configPage: page,
+}) => {
+  await mount(page, 1024 ** 3);
+  await page.locator("#quota_unit-button").click();
+  await expect(page.getByRole("option")).toHaveCount(5);
+  for (const unit of ["B", "Mi", "Gi", "Ti", "Pi"])
+    await expect(
+      page.getByRole("option", { name: unit, exact: true }),
+    ).toBeVisible();
+  await expect(
+    page.getByRole("option", { name: "Ei", exact: true }),
+  ).toHaveCount(0);
+});
+
+test("repeated submits write the quota once", async ({ configPage: page }) => {
+  const requests = await mount(page, undefined, 500);
+  await page.locator("#bucket_quota").check();
+  await page.locator("#quota_size").fill("2");
+  await selectUnit(page, "Gi");
+  const form = page.locator("form");
+  await form.dispatchEvent("submit");
+  await form.dispatchEvent("submit");
+  await form.dispatchEvent("submit");
+  await expect(page.locator("#save")).toBeDisabled();
+  await expect(page.getByTestId("closed")).toHaveText("true");
+  expect(requests).toEqual([
+    {
+      method: "PUT",
+      path: "/api/v1/buckets/test-bucket/quota",
+      body: { enabled: true, amount: 2 * 1024 ** 3, quota_type: "hard" },
+    },
+  ]);
+});
