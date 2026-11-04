@@ -26,11 +26,7 @@ import {
   Grid,
   ProgressBar,
 } from "mds";
-import {
-  calculateBytes,
-  getBytes,
-  k8sScalarUnitsExcluding,
-} from "../../../../common/utils";
+import { getBytes, k8sScalarUnitsExcluding } from "../../../../common/utils";
 
 import { modalStyleUtils } from "../../Common/FormComponents/common/styleLibrary";
 import ModalWrapper from "../../Common/ModalWrapper/ModalWrapper";
@@ -42,6 +38,26 @@ import { useAppDispatch } from "../../../../store";
 import { BucketQuota } from "api/consoleApi";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
+import {
+  getQuotaBytes,
+  isValidQuota,
+} from "../ListBuckets/AddBucket/addBucketValidation";
+
+const quotaUnits = [
+  { label: "B", value: "B" },
+  ...k8sScalarUnitsExcluding(["Ki"]),
+];
+
+// An editor must retain bytes; display-only rounding is unsuitable here.
+const editableQuota = (bytes: number) => {
+  for (const { value: unit } of [...quotaUnits].reverse()) {
+    const value = bytes / Number(getBytes("1", unit, true));
+    if (value < 1 && unit !== "B") continue;
+    const size = Number(value.toFixed(2)).toString();
+    if (Number(getBytes(size, unit, true)) === bytes) return { size, unit };
+  }
+  return { size: bytes.toString(), unit: "B" };
+};
 
 interface IEnableQuotaProps {
   open: boolean;
@@ -64,41 +80,36 @@ const EnableQuota = ({
   const [quotaEnabled, setQuotaEnabled] = useState<boolean>(false);
   const [quotaSize, setQuotaSize] = useState<string>("1");
   const [quotaUnit, setQuotaUnit] = useState<string>("Ti");
-  const [validInput, setValidInput] = useState<boolean>(false);
+  const quotaAmount = getQuotaBytes(quotaSize, quotaUnit);
+  const validInput = !quotaEnabled || isValidQuota(quotaSize, quotaUnit);
 
   useEffect(() => {
     if (enabled) {
       setQuotaEnabled(true);
       if (cfg) {
-        const unitCalc = calculateBytes(cfg.quota || 0, true, false, true);
+        const quota = editableQuota(cfg.quota || 0);
 
-        setQuotaSize(unitCalc.total.toString());
-        setQuotaUnit(unitCalc.unit);
-        setValidInput(true);
+        setQuotaSize(quota.size);
+        setQuotaUnit(quota.unit);
       }
     }
   }, [enabled, cfg]);
-
-  useEffect(() => {
-    const valRegExp = /^\d*(?:\.\d{1,2})?$/;
-
-    if (!quotaEnabled) {
-      setValidInput(true);
-      return;
-    }
-
-    setValidInput(valRegExp.test(quotaSize));
-  }, [quotaEnabled, quotaSize]);
 
   const enableBucketEncryption = () => {
     if (loading || !validInput) {
       return;
     }
 
+    const amount = quotaEnabled ? quotaAmount : 0;
+    if (quotaEnabled === enabled && (!quotaEnabled || amount === cfg?.quota)) {
+      closeModalAndRefresh();
+      return;
+    }
+
     api.buckets
       .setBucketQuota(selectedBucket, {
         enabled: quotaEnabled,
-        amount: parseInt(getBytes(quotaSize, quotaUnit, true)),
+        amount,
         quota_type: "hard",
       })
       .then(() => {
@@ -145,11 +156,6 @@ const EnableQuota = ({
               name="quota_size"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setQuotaSize(e.target.value);
-                if (!e.target.validity.valid) {
-                  setValidInput(false);
-                } else {
-                  setValidInput(true);
-                }
               }}
               label={t("Quota")}
               value={quotaSize}
@@ -162,7 +168,7 @@ const EnableQuota = ({
                     setQuotaUnit(newValue);
                   }}
                   unitSelected={quotaUnit}
-                  unitsList={k8sScalarUnitsExcluding(["Ki"])}
+                  unitsList={quotaUnits}
                   disabled={false}
                 />
               }

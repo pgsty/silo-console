@@ -18,6 +18,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -30,8 +31,53 @@ import (
 	"github.com/minio/console/models"
 	"github.com/minio/madmin-go/v3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
+
+func TestRequestCountWidgetWindow(t *testing.T) {
+	setPrometheusAuthEnv(t, "", "", "")
+	for _, tc := range []struct {
+		id            int32
+		title, metric string
+	}{
+		{60, "S3 API Requests (last 4 minutes)", "minio_api_requests_total"},
+		{71, "S3 API Request Errors (last 4 minutes)", "minio_api_requests_errors_total"},
+	} {
+		for _, step := range []int32{15, 60} {
+			t.Run(fmt.Sprintf("%d/step=%d", tc.id, step), func(t *testing.T) {
+				queries := make(chan string, 1)
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					switch r.URL.Path {
+					case "/-/healthy":
+						w.WriteHeader(http.StatusOK)
+					case "/api/v1/query_range":
+						queries <- r.URL.Query().Get("query")
+						assert.Equal(t, fmt.Sprint(step), r.URL.Query().Get("step"))
+						w.Header().Set("Content-Type", "application/json")
+						_, _ = fmt.Fprint(w, `{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"server":"node-1","name":"GetObject"},"values":[[1000,"2400"]]}]}}`)
+					default:
+						t.Errorf("unexpected Prometheus request: %s", r.URL)
+						w.WriteHeader(http.StatusNotFound)
+					}
+				}))
+				t.Cleanup(server.Close)
+				ctx := context.WithValue(context.Background(), utils.ContextClientIP, "127.0.0.1")
+				start, end := int64(0), int64(1000)
+				result, err := getWidgetDetails(ctx, server.URL, `job="silo"`, tc.id, &step, &start, &end)
+				require.Nil(t, err)
+				require.NotNil(t, result)
+				require.Equal(t, tc.title, result.Title)
+				require.Len(t, queries, 1)
+				require.Equal(t, fmt.Sprintf(`sum by (server,name) (increase(%s{job="silo"}[240s]))`, tc.metric), <-queries)
+				require.Len(t, result.Targets, 1)
+				require.Len(t, result.Targets[0].Result, 1)
+				require.Equal(t, []any{[]any{float64(1000), "2400"}}, result.Targets[0].Result[0].Values,
+					"counts must not be rescaled to per-second rates")
+			})
+		}
+	}
+}
 
 type AdminInfoTestSuite struct {
 	suite.Suite

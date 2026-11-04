@@ -384,3 +384,41 @@ func (suite *RemoteBucketsTestSuite) initUpdateMultiBucketReplicationRequest() (
 func TestRemoteBuckets(t *testing.T) {
 	suite.Run(t, new(RemoteBucketsTestSuite))
 }
+
+func TestReplicationBandwidthValidation(t *testing.T) {
+	previous := minioAddRemoteBucketMock
+	t.Cleanup(func() { minioAddRemoteBucketMock = previous })
+	for _, tc := range []struct {
+		name      string
+		mode      string
+		bandwidth int64
+		want      int64
+		invalid   bool
+	}{
+		{"negative", "async", -1, 0, true},
+		{"unlimited", "async", 0, 0, false},
+		{"fractional_Gi_converted_to_bytes", "async", 536870912, 536870912, false},
+		{"sync_does_not_apply_a_limit", "sync", 1234, 0, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			calls := 0
+			minioAddRemoteBucketMock = func(_ context.Context, _ string, target *madmin.BucketTarget) (string, error) {
+				calls++
+				assert.Equal(t, tc.want, target.BandwidthLimit)
+				return "test-arn", nil
+			}
+			_, err := addRemoteBucket(context.Background(), &AdminClientMock{}, models.CreateRemoteBucket{
+				TargetURL: swag.String("https://target.example"), TargetBucket: swag.String("target"),
+				AccessKey: swag.String("test-access"), SecretKey: swag.String("test-secret"),
+				SourceBucket: swag.String("source"), SyncMode: &tc.mode, Bandwidth: tc.bandwidth,
+			})
+			if tc.invalid {
+				assert.EqualError(t, err, "bandwidth must not be negative")
+				assert.Zero(t, calls)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, 1, calls)
+			}
+		})
+	}
+}

@@ -599,7 +599,7 @@ var widgets = []Metric{
 	},
 	{
 		ID:    60,
-		Title: "S3 API Request Rate",
+		Title: "S3 API Requests (last 4 minutes)",
 		Type:  "graph",
 		GridPos: GridPos{
 			H: 10,
@@ -616,7 +616,7 @@ var widgets = []Metric{
 	},
 	{
 		ID:    71,
-		Title: "S3 API Request Error Rate",
+		Title: "S3 API Request Errors (last 4 minutes)",
 		Type:  "graph",
 		GridPos: GridPos{
 			H: 10,

@@ -36,10 +36,12 @@ import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper"
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import QueryMultiSelector from "screens/Console/Common/FormComponents/QueryMultiSelector/QueryMultiSelector";
-import { getBytes, k8sScalarUnitsExcluding } from "common/utils";
+import { k8sScalarUnitsExcluding } from "common/utils";
 import get from "lodash/get";
 import InputUnitMenu from "screens/Console/Common/FormComponents/InputUnitMenu/InputUnitMenu";
 import { formatText, useT } from "i18n";
+
+import { getReplicationBandwidth } from "../replicationValidation";
 
 const AddBucketReplication = () => {
   const dispatch = useAppDispatch();
@@ -69,6 +71,11 @@ const AddBucketReplication = () => {
   const [bandwidthScalar, setBandwidthScalar] = useState<string>("100");
   const [bandwidthUnit, setBandwidthUnit] = useState<string>("Gi");
   const [healthCheck, setHealthCheck] = useState<string>("60");
+  const bandwidth = getReplicationBandwidth(
+    bandwidthScalar,
+    bandwidthUnit,
+    replicationMode,
+  );
   const [validated, setValidated] = useState<boolean>(false);
   const backLink = IAM_PAGES.BUCKETS + `/${bucketName}/admin/replication`;
   useEffect(() => {
@@ -77,6 +84,8 @@ const AddBucketReplication = () => {
   }, []);
 
   const addRecord = () => {
+    if (bandwidth === null) return;
+    setAddLoading(true);
     const replicate = [
       {
         originBucket: bucketName,
@@ -95,10 +104,7 @@ const AddBucketReplication = () => {
       region: region,
       bucketsRelation: replicate,
       syncMode: replicationMode,
-      bandwidth:
-        replicationMode === "async"
-          ? parseInt(getBytes(bandwidthScalar, bandwidthUnit, true))
-          : 0,
+      bandwidth,
       healthCheckPeriod: hc,
       prefix: prefix,
       tags: tags,
@@ -224,7 +230,6 @@ const AddBucketReplication = () => {
             autoComplete="off"
             onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
               e.preventDefault();
-              setAddLoading(true);
               addRecord();
             }}
           >
@@ -320,18 +325,21 @@ const AddBucketReplication = () => {
             {replicationMode === "async" && (
               <Box className={"inputItem"}>
                 <InputBox
-                  type="number"
                   id="bandwidth_scalar"
                   name="bandwidth_scalar"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e.target.validity.valid) {
-                      setBandwidthScalar(e.target.value as string);
-                    }
+                    setBandwidthScalar(e.target.value);
                   }}
                   label={t("Bandwidth")}
                   value={bandwidthScalar}
                   min="0"
-                  pattern={"[0-9]*"}
+                  error={
+                    bandwidth === null
+                      ? t(
+                          "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).",
+                        )
+                      : ""
+                  }
                   overlayObject={
                     <InputUnitMenu
                       id={"quota_unit"}
@@ -461,7 +469,7 @@ const AddBucketReplication = () => {
                 type="submit"
                 variant="callAction"
                 color="primary"
-                disabled={addLoading || !validated}
+                disabled={addLoading || !validated || bandwidth === null}
                 label={t("Save")}
               />
             </Grid>

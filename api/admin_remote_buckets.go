@@ -255,6 +255,9 @@ func deleteRemoteBucket(ctx context.Context, client MinioAdmin, sourceBucketName
 }
 
 func addRemoteBucket(ctx context.Context, client MinioAdmin, params models.CreateRemoteBucket) (string, error) {
+	if params.Bandwidth < 0 {
+		return "", errors.New("bandwidth must not be negative")
+	}
 	TargetURL := *params.TargetURL
 	accessKey := *params.AccessKey
 	secretKey := *params.SecretKey

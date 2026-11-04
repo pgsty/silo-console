@@ -33,26 +33,32 @@ export const units = [
 const k8sUnits = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"];
 const k8sCalcUnits = ["B", ...k8sUnits];
 
-export const niceBytes = (x: string, showK8sUnits: boolean = false) => {
-  let n = parseInt(x, 10) || 0;
+export const niceBytes = (
+  x: string | number,
+  showK8sUnits: boolean = false,
+) => {
+  if (typeof x === "string" && x.trim() === "") return "N/A";
+  const n = Number(x);
 
   return niceBytesInt(n, showK8sUnits);
 };
 
 export const niceBytesInt = (n: number, showK8sUnits: boolean = false) => {
+  if (!Number.isFinite(n)) return "N/A";
   if (n === 0) {
     return "0 B";
   }
 
   let l = 0;
+  const displayUnits = showK8sUnits ? ["B", ...k8sUnits] : units;
 
-  while (n >= 1024 && ++l) {
+  while (n >= 1024 && l < displayUnits.length - 1) {
+    l++;
     n = n / 1024;
   }
   // include a decimal point and a tenths-place digit if presenting
   // less than ten of KB or greater units
-  const k8sUnitsN = ["B", ...k8sUnits];
-  return n.toFixed(1) + " " + (showK8sUnits ? k8sUnitsN[l] : units[l]);
+  return n.toFixed(1) + " " + displayUnits[l];
 };
 
 export const deleteCookie = (name: string) => {

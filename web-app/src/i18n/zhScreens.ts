@@ -584,6 +584,8 @@ export const zhScreens: Record<string, string> = {
   Back: "上一步",
   Backend: "后端",
   Bandwidth: "带宽",
+  "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).":
+    "请输入非负且小于 8 PiB/s 的带宽，最多保留两位小数（0 表示不限速）。",
   "Bitrot Scan": "位腐扫描",
   Brokers: "Broker 地址",
   "Browse Bucket": "浏览存储桶",
