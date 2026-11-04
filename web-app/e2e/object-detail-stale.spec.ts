@@ -130,6 +130,83 @@ const visitBucket = async (page: Page) => {
 
 const versionRows = (page: Page) => page.locator(".ctrItem");
 
+interface PanelSample {
+  at: "task" | "frame" | "now";
+  pathname: string;
+  names: string[];
+}
+
+// Record which object names the details panel shows as actionable (visible and
+// neither inert nor aria-hidden) whenever the URL changes: once at the end of
+// the task that changed it, before the browser can paint, and then on each of
+// the next animation frames while the navigation renders.
+const installPanelProbe = (page: Page) =>
+  page.evaluate(() => {
+    const samples: PanelSample[] = [];
+    const sample = (at: PanelSample["at"]) =>
+      samples.push({
+        at,
+        pathname: decodeURIComponent(window.location.pathname),
+        names: Array.from(
+          document.querySelectorAll<HTMLElement>(
+            "#details-panel .objectNameContainer",
+          ),
+        )
+          .filter(
+            (element) =>
+              !element.closest('[inert], [aria-hidden="true"]') &&
+              element.checkVisibility({
+                checkOpacity: true,
+                checkVisibilityCSS: true,
+              }),
+          )
+          .map((element) => (element.textContent || "").trim())
+          .filter((name) => name !== ""),
+      });
+    const followFrames = (frames: number) => {
+      if (frames > 0)
+        requestAnimationFrame(() => {
+          sample("frame");
+          followFrames(frames - 1);
+        });
+    };
+    // Back/forward: the browser dispatches popstate, so a microtask checkpoint
+    // runs after each listener; the router's listener was registered first.
+    window.addEventListener("popstate", () => {
+      queueMicrotask(() => sample("task"));
+      followFrames(30);
+    });
+    // Push/replace: currententrychange fires inside the router's
+    // history.pushState, before the router notifies its subscribers, so let
+    // the microtasks they queue run first.
+    const navigation = (
+      window as unknown as {
+        navigation: {
+          addEventListener: (
+            type: "currententrychange",
+            listener: (event: { navigationType: string | null }) => void,
+          ) => void;
+        };
+      }
+    ).navigation;
+    navigation.addEventListener("currententrychange", (event) => {
+      if (event.navigationType === "traverse") return;
+      queueMicrotask(() => queueMicrotask(() => sample("task")));
+      followFrames(30);
+    });
+    Object.assign(window, { panelSamples: samples, samplePanel: sample });
+  });
+
+const readPanelSamples = (page: Page) =>
+  page.evaluate(() => {
+    const probe = window as unknown as {
+      panelSamples: PanelSample[];
+      samplePanel: (at: PanelSample["at"]) => void;
+    };
+    probe.samplePanel("now");
+    return probe.panelSamples;
+  });
+
 test.describe("authenticated object browser", () => {
   test.use({ storageState: minioadminFile });
 
@@ -375,6 +452,53 @@ test.describe("authenticated object browser", () => {
     await page.goForward();
     await expect(page).toHaveURL(new RegExp(`/${objectA}$`));
     await expect(panelName(page)).toHaveText(objectA);
+  });
+
+  test("on a slow CPU no route change leaves another object's panel actionable", async ({
+    page,
+  }) => {
+    // React Router renders every accepted location inside a React transition.
+    // A throttled CPU stretches that render over several frames, which is when
+    // the previous route's panel stayed actionable under the new URL. The
+    // end-of-task sample catches that at any CPU speed; the frame samples
+    // show what a user would have seen.
+    const cdp = await page.context().newCDPSession(page);
+    await visitBucket(page);
+    await openObject(page, objectA);
+    await expect(panelName(page)).toHaveText(objectA);
+    await installPanelProbe(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
+
+    const settle = async (pattern: RegExp, name?: string) => {
+      await expect(page).toHaveURL(pattern);
+      if (name) await expect(panelName(page)).toHaveText(name);
+      // Let the frame samplers started by this change finish.
+      await page.waitForTimeout(750);
+    };
+    const objectURL = (name: string) => new RegExp(`/${name}$`);
+    await openObject(page, objectB); // push A -> B
+    await settle(objectURL(objectB), objectB);
+    await page.goBack(); // B -> A
+    await settle(objectURL(objectA), objectA);
+    await page.goBack(); // A -> bucket root
+    await settle(new RegExp(`/browser/${bucketName}/?$`));
+    await page.goForward(); // bucket root -> A
+    await settle(objectURL(objectA), objectA);
+
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    const samples = await readPanelSamples(page);
+    expect(samples.filter((sample) => sample.at === "task")).toHaveLength(4);
+    expect(
+      samples.filter((sample) =>
+        sample.names.some((name) => !sample.pathname.endsWith(`/${name}`)),
+      ),
+    ).toEqual([]);
+    // Once the navigation has rendered, the panel is actionable again.
+    expect(samples.at(-1)).toEqual({
+      at: "now",
+      pathname: `/browser/${bucketName}/${objectA}`,
+      names: [objectA],
+    });
   });
 });
 

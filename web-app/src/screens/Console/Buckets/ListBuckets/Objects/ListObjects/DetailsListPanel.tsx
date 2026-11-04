@@ -19,14 +19,18 @@ import React, { useLayoutEffect, useRef } from "react";
 import { ModalBox } from "mds";
 import { useMobile } from "common/ui/useMediaQuery";
 import { useOverlayIntent } from "common/ui/overlayIntent";
+import RouteBoundContent from "./RouteBoundContent";
 
 interface IDetailsListPanel {
   open: boolean;
+  /** The router has accepted a location the panel's route has not rendered. */
+  routePending: boolean;
   closePanel: () => void;
   children: React.ReactNode;
 }
 const DetailsListPanel = ({
   open,
+  routePending,
   closePanel,
   children,
 }: IDetailsListPanel) => {
@@ -92,7 +96,7 @@ const DetailsListPanel = ({
             : undefined
         }
       >
-        {children}
+        <RouteBoundContent pending={routePending}>{children}</RouteBoundContent>
       </ModalBox>
     </div>
   );
