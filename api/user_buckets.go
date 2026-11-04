@@ -35,6 +35,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/tags"
 
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 	"github.com/minio/console/api/operations"
 	bucketApi "github.com/minio/console/api/operations/bucket"
@@ -460,13 +461,30 @@ func makeBucket(ctx context.Context, client MinioClient, bucketName string, obje
 }
 
 // getMakeBucketResponse performs makeBucket() to create a bucket with its access policy
-func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucketParams) (*models.MakeBucketsResponse, *CodedAPIError) {
+func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucketParams) (_ *models.MakeBucketsResponse, resultErr *CodedAPIError) {
 	ctx, cancel := context.WithCancel(params.HTTPRequest.Context())
 	defer cancel()
 	// bucket request needed to proceed
 	br := params.Body
 	if br == nil {
 		return nil, ErrorWithContext(ctx, ErrBucketBodyNotInRequest)
+	}
+	// Reject deterministic configuration errors before creating any resource.
+	if err := br.Validate(strfmt.Default); err != nil {
+		apiErr := ErrorWithContext(ctx, ErrBadRequest)
+		apiErr.APIError.DetailedMessage = err.Error()
+		return nil, apiErr
+	}
+	if strings.TrimSpace(*br.Name) == "" {
+		return nil, ErrorWithContext(ctx, ErrBucketNameNotInRequest)
+	}
+	if br.Quota != nil {
+		if err := validateBucketQuota(br.Quota); err != nil {
+			return nil, ErrorWithContext(ctx, err)
+		}
+	}
+	if br.Retention != nil && *br.Retention.Validity <= 0 {
+		return nil, ErrorWithContext(ctx, ErrBadRequest)
 	}
 	mClient, err := newMinioClient(session, getClientIP(params.HTTPRequest))
 	if err != nil {
@@ -485,13 +503,21 @@ func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucke
 		return nil, ErrorWithContext(ctx, err)
 	}
 
-	// make sure to delete bucket if an errors occurs after bucket was created
+	// Every post-create failure must attempt rollback, including errors from
+	// nested scopes. Cancellation of the request must not cancel cleanup, but
+	// cleanup itself is bounded. Never delete objects if the bucket is now in use.
 	defer func() {
-		if err != nil {
-			ErrorWithContext(ctx, fmt.Errorf("error creating bucket: %v", err))
-			if err := removeBucket(minioClient, *br.Name); err != nil {
-				ErrorWithContext(ctx, fmt.Errorf("error removing bucket: %v", err))
-			}
+		if resultErr == nil {
+			return
+		}
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cleanupCancel()
+		if cleanupErr := minioClient.removeBucket(cleanupCtx, *br.Name); cleanupErr != nil {
+			resultErr.APIError.Message = fmt.Sprintf("Bucket %q could not be fully configured or removed; it may still exist. Inspect its configuration before retrying.", *br.Name)
+			resultErr.APIError.DetailedMessage += fmt.Sprintf("; rollback failed: %v", cleanupErr)
+			ErrorWithContext(ctx, cleanupErr)
+		} else {
+			resultErr.APIError.Message = fmt.Sprintf("Bucket %q was removed because its requested configuration could not be applied.", *br.Name)
 		}
 	}()
 
@@ -510,11 +536,8 @@ func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucke
 		excludePrefixes := []string{}
 		excludeFolders := false
 
-		if br.Versioning.ExcludeFolders && !br.Locking {
-			excludeFolders = true
-		}
-
-		if br.Versioning.ExcludePrefixes != nil && !br.Locking {
+		if br.Versioning != nil && !br.Locking {
+			excludeFolders = br.Versioning.ExcludeFolders
 			excludePrefixes = br.Versioning.ExcludePrefixes
 		}
 
@@ -532,9 +555,8 @@ func getMakeBucketResponse(session *models.Principal, params bucketApi.MakeBucke
 		// create a minioClient interface implementation
 		// defining the client to be used
 		adminClient := AdminClient{Client: mAdmin}
-		// we will tolerate this call failing
 		if err := setBucketQuota(ctx, &adminClient, br.Name, br.Quota); err != nil {
-			ErrorWithContext(ctx, fmt.Errorf("error versioning bucket: %v", err))
+			return nil, ErrorWithContext(ctx, err)
 		}
 	}
 
