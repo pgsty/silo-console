@@ -4,6 +4,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/go-openapi/runtime"
 	"github.com/minio/console/api/operations"
@@ -148,6 +150,149 @@ func TestBucketCreationConfiguration(t *testing.T) {
 			if tc.wantStatus == 200 && body.Quota != nil {
 				require.JSONEq(t, `{"size":1024,"quota":0,"rate":0,"requests":0,"quotatype":"hard"}`, quota)
 			}
+		})
+	}
+}
+
+// Rollback is limited to the bucket this request created, and still runs when
+// the browser disconnects. A bucket that is in use is reported, never forced.
+func TestBucketCreationRollbackBoundaries(t *testing.T) {
+	const name = "creation-boundary"
+	errorXML := func(code string) string {
+		return `<Error><Code>` + code + `</Code><Message>` + code + `</Message><BucketName>` + name + `</BucketName></Error>`
+	}
+	for _, tc := range []struct {
+		name, config         string
+		createStatus         int
+		createCode           string
+		deleteStatus         int
+		deleteCode           string
+		disconnectVersioning bool
+		wantCalls            []string
+		wantMessage          string
+		wantCreated          bool
+	}{
+		{
+			name: "existing bucket", config: `,"quota":{"enabled":true,"quota_type":"hard","amount":1024}`,
+			createStatus: http.StatusConflict, createCode: "BucketAlreadyOwnedByYou",
+			wantCalls: []string{"create"}, wantCreated: true,
+		},
+		{
+			name: "rollback refused because the bucket is in use", config: `,"versioning":{"enabled":true}`,
+			deleteStatus: http.StatusConflict, deleteCode: "BucketNotEmpty",
+			wantCalls: []string{"create", "versioning", "rollback"}, wantMessage: "may still exist", wantCreated: true,
+		},
+		{
+			name: "browser disconnects after creation", config: `,"versioning":{"enabled":true}`,
+			disconnectVersioning: true,
+			wantCalls:            []string{"create", "versioning", "rollback"}, wantMessage: "was removed",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var mu sync.Mutex
+			var calls []string
+			created := tc.createStatus == http.StatusConflict
+			request, disconnect := context.WithCancel(context.Background())
+			defer disconnect()
+			record := func(operation string) {
+				mu.Lock()
+				defer mu.Unlock()
+				calls = append(calls, operation)
+			}
+			backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/xml")
+				switch {
+				case r.Method == http.MethodGet && r.URL.Query().Has("location"):
+					_, _ = fmt.Fprint(w, `<LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">us-east-1</LocationConstraint>`)
+				case r.Method == http.MethodPut && r.URL.Query().Has("versioning"):
+					record("versioning")
+					if tc.disconnectVersioning {
+						disconnect()
+						// The client abandons this call; the server may not notice.
+						select {
+						case <-r.Context().Done():
+						case <-time.After(time.Second):
+						}
+						return
+					}
+					w.WriteHeader(http.StatusForbidden)
+					_, _ = fmt.Fprint(w, errorXML("AccessDenied"))
+				case r.Method == http.MethodPut && strings.Trim(r.URL.Path, "/") == name:
+					record("create")
+					if tc.createStatus != 0 {
+						w.WriteHeader(tc.createStatus)
+						_, _ = fmt.Fprint(w, errorXML(tc.createCode))
+						return
+					}
+					mu.Lock()
+					created = true
+					mu.Unlock()
+				case r.Method == http.MethodDelete:
+					record("rollback")
+					if r.Context().Err() != nil {
+						t.Error("rollback inherited the canceled browser request")
+					}
+					if tc.deleteStatus != 0 {
+						w.WriteHeader(tc.deleteStatus)
+						_, _ = fmt.Fprint(w, errorXML(tc.deleteCode))
+						return
+					}
+					mu.Lock()
+					created = false
+					mu.Unlock()
+					w.WriteHeader(http.StatusNoContent)
+				default:
+					t.Errorf("unexpected backend request: %s %s", r.Method, r.URL)
+					w.WriteHeader(http.StatusBadRequest)
+				}
+			}))
+			defer backend.Close()
+			t.Setenv(ConsoleMinIOServer, backend.URL)
+			var body models.MakeBucketRequest
+			require.NoError(t, json.Unmarshal([]byte(`{"name":"`+name+`"`+tc.config+`}`), &body))
+			api := &operations.ConsoleAPI{}
+			registerBucketsHandlers(api)
+			response := api.BucketMakeBucketHandler.Handle(bucketAPI.MakeBucketParams{
+				HTTPRequest: httptest.NewRequest(http.MethodPost, "/api/v1/buckets", nil).WithContext(request), Body: &body,
+			}, &models.Principal{STSAccessKeyID: "test-access", STSSecretAccessKey: "test-secret"})
+			rec := httptest.NewRecorder()
+			response.WriteResponse(rec, runtime.JSONProducer())
+			require.NotEqual(t, http.StatusOK, rec.Code, rec.Body.String())
+			mu.Lock()
+			defer mu.Unlock()
+			require.Equal(t, tc.wantCalls, calls)
+			require.Equal(t, tc.wantCreated, created, "backend bucket state")
+			if tc.wantMessage != "" {
+				require.Contains(t, rec.Body.String(), tc.wantMessage)
+			}
+		})
+	}
+}
+
+func TestBucketCreationRejectsVersioningExclusionsWithLocking(t *testing.T) {
+	for _, config := range []string{
+		`,"locking":true,"versioning":{"enabled":true,"excludePrefixes":["logs/"]}`,
+		`,"locking":true,"versioning":{"enabled":true,"excludeFolders":true}`,
+		`,"retention":{"mode":"governance","unit":"days","validity":1},"versioning":{"enabled":true,"excludeFolders":true}`,
+	} {
+		t.Run(config, func(t *testing.T) {
+			backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t.Errorf("invalid input reached the backend: %s %s", r.Method, r.URL)
+				w.WriteHeader(http.StatusBadRequest)
+			}))
+			defer backend.Close()
+			t.Setenv(ConsoleMinIOServer, backend.URL)
+			var body models.MakeBucketRequest
+			require.NoError(t, json.Unmarshal([]byte(`{"name":"creation-exclusions"`+config+`}`), &body))
+			api := &operations.ConsoleAPI{}
+			registerBucketsHandlers(api)
+			response := api.BucketMakeBucketHandler.Handle(bucketAPI.MakeBucketParams{
+				HTTPRequest: httptest.NewRequest(http.MethodPost, "/api/v1/buckets", nil), Body: &body,
+			}, &models.Principal{STSAccessKeyID: "test-access", STSSecretAccessKey: "test-secret"})
+			rec := httptest.NewRecorder()
+			response.WriteResponse(rec, runtime.JSONProducer())
+			require.Equal(t, http.StatusBadRequest, rec.Code, rec.Body.String())
+			require.Contains(t, rec.Body.String(), "versioning exclusions")
 		})
 	}
 }
