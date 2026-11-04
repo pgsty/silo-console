@@ -84,6 +84,15 @@ test("the panels are keyed and gated by the route identity", () => {
   expect(listObjects).toContain(
     "routeObjectIdentity(location.pathname, bucketName)",
   );
+  // React Router renders navigations in a transition; until the new route
+  // commits, both object-scoped surfaces must stop being actionable.
+  expect(listObjects).toContain("useRouteRenderPending()");
+  expect(listObjects).toMatch(
+    /<RouteBoundContent pending=\{routePending\}>\s*\{detailsIdentityMatches && \(\s*<VersionsNavigator/,
+  );
+  expect(listObjects).toMatch(
+    /<DetailsListPanel\s+routePending=\{routePending\}/,
+  );
   expect(listObjects).toMatch(/<ShareFile\s+key=\{shareSubjectKey\(/);
 });
 

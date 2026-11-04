@@ -16,6 +16,7 @@
 
 import { useMobile } from "common/ui/useMediaQuery";
 import { ModalPresence } from "common/ui/ModalPresence";
+import { useRouteRenderPending } from "common/routeRenderPending";
 import React, {
   Fragment,
   useCallback,
@@ -110,6 +111,7 @@ import {
 import withSuspense from "../../../../Common/Components/withSuspense";
 import UploadFilesButton from "../../UploadFilesButton";
 import DetailsListPanel from "./DetailsListPanel";
+import RouteBoundContent from "./RouteBoundContent";
 import ObjectDetailPanel from "./ObjectDetailPanel";
 import VersionsNavigator from "../ObjectDetails/VersionsNavigator";
 import ShareFile from "../ObjectDetails/ShareFile";
@@ -248,6 +250,9 @@ const ListObjects = () => {
     selectedInternalPaths !== null &&
     selectedInternalPaths === routeIdentity.key;
   const detailsIdentityKey = identityKey([bucketName, routeIdentity.key]);
+  // React Router renders an accepted navigation in a transition, so for a few
+  // frames this component may still be committed for the route the URL left.
+  const routePending = useRouteRenderPending();
   // Dialogs opened from the object list capture the complete identity of the
   // selected object when they open, bucket included, and are discarded when the
   // route leaves that bucket.
@@ -1176,7 +1181,7 @@ const ListObjects = () => {
               }}
             >
               {versionsMode ? (
-                <Fragment>
+                <RouteBoundContent pending={routePending}>
                   {detailsIdentityMatches && (
                     <VersionsNavigator
                       key={detailsIdentityKey}
@@ -1184,7 +1189,7 @@ const ListObjects = () => {
                       bucketName={bucketName}
                     />
                   )}
-                </Fragment>
+                </RouteBoundContent>
               ) : (
                 <SecureComponent
                   scopes={[
@@ -1287,6 +1292,7 @@ const ListObjects = () => {
                   errorProps={{ disabled: true }}
                 >
                   <DetailsListPanel
+                    routePending={routePending}
                     open={
                       detailsOpen &&
                       (!mobile ||

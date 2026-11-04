@@ -1,5 +1,34 @@
 # Changelog
 
+## Release v2.6.0
+
+- Add optional folder and bucket usage scans, retained-version totals, live
+  freshness metadata, on-demand refresh, and a durable PostgreSQL-backed usage
+  worker. The worker keeps bounded scans resumable, renews observer leases
+  independently, and preserves unknown or unavailable measurements instead of
+  presenting them as zero.
+- Make usage refreshes reliable across reloads and change events, and expand the
+  Console integration and browser regression coverage for the maintained SILO
+  stack. The optional worker and the matching server APIs require coordinated
+  SILO support.
+- Validate bucket retention, quota, and replication values before numeric
+  conversion; preserve exact JSON integer boundaries and fractional rate labels;
+  reject versioning exclusions on locked buckets; and report when a requested
+  bucket configuration was not applied.
+- Keep quota values and usage totals visible in bucket lists, and improve table,
+  card, toolbar, and retained-column layout across narrow widths and fallback
+  fonts. Rebuild the embedded frontend assets after the acceptance fixes.
+- Hide and disable object details and version controls while a new route is
+  rendering, so navigation never leaves the previous object's panel actionable
+  under the new URL, including on slow CPUs.
+- Apply the three-minute keep-alive default to embedded Console servers as well
+  as the CLI, allowing HTTP/2 assets to reuse one connection. Explicitly setting
+  `--keep-alive=0` continues to disable reuse.
+- Upgrade `golang.org/x/net` to v0.62.0 for GO-2026-6860 and GO-2026-6866, and
+  select the `golang.org/x/crypto` revision containing the GO-2026-5932 fix.
+  Retain the go-systemd v22.6.0 NetBSD portability pin and the existing
+  coordinated SILO dependency selections.
+
 ## Release v2.5.1
 
 - Preserve group membership when changing group status. Explicit member arrays

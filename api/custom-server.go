@@ -58,7 +58,10 @@ func init() {
 
 // NewServer creates a new api console server but does not configure it
 func NewServer(api *operations.ConsoleAPI) *Server {
-	s := new(Server)
+	// Embedded callers do not parse CLI flags. Keep the declared CLI default
+	// here so HTTP/2 asset requests are not interrupted by immediate GOAWAY.
+	// A caller or an explicit --keep-alive=0 flag can still disable reuse.
+	s := &Server{KeepAlive: 3 * time.Minute}
 
 	s.shutdown = make(chan struct{})
 	s.api = api

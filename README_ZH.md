@@ -8,19 +8,22 @@ SILO 对象存储的 Web 管理控制台，由 Pigsty 社区维护。前端使�
 
 这是从开源 MinIO Console 延续而来的独立项目，与 MinIO, Inc. 无隶属、赞助或背书关系。MinIO 名称用于说明上游来源与兼容谱系。
 
-## 2.5.1
+## 2.6.0 发布候选
 
-**v2.5.1** 使用 **Go 1.27.3**、**silo-pkg v3.15.2** 与已正式发布的 mcli 20261026
+2.6.0 正在准备发布草稿，正式发布仍需维护者授权；当前已发布的稳定版仍为 v2.5.1。
+
+**v2.6.0** 使用 **Go 1.27.3**、**silo-pkg v3.15.2** 与已正式发布的 mcli 20261026
 源码（`20261026000000.0.0`）；精确依赖提交见 [发布依赖记录](hack/deps-release.json)。上游 SDK 固定为
 `v7.4.2-0.20261025165926-320af050c445`，修复删除桶复制配置时误将 HTTP 204 当作失败的问题。
 
-本次补丁修复组状态变更覆盖成员、OIDC 组权限、TLS 反代下的会话 Cookie、凭据 JSON
-导出和 ZIP 错误状态，并改善表格焦点、可访问性与标签页滚动。保留既有策略语义和输出格式兼容性例外。
+本版本加入目录与存储桶用量扫描、按需刷新、持久化后台任务、数据新鲜度元数据和保留版本统计，
+并强化存储桶数值校验、配额与复制处理、锁定桶版本控制检查，以及不同宽度和字体下的表格布局。
+Go 安全依赖图同步采用 `go.mod` 中修复后的 x/crypto 与 x/net 版本，保留既有策略语义和输出格式兼容性例外。
 发布状态与制品见 [GitHub Releases](https://github.com/pgsty/silo-console/releases)，
-详细变化见 [CHANGELOG.md](CHANGELOG.md#release-v251)。
+详细变化见 [CHANGELOG.md](CHANGELOG.md#release-v260)。
 
-SILO Server 20261026 内嵌 Console v2.5.1，并包含策略“恢复默认”所需的 IAM 缓存修复。
-更新独立 Console 不会替换旧 Server 的内嵌 Console；升级 Server 才能同时采用这两项变更。
+SILO Server 20261026 仍内嵌 Console v2.5.1，并包含策略“恢复默认”所需的 IAM 缓存修复。
+更新独立 Console 不会替换旧 Server 的内嵌 Console；需要采用选择 Console v2.6.0 的 SILO Server 版本，才能协调升级。
 详见[联合发布说明](https://silo.pgsty.com/zh/blog/release/silo-20261026/)。
 
 ## 功能与兼容范围
@@ -65,7 +68,7 @@ make console
 CONSOLE_MINIO_SERVER=http://127.0.0.1:9000 ./console server
 ```
 
-保留的 Go 模块路径没有 `/v2` 后缀。当前 2.5.1 源码的依赖与 replacement 见 [Embedding.md](docs/Embedding.md) 和[英文 README](README.md#status-and-compatibility)。嵌入 v2.4.2 时使用 `v0.0.0-20261017112417-ef2dd2c41d21`，并显式选择 MC replacement，Go 不会继承依赖的替换配置。完整示例见[集成说明](https://silo.pgsty.com/zh/blog/release/console-2.4.2/#integration)。
+保留的 Go 模块路径没有 `/v2` 后缀。当前 2.6.0 源码的依赖与 replacement 见 [Embedding.md](docs/Embedding.md) 和[英文 README](README.md#status-and-compatibility)。嵌入 v2.4.2 时使用 `v0.0.0-20261017112417-ef2dd2c41d21`，并显式选择 MC replacement，Go 不会继承依赖的替换配置。完整示例见[集成说明](https://silo.pgsty.com/zh/blog/release/console-2.4.2/#integration)。
 
 前端开发见 [DEVELOPMENT.md](DEVELOPMENT.md) 与 [web-app/README.md](web-app/README.md)。工具链及 TLS 兼容细节、功能截图和维护范围见[英文 README](README.md)。
 

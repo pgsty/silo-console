@@ -31,6 +31,7 @@ import { isValidPathname } from "./utils/routePath";
 import NotFoundPage from "./screens/NotFoundPage";
 import { ShortcutHelpHost } from "./common/ui/ShortcutHelp";
 import TaskDepartureGuard from "./screens/Console/Common/ObjectManager/TaskDepartureGuard";
+import { trackAcceptedLocation } from "./common/routeRenderPending";
 
 const AppConsole = React.lazy(() => import("./screens/Console/ConsoleKBar"));
 const Logout = React.lazy(() => import("./screens/LogoutPage/LogoutPage"));
@@ -112,6 +113,9 @@ const router = createBrowserRouter(
     basename: baseUrl,
   },
 );
+// Subscribed before RouterProvider, so the accepted location is published
+// before React starts rendering it in a transition.
+trackAcceptedLocation(router);
 
 const MainRouter = () => <RouterProvider router={router} />;
 
