@@ -23,10 +23,13 @@ import { selFeatures } from "./consoleSlice";
 import TrafficMonitor from "./Common/ObjectManager/TrafficMonitor";
 import { AppState } from "../../store";
 import AnonymousAccess from "../AnonymousAccess/AnonymousAccess";
-import { registerScreenTranslations } from "i18n/lang";
+import { registerScreenLoader, registerScreenTranslations } from "i18n/lang";
 import { zhScreens } from "i18n/zhScreens";
 
 registerScreenTranslations(zhScreens);
+registerScreenLoader(() =>
+  import("i18n/ptScreens").then((module) => module.ptScreens),
+);
 
 import { useNavigate } from "react-router-dom";
 import { useLanguage, useT } from "i18n";

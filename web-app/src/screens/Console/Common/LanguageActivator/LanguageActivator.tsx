@@ -9,24 +9,32 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { AppState, useAppDispatch } from "../../../../store";
 import { setLanguage } from "../../../../systemSlice";
-import { Lang, storeLanguage } from "../../../../i18n/lang";
+import { Lang, nextLanguage, storeLanguage } from "../../../../i18n/lang";
 import LanguageToggleIcon from "../../../../icons/LanguageToggleIcon";
 import HeaderIconButton from "../PageHeaderWrapper/HeaderIconButton";
+
+// Deliberately in the target language so its speakers can find it; not
+// dictionary-driven.
+const SWITCH_LABELS: Record<Lang, string> = {
+  en: "Switch to English",
+  zh: "切换到中文",
+  pt: "Mudar para português",
+};
 
 export const useLanguageAction = () => {
   const dispatch = useAppDispatch();
 
   const language = useSelector((state: AppState) => state.system.language);
 
-  const toggleLanguage = () => {
-    const next: Lang = language === "zh" ? "en" : "zh";
+  const next = nextLanguage(language);
 
+  const toggleLanguage = () => {
     dispatch(setLanguage(next));
     storeLanguage(next);
   };
 
   return {
-    label: language === "zh" ? "Switch to English" : "切换到中文",
+    label: SWITCH_LABELS[next],
     onClick: toggleLanguage,
   };
 };
@@ -36,8 +44,6 @@ const LanguageActivator = () => {
   return (
     <HeaderIconButton
       id={"language-activator"}
-      // Deliberately in the target language so speakers of the other
-      // language can find their way back; not dictionary-driven.
       aria-label={action.label}
       onClick={action.onClick}
     >

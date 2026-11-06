@@ -269,7 +269,8 @@ technical examples such as URLs and LDAP filters are not static UI copy.
 
 Add feature-screen Chinese translations to `src/i18n/zhScreens.ts`; the Console
 boundary registers them with `registerScreenTranslations` from `src/i18n/lang.ts`.
-`zh.ts` and `zhHelp.ts` remain eager. Login, anonymous/error pages and shared
+`zh.ts` and `zhHelp.ts` remain eager. Brazilian Portuguese mirrors this layout in
+`pt.ts`, `ptHelp.ts` and `ptScreens.ts`, with the same keys in each file. Login, anonymous/error pages and shared
 shell/control labels must work before Console loads, so put their keys in the
 eager dictionaries. Keep English keys unchanged, including whitespace, and use
 the project glossary. `untranslatable.ts` permits only documented brand/protocol

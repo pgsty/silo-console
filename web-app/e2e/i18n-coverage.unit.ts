@@ -14,8 +14,9 @@
  * i18nKey() at their definition (menus, tabs, columns, component props, metadata).
  * The marker preserves the original value and literal type; it never translates.
  * JSON keys are expanded from the explicit paths in indirectKeys.ts at test time.
- * Add Chinese copy to zhScreens.ts (shell chrome: zh.ts); untranslatable.ts is
- * only for exact brand/protocol names. Never change English copy to satisfy this
+ * Add Chinese copy to zhScreens.ts (shell chrome: zh.ts) and Portuguese copy to the
+ * matching ptScreens.ts/pt.ts entry; untranslatable.ts is only for exact
+ * brand/protocol names. Never change English copy to satisfy this
  * test. Runtime values such as object names and RSS titles are not static keys.
  *
  * Missing keys fail with sorted, deduplicated source file:line locations. The
@@ -36,6 +37,9 @@ import ts from "typescript";
 import { indirectKeySources } from "../src/i18n/indirectKeys";
 import { i18nKey } from "../src/i18n/lang";
 import { duplicateBaseline, orphanBaseline } from "../src/i18n/orphanBaseline";
+import { pt } from "../src/i18n/pt";
+import { ptHelp } from "../src/i18n/ptHelp";
+import { ptScreens } from "../src/i18n/ptScreens";
 import { untranslatable } from "../src/i18n/untranslatable";
 import { zh } from "../src/i18n/zh";
 import { zhHelp } from "../src/i18n/zhHelp";
@@ -52,6 +56,12 @@ const dictionaries: Dictionary[] = [
   { name: "zh", values: zh },
 ];
 const mergedZh = { ...zhHelp, ...zhScreens, ...zh };
+const ptDictionaries: Dictionary[] = [
+  { name: "ptHelp", values: ptHelp },
+  { name: "ptScreens", values: ptScreens },
+  { name: "pt", values: pt },
+];
+const mergedPt = { ...ptHelp, ...ptScreens, ...pt };
 
 const sourceFiles = (directory: string): string[] =>
   readdirSync(directory, { withFileTypes: true })
@@ -342,7 +352,7 @@ test("regression guards catch removed translations, removed uses and changed hid
   expect(conflictingKeys(sources)).not.toEqual(baseline);
 });
 
-test("Chinese translations cover source keys without new orphans or hidden changes", async () => {
+const collectCatalog = () => {
   const keys: KeyUse[] = [];
   const literals = new Set<string>();
   for (const file of sourceFiles(sourceRoot)) {
@@ -365,6 +375,37 @@ test("Chinese translations cover source keys without new orphans or hidden chang
     ).toBeGreaterThan(0);
     keys.push(...indirect);
   }
+  return { keys, literals };
+};
+
+const placeholdersOf = (text: string) =>
+  [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
+
+test("Portuguese translations mirror the Chinese catalog and keep placeholders", () => {
+  const { keys } = collectCatalog();
+  const missing = missingKeys(keys, mergedPt, untranslatable);
+  expect(
+    missing,
+    `Missing Portuguese translations:\n${missing.join("\n")}`,
+  ).toEqual([]);
+  for (const [index, chinese] of dictionaries.entries()) {
+    const portuguese = ptDictionaries[index];
+    expect(
+      Object.keys(portuguese.values).sort(),
+      `${portuguese.name} must hold the same keys as ${chinese.name}, or cold loading diverges`,
+    ).toEqual(Object.keys(chinese.values).sort());
+  }
+  const broken = Object.entries(mergedPt).filter(
+    ([key, value]) =>
+      !value.trim() ||
+      placeholdersOf(key).join() !== placeholdersOf(value).join(),
+  );
+  expect(broken).toEqual([]);
+  expect(conflictingKeys(ptDictionaries)).toEqual([]);
+});
+
+test("Chinese translations cover source keys without new orphans or hidden changes", async () => {
+  const { keys, literals } = collectCatalog();
   const missing = missingKeys(keys, mergedZh, untranslatable);
   const orphans = orphanKeys(mergedZh, literals);
   const newOrphans = orphans.filter((key) => !orphanBaseline.includes(key));
@@ -420,4 +461,15 @@ test("Chinese translations cover source keys without new orphans or hidden chang
       `New/changed translations hidden by dictionary precedence:\n${JSON.stringify(newDuplicates, null, 2)}`,
     )
     .toEqual([]);
+});
+
+test("Console entry registers feature copy for every translated language", () => {
+  const source = readFileSync(
+    path.join(sourceRoot, "screens/Console/ConsoleKBar.tsx"),
+    "utf8",
+  );
+  expect(source).toMatch(/^registerScreenTranslations\(zhScreens\);\r?$/m);
+  expect(source).toMatch(
+    /^registerScreenLoader\(\(\) =>\s+import\("i18n\/ptScreens"\)/m,
+  );
 });

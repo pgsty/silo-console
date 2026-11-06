@@ -34,7 +34,7 @@ import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import withSuspense from "../Common/Components/withSuspense";
 import { useMobile } from "common/ui/useMediaQuery";
 import { OverflowItem } from "common/ui/OverflowMenu";
-import { formatText, useLanguage, useT } from "i18n";
+import { formatText, localeTag, useLanguage, useT } from "i18n";
 import { bucketTabs } from "./bucketTabs";
 import { bucketStatistic } from "./bucketMetadata";
 
@@ -182,9 +182,7 @@ export default function BucketPageHeader({
         ? t("Write only")
         : undefined;
   const date = metadata?.creation_date
-    ? DateTime.fromISO(metadata.creation_date).setLocale(
-        language === "zh" ? "zh-CN" : "en",
-      )
+    ? DateTime.fromISO(metadata.creation_date).setLocale(localeTag(language))
     : undefined;
   const tabs = bucketTabs(bucketName, context, site.enabled && site.curSite);
   const objects = tabs.find((tab) => tab.id === "objects");

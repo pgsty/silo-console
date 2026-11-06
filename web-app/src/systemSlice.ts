@@ -48,6 +48,7 @@ interface SystemState {
   locationPath: string;
   darkMode: boolean;
   language: Lang;
+  catalogRevision: number;
 }
 
 const initialState: SystemState = {
@@ -84,6 +85,7 @@ const initialState: SystemState = {
   locationPath: "",
   darkMode: isDarkModeOn(),
   language: getStoredLanguage(),
+  catalogRevision: 0,
 };
 
 const systemSlice = createSlice({
@@ -202,6 +204,9 @@ const systemSlice = createSlice({
     setLanguage: (state, action: PayloadAction<Lang>) => {
       state.language = action.payload;
     },
+    languageCatalogLoaded: (state) => {
+      state.catalogRevision += 1;
+    },
     resetSystem: () => {
       return initialState;
     },
@@ -232,6 +237,7 @@ export const {
   setLocationPath,
   setDarkMode,
   setLanguage,
+  languageCatalogLoaded,
 } = systemSlice.actions;
 
 export const selDistSet = (state: AppState) => state.system.distributedSetup;

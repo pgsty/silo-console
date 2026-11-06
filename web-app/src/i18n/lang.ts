@@ -12,7 +12,7 @@
 import { zh } from "./zh";
 import { zhHelp } from "./zhHelp";
 
-export type Lang = "en" | "zh";
+export type Lang = "en" | "zh" | "pt";
 
 // Mark an English literal that is translated later (menus, tabs, form metadata).
 // Identity only: keep the raw key until the rendering component calls t().
@@ -20,14 +20,28 @@ export const i18nKey = <T extends string>(key: T): T => key;
 
 export const DEFAULT_LANG: Lang = "en";
 
+const LANGUAGE_CYCLE: Record<Lang, Lang> = { en: "zh", zh: "pt", pt: "en" };
+
+export const nextLanguage = (lang: Lang): Lang => LANGUAGE_CYCLE[lang];
+
+const isLang = (value: string | null): value is Lang =>
+  value !== null && Object.hasOwn(LANGUAGE_CYCLE, value);
+
+const LOCALE_TAGS: Record<Lang, string> = {
+  en: "en",
+  zh: "zh-CN",
+  pt: "pt-BR",
+};
+
+export const localeTag = (lang: Lang): string => LOCALE_TAGS[lang];
+
 const LANGUAGE_STORAGE_KEY = "language";
 
 // Default is always English by design — no browser-language detection.
 export const getStoredLanguage = (): Lang => {
   try {
-    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "zh"
-      ? "zh"
-      : DEFAULT_LANG;
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return isLang(stored) ? stored : DEFAULT_LANG;
   } catch {
     return DEFAULT_LANG;
   }
@@ -41,17 +55,77 @@ export const storeLanguage = (lang: Lang) => {
   }
 };
 
-// Precedence on duplicate keys: curated chrome (zh) > feature screens
-// (zhScreens) > help topics (zhHelp).
-const dictionaries: Record<Lang, Record<string, string> | null> = {
+type Dictionary = Record<string, string>;
+
+// Precedence on duplicate keys: curated chrome (zh, pt) > feature screens
+// (zhScreens, ptScreens) > help topics (zhHelp, ptHelp).
+// Portuguese stays out of the login bundle; loadLanguage fills it on demand.
+const dictionaries: Record<Lang, Dictionary | null> = {
   en: null,
   zh: { ...zhHelp, ...zh },
+  pt: null,
+};
+
+let ptCommon: { chrome: Dictionary; help: Dictionary } | null = null;
+let ptCommonLoad: Promise<void> | null = null;
+let ptScreenCopy: Dictionary | null = null;
+let ptScreenLoader: (() => Promise<Dictionary>) | null = null;
+
+const rebuildPortuguese = () => {
+  if (ptCommon) {
+    dictionaries.pt = {
+      ...ptCommon.help,
+      ...ptScreenCopy,
+      ...ptCommon.chrome,
+    };
+  }
 };
 
 // The lazy Console owns feature-screen copy. Register before rendering its
-// first screen, keeping login/common copy synchronous and precedence intact.
-export const registerScreenTranslations = (screens: Record<string, string>) => {
-  dictionaries.zh = { ...zhHelp, ...screens, ...zh };
+// first screen, keeping precedence intact and eager languages synchronous.
+export const registerScreenTranslations = (
+  screens: Dictionary,
+  lang: "zh" | "pt" = "zh",
+) => {
+  if (lang === "zh") {
+    dictionaries.zh = { ...zhHelp, ...screens, ...zh };
+  } else {
+    ptScreenCopy = screens;
+    rebuildPortuguese();
+  }
+};
+
+export const registerScreenLoader = (loader: () => Promise<Dictionary>) => {
+  ptScreenLoader = loader;
+};
+
+const loadPortugueseCommon = () => {
+  ptCommonLoad ??= Promise.all([import("./pt"), import("./ptHelp")]).then(
+    ([chrome, help]) => {
+      ptCommon = { chrome: chrome.pt, help: help.ptHelp };
+      rebuildPortuguese();
+    },
+    (error: unknown) => {
+      ptCommonLoad = null;
+      throw error;
+    },
+  );
+  return ptCommonLoad;
+};
+
+// Resolves true when the language's dictionary changed. Rejects when a chunk
+// cannot be fetched, and may never settle on a stalled request, so the UI must
+// not depend on it: translate falls back to English for anything still missing.
+export const loadLanguage = async (lang: Lang): Promise<boolean> => {
+  if (lang !== "pt") {
+    return false;
+  }
+  const before = dictionaries.pt;
+  await loadPortugueseCommon();
+  if (ptScreenLoader && !ptScreenCopy) {
+    registerScreenTranslations(await ptScreenLoader(), "pt");
+  }
+  return dictionaries.pt !== before;
 };
 
 // Keep placeholder matching shared by plain-text and React-node formatting.

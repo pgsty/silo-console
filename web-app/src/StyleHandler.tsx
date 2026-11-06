@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { useT } from "i18n";
+import { localeTag, useT } from "i18n";
 import React, { Fragment, useLayoutEffect } from "react";
 import { GlobalStyles, ThemeHandler, ControlLabelsProvider } from "mds";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
@@ -57,7 +57,7 @@ const StyleHandler = ({ children }: IStyleHandler) => {
   // index.css; this wraps both the login page and the console. Layout effect
   // so a persisted Chinese preference applies before first paint.
   useLayoutEffect(() => {
-    document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+    document.documentElement.lang = localeTag(language);
   }, [language]);
 
   useLayoutEffect(() => {
@@ -91,7 +91,7 @@ const StyleHandler = ({ children }: IStyleHandler) => {
           inputAction: t("Input action"),
           chooseDate: t("Choose date"),
           chooseDateTime: t("Choose date and time"),
-          calendarLocale: language === "zh" ? "zh-CN" : "en",
+          calendarLocale: localeTag(language),
           time: t("Time"),
           hour: t("Hour"),
           minute: t("Minute"),
