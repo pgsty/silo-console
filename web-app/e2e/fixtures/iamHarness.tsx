@@ -7,8 +7,10 @@
 
 // Isolated feature entry: use the same deferred catalogue boundary as Console.
 import { registerScreenTranslations } from "../../src/i18n/lang";
+import { ptScreens } from "../../src/i18n/ptScreens";
 import { zhScreens } from "../../src/i18n/zhScreens";
 registerScreenTranslations(zhScreens);
+registerScreenTranslations(ptScreens, "pt");
 
 import React from "react";
 import { createRoot } from "react-dom/client";

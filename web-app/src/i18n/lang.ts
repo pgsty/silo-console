@@ -9,10 +9,12 @@
 // systemSlice initializes its state from here, so importing the store back
 // would create a circular dependency.
 
+import { pt } from "./pt";
+import { ptHelp } from "./ptHelp";
 import { zh } from "./zh";
 import { zhHelp } from "./zhHelp";
 
-export type Lang = "en" | "zh";
+export type Lang = "en" | "zh" | "pt";
 
 // Mark an English literal that is translated later (menus, tabs, form metadata).
 // Identity only: keep the raw key until the rendering component calls t().
@@ -20,14 +22,28 @@ export const i18nKey = <T extends string>(key: T): T => key;
 
 export const DEFAULT_LANG: Lang = "en";
 
+const LANGUAGE_CYCLE: Record<Lang, Lang> = { en: "zh", zh: "pt", pt: "en" };
+
+export const nextLanguage = (lang: Lang): Lang => LANGUAGE_CYCLE[lang];
+
+const isLang = (value: string | null): value is Lang =>
+  value !== null && Object.hasOwn(LANGUAGE_CYCLE, value);
+
+const LOCALE_TAGS: Record<Lang, string> = {
+  en: "en",
+  zh: "zh-CN",
+  pt: "pt-BR",
+};
+
+export const localeTag = (lang: Lang): string => LOCALE_TAGS[lang];
+
 const LANGUAGE_STORAGE_KEY = "language";
 
 // Default is always English by design — no browser-language detection.
 export const getStoredLanguage = (): Lang => {
   try {
-    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "zh"
-      ? "zh"
-      : DEFAULT_LANG;
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return isLang(stored) ? stored : DEFAULT_LANG;
   } catch {
     return DEFAULT_LANG;
   }
@@ -41,17 +57,24 @@ export const storeLanguage = (lang: Lang) => {
   }
 };
 
-// Precedence on duplicate keys: curated chrome (zh) > feature screens
-// (zhScreens) > help topics (zhHelp).
+// Precedence on duplicate keys: curated chrome (zh, pt) > feature screens
+// (zhScreens, ptScreens) > help topics (zhHelp, ptHelp).
 const dictionaries: Record<Lang, Record<string, string> | null> = {
   en: null,
   zh: { ...zhHelp, ...zh },
+  pt: { ...ptHelp, ...pt },
 };
 
 // The lazy Console owns feature-screen copy. Register before rendering its
 // first screen, keeping login/common copy synchronous and precedence intact.
-export const registerScreenTranslations = (screens: Record<string, string>) => {
-  dictionaries.zh = { ...zhHelp, ...screens, ...zh };
+export const registerScreenTranslations = (
+  screens: Record<string, string>,
+  lang: "zh" | "pt" = "zh",
+) => {
+  dictionaries[lang] =
+    lang === "zh"
+      ? { ...zhHelp, ...screens, ...zh }
+      : { ...ptHelp, ...screens, ...pt };
 };
 
 // Keep placeholder matching shared by plain-text and React-node formatting.

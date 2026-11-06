@@ -12,7 +12,15 @@ import ts from "typescript";
 import { zh } from "../src/i18n/zh";
 import { zhHelp } from "../src/i18n/zhHelp";
 import { zhScreens } from "../src/i18n/zhScreens";
-import { translate, registerScreenTranslations } from "../src/i18n/lang";
+import { pt } from "../src/i18n/pt";
+import { ptScreens } from "../src/i18n/ptScreens";
+import {
+  getStoredLanguage,
+  localeTag,
+  nextLanguage,
+  registerScreenTranslations,
+  translate,
+} from "../src/i18n/lang";
 
 test("cold public/shared copy is complete before lazy Console registration", () => {
   const files = [
@@ -73,4 +81,43 @@ test("cold public/shared copy is complete before lazy Console registration", () 
   expect(translate("en", "Remote host:")).toBe("Remote host:");
   expect(translate("zh", "Unhealthy")).toBe(zh.Unhealthy);
   expect(translate("zh", "Source")).toBe("源代码");
+});
+
+test("Portuguese feature copy stays out of the login graph until Console registers it", () => {
+  expect(translate("pt", "Login")).toBe(pt.Login);
+  expect(translate("pt", "Remote host:")).toBe("Remote host:");
+  registerScreenTranslations(ptScreens, "pt");
+  expect(translate("pt", "Remote host:")).toBe(ptScreens["Remote host:"]);
+  expect(translate("pt", "Source")).toBe(pt.Source);
+  expect(translate("zh", "Login")).toBe(zh.Login);
+});
+
+test("language cycle reaches every language and maps each to its locale", () => {
+  expect(nextLanguage("en")).toBe("zh");
+  expect(nextLanguage("zh")).toBe("pt");
+  expect(nextLanguage("pt")).toBe("en");
+  expect(localeTag("pt")).toBe("pt-BR");
+  expect(localeTag("zh")).toBe("zh-CN");
+  expect(localeTag("en")).toBe("en");
+});
+
+test("stored language accepts known values and otherwise stays English", () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const withStored = (value: string | null) => {
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: { getItem: () => value },
+    });
+    return getStoredLanguage();
+  };
+  try {
+    expect(withStored("pt")).toBe("pt");
+    expect(withStored("zh")).toBe("zh");
+    expect(withStored(null)).toBe("en");
+    expect(withStored("fr")).toBe("en");
+    expect(withStored("constructor")).toBe("en");
+  } finally {
+    if (original) Object.defineProperty(globalThis, "localStorage", original);
+    else delete (globalThis as { localStorage?: unknown }).localStorage;
+  }
 });

@@ -6,7 +6,7 @@
 // (at your option) any later version.
 
 import { DateTime } from "luxon";
-import { formatText, Lang, translate } from "../../i18n/lang";
+import { formatText, Lang, localeTag, translate } from "../../i18n/lang";
 
 export const freshnessText = ({
   at,
@@ -29,7 +29,7 @@ export const freshnessText = ({
       tooltip: t("The server has not finished computing usage yet."),
       dateTime: undefined,
     };
-  const locale = language === "zh" ? "zh-CN" : "en";
+  const locale = localeTag(language);
   const relative = date.toRelative({ locale, base: now }) || "";
   return {
     label: formatText(

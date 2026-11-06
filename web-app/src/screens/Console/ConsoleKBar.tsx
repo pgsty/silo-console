@@ -24,9 +24,11 @@ import TrafficMonitor from "./Common/ObjectManager/TrafficMonitor";
 import { AppState } from "../../store";
 import AnonymousAccess from "../AnonymousAccess/AnonymousAccess";
 import { registerScreenTranslations } from "i18n/lang";
+import { ptScreens } from "i18n/ptScreens";
 import { zhScreens } from "i18n/zhScreens";
 
 registerScreenTranslations(zhScreens);
+registerScreenTranslations(ptScreens, "pt");
 
 import { useNavigate } from "react-router-dom";
 import { useLanguage, useT } from "i18n";

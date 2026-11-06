@@ -154,11 +154,11 @@ analytics, no beacons, no external scripts or fonts, and no call-home. Automatic
 self-update is disabled, and a release catalog is contacted only when one is
 explicitly configured.
 
-### Bilingual
+### Multilingual
 
 The entire interface, including help content and documentation links, is
-available in English and Chinese behind a per-page toggle, with no added runtime
-dependencies.
+available in English, Chinese and Brazilian Portuguese behind a per-page toggle,
+with no added runtime dependencies.
 
 ## Find the Right Resource
 
