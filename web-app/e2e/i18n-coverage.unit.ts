@@ -470,6 +470,6 @@ test("Console entry registers feature copy for every translated language", () =>
   );
   expect(source).toMatch(/^registerScreenTranslations\(zhScreens\);\r?$/m);
   expect(source).toMatch(
-    /^registerScreenTranslations\(ptScreens, "pt"\);\r?$/m,
+    /^registerScreenLoader\(\(\) =>\s+import\("i18n\/ptScreens"\)/m,
   );
 });

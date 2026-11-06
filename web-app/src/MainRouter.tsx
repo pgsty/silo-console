@@ -32,8 +32,13 @@ import NotFoundPage from "./screens/NotFoundPage";
 import { ShortcutHelpHost } from "./common/ui/ShortcutHelp";
 import TaskDepartureGuard from "./screens/Console/Common/ObjectManager/TaskDepartureGuard";
 import { trackAcceptedLocation } from "./common/routeRenderPending";
+import { syncLanguageCatalogBriefly } from "./store";
 
-const AppConsole = React.lazy(() => import("./screens/Console/ConsoleKBar"));
+const AppConsole = React.lazy(async () => {
+  const module = await import("./screens/Console/ConsoleKBar");
+  await syncLanguageCatalogBriefly();
+  return module;
+});
 const Logout = React.lazy(() => import("./screens/LogoutPage/LogoutPage"));
 const LoginCallback = React.lazy(
   () => import("./screens/LoginPage/LoginCallback"),

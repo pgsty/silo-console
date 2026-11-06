@@ -17,7 +17,9 @@ import { ptScreens } from "../src/i18n/ptScreens";
 import {
   getStoredLanguage,
   localeTag,
+  loadLanguage,
   nextLanguage,
+  registerScreenLoader,
   registerScreenTranslations,
   translate,
 } from "../src/i18n/lang";
@@ -83,13 +85,28 @@ test("cold public/shared copy is complete before lazy Console registration", () 
   expect(translate("zh", "Source")).toBe("源代码");
 });
 
-test("Portuguese feature copy stays out of the login graph until Console registers it", () => {
+test("Portuguese loads on demand and its feature copy waits for the Console loader", async () => {
+  expect(translate("pt", "Login")).toBe("Login");
+  await loadLanguage("pt");
   expect(translate("pt", "Login")).toBe(pt.Login);
   expect(translate("pt", "Remote host:")).toBe("Remote host:");
-  registerScreenTranslations(ptScreens, "pt");
+
+  let attempts = 0;
+  registerScreenLoader(async () => {
+    attempts += 1;
+    if (attempts === 1) throw new Error("chunk unavailable");
+    return ptScreens;
+  });
+  await expect(loadLanguage("pt")).rejects.toThrow("chunk unavailable");
+  expect(translate("pt", "Login")).toBe(pt.Login);
+  expect(translate("pt", "Remote host:")).toBe("Remote host:");
+
+  await loadLanguage("pt");
+  expect(attempts).toBe(2);
   expect(translate("pt", "Remote host:")).toBe(ptScreens["Remote host:"]);
   expect(translate("pt", "Source")).toBe(pt.Source);
   expect(translate("zh", "Login")).toBe(zh.Login);
+  expect(translate("en", "Login")).toBe("Login");
 });
 
 test("language cycle reaches every language and maps each to its locale", () => {

@@ -9,8 +9,6 @@
 // systemSlice initializes its state from here, so importing the store back
 // would create a circular dependency.
 
-import { pt } from "./pt";
-import { ptHelp } from "./ptHelp";
 import { zh } from "./zh";
 import { zhHelp } from "./zhHelp";
 
@@ -57,24 +55,77 @@ export const storeLanguage = (lang: Lang) => {
   }
 };
 
+type Dictionary = Record<string, string>;
+
 // Precedence on duplicate keys: curated chrome (zh, pt) > feature screens
 // (zhScreens, ptScreens) > help topics (zhHelp, ptHelp).
-const dictionaries: Record<Lang, Record<string, string> | null> = {
+// Portuguese stays out of the login bundle; loadLanguage fills it on demand.
+const dictionaries: Record<Lang, Dictionary | null> = {
   en: null,
   zh: { ...zhHelp, ...zh },
-  pt: { ...ptHelp, ...pt },
+  pt: null,
+};
+
+let ptCommon: { chrome: Dictionary; help: Dictionary } | null = null;
+let ptCommonLoad: Promise<void> | null = null;
+let ptScreenCopy: Dictionary | null = null;
+let ptScreenLoader: (() => Promise<Dictionary>) | null = null;
+
+const rebuildPortuguese = () => {
+  if (ptCommon) {
+    dictionaries.pt = {
+      ...ptCommon.help,
+      ...ptScreenCopy,
+      ...ptCommon.chrome,
+    };
+  }
 };
 
 // The lazy Console owns feature-screen copy. Register before rendering its
-// first screen, keeping login/common copy synchronous and precedence intact.
+// first screen, keeping precedence intact and eager languages synchronous.
 export const registerScreenTranslations = (
-  screens: Record<string, string>,
+  screens: Dictionary,
   lang: "zh" | "pt" = "zh",
 ) => {
-  dictionaries[lang] =
-    lang === "zh"
-      ? { ...zhHelp, ...screens, ...zh }
-      : { ...ptHelp, ...screens, ...pt };
+  if (lang === "zh") {
+    dictionaries.zh = { ...zhHelp, ...screens, ...zh };
+  } else {
+    ptScreenCopy = screens;
+    rebuildPortuguese();
+  }
+};
+
+export const registerScreenLoader = (loader: () => Promise<Dictionary>) => {
+  ptScreenLoader = loader;
+};
+
+const loadPortugueseCommon = () => {
+  ptCommonLoad ??= Promise.all([import("./pt"), import("./ptHelp")]).then(
+    ([chrome, help]) => {
+      ptCommon = { chrome: chrome.pt, help: help.ptHelp };
+      rebuildPortuguese();
+    },
+    (error: unknown) => {
+      ptCommonLoad = null;
+      throw error;
+    },
+  );
+  return ptCommonLoad;
+};
+
+// Resolves true when the language's dictionary changed. Rejects when a chunk
+// cannot be fetched, and may never settle on a stalled request, so the UI must
+// not depend on it: translate falls back to English for anything still missing.
+export const loadLanguage = async (lang: Lang): Promise<boolean> => {
+  if (lang !== "pt") {
+    return false;
+  }
+  const before = dictionaries.pt;
+  await loadPortugueseCommon();
+  if (ptScreenLoader && !ptScreenCopy) {
+    registerScreenTranslations(await ptScreenLoader(), "pt");
+  }
+  return dictionaries.pt !== before;
 };
 
 // Keep placeholder matching shared by plain-text and React-node formatting.
