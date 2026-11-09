@@ -17,7 +17,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
-import { store } from "./store";
+import { store, syncLanguageCatalogBriefly } from "./store";
 import MainRouter from "./MainRouter";
 import StyleHandler from "./StyleHandler";
 import RootErrorBoundary from "./common/RootErrorBoundary";
@@ -26,14 +26,17 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 
-root.render(
-  <React.StrictMode>
-    <RootErrorBoundary>
-      <Provider store={store}>
-        <StyleHandler>
-          <MainRouter />
-        </StyleHandler>
-      </Provider>
-    </RootErrorBoundary>
-  </React.StrictMode>,
-);
+const render = () =>
+  root.render(
+    <React.StrictMode>
+      <RootErrorBoundary>
+        <Provider store={store}>
+          <StyleHandler>
+            <MainRouter />
+          </StyleHandler>
+        </Provider>
+      </RootErrorBoundary>
+    </React.StrictMode>,
+  );
+
+syncLanguageCatalogBriefly().then(render);

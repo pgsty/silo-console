@@ -4,7 +4,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Button, Checkbox } from "mds";
-import { useLanguage, useT } from "i18n";
+import { localeTag, useLanguage, useT } from "i18n";
 import { typography } from "../../../common/ui/typography";
 import { formatUsageBytes } from "./prefixUsage";
 import type { usePrefixUsage } from "./usePrefixUsage";
@@ -47,7 +47,7 @@ export function PrefixUsagePanel({
   canListVersions: boolean;
 }) {
   const t = useT();
-  const locale = useLanguage() === "zh" ? "zh-CN" : "en";
+  const locale = localeTag(useLanguage());
   const { scan } = usage;
   const frame = scan?.frame;
   const complete = !scan?.outcome && frame?.status === "complete";

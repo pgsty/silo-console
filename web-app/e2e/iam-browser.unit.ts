@@ -321,6 +321,10 @@ test("actual user and group tabs keep each section directly below the entity hea
       await expect(page.locator("#group-status")).toHaveAccessibleName("状态");
       await expect(page.locator("#group-status")).toBeChecked();
       await page.locator("#language-activator").click();
+      await expect(page.locator("#group-status")).toHaveAccessibleName(
+        "Status",
+      );
+      await page.locator("#language-activator").click();
       await open(`${scenario.path}?access=read-only`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(
         scenario.name,
@@ -823,7 +827,7 @@ test("language changes preserve an unsaved policy override without refetching, a
         triggerReceivesPointer: hit !== null && trigger.contains(hit),
       };
     });
-  await expect(page.getByRole("tooltip")).toHaveText("Switch to English");
+  await expect(page.getByRole("tooltip")).toHaveText("Mudar para português");
   await test.info().attach("language-before-error", {
     body: JSON.stringify(await tooltipGeometry(), null, 2),
     contentType: "application/json",
@@ -861,6 +865,9 @@ test("language changes preserve an unsaved policy override without refetching, a
     body: JSON.stringify(await tooltipGeometry(), null, 2),
     contentType: "application/json",
   });
+  await page.locator("#language-activator").click();
+  await expect(editor).toHaveAccessibleName("Política bruta");
+  await expect(editor).toHaveValue(draft);
   await page.locator("#language-activator").click();
   await expect(editor).toHaveAccessibleName("Raw Policy");
   await expect(editor).toHaveValue(draft);

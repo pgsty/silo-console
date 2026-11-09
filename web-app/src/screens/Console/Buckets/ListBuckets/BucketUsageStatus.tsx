@@ -3,7 +3,7 @@
 
 import React from "react";
 import styled from "styled-components";
-import { useT, formatText, useLanguage } from "i18n";
+import { useT, formatText, localeTag, useLanguage } from "i18n";
 import { typography } from "../../../../common/ui/typography";
 import { useBucketUsageView } from "./useBucketUsage";
 
@@ -33,7 +33,7 @@ export function BucketUsageStatus({ bucket }: { bucket: string }) {
   const usage = useBucketUsageView();
   const row = usage?.records[bucket];
   const t = useT();
-  const locale = useLanguage() === "zh" ? "zh-CN" : "en";
+  const locale = localeTag(useLanguage());
   if (!usage || (!row && !usage.enabled)) return null;
   const labels = {
     not_scanned: t("Not scanned"),

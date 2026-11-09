@@ -26,7 +26,7 @@ import {
 } from "../../../common/ui";
 import { hasPermission } from "../../../common/SecureComponent";
 import { niceBytes } from "../../../common/utils";
-import { formatText, useLanguage, useT } from "i18n";
+import { formatText, localeTag, useLanguage, useT } from "i18n";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { setHelpName } from "../../../systemSlice";
 import { selSession } from "../consoleSlice";
@@ -77,7 +77,7 @@ export default function Overview() {
   const number = (value: number | undefined) =>
     value === undefined
       ? "—"
-      : new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en").format(value);
+      : new Intl.NumberFormat(localeTag(language)).format(value);
   const bytes = (value: number | undefined) =>
     value === undefined ? "—" : niceBytes(`${value}`);
   const byteValue = (value: number | undefined) => {

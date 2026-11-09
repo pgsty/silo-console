@@ -8,7 +8,7 @@
 import React, { ReactNode, useId } from "react";
 import { Box } from "mds";
 import styled from "styled-components";
-import { useLanguage } from "i18n";
+import { localeTag, useLanguage } from "i18n";
 import { typography } from "./typography";
 import { statCardTone } from "./statCardTone";
 
@@ -122,7 +122,7 @@ export const StatCard = ({
       {amount !== undefined && (
         <Progress>
           <span>
-            {new Intl.NumberFormat(language === "zh" ? "zh-CN" : "en", {
+            {new Intl.NumberFormat(localeTag(language), {
               style: "percent",
               maximumFractionDigits: 1,
             }).format(amount)}

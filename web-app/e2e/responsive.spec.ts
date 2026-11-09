@@ -619,6 +619,12 @@ test("mobile actions retain language, theme and Help; login hero starts at 768",
   ).toBeVisible();
   await page.getByRole("button", { name: "页面操作", exact: true }).click();
   await page
+    .getByRole("menuitem", { name: "Mudar para português", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Ações da página", exact: true })
+    .click();
+  await page
     .getByRole("menuitem", { name: "Switch to English", exact: true })
     .click();
   for (const width of [390, 768, 1440]) {

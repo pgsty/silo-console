@@ -19,12 +19,22 @@ import {
   translateLegend,
 } from "./lang";
 
-export const useLanguage = (): Lang =>
-  useSelector((state: AppState) => state.system.language);
+const useCatalogRevision = (): number =>
+  useSelector((state: AppState) => state.system.catalogRevision);
+
+export const useLanguage = (): Lang => {
+  useCatalogRevision();
+  return useSelector((state: AppState) => state.system.language);
+};
 
 export const useT = (): ((text: string) => string) => {
   const lang = useLanguage();
-  return useMemo(() => (text: string) => translate(lang, text), [lang]);
+  const revision = useCatalogRevision();
+  return useMemo(
+    () => (text: string) => translate(lang, text),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lang, revision],
+  );
 };
 
 export const useLocalizedLink = (): ((url: string) => string) => {
@@ -34,7 +44,12 @@ export const useLocalizedLink = (): ((url: string) => string) => {
 
 export const useLegendT = (): ((text: string) => string) => {
   const lang = useLanguage();
-  return useMemo(() => (text: string) => translateLegend(lang, text), [lang]);
+  const revision = useCatalogRevision();
+  return useMemo(
+    () => (text: string) => translateLegend(lang, text),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lang, revision],
+  );
 };
 
 // Renders a translated template with React nodes in {slot} positions, so

@@ -9,7 +9,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderIcon, SettingsIcon, TrashIcon } from "mds";
 import { DateTime } from "luxon";
-import { formatText, interpolate, useLanguage, useT } from "i18n";
+import { formatText, interpolate, localeTag, useLanguage, useT } from "i18n";
 import type { Bucket } from "../../../../api/consoleApi";
 import { hasPermission } from "../../../../common/SecureComponent";
 import {
@@ -150,7 +150,7 @@ export const BucketFeature = ({
 export const BucketCreated = ({ at }: { at?: string }) => {
   const language = useLanguage();
   const date = at
-    ? DateTime.fromISO(at).setLocale(language === "zh" ? "zh-CN" : "en")
+    ? DateTime.fromISO(at).setLocale(localeTag(language))
     : undefined;
   return date?.isValid ? (
     <Hint text={date.toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS)}>
