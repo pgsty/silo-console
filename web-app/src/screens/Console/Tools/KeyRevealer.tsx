@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React, { useState } from "react";
+import copy from "copy-to-clipboard";
 import { Button, CopyIcon, InputBox, Box, breakPoints } from "mds";
 import { useT } from "i18n";
 
@@ -44,7 +45,9 @@ const KeyRevealer = ({ value }: { value: string }) => {
         value={value}
         overlayIcon={<CopyIcon />}
         readOnly={true}
-        overlayAction={() => navigator.clipboard.writeText(value)}
+        // The async Clipboard API exists only in secure contexts; Console is
+        // often served over plain HTTP, so use the execCommand fallback.
+        overlayAction={() => copy(value)}
       />
 
       <Button

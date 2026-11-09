@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "api";
 import type { PrefixUsageFrame } from "api/consoleApi";
 import { readPrefixUsageStream } from "./prefixUsage";
-import { registerTaskControl, removeTrace } from "./transferManager";
+import { makeid, registerTaskControl, removeTrace } from "./transferManager";
 import { useTaskSession } from "../Common/ObjectManager/useTaskSession";
 
 type Scan = {
@@ -40,7 +40,9 @@ export function usePrefixUsage(
       const request = ++serial.current;
       const controller = new AbortController();
       active.current = controller;
-      const task = `prefix-usage-${crypto.randomUUID()}`;
+      // randomUUID exists only in secure contexts; embedded Console is
+      // often served over plain HTTP, so use the shared task-ID helper.
+      const task = `prefix-usage-${makeid(16)}`;
       registerTaskControl(task, { cancel: () => controller.abort() });
       const current = () => serial.current === request && isCurrentSession();
       setScan({ owner, prefix: target, running: true });

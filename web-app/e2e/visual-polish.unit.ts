@@ -192,6 +192,23 @@ test("actual Inspect guards pristine submit and preserves encoded download and d
     page.getByRole("dialog", { name: "Inspect Decryption Key" }),
   ).toBeVisible();
   await expect(page.locator("#inspect-dec-key")).toHaveValue("test-key");
+  // polish.test is plain HTTP, where the async Clipboard API is absent. The
+  // copy action must still work, and stay the field's only overlay button.
+  const copyKey = page.locator(
+    ".textBoxContainer:has(#inspect-dec-key) .overlayAction button",
+  );
+  await expect(copyKey).toHaveCount(1);
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await copyKey.click();
+  expect(pageErrors).toEqual([]);
+  await expect(page.locator("#inspect-dec-key")).toHaveAttribute(
+    "type",
+    "password",
+  );
+  // Leave the button so its tooltip does not take the first Escape.
+  await page.mouse.move(0, 0);
+  await page.locator("#inspect-dec-key").focus();
   await page.keyboard.press("Escape");
   await expect(page.locator("#inspect_volume")).toHaveValue("");
   await expect(page.locator('[aria-invalid="true"]')).toHaveCount(0);

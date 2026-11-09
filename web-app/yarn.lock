@@ -10991,6 +10991,7 @@ __metadata:
     "@types/react-virtualized": "npm:9.22.4"
     "@types/superagent": "npm:8.1.11"
     "@vitejs/plugin-react": "npm:6.1.2"
+    copy-to-clipboard: "npm:^3.3.3"
     fflate: "npm:0.8.3"
     genversion: "npm:^3.2.0"
     kbar: "npm:^0.1.0-beta.48"
