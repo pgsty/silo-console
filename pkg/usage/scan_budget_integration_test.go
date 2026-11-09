@@ -252,3 +252,46 @@ func TestBudgetExhaustionIsRecordedOnEveryExit(t *testing.T) {
 		}
 	}
 }
+
+// A shutdown that cancels a checkpoint, yield or completion write surfaces as
+// a database error rather than worker_shutdown; the job must still be handed
+// back at once instead of waiting for its lease to expire.
+func TestShutdownDuringADatabaseWriteStillRequeues(t *testing.T) {
+	s := integrationStore(t)
+	c := scanBudgetConfig(t)
+	ctx := context.Background()
+	for _, bucket := range []string{"budget-canceled-write", "budget-upstream"} {
+		if err := s.Queue(ctx, bucket, true, 0, 0, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	job, err := s.Claim(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stopping, stop := context.WithCancel(ctx)
+	stop()
+	settleScan(stopping, s, job, fmt.Errorf("save checkpoint: %w", context.Canceled), c)
+	record, err := s.Get(ctx, job.Bucket)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.State != "queued" || record.ErrorCode != "" {
+		t.Fatalf("an interrupted write left the job %s/%s", record.State, record.ErrorCode)
+	}
+	// A failure while the worker keeps running is still recorded.
+	other, err := s.Claim(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if other.Bucket == job.Bucket {
+		other, err = s.Claim(ctx, time.Minute)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	settleScan(ctx, s, other, &ScanFailure{Code: "upstream"}, c)
+	if record, err = s.Get(ctx, other.Bucket); err != nil || record.State != "error" || record.ErrorCode != "upstream" {
+		t.Fatalf("a scan failure was not recorded: %+v %v", record, err)
+	}
+}

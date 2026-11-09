@@ -99,40 +99,47 @@ func runScanWorker(ctx context.Context, s *Store, client ListingClient, c Config
 			}
 			continue
 		}
-		err = s.RunSlice(ctx, client, job, c)
-		if err == nil {
-			continue
-		}
-		if errors.Is(err, ErrLeaseLost) {
-			continue
-		}
-		var failure *ScanFailure
-		if errors.As(err, &failure) {
-			if failure.Code == "not_found" {
-				operation, stop := context.WithTimeout(ctx, c.Heartbeat)
-				_ = s.MissingBucket(operation, job)
-				stop()
-				continue
-			}
-			operation, cancel := context.WithTimeout(context.Background(), c.Heartbeat)
-			var persistErr error
-			if failure.Code == "worker_shutdown" {
-				// Shutdown interrupts a healthy scan; the next worker resumes it.
-				persistErr = s.Release(operation, job)
-			} else {
-				persistErr = s.Fail(operation, job, failure.Code, failure.Limited, c.retry(job.Attempts))
-			}
-			cancel()
-			if persistErr != nil && !errors.Is(persistErr, ErrLeaseLost) {
-				log.Print("usage worker: state store unavailable while recording scan failure")
-			}
-			if failure.Code != "worker_shutdown" {
-				log.Printf("usage worker: bucket=%q scan=%s", job.Bucket, failure.Code)
-			}
-		} else if ctx.Err() == nil {
-			log.Print("usage worker: scan interrupted by state store failure; lease recovery will resume it")
-		}
+		settleScan(ctx, s, job, s.RunSlice(ctx, client, job, c), c)
 	}
+}
+
+// settleScan records how a claimed slice ended. A stopping worker hands its
+// job back with Release whatever interrupted it: the shutdown check inside
+// RunSlice, or a database write canceled with the worker's context. The
+// lease guard makes Release a no-op for a job that was already completed,
+// yielded or taken over.
+func settleScan(ctx context.Context, s *Store, job Record, err error, c Config) {
+	if err == nil || errors.Is(err, ErrLeaseLost) {
+		return
+	}
+	var failure *ScanFailure
+	isFailure := errors.As(err, &failure)
+	if ctx.Err() != nil || (isFailure && failure.Code == "worker_shutdown") {
+		operation, cancel := context.WithTimeout(context.Background(), c.Heartbeat)
+		releaseErr := s.Release(operation, job)
+		cancel()
+		if releaseErr != nil && !errors.Is(releaseErr, ErrLeaseLost) {
+			log.Print("usage worker: state store unavailable while releasing an interrupted scan; lease recovery will resume it")
+		}
+		return
+	}
+	if !isFailure {
+		log.Print("usage worker: scan interrupted by state store failure; lease recovery will resume it")
+		return
+	}
+	if failure.Code == "not_found" {
+		operation, stop := context.WithTimeout(ctx, c.Heartbeat)
+		_ = s.MissingBucket(operation, job)
+		stop()
+		return
+	}
+	operation, cancel := context.WithTimeout(context.Background(), c.Heartbeat)
+	persistErr := s.Fail(operation, job, failure.Code, failure.Limited, c.retry(job.Attempts))
+	cancel()
+	if persistErr != nil && !errors.Is(persistErr, ErrLeaseLost) {
+		log.Print("usage worker: state store unavailable while recording scan failure")
+	}
+	log.Printf("usage worker: bucket=%q scan=%s", job.Bucket, failure.Code)
 }
 
 func reconcile(ctx context.Context, s *Store, client *minio.Client, c Config, full bool) error {
