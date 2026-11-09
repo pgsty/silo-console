@@ -54,25 +54,17 @@ jobs:
 
   lint-job:
     name: Checking Lint
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
+      - name: Run checks
         run: |
           make verifiers
 
@@ -85,10 +77,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go 1.27.3
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: 1.27.3
+          go-version-file: go.mod
       - name: Remove the maintained mc replacement and probe compatibility
         # hack/upstream-floor.sh models an embedder that does not copy the mc
         # replacement.
@@ -100,10 +92,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go 1.27.3
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: 1.27.3
+          go-version-file: go.mod
       - name: Verify the README block against go.mod
         run: go run ./hack/replacements check
       - name: Build an embedder that copies the README block verbatim
@@ -113,10 +105,7 @@ jobs:
 
   semgrep-static-code-analysis:
     name: "semgrep checks"
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out source code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -130,21 +119,14 @@ jobs:
   ui-assets:
     name: "React Code Has No Warnings & Prettified"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -156,12 +138,10 @@ jobs:
           key: ${{ runner.os }}-assets-${{ github.run_id }}
       - name: Install Dependencies
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           yarn install --immutable
       - name: Check for Warnings in build output
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           ./check-warnings.sh
       - name: Check JavaScript bundle budgets
@@ -169,18 +149,16 @@ jobs:
         run: yarn check:bundle
       - name: Check if Files are Prettified
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           ./check-prettier.sh
       - name: Check for dead code
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           ./check-deadcode.sh
       - name: Set up Go for the credits check
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: go.mod
       - name: Check the frontend section of CREDITS
         # The production dependency closure is read from node_modules, so this
         # check lives where the immutable install just happened.
@@ -194,10 +172,10 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      - name: Set up Go 1.27.3
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: 1.27.3
+          go-version-file: go.mod
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
         with:
@@ -228,10 +206,10 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
-      - name: Set up Go 1.27.3
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: 1.27.3
+          go-version-file: go.mod
           cache: false
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
@@ -251,31 +229,23 @@ jobs:
       - lint-job
       - ui-assets
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
+          go-version-file: go.mod
       - name: Enable Corepack
         run: corepack enable
       - name: Setup Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
       - name: Install NPM Dependencies
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           yarn install --immutable
       - name: Install go-swagger
@@ -300,7 +270,7 @@ jobs:
           fi
 
   compile-binary:
-    name: Compiles on Go ${{ matrix.go-version }} and ${{ matrix.os }}
+    name: Build Console
     needs:
       - compile-silo
       - lint-job
@@ -308,20 +278,15 @@ jobs:
       - ui-assets
       - semgrep-static-code-analysis
       - swagger-codegen
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
         with:
@@ -335,10 +300,7 @@ jobs:
           path: |
             ./web-app/build/
           key: ${{ runner.os }}-assets-${{ github.run_id }}
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
+      - name: Run checks
         run: |
           make console
 
@@ -346,28 +308,20 @@ jobs:
     name: Test Subpath with Nginx
     needs:
       - compile-binary
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
       - name: Install locked browser dependencies
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           yarn install --immutable
 
@@ -377,11 +331,6 @@ jobs:
           path: |
             ./console
           key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
 
       - name: Prepare the coordinated SILO fixture
         uses: ./.github/actions/test-silo
@@ -394,8 +343,7 @@ jobs:
         run: bash hack/install-ci-firefox.sh
 
       - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/subpath-nginx/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/subpath-nginx/ --skip-js-errors --screenshots "path=testcafe-screenshots,takeOnFails=true,pathPattern=\${FIXTURE}/\${TEST}.png"
       - name: Upload TestCafe screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -409,661 +357,69 @@ jobs:
         run: |
           make cleanup-minio-nginx
 
-  all-permissions-1:
-    name: Permissions Tests Part 1
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-1/ -q --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-      - name: Clean up users & policies
-        run: |
-          make cleanup-permissions
-
-  all-permissions-2:
-    name: Permissions Tests Part 2
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-2/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-      - name: Clean up users & policies
-        run: |
-          make cleanup-permissions
-
-  all-permissions-3:
-    name: Permissions Tests Part 3
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-3/ -q --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-      - name: Clean up users & policies
-        run: |
-          make cleanup-permissions
-
-  all-permissions-4:
-    name: Permissions Tests Part 4
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
+  permissions-tests:
+    name: Permissions Tests Part ${{ matrix.suite }}
+    needs: compile-binary
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+        suite: ["1", "2", "3", "4", "5", "6", "7", "8", "A", "B"]
     steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Enable Corepack
         run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
+          node-version-file: .nvmrc
+          cache: yarn
           cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
+      - name: Install browser dependencies
+        working-directory: web-app
+        run: yarn install --immutable
+      - name: Restore Console
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: |
-            ./console
+          path: ./console
           key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
+      - uses: ./.github/actions/test-silo
+      - name: Initialize users and policies, then start Console
         run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
+          make initialize-permissions
+          ./console server > "$RUNNER_TEMP/console.log" 2>&1 &
+      - name: Install Firefox
         run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        timeout-minutes: 10
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-4/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
+      - name: Run permission tests
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" "web-app/tests/permissions-$SUITE/" --skip-js-errors --screenshots "path=testcafe-screenshots,takeOnFails=true,pathPattern=\${FIXTURE}/\${TEST}.png"
+      - name: Retain failure evidence
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-  all-permissions-5:
-    name: Permissions Tests Part 5
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
+          name: permissions-${{ matrix.suite }}-attempt-${{ github.run_attempt }}
           path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        timeout-minutes: 5
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-5/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-  all-permissions-6:
-    name: Permissions Tests Part 6
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        timeout-minutes: 5
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-6/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-  all-permissions-7:
-    name: Permissions Tests Part 7
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        timeout-minutes: 10
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-7/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-  all-permissions-8:
-    name: Permissions Tests Part 8
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        timeout-minutes: 5
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-8/ --skip-js-errors --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-  all-permissions-A:
-    name: Permissions Tests Part A
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-A/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-      - name: Clean up users & policies
-        run: |
-          make cleanup-permissions
-
-  all-permissions-B:
-    name: Permissions Tests Part B
-    needs:
-      - compile-binary
-    runs-on: [ubuntu-latest]
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
-      - name: Enable Corepack
-        run: corepack enable
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
-        with:
-          node-version: ${{ env.NVMRC }}
-          cache: "yarn"
-          cache-dependency-path: web-app/yarn.lock
-      - name: Install locked browser dependencies
-        working-directory: ./web-app
-        continue-on-error: false
-        run: |
-          yarn install --immutable
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        name: Console Binary Cache
-        with:
-          path: |
-            ./console
-          key: ${{ runner.os }}-binary-${{ github.run_id }}
-
-      - name: clean-previous-containers-if-any
-        run: |
-          docker stop minio || true;
-          docker container prune -f || true;
-
-      - name: Prepare the coordinated SILO fixture
-        uses: ./.github/actions/test-silo
-
-      - name: Start Console, front-end app and initialize users/policies
-        run: |
-          (./console server) & (make initialize-permissions)
-
-      - name: Install the pinned and checksum-verified Firefox
-        run: bash hack/install-ci-firefox.sh
-
-      - name: Run TestCafe Tests
-        # Evidence for the next flake: a screenshot per failed test, uploaded per job and attempt.
-        run: ./web-app/node_modules/.bin/testcafe "firefox:headless" web-app/tests/permissions-B/ --skip-js-errors -c 1 --screenshots 'path=testcafe-screenshots,takeOnFails=true,pathPattern=${FIXTURE}/${TEST}.png'
-      - name: Upload TestCafe screenshots
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: testcafe-${{ github.job }}-attempt-${{ github.run_attempt }}
-          path: testcafe-screenshots
-          if-no-files-found: warn
-
-      - name: Clean up users & policies
-        run: |
-          make cleanup-permissions
+            testcafe-screenshots
+            ${{ runner.temp }}/console.log
 
   test-pkg-on-go:
-    name: Test Pkg on Go ${{ matrix.go-version }} and ${{ matrix.os }}
+    name: Test Go packages
     needs:
       - lint-job
       - ui-assets
       - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
+      - name: Run checks
         run: |
           make test-pkg
 
@@ -1076,30 +432,22 @@ jobs:
           key: ${{ runner.os }}-coverage-pkg-2-${{ github.run_id }}
 
   test-api-on-go:
-    name: Test API on Go ${{ matrix.go-version }} and ${{ matrix.os }}
+    name: Test Go API
     needs:
       - lint-job
       - ui-assets
       - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
+      - name: Run checks
         run: |
           make test
 
@@ -1113,25 +461,16 @@ jobs:
 
   b-integration-tests:
     name: Integration Tests with Pinned SILO
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-      - compile-binary
+    needs: compile-binary
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go-version: [1.27.3]
 
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache
@@ -1142,19 +481,11 @@ jobs:
       - name: Prepare the coordinated SILO fixture
         uses: ./.github/actions/test-silo
 
-      - name: Build on ${{ runner.os }}
+      - name: Test the Console container with SILO
         run: |
-          echo "The idea is to build console image from cached binary";
-          cd $GITHUB_WORKSPACE;
-
           TAG="docker.io/pgsty/silo-console:dev"
-          echo "Create Console image: $TAG";
-          docker build -q --no-cache -t $TAG . -f Dockerfile.release
-
-          echo "Use the coordinated SILO fixture for integration tests";
-          echo $MINIO_VERSION;
-
-          make test-integration MINIO_VERSION=$MINIO_VERSION TAG=$TAG;
+          docker build --no-cache -t "$TAG" -f Dockerfile.release .
+          make test-integration TAG="$TAG"
 
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache
@@ -1166,36 +497,23 @@ jobs:
 
   replication:
     name: Site Replication Test
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-      - compile-binary
-    runs-on: [ubuntu-latest]
-
-    strategy:
-      matrix:
-        go-version: [1.27.3]
+    needs: compile-binary
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
       - name: Prepare the coordinated SILO fixture
         uses: ./.github/actions/test-silo
 
-      - name: Build on ${{ runner.os }}
-        run: |
-          echo "Use the coordinated SILO fixture for site-replication tests";
-          echo $MINIO_VERSION;
-
-          make test-replication MINIO_VERSION=$MINIO_VERSION;
+      - name: Run integration tests
+        run: make test-replication
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-replication
         name: Coverage Cache Replication
@@ -1206,36 +524,23 @@ jobs:
 
   sso-integration:
     name: SSO Integration Test with SILO
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-      - compile-binary
+    needs: compile-binary
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        go-version: [1.27.3]
 
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ runner.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
 
       - name: Prepare the coordinated SILO fixture
         uses: ./.github/actions/test-silo
 
-      - name: Build on ${{ runner.os }}
-        run: |
-          echo "Use the coordinated SILO fixture for the Console compatibility gate";
-          echo $MINIO_VERSION;
-
-          make test-sso-integration MINIO_VERSION=$MINIO_VERSION;
+      - name: Run integration tests
+        run: make test-sso-integration
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: coverage-cache-sso
         name: Coverage Cache SSO
@@ -1245,26 +550,21 @@ jobs:
           key: ${{ runner.os }}-sso-coverage-2-${{ github.run_id }}
 
   coverage:
-    name: "Coverage Limit Check"
+    name: Go coverage report
     needs:
       - b-integration-tests
       - test-api-on-go
       - test-pkg-on-go
       - sso-integration
       - replication
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
       - name: Check out gocovmerge as a nested repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -1311,67 +611,36 @@ jobs:
             ./pkg/coverage/
           key: ${{ runner.os }}-coverage-pkg-2-${{ github.run_id }}
 
-      - name: Get coverage
+      - name: Merge coverage and write reports
+        working-directory: gocovmerge
         run: |
-          echo "change directory to gocovmerge"
-          cd gocovmerge
-          echo "download golang x tools"
           go mod download golang.org/x/tools
-          echo "go mod tidy compat mode"
-          go mod tidy -compat=1.27
-          echo "go build gocoverage.go"
+          go mod tidy
           go build gocovmerge.go
-          echo "put together the outs for final coverage resolution"
-          ./gocovmerge ../integration/coverage/system.out ../replication/coverage/replication.out ../sso-integration/coverage/sso-system.out ../api/coverage/coverage.out ../pkg/coverage/coverage-pkg.out > all.out
-
-          go tool cover -html=all.out -o $GITHUB_WORKSPACE/all-coverage.html
-          go tool cover -html=../integration/coverage/system.out -o $GITHUB_WORKSPACE/system.html
-          go tool cover -html=../sso-integration/coverage/sso-system.out -o $GITHUB_WORKSPACE/sso-system.html
-          go tool cover -html=../api/coverage/coverage.out -o $GITHUB_WORKSPACE/coverage.html
-          go tool cover -html=../pkg/coverage/coverage-pkg.out -o $GITHUB_WORKSPACE/coverage-pkg.html
-
-          echo "grep to obtain the result"
-          go tool cover -func=all.out | grep total > tmp2
-          result=`cat tmp2 | awk 'END {print $3}'`
-          result=${result%\%}
-          threshold=1.0
-          echo "Result:"
-          echo "$result%"
-          if (( $(echo "$result >= $threshold" |bc -l) )); then
-            echo "It is equal or greater than threshold ($threshold%), passed!"
-          else
-            echo "It is smaller than threshold ($threshold%) value, failed!"
-            exit 1
-          fi
-
-      # To save our all.out and all-coverage.html file into an artifact.
-      # By default, GitHub stores build logs and artifacts for 90 days.
+          ./gocovmerge ../integration/coverage/system.out ../replication/coverage/replication.out ../sso-integration/coverage/sso-system.out ../api/coverage/coverage.out ../pkg/coverage/coverage-pkg.out > "$GITHUB_WORKSPACE/all.out"
+          go tool cover -html="$GITHUB_WORKSPACE/all.out" -o "$GITHUB_WORKSPACE/all-coverage.html"
+          go tool cover -func="$GITHUB_WORKSPACE/all.out" | tee "$GITHUB_WORKSPACE/coverage-summary.txt"
+          tail -n 1 "$GITHUB_WORKSPACE/coverage-summary.txt" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-artifact
           path: |
             ./all.out
             ./all-coverage.html
+            ./coverage-summary.txt
           if-no-files-found: error
 
   ui-assets-istanbul-coverage:
     name: "Assets with Istanbul Plugin for coverage"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -1383,12 +652,10 @@ jobs:
           key: ${{ runner.os }}-assets-istanbul-coverage-${{ github.run_id }}
       - name: Install Dependencies
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           yarn install --immutable
       - name: Check for Warnings in build output
         working-directory: ./web-app
-        continue-on-error: false
         run: |
           ./check-warnings-istanbul-coverage.sh
 
@@ -1399,20 +666,15 @@ jobs:
       - ui-assets-istanbul-coverage
       - semgrep-static-code-analysis
       - compile-binary
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
+      - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
+          go-version-file: go.mod
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Console Binary Cache Istanbul Coverage
         with:
@@ -1426,151 +688,35 @@ jobs:
           path: |
             ./web-app/build/
           key: ${{ runner.os }}-assets-istanbul-coverage-${{ github.run_id }}
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
+      - name: Run checks
         run: |
           make console
 
-  cross-compile-1:
-    name: Cross compile
+  cross-compile:
+    name: Cross compile (${{ matrix.targets }})
     needs:
       - lint-job
       - ui-assets
       - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
+        targets:
+          - linux/ppc64le linux/mips64
+          - linux/arm64 linux/s390x
+          - darwin/amd64 freebsd/amd64
+          - windows/amd64 linux/arm
+          - linux/386 netbsd/amd64
     steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - name: Build on ${{ matrix.os }}
+          go-version-file: go.mod
+      - name: Build target platforms
         env:
-          GO111MODULE: on
-          GOOS: linux
-        run: |
-          make crosscompile arg1="'linux/ppc64le linux/mips64'"
-
-  cross-compile-2:
-    name: Cross compile 2
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
-        run: |
-          make crosscompile arg1="'linux/arm64 linux/s390x'"
-
-  cross-compile-3:
-    name: Cross compile 3
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
-        run: |
-          make crosscompile arg1="'darwin/amd64 freebsd/amd64'"
-
-  cross-compile-4:
-    name: Cross compile 4
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
-        run: |
-          make crosscompile arg1="'windows/amd64 linux/arm'"
-
-  cross-compile-5:
-    name: Cross compile 5
-    needs:
-      - lint-job
-      - ui-assets
-      - semgrep-static-code-analysis
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
-    steps:
-      - name: Check out code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-
-      - name: Set up Go ${{ matrix.go-version }} on ${{ matrix.os }}
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - name: Build on ${{ matrix.os }}
-        env:
-          GO111MODULE: on
-          GOOS: linux
-        run: |
-          make crosscompile arg1="'linux/386 netbsd/amd64'"
+          TARGETS: ${{ matrix.targets }}
+        run: bash cross-compile.sh "$TARGETS"
 
   playwright:
     needs:
@@ -1598,14 +744,11 @@ jobs:
       CONSOLE_USAGE_RECONCILE_INTERVAL: 1s
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - name: Enable Corepack
         run: corepack enable
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
           cache: "yarn"
           cache-dependency-path: web-app/yarn.lock
 
@@ -1635,7 +778,7 @@ jobs:
             CONSOLE_USAGE_HTTP_ADDRESS=127.0.0.1:19091 \
             ./console usage-worker > "$RUNNER_TEMP/playwright-usage-worker.log" 2>&1 &
           ready=false
-          for attempt in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:19091/ready >/dev/null; then
               ready=true
               break
@@ -1645,7 +788,7 @@ jobs:
           if [ "$ready" != true ]; then cat "$RUNNER_TEMP/playwright-usage-worker.log"; exit 1; fi
           ./console server > "$RUNNER_TEMP/playwright-console.log" 2>&1 &
           ready=false
-          for attempt in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:9090/ >/dev/null; then
               ready=true
               break
@@ -1721,7 +864,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: 1.27.3
+          go-version-file: go.mod
       - name: Enable Corepack
         run: corepack enable
       - name: Set up Node
@@ -1802,7 +945,7 @@ jobs:
           silo_pid=$!
           trap 'kill "$silo_pid" 2>/dev/null || true' EXIT
           ready=false
-          for attempt in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl --fail --silent "$TEST_USAGE_S3_ENDPOINT/minio/health/live" >/dev/null; then
               ready=true
               break
@@ -1822,10 +965,8 @@ jobs:
           path: ${{ runner.temp }}/usage-silo.log
 
   required-matrix:
-    # The release gate (release.yaml) and branch protection look at this one
-    # job. It lists every release-gating job explicitly and fails unless each
-    # succeeded. Best-effort upstream compatibility jobs are intentionally not
-    # included: they report drift without overriding the maintained SILO graph.
+    # Release workflows check this aggregate result. Upstream compatibility
+    # remains advisory.
     name: Required matrix
     if: always()
     needs:
@@ -1839,16 +980,7 @@ jobs:
       - release-artifacts
       - reproducible-artifacts
       - test-nginx-subpath
-      - all-permissions-1
-      - all-permissions-2
-      - all-permissions-3
-      - all-permissions-4
-      - all-permissions-5
-      - all-permissions-6
-      - all-permissions-7
-      - all-permissions-8
-      - all-permissions-A
-      - all-permissions-B
+      - permissions-tests
       - test-pkg-on-go
       - test-api-on-go
       - b-integration-tests
@@ -1857,11 +989,7 @@ jobs:
       - coverage
       - ui-assets-istanbul-coverage
       - compile-binary-istanbul-coverage
-      - cross-compile-1
-      - cross-compile-2
-      - cross-compile-3
-      - cross-compile-4
-      - cross-compile-5
+      - cross-compile
       - playwright
       - sharing-boundary
       - usage-integration

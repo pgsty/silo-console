@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-          check-latest: true
       - name: Get official govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
         shell: bash
@@ -35,19 +34,12 @@ jobs:
   react-code-known-vulnerabilities:
     name: "React Code Has No Known Vulnerable Deps"
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: [1.27.3]
-        os: [ubuntu-latest]
     steps:
       - name: Check out code
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-      - name: Read .nvmrc
-        id: node_version
-        run: echo "$(cat .nvmrc)" && echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_ENV
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.0.0
         with:
-          node-version: ${{ env.NVMRC }}
+          node-version-file: .nvmrc
       - name: Enable Corepack
         run: corepack enable
       - name: Install locked frontend dependencies
@@ -55,11 +47,9 @@ jobs:
         run: yarn install --immutable
       - name: Check production dependencies for known security issues
         working-directory: ./web-app
-        continue-on-error: false
         run: yarn npm audit --recursive --environment production --no-deprecations
       - name: Block high-severity issues in all dependency groups
         working-directory: ./web-app
-        continue-on-error: false
         # GHSA-vfj7-8cjw-p6xm (npm 1240992): upstream braces 3.0.3 has no fixed release.
         # The Yarn patch bounds parse and AST walker nesting; dependency-security.unit.ts
         # checks malicious patterns, AST inputs, and normal build/test globs. npm audit

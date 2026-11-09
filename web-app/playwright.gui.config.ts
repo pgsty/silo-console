@@ -17,10 +17,7 @@ export default defineConfig({
     ...(process.env.VISUAL === "1" ? [/visual\.spec\.ts$/] : []),
   ],
   globalSetup: "./e2e/fixtures/guiAuthenticate.ts",
-  fullyParallel: false,
   workers: 1,
-  retries: 0,
-  repeatEach: 1,
   forbidOnly: true,
   reporter: [
     ["line"],
