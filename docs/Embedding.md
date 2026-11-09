@@ -4,7 +4,7 @@ Console 2.7.0 source uses silo-pkg v3.16.0 and the published
 mcli 20261109 source, recorded in `hack/deps-release.json`, with Go 1.27.3 and upstream
 minio-go `v7.4.2-0.20261025165926-320af050c445`. This SDK revision includes
 post-v7.4.1 fixes; it is not a tagged v7.4.2 release.
-The candidate retains the fixed `golang.org/x/net v0.62.0` and
+It retains the fixed `golang.org/x/net v0.62.0` and
 `golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2` revisions already used
 by Console v2.6.0. Use the README replacement block from the Console revision
 being embedded in a SILO server.
@@ -13,13 +13,13 @@ MC resolves to `v0.0.0-20261109021353-e1d4cc5abfe0`, the source commit
 `e1d4cc5abfe00b674eb36347399e7398990be467` tagged
 `RELEASE.2026-11-09T00-00-00Z`. The calendar tag is not Go SemVer.
 silo-pkg v3.16.0 resolves to `b7aeea85e84e8888d6ab424c7123a1297711bc3f`.
-These are released dependencies. Console 2.7.0 artifacts are prepared as a
-GitHub draft before public release; check the release's publication status.
+These are released dependencies; see GitHub Releases for Console's own
+publication status.
 Published Console v2.6.0 used silo-pkg v3.15.2 and mcli 20261026; its
 [dependency record](https://github.com/pgsty/silo-console/blob/v2.6.0/hack/deps-release.json)
 remains attached to that release.
 
-The candidate's generator is go-swagger v0.36.7; its linked runtime and
+The generator is go-swagger v0.36.7; its linked runtime and
 server-middleware are v0.33.4. Generated array context validators now continue
 past zero elements. The current schema has no `readOnly` constraints, so this
 does not introduce new contextual request restrictions. The default generated

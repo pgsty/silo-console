@@ -13,7 +13,6 @@
 - Include system CA roots and a writable `/tmp` in scratch container images
   for HTTPS requests and large multipart uploads, while retaining the non-root
   runtime and explicit private-CA configuration (PR #84).
-
 - Upgrade the Swagger generator to v0.36.7 and runtime/server-middleware to
   v0.33.4. Regenerate array context validators so zero elements do not stop
   validation of later elements. Preserve the customized server and configuration
@@ -36,6 +35,32 @@
   settings. Keep the maintained SILO, PostgreSQL, browser, artifact and
   reproducibility checks. Exercise observer renewal with production lease
   defaults and synchronization against the database deadline.
+- Start folder-size calculations and decryption-key copying when Console is
+  opened over plain HTTP, where browsers omit `crypto.randomUUID` and the async
+  Clipboard API. Previously both buttons silently did nothing.
+- Let `console usage-worker` trust the same roots as `console server`: it
+  accepts `--certs-dir`, trusts `certs/CAs` and Console's public certificate,
+  and applies `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY` to the SILO endpoint only.
+  The worker only reads that directory; it neither creates it nor loads
+  `private.key`.
+- Charge `CONSOLE_USAGE_SCAN_TIMEOUT` for listing time summed across scan
+  slices, not for time a bucket spends queued behind others. Many large buckets
+  no longer all end `limited` together. Buckets left limited by the earlier
+  accounting resume with a full budget on their next retry; stop older usage
+  workers before starting 2.7.0 workers so the budget is accumulated
+  consistently.
+- Return scans interrupted by worker shutdown, including during a database
+  write, to the queue with their checkpoint instead of showing them as failed.
+- Forget a deleted bucket's saved totals on `s3:BucketRemoved`, including after
+  a force delete that emits no object events, so a bucket re-created under the
+  same name never shows them. Deletions that cannot be persisted at once are
+  retried.
+- Without the usage database, retry a busy scanner (HTTP 429) with backoff for
+  about 30 seconds before reporting a bucket as failed.
+- Reject malformed or truncated multipart uploads with an error instead of a
+  request-handler panic.
+- Never treat a canceled bucket-usage authorization probe as authorized, and
+  build the share-link expiry from Luxon's locale-independent ISO output.
 
 ## Release v2.6.0
 

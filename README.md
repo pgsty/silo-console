@@ -36,11 +36,11 @@
 
 ## SILO Console 2.7.0
 
-This source prepares **2.7.0**: ten UI languages and Arabic RTL, independently
-cached language assets, container HTTPS and temporary-file fixes, and updated
-Go dependencies and API documentation. Release artifacts are prepared as a
-GitHub draft; [v2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)
-remains the latest published stable release until that draft is published.
+This source is **2.7.0**: ten UI languages and Arabic RTL, independently cached
+language assets, container HTTPS and temporary-file fixes, usage-worker TLS and
+scheduling fixes, folder sizes over plain HTTP, and updated Go dependencies and
+API documentation. See [GitHub Releases](https://github.com/pgsty/silo-console/releases)
+for publication status.
 
 [English](README.md) · [简体中文](README_ZH.md)
 

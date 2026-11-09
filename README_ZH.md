@@ -10,9 +10,9 @@ SILO 对象存储的 Web 管理控制台，由 Pigsty 社区维护。前端使�
 
 ## SILO Console 2.7.0
 
-当前源码准备 **2.7.0**：十种语言与阿拉伯语 RTL、独立缓存的语言资源、容器 HTTPS 与临时文件修复，以及 Go 依赖和 API 文档更新。
-制品通过标签流水线准备为 GitHub Draft Release；草稿公开发布前，最新正式版仍为
-[v2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)。
+本源码为 **2.7.0**：十种语言与阿拉伯语 RTL、独立缓存的语言资源、容器 HTTPS 与临时文件修复、用量后台任务的 TLS 与调度修复、
+普通 HTTP 下的目录大小计算，以及 Go 依赖和 API 文档更新。
+发布状态见 [GitHub Releases](https://github.com/pgsty/silo-console/releases)。
 
 **2.7.0** 使用 **Go 1.27.3**、**silo-pkg v3.16.0** 与 **mcli 20261109 正式版**。
 MC 的 `RELEASE.2026-11-09T00-00-00Z` 是日历标签，Go 用伪版本

@@ -1,7 +1,6 @@
 # Docs
 
-These pages describe the Console v2.7.0 candidate source. Console v2.6.0 remains
-the latest published release while the v2.7.0 GitHub draft is being prepared.
+These pages describe the Console v2.7.0 source.
 Published binaries, packages and release status are available on
 [GitHub Releases](https://github.com/pgsty/silo-console/releases).
 See [CHANGELOG.md](../CHANGELOG.md) and the
