@@ -167,7 +167,7 @@ func (m *LoginDetails) contextValidateRedirectRules(ctx context.Context, formats
 		if m.RedirectRules[i] != nil {
 
 			if typeutils.IsZero(m.RedirectRules[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.RedirectRules[i].ContextValidate(ctx, formats); err != nil {

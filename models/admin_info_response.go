@@ -287,7 +287,7 @@ func (m *AdminInfoResponse) contextValidateServers(ctx context.Context, formats 
 		if m.Servers[i] != nil {
 
 			if typeutils.IsZero(m.Servers[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Servers[i].ContextValidate(ctx, formats); err != nil {
@@ -316,7 +316,7 @@ func (m *AdminInfoResponse) contextValidateWidgets(ctx context.Context, formats 
 		if m.Widgets[i] != nil {
 
 			if typeutils.IsZero(m.Widgets[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Widgets[i].ContextValidate(ctx, formats); err != nil {

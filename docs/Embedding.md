@@ -18,6 +18,16 @@ Published Console v2.6.0 used silo-pkg v3.15.2 and mcli 20261026; its
 [dependency record](https://github.com/pgsty/silo-console/blob/v2.6.0/hack/deps-release.json)
 remains attached to that release.
 
+The candidate's generator is go-swagger v0.36.7; its linked runtime and
+server-middleware are v0.33.4. Generated array context validators now continue
+past zero elements. The current schema has no `readOnly` constraints, so this
+does not introduce new contextual request restrictions. The default generated
+API documentation at `/api/v1/docs` loads Redoc 3 as an ES module from
+`cdn.jsdelivr.net`; its specification is served at `/swagger.json`.
+This concerns the API documentation middleware, not the bundled Console UI.
+Embedders with a custom documentation template or a Redoc 2 asset override
+should review the runtime's `RedocV2` / `WithRedocV2` option.
+
 SILO embeds this module (`github.com/minio/console`) as a Go dependency.
 Console directly requires `github.com/pgsty/silo-pkg/v3`; that requirement is
 inherited normally and needs no downstream replacement. Console has one

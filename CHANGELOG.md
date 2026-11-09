@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Upgrade the Swagger generator to v0.36.7 and runtime/server-middleware to
+  v0.33.4. Regenerate array context validators so zero elements do not stop
+  validation of later elements. Preserve the customized server and configuration
+  import binder; the default API documentation page now loads Redoc 3 as an ES
+  module. Route its `/swagger.json` request to the API instead of the frontend
+  SPA fallback. The Console frontend and TypeScript API remain unchanged.
 - Adopt released silo-pkg v3.16.0 and mcli 20261109, pinning MC's calendar
   release to `v0.0.0-20261109021353-e1d4cc5abfe0`. Record the release tags and
   full source commits in `hack/deps-release.json` for downstream embedders.

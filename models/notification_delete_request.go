@@ -133,7 +133,7 @@ func (m *NotificationDeleteRequest) contextValidateEvents(ctx context.Context, f
 	for i := 0; i < len(m.Events); i++ {
 
 		if typeutils.IsZero(m.Events[i]) { // not required
-			return nil
+			continue
 		}
 
 		if err := m.Events[i].ContextValidate(ctx, formats); err != nil {

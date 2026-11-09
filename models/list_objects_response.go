@@ -106,7 +106,7 @@ func (m *ListObjectsResponse) contextValidateObjects(ctx context.Context, format
 		if m.Objects[i] != nil {
 
 			if typeutils.IsZero(m.Objects[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Objects[i].ContextValidate(ctx, formats); err != nil {

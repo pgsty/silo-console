@@ -207,7 +207,7 @@ func (m *SessionResponse) contextValidateAllowResources(ctx context.Context, for
 		if m.AllowResources[i] != nil {
 
 			if typeutils.IsZero(m.AllowResources[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.AllowResources[i].ContextValidate(ctx, formats); err != nil {

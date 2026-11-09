@@ -106,7 +106,7 @@ func (m *StartProfilingList) contextValidateStartResults(ctx context.Context, fo
 		if m.StartResults[i] != nil {
 
 			if typeutils.IsZero(m.StartResults[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.StartResults[i].ContextValidate(ctx, formats); err != nil {

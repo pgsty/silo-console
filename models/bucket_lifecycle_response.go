@@ -103,7 +103,7 @@ func (m *BucketLifecycleResponse) contextValidateLifecycle(ctx context.Context, 
 		if m.Lifecycle[i] != nil {
 
 			if typeutils.IsZero(m.Lifecycle[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Lifecycle[i].ContextValidate(ctx, formats); err != nil {

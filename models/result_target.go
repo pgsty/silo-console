@@ -109,7 +109,7 @@ func (m *ResultTarget) contextValidateResult(ctx context.Context, formats strfmt
 		if m.Result[i] != nil {
 
 			if typeutils.IsZero(m.Result[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Result[i].ContextValidate(ctx, formats); err != nil {

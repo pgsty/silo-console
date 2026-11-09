@@ -103,7 +103,7 @@ func (m *MultiBucketResponseState) contextValidateReplicationState(ctx context.C
 		if m.ReplicationState[i] != nil {
 
 			if typeutils.IsZero(m.ReplicationState[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.ReplicationState[i].ContextValidate(ctx, formats); err != nil {

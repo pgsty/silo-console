@@ -106,7 +106,7 @@ func (m *ListAccessRulesResponse) contextValidateAccessRules(ctx context.Context
 		if m.AccessRules[i] != nil {
 
 			if typeutils.IsZero(m.AccessRules[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.AccessRules[i].ContextValidate(ctx, formats); err != nil {

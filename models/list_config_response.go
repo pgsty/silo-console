@@ -106,7 +106,7 @@ func (m *ListConfigResponse) contextValidateConfigurations(ctx context.Context, 
 		if m.Configurations[i] != nil {
 
 			if typeutils.IsZero(m.Configurations[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Configurations[i].ContextValidate(ctx, formats); err != nil {

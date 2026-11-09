@@ -412,7 +412,7 @@ func (m *PrefixUsageFrame) contextValidateFolders(ctx context.Context, formats s
 		if m.Folders[i] != nil {
 
 			if typeutils.IsZero(m.Folders[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Folders[i].ContextValidate(ctx, formats); err != nil {

@@ -112,7 +112,7 @@ func (m *BucketVersioningResponse) contextValidateExcludedPrefixes(ctx context.C
 		if m.ExcludedPrefixes[i] != nil {
 
 			if typeutils.IsZero(m.ExcludedPrefixes[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.ExcludedPrefixes[i].ContextValidate(ctx, formats); err != nil {

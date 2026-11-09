@@ -469,7 +469,9 @@ func FileServerMiddleware(next http.Handler) http.Handler {
 		switch {
 		case strings.HasPrefix(r.URL.Path, "/ws"):
 			serveWS(w, r)
-		case strings.HasPrefix(r.URL.Path, "/api"):
+		case strings.HasPrefix(r.URL.Path, "/api") || r.URL.Path == "/swagger.json":
+			// The generated documentation UI fetches its spec from /swagger.json.
+			// Keep that exact route out of the frontend's SPA fallback.
 			next.ServeHTTP(w, r)
 		case isLegalDocumentPath(r.URL.Path):
 			serveLegalDocument(w, r)

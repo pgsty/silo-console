@@ -116,7 +116,7 @@ func (m *SetConfigRequest) contextValidateKeyValues(ctx context.Context, formats
 		if m.KeyValues[i] != nil {
 
 			if typeutils.IsZero(m.KeyValues[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.KeyValues[i].ContextValidate(ctx, formats); err != nil {

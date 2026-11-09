@@ -106,7 +106,7 @@ func (m *UserServiceAccountSummary) contextValidateUserServiceAccountList(ctx co
 		if m.UserServiceAccountList[i] != nil {
 
 			if typeutils.IsZero(m.UserServiceAccountList[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.UserServiceAccountList[i].ContextValidate(ctx, formats); err != nil {
