@@ -106,7 +106,7 @@ func (m *IamPolicy) contextValidateStatement(ctx context.Context, formats strfmt
 		if m.Statement[i] != nil {
 
 			if typeutils.IsZero(m.Statement[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Statement[i].ContextValidate(ctx, formats); err != nil {

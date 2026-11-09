@@ -106,7 +106,7 @@ func (m *ListPoliciesResponse) contextValidatePolicies(ctx context.Context, form
 		if m.Policies[i] != nil {
 
 			if typeutils.IsZero(m.Policies[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Policies[i].ContextValidate(ctx, formats); err != nil {

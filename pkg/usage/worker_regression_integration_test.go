@@ -226,6 +226,8 @@ func TestObserverRenewalCannotResurrectOrStealLease(t *testing.T) {
 
 func TestObserverRenewsLeaseDuringInventory(t *testing.T) {
 	s := integrationStore(t)
+	inventoryStarted := make(chan struct{}, 1)
+	releaseInventory := make(chan struct{})
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Has("events") {
 			w.Header().Set("Content-Type", "application/json")
@@ -235,9 +237,13 @@ func TestObserverRenewsLeaseDuringInventory(t *testing.T) {
 			return
 		}
 		select {
+		case inventoryStarted <- struct{}{}:
+		default:
+		}
+		select {
 		case <-r.Context().Done():
 			return
-		case <-time.After(500 * time.Millisecond):
+		case <-releaseInventory:
 		}
 		w.Header().Set("Content-Type", "application/xml")
 		_, _ = w.Write([]byte(`<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>test</ID></Owner><Buckets><Bucket><Name>inventory-bucket</Name><CreationDate>2026-10-26T00:00:00.000Z</CreationDate></Bucket></Buckets></ListAllMyBucketsResult>`))
@@ -247,21 +253,71 @@ func TestObserverRenewsLeaseDuringInventory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.Endpoint, c.Lease, c.Heartbeat = server.URL, 300*time.Millisecond, 50*time.Millisecond
-	c.ScanTimeout = 3 * time.Second
+	// Keep the production lease, heartbeat and scan timeout defaults.
+	// Hold inventory past the database's original deadline and verify renewal
+	// before allowing reconciliation, instead of racing a short fixed sleep.
+	c.Endpoint = server.URL
 	acquired, err := s.AcquireObserver(context.Background(), "review-observer", c.Lease)
 	if err != nil || !acquired {
 		t.Fatalf("acquire=%v err=%v", acquired, err)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	observeLease(ctx, s, c, "review-observer")
-	coverage, err := s.Coverage(context.Background())
-	if err != nil {
+	var initialDeadline time.Time
+	if err := s.pool.QueryRow(context.Background(), `SELECT observer_until FROM console_usage_coverage WHERE scope=$1`, s.scope).Scan(&initialDeadline); err != nil {
 		t.Fatal(err)
 	}
-	if coverage.LastReconciledAt == nil {
-		t.Fatal("observer lost its lease during a successful inventory listing; no reconciliation was recorded")
+	ctx, cancel := context.WithCancel(t.Context())
+	done := make(chan struct{})
+	go func() { defer close(done); observeLease(ctx, s, c, "review-observer") }()
+	defer func() { cancel(); <-done }()
+	select {
+	case <-inventoryStarted:
+	case <-done:
+		t.Fatal("observer stopped before requesting inventory")
+	case <-ctx.Done():
+		t.Fatal("observer did not request inventory: ", ctx.Err())
+	}
+	poll := time.NewTicker(100 * time.Millisecond)
+	defer poll.Stop()
+	for {
+		var originalExpired, alive bool
+		err := s.pool.QueryRow(ctx, `SELECT clock_timestamp()>$2, observer_until>clock_timestamp() AND observer_id=$3
+ FROM console_usage_coverage WHERE scope=$1`, s.scope, initialDeadline, "review-observer").Scan(&originalExpired, &alive)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if originalExpired {
+			if !alive {
+				t.Fatal("observer lease expired while inventory was blocked")
+			}
+			break
+		}
+		select {
+		case <-done:
+			t.Fatal("observer stopped before renewing its lease during blocked inventory")
+		case <-ctx.Done():
+			t.Fatal("lease was not renewed during blocked inventory: ", ctx.Err())
+		case <-poll.C:
+		}
+	}
+	close(releaseInventory)
+	for {
+		coverage, err := s.Coverage(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if coverage.LastReconciledAt != nil {
+			if _, err := s.Get(ctx, "inventory-bucket"); err != nil {
+				t.Fatal("reconciliation did not persist the inventory bucket: ", err)
+			}
+			return
+		}
+		select {
+		case <-done:
+			t.Fatal("observer stopped before recording its successful inventory reconciliation")
+		case <-ctx.Done():
+			t.Fatal("inventory reconciliation was not recorded: ", ctx.Err())
+		case <-poll.C:
+		}
 	}
 }
 

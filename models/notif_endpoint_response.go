@@ -103,7 +103,7 @@ func (m *NotifEndpointResponse) contextValidateNotificationEndpoints(ctx context
 		if m.NotificationEndpoints[i] != nil {
 
 			if typeutils.IsZero(m.NotificationEndpoints[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.NotificationEndpoints[i].ContextValidate(ctx, formats); err != nil {

@@ -124,7 +124,7 @@ func (m *ServerProperties) contextValidateDrives(ctx context.Context, formats st
 		if m.Drives[i] != nil {
 
 			if typeutils.IsZero(m.Drives[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Drives[i].ContextValidate(ctx, formats); err != nil {

@@ -103,7 +103,7 @@ func (m *RewindResponse) contextValidateObjects(ctx context.Context, formats str
 		if m.Objects[i] != nil {
 
 			if typeutils.IsZero(m.Objects[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Objects[i].ContextValidate(ctx, formats); err != nil {

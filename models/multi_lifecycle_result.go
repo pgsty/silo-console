@@ -103,7 +103,7 @@ func (m *MultiLifecycleResult) contextValidateResults(ctx context.Context, forma
 		if m.Results[i] != nil {
 
 			if typeutils.IsZero(m.Results[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Results[i].ContextValidate(ctx, formats); err != nil {

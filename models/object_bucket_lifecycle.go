@@ -205,7 +205,7 @@ func (m *ObjectBucketLifecycle) contextValidateTags(ctx context.Context, formats
 		if m.Tags[i] != nil {
 
 			if typeutils.IsZero(m.Tags[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Tags[i].ContextValidate(ctx, formats); err != nil {

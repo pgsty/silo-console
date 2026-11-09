@@ -115,7 +115,7 @@ func (m *IdpServerConfiguration) contextValidateInfo(ctx context.Context, format
 		if m.Info[i] != nil {
 
 			if typeutils.IsZero(m.Info[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Info[i].ContextValidate(ctx, formats); err != nil {

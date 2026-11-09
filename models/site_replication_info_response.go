@@ -112,7 +112,7 @@ func (m *SiteReplicationInfoResponse) contextValidateSites(ctx context.Context, 
 		if m.Sites[i] != nil {
 
 			if typeutils.IsZero(m.Sites[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Sites[i].ContextValidate(ctx, formats); err != nil {

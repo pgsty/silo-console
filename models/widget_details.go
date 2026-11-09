@@ -171,7 +171,7 @@ func (m *WidgetDetails) contextValidateTargets(ctx context.Context, formats strf
 		if m.Targets[i] != nil {
 
 			if typeutils.IsZero(m.Targets[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Targets[i].ContextValidate(ctx, formats); err != nil {

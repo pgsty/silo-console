@@ -251,7 +251,7 @@ func (m *MultiBucketReplication) contextValidateBucketsRelation(ctx context.Cont
 		if m.BucketsRelation[i] != nil {
 
 			if typeutils.IsZero(m.BucketsRelation[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.BucketsRelation[i].ContextValidate(ctx, formats); err != nil {

@@ -184,7 +184,7 @@ func (m *BucketUsageResponse) contextValidateBuckets(ctx context.Context, format
 		if m.Buckets[i] != nil {
 
 			if typeutils.IsZero(m.Buckets[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Buckets[i].ContextValidate(ctx, formats); err != nil {

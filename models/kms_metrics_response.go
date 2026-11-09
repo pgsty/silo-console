@@ -313,7 +313,7 @@ func (m *KmsMetricsResponse) contextValidateLatencyHistogram(ctx context.Context
 		if m.LatencyHistogram[i] != nil {
 
 			if typeutils.IsZero(m.LatencyHistogram[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.LatencyHistogram[i].ContextValidate(ctx, formats); err != nil {

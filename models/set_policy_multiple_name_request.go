@@ -135,7 +135,7 @@ func (m *SetPolicyMultipleNameRequest) contextValidateGroups(ctx context.Context
 	for i := 0; i < len(m.Groups); i++ {
 
 		if typeutils.IsZero(m.Groups[i]) { // not required
-			return nil
+			continue
 		}
 
 		if err := m.Groups[i].ContextValidate(ctx, formats); err != nil {
@@ -161,7 +161,7 @@ func (m *SetPolicyMultipleNameRequest) contextValidateUsers(ctx context.Context,
 	for i := 0; i < len(m.Users); i++ {
 
 		if typeutils.IsZero(m.Users[i]) { // not required
-			return nil
+			continue
 		}
 
 		if err := m.Users[i].ContextValidate(ctx, formats); err != nil {

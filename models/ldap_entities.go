@@ -188,7 +188,7 @@ func (m *LdapEntities) contextValidateGroups(ctx context.Context, formats strfmt
 		if m.Groups[i] != nil {
 
 			if typeutils.IsZero(m.Groups[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Groups[i].ContextValidate(ctx, formats); err != nil {
@@ -217,7 +217,7 @@ func (m *LdapEntities) contextValidatePolicies(ctx context.Context, formats strf
 		if m.Policies[i] != nil {
 
 			if typeutils.IsZero(m.Policies[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Policies[i].ContextValidate(ctx, formats); err != nil {
@@ -246,7 +246,7 @@ func (m *LdapEntities) contextValidateUsers(ctx context.Context, formats strfmt.
 		if m.Users[i] != nil {
 
 			if typeutils.IsZero(m.Users[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Users[i].ContextValidate(ctx, formats); err != nil {

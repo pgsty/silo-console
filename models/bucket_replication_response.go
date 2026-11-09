@@ -103,7 +103,7 @@ func (m *BucketReplicationResponse) contextValidateRules(ctx context.Context, fo
 		if m.Rules[i] != nil {
 
 			if typeutils.IsZero(m.Rules[i]) { // not required
-				return nil
+				continue
 			}
 
 			if err := m.Rules[i].ContextValidate(ctx, formats); err != nil {
