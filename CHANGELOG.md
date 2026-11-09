@@ -1,13 +1,25 @@
 # Changelog
 
-## Unreleased
+## Release v2.7.0
+
+- Add a shared ten-language UI and locale-aware formatting, with Arabic RTL
+  layouts and original direction retained for paths, identifiers, policy JSON
+  and logs. Preserve unsaved inputs during language changes. Credit the
+  Brazilian Portuguese contribution in PR #83.
+- Split the nine translated catalogs into independently compressed assets,
+  load them eagerly for offline language switching, and cache content-hashed
+  assets for one year. Keep HTML revalidated and verify compact labels across
+  ten languages at phone, tablet and desktop widths.
+- Include system CA roots and a writable `/tmp` in scratch container images
+  for HTTPS requests and large multipart uploads, while retaining the non-root
+  runtime and explicit private-CA configuration (PR #84).
 
 - Upgrade the Swagger generator to v0.36.7 and runtime/server-middleware to
   v0.33.4. Regenerate array context validators so zero elements do not stop
   validation of later elements. Preserve the customized server and configuration
   import binder; the default API documentation page now loads Redoc 3 as an ES
   module. Route its `/swagger.json` request to the API instead of the frontend
-  SPA fallback. The Console frontend and TypeScript API remain unchanged.
+  SPA fallback. Preserve the generated TypeScript API contract.
 - Adopt released silo-pkg v3.16.0 and mcli 20261109, pinning MC's calendar
   release to `v0.0.0-20261109021353-e1d4cc5abfe0`. Record the release tags and
   full source commits in `hack/deps-release.json` for downstream embedders.
@@ -19,6 +31,11 @@
 - Retain Go 1.27.3, the verified upstream minio-go commit, x/net v0.62.0,
   the existing x/crypto fix, and the tablewriter, runewidth and go-systemd
   compatibility replacements. Console v2.6.0's dependency history is unchanged.
+- Simplify CI into explicit permission and platform matrices, use the project
+  toolchain version files, and remove automatic test retries and redundant
+  settings. Keep the maintained SILO, PostgreSQL, browser, artifact and
+  reproducibility checks. Exercise observer renewal with production lease
+  defaults and synchronization against the database deadline.
 
 ## Release v2.6.0
 

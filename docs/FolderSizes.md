@@ -5,8 +5,8 @@ The operator guide lives on the SILO documentation site:
 - [English: usage scans, permissions, limits and the optional worker](https://silo.pgsty.com/administration/console/managing-objects/#usage-scans)
 - [中文：用量扫描、权限、限制与可选后台任务](https://silo.pgsty.com/zh/administration/console/managing-objects/#usage-scans)
 
-Usage scans are included in the Console 2.6.0 release candidate, pending formal
-publication. The optional worker and the matching
+Usage scans shipped in [Console 2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)
+and remain available in the 2.7.0 candidate. The optional worker and the matching
 server APIs require coordinated SILO support; Server 20261026 does not acquire
 the feature merely because this source tree contains it. The implementation and
 original guide were contributed by Urbanize in

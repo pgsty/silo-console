@@ -1,7 +1,9 @@
 # Docs
 
-These pages describe the Console v2.6.0 release candidate. Published binaries, packages and
-release status are available on [GitHub Releases](https://github.com/pgsty/silo-console/releases).
+These pages describe the Console v2.7.0 candidate source. Console v2.6.0 remains
+the latest published release while the v2.7.0 GitHub draft is being prepared.
+Published binaries, packages and release status are available on
+[GitHub Releases](https://github.com/pgsty/silo-console/releases).
 See [CHANGELOG.md](../CHANGELOG.md) and the
 [component matrix](https://silo.pgsty.com/compatibility/versions/) for the selected
 pkg, MC and SDK versions and the separate Server release status.
@@ -68,9 +70,10 @@ mc admin config get ALIAS region
 Yes, see docs [OIDC](OIDC.md).
 
 ### Docker Volume Mount?
-Console stores no persistent data of its own; it is configured with environment
-variables. The only required value is the SILO or MinIO-compatible server URL,
-using the retained compatibility variable `CONSOLE_MINIO_SERVER`.
+Console is configured with environment variables. The base service requires the
+SILO or MinIO-compatible server URL through the retained compatibility variable
+`CONSOLE_MINIO_SERVER`. The optional [usage worker](FolderSizes.md) also requires
+PostgreSQL for persistent scan state; preserve that database when using it.
 
 ### Can I use this Console as S3 Browser for other S3 Provider?
 No. This Console requires the MinIO-compatible administration APIs implemented
