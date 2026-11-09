@@ -141,3 +141,34 @@ func TestUnpersistedBucketRemovalIsRetried(t *testing.T) {
 		t.Fatalf("the deleted bucket's results survived: %+v", record)
 	}
 }
+
+// A shutdown can interrupt a reconciliation after the event consumer has
+// received a deletion but before the event loop flushed it. The worker must
+// persist it on the way out; reconnect reconciliation alone keeps a limited
+// row's totals.
+func TestShutdownPersistsPendingBucketRemoval(t *testing.T) {
+	s := integrationStore(t)
+	ctx := context.Background()
+	if err := s.Queue(ctx, "removed-at-shutdown", true, 0, 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	job, err := s.Claim(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Complete(ctx, job, observation(5)); err != nil {
+		t.Fatal(err)
+	}
+	pending := &pendingChanges{buckets: map[string]pendingChange{}}
+	pending.add("removed-at-shutdown", pendingChange{at: time.Now().UTC(), removed: true})
+	stopped, stop := context.WithCancel(ctx)
+	stop()
+	observeChanges(stopped, s, scanBudgetConfig(t), "stopping-observer", pending)
+	record, err := s.Get(ctx, "removed-at-shutdown")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.LastGood != nil || record.State != "queued" {
+		t.Fatalf("a deletion received before shutdown was lost: %+v", record)
+	}
+}

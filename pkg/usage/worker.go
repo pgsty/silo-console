@@ -163,12 +163,19 @@ func reconcile(ctx context.Context, s *Store, client *minio.Client, c Config, fu
 }
 
 func runObserver(ctx context.Context, s *Store, c Config) {
-	owner := uuid.NewString()
 	// Received changes that could not be persisted outlive an observer lease.
 	// Reconnect reconciliation re-queues every bucket, but it cannot tell that
 	// a bucket was deleted and re-created, so a lost deletion would leave the
 	// old bucket's totals in place.
-	pending := &pendingChanges{buckets: map[string]pendingChange{}}
+	observeChanges(ctx, s, c, uuid.NewString(), &pendingChanges{buckets: map[string]pendingChange{}})
+}
+
+// observeChanges runs observer leases until ctx ends, then persists whatever
+// is still pending, such as a deletion received while a reconciliation kept
+// the event loop from flushing. observeLease returns only after its event
+// consumer has stopped, so nothing is added after the final flush.
+func observeChanges(ctx context.Context, s *Store, c Config, owner string, pending *pendingChanges) {
+	defer flushPending(ctx, s, pending, c)
 	for ctx.Err() == nil {
 		flushPending(ctx, s, pending, c)
 		operation, cancel := context.WithTimeout(ctx, c.Heartbeat)
