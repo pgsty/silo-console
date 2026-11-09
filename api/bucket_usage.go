@@ -108,7 +108,9 @@ func authorizeBucketUsage(ctx context.Context, client usage.ListingClient, bucke
 		if open {
 			return first.Err
 		}
-		return nil
+		// minio-go closes the channel without an error when ctx is canceled;
+		// that must not read as an authorized, empty listing.
+		return ctx.Err()
 	}
 }
 
