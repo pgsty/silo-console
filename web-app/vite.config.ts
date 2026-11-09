@@ -45,6 +45,9 @@ export default defineConfig({
           requireEnv: true,
           checkProd: true,
           forceBuildInstrument: true,
+          // Literal translation data is checked by catalog validation, not
+          // executable-code coverage. Instrumenting it bloats the static asset.
+          exclude: ["src/i18n/locales/**"],
         })
       : undefined,
   ],
