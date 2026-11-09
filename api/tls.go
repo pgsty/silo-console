@@ -122,6 +122,13 @@ var (
 	insecureMinIOTransport     *http.Transport
 )
 
+// MinIOEndpointTransport exposes the SILO endpoint policy of
+// PrepareSTSClientTransport, without the per-request client address, to
+// processes that act on their own behalf, such as the usage worker.
+func MinIOEndpointTransport() http.RoundTripper {
+	return minioEndpointTransport()
+}
+
 // minioEndpointTransport returns GlobalTransport unless the operator explicitly
 // enabled the SILO endpoint compatibility switch for an HTTPS endpoint.
 func minioEndpointTransport() http.RoundTripper {

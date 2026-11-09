@@ -212,10 +212,14 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 			<-streamDone
 		}
 	}()
-	base, err := minio.DefaultTransport(strings.HasPrefix(c.Endpoint, "https://"))
-	if err != nil {
-		log.Print("usage observer: transport configuration invalid")
-		return
+	base := c.Transport
+	if base == nil {
+		defaultTransport, err := minio.DefaultTransport(strings.HasPrefix(c.Endpoint, "https://"))
+		if err != nil {
+			log.Print("usage observer: transport configuration invalid")
+			return
+		}
+		base = defaultTransport
 	}
 	transport := &eventTransport{base: base, wake: make(chan struct{}, 1)}
 	endpoint, _ := url.Parse(c.Endpoint)

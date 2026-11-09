@@ -47,6 +47,12 @@ trust store is the system root store plus every certificate under
 `--tls-ca` file when it is set. Console's own serving certificates are added to
 that pool as well, so a Console that talks to itself trusts itself.
 
+The optional `console usage-worker` uses the same trust store and accepts the
+same `--certs-dir` flag. It only reads that directory: unlike `console server`
+it does not create it and never loads `private.key`, so a read-only directory
+or a key the worker cannot read is fine. Its storage requests follow the SILO endpoint policy
+described below, including `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY`.
+
 Embedded in SILO, Console uses the server's pool (`certs/CAs` plus the server's
 own public certificates) and dials the address the server advertises to it:
 `MINIO_SERVER_URL` when set, otherwise `https://127.0.0.1:<port>`. The server

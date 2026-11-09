@@ -128,6 +128,19 @@ func MkdirAllIgnorePerm(path string) error {
 }
 
 func NewConfigDirFromCtx(ctx *cli.Context, option string, getDefaultDir func() string) (*ConfigDir, bool, error) {
+	configDir, dirSet, err := ResolveConfigDirFromCtx(ctx, option, getDefaultDir)
+	if err != nil {
+		return nil, false, err
+	}
+	if err = MkdirAllIgnorePerm(configDir.Path); err != nil {
+		return nil, false, fmt.Errorf("%w: Unable to create directory specified %s=%s", err, option, configDir.Path)
+	}
+	return configDir, dirSet, nil
+}
+
+// ResolveConfigDirFromCtx resolves a directory option like NewConfigDirFromCtx
+// without creating it, for processes that only read the directory.
+func ResolveConfigDirFromCtx(ctx *cli.Context, option string, getDefaultDir func() string) (*ConfigDir, bool, error) {
 	var dir string
 	var dirSet bool
 
@@ -163,9 +176,6 @@ func NewConfigDirFromCtx(ctx *cli.Context, option string, getDefaultDir func() s
 	dirAbs, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, false, fmt.Errorf("%w: Unable to fetch absolute path for %s=%s", err, option, dir)
-	}
-	if err = MkdirAllIgnorePerm(dirAbs); err != nil {
-		return nil, false, fmt.Errorf("%w: Unable to create directory specified %s=%s", err, option, dir)
 	}
 	return &ConfigDir{Path: dirAbs}, dirSet, nil
 }
@@ -313,6 +323,32 @@ func GetAllCertificatesAndCAs() (*x509.CertPool, []*x509.Certificate, *xcerts.Ma
 		rootCAs.AddCert(publicCrt)
 	}
 	return rootCAs, publicCerts, certsManager, nil
+}
+
+// GetTrustedRootCAs returns the pool Console verifies peers with: the system
+// roots, every certificate under certs/CAs and Console's own public.crt when
+// present. Unlike GetAllCertificatesAndCAs it never loads a private key, so a
+// process that only makes outbound connections, such as the usage worker,
+// needs neither a readable key nor its password. An unreadable public.crt is
+// skipped like unreadable files under certs/CAs.
+func GetTrustedRootCAs() (*x509.CertPool, error) {
+	rootCAs, err := xcerts.GetRootCAs(GlobalCertsCADir.Get())
+	if err != nil {
+		return nil, err
+	}
+	if rootCAs == nil {
+		rootCAs = &x509.CertPool{}
+	}
+	if isFile(getPublicCertFile()) {
+		publicCerts, err := ParsePublicCertFile(getPublicCertFile())
+		if err != nil && !errors.Is(err, os.ErrPermission) {
+			return nil, err
+		}
+		for _, publicCert := range publicCerts {
+			rootCAs.AddCert(publicCert)
+		}
+	}
+	return rootCAs, nil
 }
 
 // EnsureCertAndKey checks if both client certificate and key paths are provided

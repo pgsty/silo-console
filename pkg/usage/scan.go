@@ -28,7 +28,7 @@ func (c Config) NewS3Client() (*minio.Client, error) {
 	if err != nil {
 		return nil, errors.New("invalid usage storage endpoint")
 	}
-	return minio.New(endpoint.Host, &minio.Options{Secure: endpoint.Scheme == "https", Creds: credentials.NewStaticV4(c.AccessKey, c.SecretKey, c.SessionToken)})
+	return minio.New(endpoint.Host, &minio.Options{Secure: endpoint.Scheme == "https", Creds: credentials.NewStaticV4(c.AccessKey, c.SecretKey, c.SessionToken), Transport: c.Transport})
 }
 
 func (s Stats) counts() (Counts, error) {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -38,6 +39,10 @@ type Config struct {
 	FullReconcileInterval              time.Duration
 	RetryInterval                      time.Duration
 	MaxRetryInterval                   time.Duration
+	// Transport carries the caller's TLS trust and endpoint policy to every
+	// storage request. It is never read from the environment; nil keeps the
+	// minio-go default, which trusts only the system roots.
+	Transport http.RoundTripper
 }
 
 func LoadConfig(worker bool) (Config, error) {
