@@ -25,7 +25,7 @@ const LANGUAGE_CYCLE: Record<Lang, Lang> = { en: "zh", zh: "pt", pt: "en" };
 export const nextLanguage = (lang: Lang): Lang => LANGUAGE_CYCLE[lang];
 
 const isLang = (value: string | null): value is Lang =>
-  value !== null && Object.hasOwn(LANGUAGE_CYCLE, value);
+  value !== null && Object.prototype.hasOwnProperty.call(LANGUAGE_CYCLE, value);
 
 const LOCALE_TAGS: Record<Lang, string> = {
   en: "en",
