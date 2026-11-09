@@ -59,6 +59,10 @@
   about 30 seconds before reporting a bucket as failed.
 - Reject malformed or truncated multipart uploads with an error instead of a
   request-handler panic.
+- Persist bucket changes received by the usage worker's observer when the
+  worker stops, so a deletion received during reconciliation is not lost.
+- Keep the reveal button and unit selectors of password, URL, e-mail and number
+  fields beside the text in Arabic, and restore the task-count badge position.
 - Never treat a canceled bucket-usage authorization probe as authorized, and
   build the share-link expiry from Luxon's locale-independent ISO output.
 
