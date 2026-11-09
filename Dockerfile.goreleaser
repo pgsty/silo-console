@@ -1,3 +1,27 @@
+# scratch has no CA bundle and no /tmp. Go reads the system roots from
+# /etc/ssl/certs/ca-certificates.crt for HTTPS to SILO and OIDC providers, and
+# spills large multipart uploads to /tmp. The bundle is architecture-neutral,
+# so it is built once on the builder platform, with the same blocklist as the
+# pgsty/silo and pgsty/mc images.
+FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi9/ubi:latest@sha256:16e9e43d99e181463513cc84a514859b1abb9460f1c4d9e208da4b4e51cd5cc3 AS certs
+# Native root blocklist mitigation: https://access.redhat.com/security/vulnerabilities/RHSB-2026-012
+RUN dnf -y install ca-certificates && \
+    if [ -d /etc/pki/ca-trust/source/blocklist ]; then \
+      blocklist=/etc/pki/ca-trust/source/blocklist; \
+    else \
+      blocklist=/etc/pki/ca-trust/source/blacklist; \
+    fi && \
+    trust extract --overwrite --format=pem-bundle \
+      --filter='pkcs11:object=Comodo%20AAA%20Services%20root;type=cert' \
+      "$blocklist/Comodo_AAA_Services_root.pem" && \
+    trust extract --overwrite --format=pem-bundle \
+      --filter='pkcs11:object=emSign%20ECC%20Root%20CA%20-%20G3;type=cert' \
+      "$blocklist/emSign_ECC_Root_CA_-_G3.pem" && \
+    update-ca-trust && \
+    mkdir -p /rootfs/etc/ssl/certs /rootfs/tmp && \
+    chmod 1777 /rootfs/tmp && \
+    cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
+
 FROM scratch
 
 ARG TARGETPLATFORM
@@ -14,6 +38,8 @@ LABEL name="SILO Console" \
       org.opencontainers.image.description="The SILO object storage console" \
       org.opencontainers.image.licenses="AGPL-3.0-or-later"
 
+# Copy the parent so tmp/ arrives as a directory entry and keeps mode 1777.
+COPY --from=certs /rootfs/ /
 COPY $TARGETPLATFORM/silo-console /console
 COPY LICENSE NOTICE CREDITS /usr/share/licenses/silo-console/
 

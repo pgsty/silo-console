@@ -33,6 +33,30 @@ RUN release_version="${build_release_version:-${build_version#v}}"; \
       -ldflags "-s -w -X github.com/minio/console/pkg.ReleaseTag=${build_version} -X github.com/minio/console/pkg.CommitID=${build_commit} -X github.com/minio/console/pkg.Version=${release_version} -X github.com/minio/console/pkg.ShortCommitID=${short_commit} -X github.com/minio/console/pkg.ReleaseTime=${release_time}" \
       -o console ./cmd/console
 
+# scratch has no CA bundle and no /tmp. Go reads the system roots from
+# /etc/ssl/certs/ca-certificates.crt for HTTPS to SILO and OIDC providers, and
+# spills large multipart uploads to /tmp. The bundle is architecture-neutral,
+# so it is built once on the builder platform, with the same blocklist as the
+# pgsty/silo and pgsty/mc images.
+FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi9/ubi:latest@sha256:16e9e43d99e181463513cc84a514859b1abb9460f1c4d9e208da4b4e51cd5cc3 AS certs
+# Native root blocklist mitigation: https://access.redhat.com/security/vulnerabilities/RHSB-2026-012
+RUN dnf -y install ca-certificates && \
+    if [ -d /etc/pki/ca-trust/source/blocklist ]; then \
+      blocklist=/etc/pki/ca-trust/source/blocklist; \
+    else \
+      blocklist=/etc/pki/ca-trust/source/blacklist; \
+    fi && \
+    trust extract --overwrite --format=pem-bundle \
+      --filter='pkcs11:object=Comodo%20AAA%20Services%20root;type=cert' \
+      "$blocklist/Comodo_AAA_Services_root.pem" && \
+    trust extract --overwrite --format=pem-bundle \
+      --filter='pkcs11:object=emSign%20ECC%20Root%20CA%20-%20G3;type=cert' \
+      "$blocklist/emSign_ECC_Root_CA_-_G3.pem" && \
+    update-ca-trust && \
+    mkdir -p /rootfs/etc/ssl/certs /rootfs/tmp && \
+    chmod 1777 /rootfs/tmp && \
+    cp /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /rootfs/etc/ssl/certs/ca-certificates.crt
+
 FROM scratch
 ARG build_version=dev
 ARG build_commit=unknown
@@ -42,6 +66,8 @@ LABEL org.opencontainers.image.source="https://github.com/pgsty/silo-console" \
       org.opencontainers.image.version="${build_version}" \
       org.opencontainers.image.revision="${build_commit}" \
       org.opencontainers.image.created="${build_time}"
+# Copy the parent so tmp/ arrives as a directory entry and keeps mode 1777.
+COPY --from=certs /rootfs/ /
 COPY --from=golayer /console/console /console
 COPY LICENSE NOTICE CREDITS /usr/share/licenses/silo-console/
 EXPOSE 9090
