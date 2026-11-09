@@ -248,8 +248,13 @@ check_filesystem() { # $1 = image ref (pullable/local), $2 = platform, $3 = labe
   local cid dir
   dir="$work/img-${3//[^a-zA-Z0-9]/_}"; mkdir -p "$dir"
   cid="$(docker create --platform "$2" "$1" 2>/dev/null)" || fail "$3: docker create failed"
-  docker export "$cid" | tar -x -C "$dir" console usr/share/licenses/silo-console 2>/dev/null || { docker rm -f "$cid" >/dev/null; fail "$3: image lacks /console or /usr/share/licenses/silo-console"; }
+  docker export "$cid" > "$dir.tar" || { docker rm -f "$cid" >/dev/null; fail "$3: docker export failed"; }
   docker rm -f "$cid" >/dev/null
+  tar -x -C "$dir" -f "$dir.tar" console usr/share/licenses/silo-console etc/ssl/certs/ca-certificates.crt 2>/dev/null \
+    || fail "$3: image lacks /console, /usr/share/licenses/silo-console or /etc/ssl/certs/ca-certificates.crt"
+  # scratch provides neither: outbound HTTPS needs system roots, multipart spills need /tmp.
+  grep -q 'BEGIN CERTIFICATE' "$dir/etc/ssl/certs/ca-certificates.crt" || fail "$3: CA bundle is empty"
+  test "$(tar -tvf "$dir.tar" | awk '$NF == "tmp/" || $NF == "tmp" {print $1}')" = drwxrwxrwt || fail "$3: /tmp is missing or not mode 1777"
   for doc in LICENSE NOTICE CREDITS; do
     test "$(sha "$dir/usr/share/licenses/silo-console/$doc")" = "$(sha "$doc")" || fail "$3: /usr/share/licenses/silo-console/$doc differs"
   done
