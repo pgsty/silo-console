@@ -27,6 +27,9 @@ import VisibilityOffIcon from "../Icons/VisibilityOffIcon";
 import VisibilityOnIcon from "../Icons/VisibilityOnIcon";
 import Box from "../Box/Box";
 
+// Matches the forced-LTR input types in web-app/src/index.css.
+const ltrFieldTypes = ["password", "url", "email", "number"];
+
 const InputBase = styled.input<InputBoxElement>`
   ${fieldChrome}
   padding-inline-start: ${({ startIcon }) =>
@@ -137,7 +140,13 @@ const InputBox = React.forwardRef<HTMLInputElement, InputBoxElement>(
           </InputLabel>
         )}
 
-        <Box className={"textBoxContainer"}>
+        {/* Protocol fields (passwords, URLs, e-mail, numbers) stay LTR in RTL
+            layouts. Lay out their icons and overlay button in the same
+            direction, or the button sits over the start of the text. */}
+        <Box
+          className={"textBoxContainer"}
+          dir={ltrFieldTypes.includes(type ?? "") ? "ltr" : undefined}
+        >
           {startIcon && <Box className={"startOverlayIcon"}>{startIcon}</Box>}
           <InputBase
             id={id}
@@ -186,7 +195,7 @@ const InputBox = React.forwardRef<HTMLInputElement, InputBoxElement>(
             <Box className={"overlayAction"}>{overlayObject}</Box>
           )}
           {error && (
-            <Box id={`${id}-error`} className={"errorText"}>
+            <Box id={`${id}-error`} className={"errorText"} dir="auto">
               {error}
             </Box>
           )}

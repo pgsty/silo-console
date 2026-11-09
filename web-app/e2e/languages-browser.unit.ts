@@ -222,6 +222,39 @@ test("all languages switch offline without discarding form input", async () => {
     await page.close();
   }
 });
+test("Arabic lays out protocol fields' icons and overlay button LTR", async () => {
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 720 },
+  });
+  try {
+    await setup(page, "ar");
+    await page.goto(`${base}/login`);
+    const input = page.locator("#secretKey");
+    await input.fill("secret-value");
+    const layout = await input.evaluate((el) => {
+      const field = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const button = el
+        .closest(".textBoxContainer")!
+        .querySelector(".overlayAction")!
+        .getBoundingClientRect();
+      return {
+        direction: style.direction,
+        textEnd: field.right - parseFloat(style.paddingRight),
+        buttonLeft: button.left,
+        buttonRight: button.right,
+        fieldRight: field.right,
+      };
+    });
+    expect(layout.direction).toBe("ltr");
+    // The reveal button stays inside the padding reserved after the text.
+    expect(layout.buttonLeft).toBeGreaterThanOrEqual(layout.textEnd);
+    expect(layout.buttonRight).toBeLessThanOrEqual(layout.fieldRight);
+  } finally {
+    await page.close();
+  }
+});
+
 test("Arabic keeps protocol payloads LTR and does not translate log messages", async () => {
   const page = await browser.newPage({ viewport: { width: 350, height: 900 } });
   try {
