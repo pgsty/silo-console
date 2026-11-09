@@ -7,12 +7,15 @@
 
 // Embedded Console is commonly served over plain HTTP (http://<ip>:9001), where
 // browsers omit secure-context APIs. A call to one of them throws before the
-// surrounding request starts, so features silently do nothing.
+// surrounding request starts, so features silently do nothing. The share-link
+// expiry must also survive browsers whose locale formats digits natively.
 
 import { expect, test } from "@playwright/test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Settings } from "luxon";
+import { shareExpiryTimestamp } from "../src/screens/Console/Common/FormComponents/DaysSelector/shareExpiry";
 
 const roots = ["../src/", "../packages/mds/src/"].map((relative) =>
   fileURLToPath(new URL(relative, import.meta.url)),
@@ -33,4 +36,18 @@ test("source avoids APIs that plain-HTTP pages do not expose", () => {
       ),
     );
   expect(offenders).toEqual([]);
+});
+
+test("share expiry stays parseable under native-digit locales", () => {
+  const previous = Settings.defaultLocale;
+  try {
+    for (const locale of ["en-US", "ar", "ar-EG", "ar-SA", "fa", "zh-CN"]) {
+      Settings.defaultLocale = locale;
+      const value = shareExpiryTimestamp("2026-11-16T10:20:30.456+08:00");
+      expect(value, locale).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d$/);
+      expect(Number.isNaN(new Date(`${value}`).getTime()), locale).toBe(false);
+    }
+  } finally {
+    Settings.defaultLocale = previous;
+  }
 });

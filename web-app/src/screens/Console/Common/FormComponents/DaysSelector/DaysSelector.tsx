@@ -16,6 +16,7 @@
 
 import React, { useEffect, useState } from "react";
 import { DateTime } from "luxon";
+import { shareExpiryTimestamp } from "./shareExpiry";
 import { Box, InputBox, InputLabel, LinkIcon } from "mds";
 import { formatText, useT } from "i18n";
 
@@ -78,11 +79,10 @@ const DaysSelector = ({
   }, [selectedDays, selectedHours, selectedMinutes]);
 
   useEffect(() => {
-    if (validDate && dateSelected) {
-      const formattedDate = DateTime.fromISO(dateSelected).toFormat(
-        "yyyy-MM-dd HH:mm:ss",
-      );
-      onChange(formattedDate.split(" ").join("T"), true);
+    const formattedDate =
+      validDate && dateSelected ? shareExpiryTimestamp(dateSelected) : null;
+    if (formattedDate) {
+      onChange(formattedDate, true);
     } else {
       onChange("0000-00-00", false);
     }
