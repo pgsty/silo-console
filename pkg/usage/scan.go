@@ -54,9 +54,11 @@ func scanFailure(err error) *ScanFailure {
 // groups advance the checkpoint. A complete snapshot is published only when
 // the SDK reaches the end without a listing error or canceled context.
 func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, c Config) error {
-	started := time.Now().UTC()
+	sliceStarted := time.Now()
+	started := sliceStarted.UTC()
 	counts := Counts{}
 	lastKey := ""
+	spent := time.Duration(0)
 	if job.Checkpoint != nil {
 		var err error
 		counts, err = job.Checkpoint.Snapshot.Totals.counts()
@@ -65,6 +67,7 @@ func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, 
 		}
 		started = job.Checkpoint.Snapshot.StartedAt
 		lastKey = job.Checkpoint.LastKey
+		spent = job.Checkpoint.ListingTime
 	}
 	snapshot := func() Snapshot {
 		return Snapshot{Totals: counts.Stats(), ScannedEntries: counts.CurrentObjects + counts.RetainedVersions + counts.DeleteMarkers, StartedAt: started, UpdatedAt: time.Now().UTC()}
@@ -75,18 +78,21 @@ func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, 
 		generation = job.Checkpoint.Generation
 	}
 	safe := func() Checkpoint {
-		return Checkpoint{Generation: generation, LastKey: safeKey, Snapshot: Snapshot{Totals: safeCounts.Stats(), ScannedEntries: safeCounts.CurrentObjects + safeCounts.RetainedVersions + safeCounts.DeleteMarkers, StartedAt: started, UpdatedAt: time.Now().UTC()}}
+		return Checkpoint{Generation: generation, LastKey: safeKey, ListingTime: spent + time.Since(sliceStarted), Snapshot: Snapshot{Totals: safeCounts.Stats(), ScannedEntries: safeCounts.CurrentObjects + safeCounts.RetainedVersions + safeCounts.DeleteMarkers, StartedAt: started, UpdatedAt: time.Now().UTC()}}
 	}
-	// A fair slice resumes the same scan, including its original wall-clock
-	// budget. Starting a fresh timeout here lets large buckets run indefinitely.
-	deadline := started.Add(c.ScanTimeout)
+	// A fair slice resumes the same scan with the budget it has left. The
+	// budget counts listing time summed over slices, not the wall clock since
+	// the scan started: time spent queued while other buckets take their
+	// turns must not exhaust it, but a fresh timeout per slice would let a
+	// large bucket run indefinitely.
+	remaining := c.ScanTimeout - spent
 	if ctx.Err() != nil {
 		return &ScanFailure{Code: "worker_shutdown"}
 	}
-	if !time.Now().Before(deadline) {
+	if remaining <= 0 {
 		return &ScanFailure{Code: "duration", Limited: true}
 	}
-	scanCtx, cancel := context.WithDeadline(ctx, deadline)
+	scanCtx, cancel := context.WithTimeout(ctx, remaining)
 	objects := client.ListObjects(scanCtx, job.Bucket, minio.ListObjectsOptions{Recursive: true, WithVersions: true, StartAfter: lastKey, MaxKeys: 1000})
 	defer func() {
 		cancel()
@@ -99,7 +105,6 @@ func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, 
 	}
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	sliceStarted := time.Now()
 	currentKey := ""
 	persist := func() error {
 		operation, cancel := context.WithTimeout(ctx, c.Heartbeat)

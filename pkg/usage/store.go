@@ -148,10 +148,10 @@ func (s *Store) Migrate(ctx context.Context) error {
 // Repeated manual clicks join an existing job rather than creating a backlog.
 //
 // A failed or limited job keeps its checkpoint so automatic retries never
-// restart an over-budget listing. That checkpoint also carries the original
-// scan deadline, so resuming it after a limit can only end limited again. An
-// explicit refresh therefore discards it and starts a new scan with a new
-// budget; automatic events and reconciliation leave it in place.
+// restart an over-budget listing. That checkpoint also carries the listing
+// time already spent, so resuming it after a limit can only end limited
+// again. An explicit refresh therefore discards it and starts a new scan with
+// a new budget; automatic events and reconciliation leave it in place.
 func (s *Store) Queue(ctx context.Context, bucket string, manual bool, debounce, spacing time.Duration, eventAt *time.Time) error {
 	if debounce < 0 || spacing < 0 {
 		return errors.New("usage queue delays must not be negative")

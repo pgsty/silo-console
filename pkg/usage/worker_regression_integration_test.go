@@ -18,7 +18,7 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-func TestScanDeadlineSurvivesCheckpoint(t *testing.T) {
+func TestScanBudgetSurvivesCheckpoint(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
 	if err := s.Queue(ctx, "deadline-bucket", true, 0, 0, nil); err != nil {
@@ -30,7 +30,7 @@ func TestScanDeadlineSurvivesCheckpoint(t *testing.T) {
 	}
 	snapshot := observation(10)
 	snapshot.StartedAt = time.Now().Add(-time.Hour)
-	checkpoint := Checkpoint{Generation: job.Generation, LastKey: "a", Snapshot: snapshot}
+	checkpoint := Checkpoint{Generation: job.Generation, LastKey: "a", ListingTime: time.Hour, Snapshot: snapshot}
 	if err := s.Yield(ctx, job, checkpoint, snapshot); err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestScanDeadlineSurvivesCheckpoint(t *testing.T) {
 	var failure *ScanFailure
 	if !errors.As(err, &failure) || failure.Code != "duration" || !failure.Limited {
 		record, _ := s.Get(ctx, "deadline-bucket")
-		t.Fatalf("expired full-scan deadline must remain limited after resume; err=%v state=%s", err, record.State)
+		t.Fatalf("an exhausted listing budget must remain limited after resume; err=%v state=%s", err, record.State)
 	}
 	if listed {
 		t.Fatal("an expired checkpoint must not start another S3 listing")
@@ -102,7 +102,7 @@ func TestManualRefreshRestartsLimitedScanWithFreshBudget(t *testing.T) {
 	}
 	stale := observation(10)
 	stale.StartedAt = time.Now().Add(-time.Hour)
-	if err = s.Yield(ctx, job, Checkpoint{Generation: job.Generation, LastKey: "a", Snapshot: stale}, stale); err != nil {
+	if err = s.Yield(ctx, job, Checkpoint{Generation: job.Generation, LastKey: "a", ListingTime: time.Hour, Snapshot: stale}, stale); err != nil {
 		t.Fatal(err)
 	}
 	var starts []string

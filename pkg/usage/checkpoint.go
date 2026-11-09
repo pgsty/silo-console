@@ -15,15 +15,23 @@ import (
 // StartAfter key for version listings but no public version-ID resume marker.
 // Saving an intermediate version as the cursor would silently skip its peers.
 // This object is private worker state and never returned to a browser.
+//
+// ListingTime is the scan budget already used: listing time summed over the
+// scan's slices, excluding time spent queued behind other buckets.
+// Checkpoints written before this field existed decode it as zero.
 type Checkpoint struct {
-	Generation int64    `json:"generation"`
-	LastKey    string   `json:"last_key"`
-	Snapshot   Snapshot `json:"snapshot"`
+	Generation  int64         `json:"generation"`
+	LastKey     string        `json:"last_key"`
+	ListingTime time.Duration `json:"listing_time_ns,omitempty"`
+	Snapshot    Snapshot      `json:"snapshot"`
 }
 
 func (c Checkpoint) Validate() error {
 	if c.Generation < 1 {
 		return errors.New("invalid usage checkpoint generation")
+	}
+	if c.ListingTime < 0 {
+		return errors.New("invalid usage checkpoint listing time")
 	}
 	if err := c.Snapshot.Validate(); err != nil {
 		return err
