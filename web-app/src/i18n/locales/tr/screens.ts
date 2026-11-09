@@ -9,36 +9,37 @@ const messages: Dictionary = {
     "Kullanıcılar politikaları gruplarından devralır. Açıkça izin verilmediği sürece erişim reddedilir.",
   "Policies define allowed actions and resources for users and groups.":
     "Politikalar, kullanıcılar ve gruplar için izin verilen eylemleri ve kaynakları tanımlar.",
-  "IAM policies": "IAM politikalar",
+  "IAM policies": "IAM politikaları",
   "Access keys inherit their parent user’s permissions. An inline policy can only restrict them further.":
     "Erişim anahtarları, üst kullanıcılarının izinlerini devralır. Satır içi bir politika bunları yalnızca daha da kısıtlayabilir.",
-  "Access keys": "Erişim tuşları",
+  "Access keys": "Erişim anahtarları",
   "Configure a destination, then add bucket notification rules to send S3 events to it.":
-    "Bir hedef yapılandırın, ardından ona S3 etkinlik göndermek için kova bildirim kuralları ekleyin.",
+    "Bir hedef yapılandırın, ardından bu hedefe S3 etkinlikleri göndermek için kova bildirim kuralları ekleyin.",
   "Event destinations": "Etkinlik hedefleri",
-  "SILO version": "SILO versiyonu",
+  "SILO version": "SILO sürümü",
   "Raw JSON": "Ham JSON",
   "Recursive inspections can be expensive. Limit the bucket and path before starting.":
-    "Yinelemeli denetimler pahalı olabilir. Başlamadan önce kovayı ve yolu sınırlayın.",
-  "Open Help for examples, or read the": "Örnekler için Yardım'ı açın veya",
+    "Özyinelemeli incelemeler yüksek kaynak tüketebilir. Başlamadan önce kovayı ve yolu sınırlayın.",
+  "Open Help for examples, or read the":
+    "Örnekler için Yardım'ı açın veya şunu okuyun:",
   Tasks: "Görevler",
-  "Tasks: {count} running": "Görevler: {count} koşuyor",
+  "Tasks: {count} running": "Görevler: {count} çalışıyor",
   "Close Tasks": "Görevleri Kapat",
   "Object operations": "Nesne işlemleri",
-  Running: "Koşuyor",
+  Running: "Çalışıyor",
   Finished: "Bitti",
   Queued: "Sıraya alındı",
   Completed: "Tamamlandı",
   "No running tasks": "Çalışan görev yok",
   "No finished tasks": "Tamamlanmış görev yok",
-  "Clear finished": "Temizle tamamlandı",
+  "Clear finished": "Tamamlananları temizle",
   "ZIP download": "ZIP indir",
   "Browser handoff": "Tarayıcı geçişi",
   "Task progress": "Görev ilerlemesi",
   "Waiting for data": "Veri bekleniyor",
   "Remove task": "Görevi kaldır",
   "Cancel task": "Görevi iptal et",
-  "Retry failed": "Yeniden deneme başarısız oldu",
+  "Retry failed": "Başarısızları yeniden dene",
   "Open bucket/prefix": "Kovayı/ön eki aç",
   "{done}/{total} completed · {failed} failed · {cancelled} cancelled":
     "{done}/{total} tamamlandı · {failed} başarısız oldu · {cancelled} iptal edildi",
@@ -48,8 +49,8 @@ const messages: Dictionary = {
   "Counts represent selected targets. Progress within a folder or version cleanup is unavailable.":
     "Sayımlar seçilen hedefleri temsil eder. Bir klasör veya sürüm temizleme işleminde ilerleme sağlanamıyor.",
   "Completed changes remain in place. In-flight requests may have reached the server; inspect before repeating them.":
-    "Tamamlanan değişiklikler yerinde kalır. Uçuş sırasındaki istekler sunucuya ulaşmış olabilir; tekrarlamadan önce inceleyin.",
-  "Review {count} results": "{count} sonuçları inceleyin",
+    "Tamamlanan değişiklikler korunur. Devam eden istekler sunucuya ulaşmış olabilir; tekrarlamadan önce inceleyin.",
+  "Review {count} results": "{count} sonucu inceleyin",
   "Server outcome is unconfirmed. Inspect this object before another operation.":
     "Sunucu sonucu doğrulanmadı. Başka bir işlemden önce bu nesneyi inceleyin.",
   "Task failed: {name}": "Görev başarısız oldu: {name}",
@@ -68,11 +69,11 @@ const messages: Dictionary = {
     "Bu oturumda görevler devam edecek. İlerleme durumlarını başka bir sayfadaki Görevler bölümünden kontrol edebilirsiniz.",
   "Delete Versions": "Sürümleri Sil",
   "Cluster health": "Küme sağlığı",
-  "servers online": "sunucular çevrimiçi",
-  "{count} drives online": "{count} çevrimiçi sürücüler",
-  "{count} server(s) offline": "{count} sunucu(lar) çevrimdışı",
-  "{count} drive(s) offline": "{count} sürücü(ler) çevrimdışı",
-  "{count} drive(s) healing": "{count} iyileştirmeyi teşvik eder",
+  "servers online": "sunucu çevrimiçi",
+  "{count} drives online": "{count} sürücü çevrimiçi",
+  "{count} server(s) offline": "{count} sunucu çevrimdışı",
+  "{count} drive(s) offline": "{count} sürücü çevrimdışı",
+  "{count} drive(s) healing": "{count} sürücü onarılıyor",
   "Drive {drive} is at least 95% full. The server may reject writes.":
     "Sürücü {drive} en az %95 dolu. Sunucu yazma işlemlerini reddedebilir.",
   "Drive {drive} is at least 85% full.": "Sürücü {drive} en az %85 dolu.",
@@ -85,17 +86,17 @@ const messages: Dictionary = {
   "Generate health report": "Sağlık raporu oluştur",
   "No servers reported": "Sunucu bildirilmedi",
   Server: "Sunucu",
-  "Just started": "Yeni başladım",
+  "Just started": "Yeni başladı",
   "Hide drives for {server}": "{server} için sürücüleri gizle",
   "Show drives for {server}": "{server} için sürücüleri göster",
   "No drive information available": "Sürücü bilgisi mevcut değil",
-  "Drives on {server}": "Sürücüler açık {server}",
+  "Drives on {server}": "{server} üzerindeki sürücüler",
   "{used} / {total} used": "{used} / {total} kullanılmış",
   "Drive usage: {drive}": "Sürücü kullanımı: {drive}",
   "Refresh failed. The last received data is still shown.":
     "Yenileme başarısız oldu. En son alınan veriler hâlâ gösterilmektedir.",
   "Could not load deployment information. Try refreshing.":
-    "Dağıtım bilgileri yüklenemedi. Tazelemeyi deneyin.",
+    "Dağıtım bilgileri yüklenemedi. Yenilemeyi deneyin.",
   "Deployment statistics": "Dağıtım istatistikleri",
   "of {total} raw capacity": "/ {total} ham kapasite",
   "{available} available": "{available} mevcut",
@@ -110,15 +111,15 @@ const messages: Dictionary = {
   "Read & write": "Okuma ve yazma",
   "Delete bucket": "Kovayı sil",
   "Actions for {bucket}": "{bucket} için eylemler",
-  "Select {bucket}": "{bucket}'yi seçin",
+  "Select {bucket}": "{bucket} kovasını seçin",
   "Object lock": "Nesne kilidi",
   Created: "Oluşturuldu",
   "Select all visible buckets": "Görünen tüm kovaları seç",
   "Bucket rows": "Kova satırları",
-  "The bucket list could not be loaded.": "Yapılacaklar listesi yüklenemedi.",
+  "The bucket list could not be loaded.": "Kova listesi yüklenemedi.",
   "Select one or more buckets first.": "Önce bir veya daha fazla kova seçin.",
   "configure the selected buckets": "seçilen kovaları yapılandır",
-  "Search buckets": "Arama kovalari",
+  "Search buckets": "Kova ara",
   "Bucket view": "Kova görünümü",
   Cards: "Kartlar",
   "{count} buckets selected": {
@@ -140,10 +141,10 @@ const messages: Dictionary = {
     "{name} politikası varsayılan tanımına sıfırlansın mı?",
   "The built-in policy will be restored to the SILO default definition.":
     "Yerleşik politika, SILO varsayılan tanımına geri yüklenecektir.",
-  "Loading attachment information…": "Ek bilgileri yükleniyor…",
+  "Loading attachment information…": "Atama bilgileri yükleniyor…",
   "This policy has changed or is no longer available. Refresh the list.":
     "Bu politika değişti veya artık mevcut değil. Listeyi yenileyin.",
-  "Attachment information is unavailable.": "Ek bilgisi mevcut değil.",
+  "Attachment information is unavailable.": "Atama bilgisi mevcut değil.",
   "This policy is attached to {users} users and {groups} groups.":
     "Bu politika {users} kullanıcı ve {groups} grup için geçerlidir.",
   "Their permissions will follow the default definition.":
@@ -159,14 +160,14 @@ const messages: Dictionary = {
     "Bu politika için gruplar yüklenemedi",
   "Built-in policies can be overridden by saving a modified version; you can reset it later.":
     "Yerleşik politikalar, değiştirilmiş bir sürüm kaydedilerek geçersiz kılınabilir; daha sonra sıfırlayabilirsiniz.",
-  "Override policy": "Geçersiz kılma politikası",
+  "Override policy": "Politikayı geçersiz kıl",
   "Cancel editing": "Düzenlemeyi iptal et",
   "Direct policies": "Doğrudan politikalar",
   "Policies inherited through groups":
     "Gruplar aracılığıyla devralınan politikalar",
   "Access-key count is unavailable.": "Erişim anahtarı sayısı mevcut değil.",
   "Group policy information is unavailable.":
-    "Grup ilkesi bilgisi mevcut değil.",
+    "Grup politikası bilgisi mevcut değil.",
   "Also assigned directly": "Ayrıca doğrudan atanır",
   "From groups:": "Gruplardan:",
   "Group policies could not be loaded.": "Grup politikaları yüklenemedi.",
@@ -174,7 +175,7 @@ const messages: Dictionary = {
     "Grup devre dışı; politikaları miras alınmaz.",
   "Group status is unavailable; inherited permissions are unknown.":
     "Grup durumu mevcut değil; devralınan izinler bilinmiyor.",
-  "No inherited group policies": "Devralınan grup ilkesi yok",
+  "No inherited group policies": "Devralınan grup politikası yok",
   "Some group policies are unavailable. Refresh to try again.":
     "Bazı grup politikaları kullanılamıyor. Tekrar denemek için yenileyin.",
   "Could not load user": "Kullanıcı yüklenemedi",
@@ -187,8 +188,8 @@ const messages: Dictionary = {
   "You do not have permission to view this page":
     "Bu sayfayı görüntüleme izniniz yok",
   "Ask your administrator for access. This page checks the following IAM actions:":
-    "Yöneticinizden erişim isteyin. Bu sayfa aşağıdaki IAM eylemleri kontrol eder:",
-  "Required IAM actions": "Gerekli IAM eylemler",
+    "Yöneticinizden erişim isteyin. Bu sayfa aşağıdaki IAM eylemlerini kontrol eder:",
+  "Required IAM actions": "Gerekli IAM eylemleri",
   "Encryption is not configured": "Şifreleme yapılandırılmamış",
   "Configure KES or KMS on the SILO server to manage encryption keys in Console.":
     "Konsolda şifreleme anahtarlarını yönetmek için SILO sunucusunda KES veya KMS'yi yapılandırın.",
@@ -207,26 +208,27 @@ const messages: Dictionary = {
     "Prometheus yapılandırılmış ancak ulaşılamıyor",
   "Check the Prometheus address, network access and authentication, then retry.":
     "Prometheus adresini, ağ erişimini ve kimlik doğrulamasını kontrol edip yeniden deneyin.",
-  "Advanced metrics need Prometheus": "Gelişmiş metrikler gerekir Prometheus",
+  "Advanced metrics need Prometheus":
+    "Gelişmiş metrikler için Prometheus gerekir",
   "Configure Prometheus to collect SILO metrics, then set the URL for your deployment and restart the corresponding service.":
-    "SILO metrikleri toplamak için Prometheus'yi yapılandırın, ardından dağıtımınız için URL'yi ayarlayın ve ilgili hizmeti yeniden başlatın.",
+    "SILO metriklerini toplamak için Prometheus'u yapılandırın, ardından dağıtımınız için URL'yi ayarlayın ve ilgili hizmeti yeniden başlatın.",
   "Standalone Console": "Bağımsız Konsol",
-  "Console embedded in SILO": "SILO'ye gömülü konsol",
+  "Console embedded in SILO": "SILO'ya yerleşik Konsol",
   "Optional standalone settings": "İsteğe bağlı bağımsız ayarlar",
   "Bearer token: ": "Hamiline ait jeton:",
   "Or basic authentication: ": "Veya temel kimlik doğrulama:",
   "Embedded settings: ": "Gömülü ayarlar:",
   Icons: "Simgeler",
   "Create bucket": "Kova oluştur",
-  "Edit {label}": "Düzenle {label}",
+  "Edit {label}": "{label} düzenle",
   "Calculating…": "Hesaplanıyor…",
   "The server has not finished computing usage yet.":
-    "Sunucu henüz bilgi işlem kullanımını bitirmedi.",
+    "Sunucu henüz kullanım hesaplamasını tamamlamadı.",
   "Calculated {time}": "Hesaplandı {time}",
   "Updated {time}": "Güncellendi {time}",
   "Permission required": "İzin gerekli",
   "Ask your administrator to grant the following IAM actions.":
-    "Yöneticinizden aşağıdaki IAM eylemleri gerçekleştirmesini isteyin.",
+    "Yöneticinizden aşağıdaki IAM izinlerini vermesini isteyin.",
   "More actions": "Daha fazla eylem",
   "Equivalent mcli command": "Eşdeğer mcli komutu",
   Copied: "Kopyalandı",
@@ -234,11 +236,11 @@ const messages: Dictionary = {
     "Kopyalama başarısız oldu. Komutu seçip kopyalayın.",
   "Copy commands": "Komutları kopyala",
   "Replace ALIAS with your configured mcli alias (for example, {alias}).":
-    "ALIAS'yi yapılandırılmış mcli takma adınızla değiştirin (örneğin, {alias}).",
+    "ALIAS'ı yapılandırılmış mcli takma adınızla değiştirin (örneğin, {alias}).",
   "Replace ALIAS with your configured mcli alias.":
-    "ALIAS'yi yapılandırılmış mcli takma adınızla değiştirin.",
+    "ALIAS'ı yapılandırılmış mcli takma adınızla değiştirin.",
   "Loading…": "Yükleniyor…",
-  "SILO primitives": "SILO ilkeller",
+  "SILO primitives": "SILO temel bileşenleri",
   "Shared building blocks for storage, identity and monitoring.":
     "Depolama, kimlik ve izleme için paylaşılan yapı taşları.",
   "Healthy capacity": "Sağlıklı kapasite",
@@ -248,10 +250,10 @@ const messages: Dictionary = {
   "Above the 95% critical threshold": "%95 kritik eşiğin üzerinde",
   "Usage is calculated by the server.":
     "Kullanım sunucu tarafından hesaplanır.",
-  "View buckets": "Kovalari görüntüle",
+  "View buckets": "Kovaları görüntüle",
   "Status and values": "Durum ve değerler",
   "Built-in": "Dahili",
-  "Freshness and actions": "Tazelik ve eylemler",
+  "Freshness and actions": "Veri güncelliği ve işlemler",
   "Select an object to inspect its details.":
     "Ayrıntılarını incelemek için bir nesne seçin.",
   "Object details": "Nesne ayrıntıları",
@@ -274,11 +276,11 @@ const messages: Dictionary = {
   "Showing first 500 rows": "İlk 500 satır gösteriliyor",
   "Showing the first 100 columns. View Source or download the object to see all columns.":
     "İlk 100 sütun gösteriliyor. Tüm sütunları görmek için Kaynağı Görüntüleyin veya nesneyi indirin.",
-  Rendered: "Oluşturuldu",
-  "Wrap lines": "Sarma çizgileri",
+  Rendered: "Görsel Görünüm",
+  "Wrap lines": "Satırları kaydır",
   Row: "Satır",
   "CSV preview content": "CSV içeriğin önizlemesi",
-  "Markdown preview content": "İşaretleme önizleme içeriği",
+  "Markdown preview content": "Markdown önizleme içeriği",
   "Markdown rendering is unavailable for this content. Showing the source instead.":
     "Markdown oluşturma bu içerik için mevcut değil. Bunun yerine kaynak gösteriliyor.",
   "Image: {alt}": "Resim: {alt}",
@@ -286,21 +288,21 @@ const messages: Dictionary = {
   Actions: "Eylemler",
   "Select version": "Sürümü seçin",
   "This version is a delete marker.": "Bu sürüm bir silme işaretçisidir.",
-  "You need s3:GetObject permission.": "s3:GetObject izne ihtiyacınız var.",
+  "You need s3:GetObject permission.": "s3:GetObject iznine ihtiyacınız var.",
   "You need s3:GetObjectVersion permission.":
-    "s3:GetObjectVersion izne ihtiyacınız var.",
+    "s3:GetObjectVersion iznine ihtiyacınız var.",
   "Preview is not available for this file type.":
     "Bu dosya türü için önizleme mevcut değil.",
   "Object Lock is not enabled on this bucket.":
-    "Bu kovate Nesne Kilidi etkin değil.",
+    "Bu kovada Nesne Kilidi etkin değil.",
   "You need s3:PutObjectLegalHold permission.":
-    "s3:PutObjectLegalHold izne ihtiyacınız var.",
+    "s3:PutObjectLegalHold iznine ihtiyacınız var.",
   "You need s3:PutObjectRetention permission.":
     "s3:PutObjectRetention iznine ihtiyacınız var.",
   "Tags can only be changed on the current version.":
     "Etiketler yalnızca güncel sürümde değiştirilebilir.",
   "Versioning is not enabled on this bucket.":
-    "Bu kovate sürüm oluşturma etkin değil.",
+    "Bu kovada sürüm oluşturma etkin değil.",
   "Select one or more objects first.":
     "Önce bir veya daha fazla nesneyi seçin.",
   "Select a single object first.": "Önce tek bir nesne seçin.",
@@ -312,18 +314,18 @@ const messages: Dictionary = {
   "This action requires a distributed server.":
     "Bu eylem dağıtılmış bir sunucu gerektirir.",
   "You need s3:PutObjectTagging permission.":
-    "s3:PutObjectTagging izne ihtiyacınız var.",
+    "s3:PutObjectTagging iznine ihtiyacınız var.",
   "You need admin:InspectData permission.":
-    "Admin:InspectData iznine ihtiyacınız var.",
+    "admin:InspectData iznine ihtiyacınız var.",
   "You need permission to view object versions.":
     "Nesne sürümlerini görüntülemek için izne ihtiyacınız var.",
   "You need s3:DeleteObject permission.":
-    "s3:DeleteObject izne ihtiyacınız var.",
+    "s3:DeleteObject iznine ihtiyacınız var.",
   "You need permission to change the bucket policy.":
     "Kova politikasını değiştirmek için izne ihtiyacınız var.",
   "You need permission to read objects and bucket versioning.":
     "Nesneleri ve kova sürümlerini okumak için izne ihtiyacınız var.",
-  "You need s3:ListBucket permission.": "s3:ListBucket izne ihtiyacınız var.",
+  "You need s3:ListBucket permission.": "s3:ListBucket iznine ihtiyacınız var.",
   "You need permission to restore this version.":
     "Bu sürümü geri yüklemek için izne ihtiyacınız var.",
   "You need permission to select this version.":
@@ -335,11 +337,11 @@ const messages: Dictionary = {
   "There are no non-current versions to delete.":
     "Silinecek güncel olmayan sürüm yok.",
   "Invalid Endpoint": "Geçersiz Uç Nokta",
-  Broker: "Komisyoncu",
+  Broker: "Broker",
   QOS: "QOS",
-  "Client ID": "Müşteri ID",
-  "Client Secret": "Müşteri Sırrı",
-  "Redirect URI": "Yönlendir URI",
+  "Client ID": "İstemci ID",
+  "Client Secret": "İstemci Gizli Anahtarı",
+  "Redirect URI": "Yönlendirme URI'si",
   "Lookup Bind DN": "Arama Bağlantısı DN",
   "Lookup Bind Password": "Arama Bağlama Şifresi",
   "User DN Search Base": "Kullanıcı DN Arama Tabanı",
@@ -350,7 +352,7 @@ const messages: Dictionary = {
   "Remove transfer": "Aktarımı kaldır",
   "Cancel transfer": "Aktarımı iptal et",
   "This download has already started. Dismiss its transfer entry to start it again.":
-    "Bu indirme işlemi zaten başladı. Tekrar başlatmak için aktarım girişini reddedin.",
+    "Bu indirme işlemi zaten başladı. Yeniden başlatmak için aktarım kaydını kaldırın.",
   "Track or cancel this download in your browser's download manager.":
     "Bu indirme işlemini tarayıcınızın indirme yöneticisinden takip edin veya iptal edin.",
   "For selections above 5 GiB or of unknown size, MCLI is recommended. This ZIP will stream without buffering in memory.":
@@ -359,7 +361,7 @@ const messages: Dictionary = {
   "Set replication": "Çoğaltmayı ayarla",
   "Refresh buckets": "Kovaları yenile",
   "Close details": "Ayrıntıları kapat",
-  "Copy share URL": "Paylaşımı kopyala URL",
+  "Copy share URL": "Paylaşım URL'sini kopyala",
   "Select multiple versions": "Birden fazla sürüm seçin",
   "Delete selected versions": "Seçilen sürümleri sil",
   "Delete non-current versions": "Güncel olmayan sürümleri silin",
@@ -369,7 +371,7 @@ const messages: Dictionary = {
   "Copy path": "Yolu kopyala",
   "Delete user": "Kullanıcıyı sil",
   "Change password": "Şifreyi değiştir",
-  "Copy {label}": "Kopyala {label}",
+  "Copy {label}": "{label} kopyala",
   "Add site": "Site ekle",
   "Remove site": "Siteyi kaldır",
   "Delete selected users": "Seçilen kullanıcıları sil",
@@ -382,19 +384,19 @@ const messages: Dictionary = {
   "Time:": "Zaman:",
   "API:": "API:",
   "Not available": "Mevcut değil",
-  " and ": "ve",
+  " and ": " ve ",
   "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'":
-    "'ad alanı' mevcut kova/nesne listesini yansıtır ve 'erişim' nesne işlemlerinin günlüğünü yansıtır, varsayılan olarak 'ad alanı'dır",
+    "'namespace' mevcut kova/nesne listesini, 'access' ise nesne işlemlerinin günlüğünü yansıtır; varsayılan değer 'namespace'dir",
   "{compliance} lock protects Objects from write operations by all users, including the SILO root user.":
     "{compliance} kilidi, nesneleri SILO kök kullanıcısı dahil tüm kullanıcıların yazma işlemlerinden korur.",
   "{count} days": {
     one: "{count} gün",
     other: "{count} gün",
   },
-  "{count} Entities Found": "{count} Bulunan Varlıklar",
+  "{count} Entities Found": "{count} Varlık Bulundu",
   "{count} Entity Found": "{count} Varlık Bulundu",
-  "{count} Version": "{count} Versiyon",
-  "{count} version, {size}": "{count} versiyon, {size}",
+  "{count} Version": "{count} Sürüm",
+  "{count} version, {size}": "{count} sürüm, {size}",
   "{count} versions": {
     one: "{count} sürüm",
     other: "{count} sürüm",
@@ -403,21 +405,21 @@ const messages: Dictionary = {
     one: "{count} sürüm",
     other: "{count} sürüm",
   },
-  "{count} versions, {size}": "{count} versiyonları, {size}",
+  "{count} versions, {size}": "{count} sürüm, {size}",
   "{custom} policy can be written to define which accounts are authorized to access this Bucket":
-    "{custom} Bu Bucket'e hangi hesapların erişim yetkisine sahip olduğunu tanımlamak için politika yazılabilir",
+    "Bu Kovaya hangi hesapların erişim yetkisine sahip olduğunu tanımlamak için {custom} politika yazılabilir",
   "{entity} not available": "{entity} mevcut değil",
   "{entity} will be available until:":
     "{entity} şu tarihe kadar mevcut olacak:",
   "{excludeFolders} options will not be available if this option is enabled.":
     "{excludeFolders} Bu seçenek etkinleştirildiğinde seçenekler kullanılamayacaktır.",
-  "{file} - Versions": "{file} - Versiyonlar",
+  "{file} - Versions": "{file} - Sürümler",
   "{governance} lock protects Objects from write operations by non-privileged users.":
     "{governance} kilidi, nesneleri ayrıcalıklı olmayan kullanıcıların yazma işlemlerinden korur.",
   "{label} copied to clipboard": "{label} panoya kopyalandı",
   "{minio} is a registered trademark of MinIO, Inc. {silo} is not a MinIO, Inc. product, and is not affiliated with, sponsored by, or endorsed by MinIO, Inc.":
     "{minio}, MinIO, Inc. şirketinin tescilli ticari markasıdır. {silo}, MinIO, Inc. ürünü değildir ve MinIO, Inc.'e bağlı değildir, sponsorluğunda değildir veya desteklenmemektedir.",
-  "{object} Versions": "{object} Versiyonlar",
+  "{object} Versions": "{object} Sürümleri",
   "{objectLocking} prevents objects from being deleted. Required to support retention and legal hold. Can only be enabled at bucket creation.":
     "{objectLocking}, nesnelerin silinmesini önler. Saklama ve yasal saklama için gereklidir. Yalnızca kova oluşturulurken etkinleştirilebilir.",
   "{private} policy limits access to credentialled accounts with appropriate permissions":
@@ -425,27 +427,27 @@ const messages: Dictionary = {
   "{provider} - Add Tier Configuration":
     "{provider} - Katman Yapılandırması Ekle",
   "{public} policy anyone will be able to upload, download and delete files from this Bucket once logged in":
-    "{public} politikası, giriş yaptıktan sonra herkes bu Kovaya dosya yükleyebilecek, indirebilecek ve silebilecek",
+    "{public} politikasıyla, giriş yapan herkes bu Kovaya dosya yükleyebilir, indirebilir ve silebilir",
   "{quota} limits the amount of data in the bucket.":
-    "{quota} kovateki veri miktarını sınırlar.",
+    "{quota} kovadaki veri miktarını sınırlar.",
   "{retention} imposes rules to prevent object deletion for a period of time. Versioning must be enabled in order to set bucket retention policies.":
-    "{retention}, nesnelerin belirli bir süre silinmesini önleyen kurallar uygular. Kova saklama ilkelerini ayarlamak için sürüm oluşturma etkin olmalıdır.",
-  "{service} which is {status}": "{service} hangisi {status}",
+    "{retention}, nesnelerin belirli bir süre silinmesini önleyen kurallar uygular. Kova saklama politikalarını ayarlamak için sürüm oluşturma etkin olmalıdır.",
+  "{service} which is {status}": "{status} durumundaki {service}",
   "{silo} is an independently maintained continuation of the {minio} object storage project, carried forward by the {pigsty} community since 2026. Its {code} {incorporates} {upstream}, and the complete work remains licensed under the {agpl}.":
-    "{silo}, 2026'dan bu yana {pigsty} topluluğu tarafından yürütülen {minio} nesne depolama projesinin bağımsız olarak sürdürülen bir devamıdır. {code} {incorporates} {upstream}'dir ve çalışmanın tamamı {agpl} kapsamında lisanslıdır.",
+    "{silo}, 2026'dan bu yana {pigsty} topluluğu tarafından yürütülen {minio} nesne depolama projesinin bağımsız olarak sürdürülen bir devamıdır. Kaynak {code}, {upstream} {incorporates} ve çalışmanın tamamı {agpl} kapsamında lisanslıdır.",
   "{target} Event Destination": "{target} Etkinlik Hedefi",
   "{time} ago": "{time} önce",
   "{type}: {name} not found.": "{type}: {name} bulunamadı.",
   "{versioning} allows to keep multiple versions of the same object under the same key.":
-    "{versioning} aynı nesnenin birden fazla versiyonunu aynı anahtar altında tutmaya olanak sağlar.",
+    "{versioning}, aynı nesnenin birden fazla sürümünü aynı anahtar altında tutmaya olanak sağlar.",
   "* Warning: With Public access anyone will be able to upload, download and delete files from this Bucket *":
-    "* Uyarı: Herkese açık erişim sayesinde herkes bu Kovateki dosyaları yükleyebilecek, indirebilecek ve silebilecek *",
+    "* Uyarı: Herkese açık erişim sayesinde herkes bu Kovadaki dosyaları yükleyebilecek, indirebilecek ve silebilecek *",
   "# Associated Access Keys": "# İlişkili Erişim Anahtarları",
   "© 2026 Ruohang Feng / PGSTY and the SILO contributors.":
     "© 2026 Ruohang Feng / PGSTY ve SILO katkıda bulunanlar.",
-  "<Day>": "<Day>",
-  "<Month>": "<Month>",
-  "<Year>": "<Year>",
+  "<Day>": "<Gün>",
+  "<Month>": "<Ay>",
+  "<Year>": "<Yıl>",
   "A bucket can only be deleted if it's empty.":
     "Bir kova yalnızca boşsa silinebilir.",
   "A group can have one attached IAM policy, where all users with membership in that group inherit that policy. Groups support more simplified management of user permissions on the SILO Tenant.":
@@ -479,7 +481,7 @@ const messages: Dictionary = {
   "Account Key": "Hesap Anahtarı",
   "Account Name": "Hesap Adı",
   Active: "Aktif",
-  "Active for": "Aktif",
+  "Active for": "Aktif kalma süresi",
   'AD/LDAP server address e.g. "myldapserver.com:636"':
     'AD/LDAP sunucu adresi ör. "myldapserver.com:636"',
   "Add a Row": "Satır Ekle",
@@ -493,7 +495,7 @@ const messages: Dictionary = {
   "Add Members": "Üye Ekle",
   "Add New Tag": "Yeni Etiket Ekle",
   "Add New Tag ": "Yeni Etiket Ekle",
-  "Add new Webhook": "Yeni ekle Webhook",
+  "Add new Webhook": "Yeni Webhook ekle",
   "Add Replication Rule": "Çoğaltma Kuralı Ekle",
   "Add Replication Site": "Çoğaltma Sitesi Ekle",
   "Add Replication Sites": "Çoğaltma Siteleri Ekle",
@@ -506,7 +508,7 @@ const messages: Dictionary = {
   "Add Users to Group": "Kullanıcıları Gruba Ekle",
   "add users to groups": "kullanıcıları gruplara ekleyin",
   "Adding groups lets you assign IAM policies to multiple users at once.":
-    "Grup eklemek, aynı anda birden fazla kullanıcıya IAM politika atamanıza olanak tanır.",
+    "Grup eklemek, aynı anda birden fazla kullanıcıya IAM politikası atamanıza olanak tanır.",
   Address: "Adres",
   After: "Sonra",
   All: "Hepsi",
@@ -520,7 +522,7 @@ const messages: Dictionary = {
   "Amazon Resource Name": "Amazon Kaynak Adı",
   "AMQP exchange type": "AMQP değişim türü",
   "AMQP server endpoint e.g. `amqp://myuser:mypassword@localhost:5672`":
-    "AMQP sunucu uç noktası ör. `amqp://myuser:şifrem@localhost:5672`",
+    "AMQP sunucu uç noktası ör. `amqp://myuser:mypassword@localhost:5672`",
   "An error occurred": "Bir hata oluştu",
   "An error occurred while getting the Health Report file.":
     "Sağlık Raporu dosyası alınırken hata oluştu.",
@@ -532,15 +534,15 @@ const messages: Dictionary = {
     "Bilinmeyen bir hata oluştu. Daha fazla bilgi almak için lütfen Konsol günlüklerine bakın.",
   Anonymous: "Anonim",
   "Anonymous Access": "Anonim Erişim",
-  "API Name": "API İsim",
-  "API Requests": "API İstekler",
-  Application: "Başvuru",
+  "API Name": "API Adı",
+  "API Requests": "API İstekleri",
+  Application: "Uygulama",
   "apply policies to Groups": "Gruplara politika uygulama",
   April: "Nisan",
   "Are you sure you want to continue?":
     "Devam etmek istediğinizden emin misiniz?",
   "Are you sure you want to delete Access Key {name}?":
-    "Erişim Anahtarı {name}'yı silmek istediğinizden emin misiniz?",
+    "{name} Erişim Anahtarını silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete all the non-current versions for: {object}?":
     "Şunun güncel olmayan tüm sürümlerini silmek istediğinizden emin misiniz: {object}?",
   "Are you sure you want to delete bucket {bucket}?":
@@ -558,25 +560,25 @@ const messages: Dictionary = {
   "Are you sure you want to delete the event destination ?":
     "Etkinlik hedefini silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the following {count} groups?":
-    "Aşağıdaki {count} grupları silmek istediğinizden emin misiniz?",
+    "Aşağıdaki {count} grubu silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the following {count} users?":
-    "Aşağıdaki {count} kullanıcıları silmek istediğinizden emin misiniz?",
+    "Aşağıdaki {count} kullanıcıyı silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the following group?":
     "Aşağıdaki grubu silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the following user?":
     "Aşağıdaki kullanıcıyı silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the selected {count} Access Keys?":
-    "Seçilen {count} Erişim Anahtarlarını silmek istediğinizden emin misiniz?",
+    "Seçilen {count} Erişim Anahtarını silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the selected {count} objects?":
-    "Seçilen {count} nesneleri silmek istediğinizden emin misiniz?",
+    "Seçilen {count} nesneyi silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the selected {count} versions for {object}?":
-    "{object} için seçilen {count} versiyonlarını silmek istediğinizden emin misiniz?",
+    "{object} için seçilen {count} sürümü silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the tag {tag} ?":
     "{tag} etiketini silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the tag {tag}?":
     "{tag} etiketini silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete the tier {name}?":
-    "{name} kademesini silmek istediğinizden emin misiniz?",
+    "{name} katmanını silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete this access rule?":
     "Bu erişim kuralını silmek istediğinizden emin misiniz?",
   "Are you sure you want to delete this event?":
@@ -589,15 +591,15 @@ const messages: Dictionary = {
   "Are you sure you want to remove the selected replication rules for bucket {bucket}?":
     "{bucket} numaralı kova için seçilen çoğaltma kurallarını kaldırmak istediğinizden emin misiniz?",
   "Are you sure you want to reset the Default {name}?":
-    "Varsayılan {name}'yi sıfırlamak istediğinizden emin misiniz?",
+    "Varsayılan {name} öğesini sıfırlamak istediğinizden emin misiniz?",
   "Are you sure you want to restore {object} with Version ID: {version}?":
-    "{object}'yi ID: {version} Sürümüyle geri yüklemek istediğinizden emin misiniz?",
+    "{object} nesnesini {version} Sürüm ID'si ile geri yüklemek istediğinizden emin misiniz?",
   "Are you sure you want to restore these configurations to default values?":
     "Bu yapılandırmaları varsayılan değerlere geri yüklemek istediğinizden emin misiniz?",
   "Assign Access Policies": "Erişim Politikalarını Atayın",
   "Assign Custom Credentials": "Özel Kimlik Bilgilerini Ata",
   "Assign Custom IAM Policies for Group":
-    "Grup için Özel IAM Politikalar Atayın",
+    "Grup için Özel IAM Politikaları Atayın",
   "Assign groups": "Grupları ata",
   "Assign Groups": "Grupları Ata",
   "assign policies": "politikaları atama",
@@ -611,7 +613,7 @@ const messages: Dictionary = {
   August: "Ağustos",
   "Auth Token": "Kimlik Doğrulama Jetonu",
   "Auto delete queue when set to 'on', when there are no consumers":
-    "Tüketici olmadığında 'açık' olarak ayarlandığında kuyruğu otomatik sil",
+    "Tüketici olmadığında 'on' olarak ayarlanırsa kuyruğu otomatik sil",
   "Auto Deleted": "Otomatik Silindi",
   "Available Capacity": "Mevcut Kapasite",
   Back: "Geri",
@@ -620,7 +622,7 @@ const messages: Dictionary = {
   "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).":
     "En fazla iki ondalık rakamla (0, sınırsız anlamına gelir) 8 PiB/s'nin altında negatif olmayan bir bant genişliği girin.",
   "Bitrot Scan": "Bitrot Taraması",
-  Brokers: "Komisyoncular",
+  Brokers: "Broker'lar",
   "Browse Bucket": "Kovaya Göz At",
   Bucket: "Kova",
   "Bucket Assignments": "Kova Atamaları",
@@ -631,7 +633,7 @@ const messages: Dictionary = {
   "Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).":
     "Kova adları yalnızca küçük harflerden, rakamlardan, noktalardan (.) ve kısa çizgilerden (-) oluşabilir.",
   "Bucket names must be between 3 (min) and 63 (max) characters long.":
-    "Bucket isimleri 3 (min) ile 63 (max) karakter uzunluğunda olmalıdır.",
+    "Kova adları 3 (min) ile 63 (maks) karakter uzunluğunda olmalıdır.",
   "Bucket names must be unique within a partition.":
     "Bir bölüm içindeki kova adları benzersiz olmalıdır.",
   "Bucket names must not be formatted as an IP address (for example, 192.168.5.4).":
@@ -639,7 +641,7 @@ const messages: Dictionary = {
   "Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.":
     "Kova adları iki bitişik nokta veya kısa çizginin yanında nokta içermemelidir.",
   "Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.":
-    "Bucket isimleri -s3alias son ekiyle bitmemelidir. Bu son ek, erişim noktası takma adları için ayrılmıştır.",
+    "Kova adları -s3alias sonekiyle bitmemelidir. Bu sonek, erişim noktası takma adları için ayrılmıştır.",
   "Bucket names must not start with the prefix xn--.":
     "Kova adları xn-- önekiyle başlamamalıdır.",
   "Bucket notification configuration": "Kova bildirimi yapılandırması",
@@ -673,35 +675,35 @@ const messages: Dictionary = {
     "Şu kova özelliklerindeki değişiklikler",
   "Choose or create a new path": "Yeni bir yol seçin veya oluşturun",
   "Claim from which SILO will read the policy or role to use":
-    "SILO'in politikayı veya kullanılacak rolü okuyacağı talep",
+    "SILO'nun kullanılacak politikayı veya rolü okuyacağı talep (claim)",
   "Claim Name": "Talep Adı",
   "Claim Prefix": "Talep Öneki",
-  "Claim User Info": "Kullanıcı Bilgilerini Talep Edin",
+  "Claim User Info": "Kullanıcı Bilgisi Claim'i",
   Clear: "Temizle",
   "Click on a user to view the full listing of associated Access Keys. All Access Keys associated with a user will be deleted along with the user.":
     "İlgili Erişim Anahtarlarının tam listesini görüntülemek için bir kullanıcıya tıklayın. Bir kullanıcıyla ilişkili tüm Erişim Anahtarları kullanıcıyla birlikte silinecektir.",
-  client: "müşteri",
+  client: "istemci",
   "Client Auth determines the Kafka server's policy for TLS client authorization":
     "İstemci Kimlik Doğrulaması, Kafka sunucunun TLS istemci yetkilendirme politikasını belirler",
-  "Client Cert": "Müşteri Sertifikası",
+  "Client Cert": "İstemci Sertifikası",
   "Client cert for mTLS authentication":
     "mTLS kimlik doğrulaması için istemci sertifikası",
   "Client cert for NATS mTLS auth":
-    "NATS mTLS kimlik doğrulaması için müşteri sertifikası",
-  "Client Cert Key": "Müşteri Sertifika Anahtarı",
+    "NATS mTLS kimlik doğrulaması için istemci sertifikası",
+  "Client Cert Key": "İstemci Sertifika Anahtarı",
   "Client cert key for mTLS authentication":
     "mTLS kimlik doğrulaması için istemci sertifikası anahtarı",
   "Client cert key for NATS mTLS authorization":
     "NATS mTLS yetkilendirmesi için istemci sertifikası anahtarı",
-  "Client ID is required": "Müşteri ID gereklidir",
-  "Client Key": "Müşteri Anahtarı",
+  "Client ID is required": "İstemci ID gereklidir",
+  "Client Key": "İstemci Anahtarı",
   "Client ping commands interval in s,m,h,d. Disabled by default":
     "İstemci ping komutlarının aralığı s,m,h,d cinsindendir. Varsayılan olarak devre dışı",
-  "Client Secret is required": "Müşteri Sırrı gerekli",
+  "Client Secret is required": "İstemci Gizli Anahtarı gereklidir",
   "Client Secret must be re-entered to change OpenID configurations":
-    "OpenID yapılandırmalarını değiştirmek için Müşteri Sırrı yeniden girilmelidir",
-  "client TLS cert": "müşteri TLS sertifikası",
-  "client TLS key": "istemci TLS tuşu",
+    "OpenID yapılandırmalarını değiştirmek için İstemci Gizli Anahtarı yeniden girilmelidir",
+  "client TLS cert": "istemci TLS sertifikası",
+  "client TLS key": "istemci TLS anahtarı",
   "ClientAuth determines the Kafka server's policy for TLS client authorization":
     "ClientAuth, Kafka sunucunun TLS istemci yetkilendirme politikasını belirler",
   "Cluster Health Report will be generated, you will be able to download the JSON File.":
@@ -709,7 +711,7 @@ const messages: Dictionary = {
   code: "kodu",
   "Comma separated list of Kafka broker addresses":
     "Kafka komisyoncu adreslerinin virgülle ayrılmış listesi",
-  Comment: "Yorum Yap",
+  Comment: "Yorum",
   Comments: "Yorumlar",
   Compliance: "Uyumluluk",
   Compression: "Sıkıştırma",
@@ -733,7 +735,7 @@ const messages: Dictionary = {
     "Geçişi yapılan Nesneleri almak için bir {remoteTier} yapılandırın",
   "Configure Bucket": "Kovayı Yapılandır",
   "Configuring an external IDP enables Single-Sign On workflows, where applications authenticate against the external IDP before accessing SILO.":
-    "Harici bir IDP yapılandırmak, uygulamaların SILO'ye erişmeden önce harici IDP'ye göre kimlik doğrulaması yaptığı Tek Oturum Açma iş akışlarını etkinleştirir.",
+    "Harici bir IDP yapılandırmak, uygulamaların SILO'ya erişmeden önce harici IDP'ye göre kimlik doğrulaması yaptığı Tek Oturum Açma iş akışlarını etkinleştirir.",
   "Confirm Dialogs": "İletişim Kutularını Onayla",
   "connected server": "bağlı sunucu",
   "Connection String": "Bağlantı Dizesi",
@@ -752,7 +754,7 @@ const messages: Dictionary = {
   "Create {idpType} configuration": "{idpType} yapılandırması oluşturun",
   "create a bucket": "bir kova oluştur",
   "Create a new cryptographic key in the Key Management Service server connected to SILO.":
-    "SILO'ye bağlı Anahtar Yönetim Hizmeti sunucusunda yeni bir şifreleme anahtarı oluşturun.",
+    "SILO'ya bağlı Anahtar Yönetim Hizmeti sunucusunda yeni bir şifreleme anahtarı oluşturun.",
   "create a new path": "yeni bir yol oluştur",
   "create a Policy": "Politika oluştur",
   "Create access key": "Erişim anahtarı oluştur",
@@ -794,7 +796,7 @@ const messages: Dictionary = {
   "Current User Policy - edit the JSON to remove permissions for this Access Key":
     "Mevcut Kullanıcı Politikası - bu Erişim Anahtarının izinlerini kaldırmak için JSON öğesini düzenleyin",
   "Current Version": "Güncel Sürüm",
-  "CURRENT VERSION": "CURRENT VERSION",
+  "CURRENT VERSION": "GÜNCEL SÜRÜM",
   "Currently Configured Endpoints": "Halihazırda Yapılandırılmış Uç Noktalar",
   custom: "özel",
   Custom: "Özel",
@@ -816,7 +818,7 @@ const messages: Dictionary = {
     "Belirli bir kaynakta hangi eylemlere izin verildiğini tanımlayın.",
   "Delay Multiplier": "Gecikme Çarpanı",
   "DELETE - Object Deleted": "DELETE - Nesne Silindi",
-  "Delete {name}": "Sil {name}",
+  "Delete {name}": "{name} öğesini sil",
   "Delete Access Key": "Erişim Anahtarını Sil",
   "Delete Access Keys": "Erişim Anahtarlarını Sil",
   "Delete All": "Tümünü Sil",
@@ -830,7 +832,7 @@ const messages: Dictionary = {
   "delete Groups": "Grupları sil",
   "Delete Groups": "Grupları Sil",
   "Delete Lifecycle Rule": "Yaşam Döngüsü Kuralını Sil",
-  "Delete Marker": "İşaretçiyi Sil",
+  "Delete Marker": "Silme İşaretçisi",
   "Delete Non-Current versions": "Güncel Olmayan Sürümleri Sil",
   "Delete Object": "Nesneyi Sil",
   "Delete Objects": "Nesneleri Sil",
@@ -844,22 +846,22 @@ const messages: Dictionary = {
   "Delete Selected Versions": "Seçilen Sürümleri Sil",
   "Delete Site": "Siteyi Sil",
   "Delete Tag": "Etiketi Sil",
-  "Delete Tier": "Seviyeyi Sil",
+  "Delete Tier": "Katmanı Sil",
   "delete user": "kullanıcıyı sil",
   "Delete User": "Kullanıcıyı Sil",
   "delete users": "kullanıcıları sil",
   "Delete Users": "Kullanıcıları Sil",
   "Delete version": "Sürümü sil",
-  "Delete Webhook": "Sil Webhook",
+  "Delete Webhook": "Webhook'u Sil",
   Deleted: "Silindi",
-  DELETED: "DELETED",
+  DELETED: "SİLİNDİ",
   Deletes: "Silmeler",
   "Delivery Mode": "Teslimat Modu",
   Description: "Açıklama",
   Destination: "Hedef",
   "Detailed Results:": "Ayrıntılı Sonuçlar:",
   Disable: "Devre Dışı Bırak",
-  "Disable LDAP": "Devre dışı bırak LDAP",
+  "Disable LDAP": "LDAP'ı Devre Dışı Bırak",
   "Disable SSL certificate verification ":
     "SSL sertifika doğrulamasını devre dışı bırakın",
   "disable users": "kullanıcıları devre dışı bırak",
@@ -876,14 +878,14 @@ const messages: Dictionary = {
   Done: "Bitti",
   "Download all access credentials": "Tüm erişim bilgilerini indirin",
   "Download all access credentials to a JSON file. NOTE: This file is not formatted for import using mc alias import. If you plan to import this alias from the file, please use the Download for Import button. ":
-    "Tüm erişim kimlik bilgilerini bir JSON dosyası olarak indirin. Not: Bu dosya mc alias import için biçimlendirilmemiştir. Bu takma adı dosyadan içe aktarmak için «İçe Aktarma için İndir» düğmesini kullanın.",
+    "Tüm erişim kimlik bilgilerini bir JSON dosyasına indirin. NOT: Bu dosya, mc alias import kullanılarak içe aktarma için biçimlendirilmemiştir. Bu takma adı dosyadan içe aktarmayı planlıyorsanız lütfen İçe Aktarma İçin İndir düğmesini kullanın.",
   "Download as CSV": "CSV olarak indir",
   "Download as PNG": "PNG olarak indir",
   "Download credentials in a JSON file formatted for import using mc alias import. This will only include the default login credentials.":
-    "Kimlik bilgilerini mc alias import ile içe aktarılabilecek bir JSON dosyası olarak indirin. Yalnızca varsayılan oturum açma bilgileri dahil edilir.",
+    "Kimlik bilgilerini, mc alias import komutuyla içe aktarma için biçimlendirilmiş bir JSON dosyasında indirin. Bu yalnızca varsayılan oturum açma kimlik bilgilerini içerecektir.",
   "Download File": "Dosyayı İndir",
   "Download for import": "İçe aktarmak için indirin",
-  "Download JSON": "İndir JSON",
+  "Download JSON": "JSON İndir",
   "Download of multiple files failed.":
     "Birden fazla dosyanın indirilmesi başarısız oldu.",
   "Download Results": "Sonuçları İndir",
@@ -904,28 +906,28 @@ const messages: Dictionary = {
   "e.g. 503": "ör. 503",
   "e.g. FunctionName2055": "ör. İşlevAdı2055",
   "e.g. Method 2056": "ör. Yöntem 2056",
-  "e.g. my-bucket/my-prefix/*": "ör. kovam/önekim/*",
-  "e.g. us-west-rack-2": "ör. us-batı-raf-2",
+  "e.g. my-bucket/my-prefix/*": "ör. my-bucket/my-prefix/*",
+  "e.g. us-west-rack-2": "ör. us-west-rack-2",
   "Each user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
     "Her kullanıcı yalnızca yerleşik rol tarafından açıkça verilen kaynaklara ve işlemlere erişebilir. SILO varsayılan olarak başka herhangi bir kaynağa veya eyleme erişimi reddeder.",
   Edit: "Düzenle",
   "edit a Policy": "Politikayı düzenleme",
   "Edit Anonymous Access Rule for {target}":
     "{target} için Anonim Erişim Kuralını Düzenle",
-  "Edit Audit Webhook": "Denetimi Düzenle Webhook",
+  "Edit Audit Webhook": "Denetim Webhook'unu Düzenle",
   "Edit Bucket Replication": "Kova Çoğaltmasını Düzenle",
   "Edit Configuration": "Yapılandırmayı Düzenle",
   "Edit details of - {name}": "Ayrıntıları düzenle - {name}",
   "Edit Endpoint": "Bitiş Noktasını Düzenle",
   "edit Group membership": "Grup üyeliğini düzenle",
   "Edit Lifecycle Configuration": "Yaşam Döngüsü Yapılandırmasını Düzenle",
-  "Edit Logger Webhook": "Kaydediciyi Düzenle Webhook",
+  "Edit Logger Webhook": "Günlük Webhook'unu Düzenle",
   "Edit Members": "Üyeleri Düzenle",
   "Edit Replication Endpoint": "Çoğaltma Uç Noktasını Düzenle",
   "Edit Tags": "Etiketleri Düzenle",
-  "Edit the Default Audit Webhook": "Varsayılan Denetimi Düzenle Webhook",
-  "Edit the Default Logger Webhook": "Varsayılan Kaydediciyi Düzenle Webhook",
-  "Edit Webhook": "Düzenle Webhook",
+  "Edit the Default Audit Webhook": "Varsayılan Denetim Webhook'unu Düzenle",
+  "Edit the Default Logger Webhook": "Varsayılan Günlük Webhook'unu Düzenle",
+  "Edit Webhook": "Webhook'u Düzenle",
   "Effect:": "Etkisi:",
   "Elasticsearch index to store/update events, index is auto-created":
     "Elasticsearch olayları saklamak/güncellemek için dizin, dizin otomatik olarak oluşturulur",
@@ -935,7 +937,7 @@ const messages: Dictionary = {
   "Enable audit_kafka target": "Audit_kafka hedefini etkinleştir",
   "Enable Bucket Encryption": "Kova Şifrelemesini Etkinleştir",
   "Enable Bucket Quota": "Kova Kotasını Etkinleştir",
-  "Enable LDAP": "Etkinleştir LDAP",
+  "Enable LDAP": "LDAP'ı Etkinleştir",
   "enable or disable Groups": "Grupları etkinleştirin veya devre dışı bırakın",
   "enable or disable users":
     "kullanıcıları etkinleştirin veya devre dışı bırakın",
@@ -957,95 +959,95 @@ const messages: Dictionary = {
   Endpoints: "Uç noktalar",
   "Enter '/' to apply the rule to all prefixes and objects at the bucket root. Do not include the wildcard asterisk '*' as part of the prefix *unless* it is an explicit part of the prefix name. The Console automatically appends an asterisk to the appropriate sections of the resulting IAM policy.":
     "Kuralı kova kökündeki tüm öneklere ve nesnelere uygulamak için '/' girin. *Önek adının açık bir parçası olmadığı sürece* önekin bir parçası olarak '*' joker yıldız karakterini eklemeyin. Konsol, ortaya çıkan IAM politikasının uygun bölümlerine otomatik olarak bir yıldız işareti ekler.",
-  "Enter a comment": "Bir yorum girin",
-  "Enter a description": "Bir açıklama girin",
-  "Enter a Mime Type": "Bir Mime Türü Girin",
-  "Enter a name": "Bir ad girin",
-  "Enter Access Key": "Erişim Anahtarını Girin",
-  "Enter Account Key": "Hesap Anahtarını Girin",
-  "Enter Account Name": "Hesap Adını Girin",
-  "Enter Address": "Adresi Girin",
+  "Enter a comment": "Yorum girin",
+  "Enter a description": "Açıklama girin",
+  "Enter a Mime Type": "MIME türü girin",
+  "Enter a name": "Ad girin",
+  "Enter Access Key": "Erişim anahtarı girin",
+  "Enter Account Key": "Hesap anahtarı girin",
+  "Enter Account Name": "Hesap adı girin",
+  "Enter Address": "Adres girin",
   "Enter allowed origin e.g. https://example.com":
     "İzin verilen menşei girin ör. https://example.com",
-  "Enter an Extension": "Bir Uzantı Girin",
-  "Enter Auth Token": "Kimlik Doğrulama Jetonunu Girin",
-  "Enter auth_token": "Auth_token'ı girin",
-  "Enter Brokers": "Komisyonculara Girin",
-  "Enter Bucket": "Kovaya Girin",
-  "Enter Cert Authority": "Sertifika Yetkilisini Girin",
-  "Enter Claim Name": "Talep Adını Girin",
-  "Enter Claim Prefix": "Talep Önekini Girin",
-  "Enter Client Cert": "Müşteri Sertifikasını Girin",
-  "Enter Client Cert Key": "Müşteri Sertifika Anahtarını Girin",
-  "Enter Client ID": "Müşteriye Girin ID",
-  "Enter Client Key": "İstemci Anahtarını Girin",
-  "Enter Client Secret": "Müşteri Sırrını Girin",
-  "Enter Coredns Path": "Coredns Yoluna Girin",
+  "Enter an Extension": "Uzantı girin",
+  "Enter Auth Token": "Yetki jetonu girin",
+  "Enter auth_token": "auth_token girin",
+  "Enter Brokers": "Aracıları girin",
+  "Enter Bucket": "Kova girin",
+  "Enter Cert Authority": "Sertifika yetkilisi girin",
+  "Enter Claim Name": "Talep adı girin",
+  "Enter Claim Prefix": "Talep öneki girin",
+  "Enter Client Cert": "İstemci sertifikası girin",
+  "Enter Client Cert Key": "İstemci sertifika anahtarı girin",
+  "Enter Client ID": "İstemci ID girin",
+  "Enter Client Key": "İstemci anahtarı girin",
+  "Enter Client Secret": "İstemci gizli anahtarı girin",
+  "Enter Coredns Path": "CoreDNS yolu girin",
   "Enter custom notes if any": "Varsa özel notları girin",
-  "Enter Cycle": "Döngüye Girin",
-  "Enter DB Name": "DB Adını Girin",
-  "Enter Delay": "Gecikmeyi Girin",
-  "Enter Delivery Mode": "Teslimat Moduna Girin",
-  "Enter Destination Identifier": "Hedef Tanımlayıcıyı Girin",
-  "Enter Display Name": "Görünen Adı Girin",
-  "Enter DSN String": "DSN Dizesini girin",
-  "Enter Endpoint": "Uç Noktayı Girin",
-  "Enter Exchange": "Exchange'e girin",
-  "Enter Exchange Type": "Değişim Türünü Girin",
-  "Enter Format": "Formatı Girin",
-  "Enter Host": "Sunucuya Girin",
-  "Enter Index": "Dizine Girin",
-  "Enter Kafka Broker": "Kafka Komisyoncuya girin",
-  "Enter Kafka Topic": "Kafka Konuyu Girin",
-  "Enter Kafka Version": "Kafka Versiyonunu Girin",
-  "Enter Keep Alive Interval": "Canlı Tutma Aralığını Girin",
-  "Enter Key": "Enter Tuşu",
-  "Enter Max IO": "Maksimum Girin IO",
-  "Enter Max Sleep Duration": "Maksimum Uyku Süresini Girin",
-  "Enter Max Wait": "Maksimum Beklemeyi Girin",
-  "Enter Name (Eg. REMOTE-TIER)": "İsim Girin (Örn. REMOTE-TIER)",
-  "Enter NATS password": "NATS şifresini girin",
-  "Enter NATS Subject": "NATS Konuyu Girin",
-  "Enter NATS token": "NATS jetonunu girin",
-  "Enter NATS Username": "NATS Kullanıcı adını girin",
-  "Enter New Tag Key": "Yeni Etiket Anahtarını Girin",
-  "Enter New Tag Label": "Yeni Etiket Etiketini Girin",
-  "Enter nsqd_address": "nsqd_address'i girin",
-  "Enter Password": "Şifreyi Girin",
-  "Enter Path Prefix": "Yol Önekini Girin",
-  "Enter Ping Interval": "Ping Aralığını Girin",
-  "Enter Port": "Bağlantı Noktasını Girin",
-  "Enter Prefix": "Öneki Girin",
-  "Enter QOS": "Girin QOS",
-  "Enter Queue Dir": "Sıra Dizini Girin",
-  "Enter Queue Directory": "Sıra Dizinine Girin",
-  "Enter Queue Limit": "Sıra Sınırını Girin",
-  "Enter Reconnect Interval": "Yeniden Bağlanma Aralığını Girin",
-  "Enter Replication Failed Workers": "Çoğaltma Başarısız Çalışanları Girin",
-  "Enter Replication Workers": "Çoğaltma Çalışanlarını Girin",
-  "Enter Requests Max": "Maksimum İstekleri Girin",
-  "Enter Routing Key": "Yönlendirme Anahtarını Girin",
-  "Enter SASL Mechanism": "Giriş SASL Mekanizma",
-  "Enter SASL Password": "SASL Şifrenizi Girin",
-  "Enter SASL Username": "SASL Kullanıcı adını girin",
-  "Enter Secret Key": "Gizli Anahtarı Girin",
-  "Enter SSL Mode": "SSL Moduna Girin",
-  "Enter Storage Class": "Depolama Sınıfına Girin",
-  "Enter Streaming Cluster ID": "Yayın Kümesine Girin ID",
-  "Enter Streaming in flight value": "Uçuş değerinde Akışı girin",
-  "Enter Table Name": "Tablo Adını Girin",
-  "Enter Tag Key": "Etiket Anahtarını Girin",
-  "Enter Tag Label": "Etiket Etiketini Girin",
-  "Enter the new Folder Path": "Yeni Klasör Yolunu girin",
-  "Enter TLS Client Auth": "TLS Müşteri Kimlik Doğrulamasını Girin",
-  "Enter TLS Client Cert": "TLS Müşteri Sertifikasını Girin",
-  "Enter TLS Client Key": "TLS Müşteri Anahtarını Girin",
-  "Enter Topic": "Konuya Gir",
-  "Enter URL": "Girin URL",
-  "Enter User": "Kullanıcı Gir",
-  "Enter Username": "Kullanıcı Adını Girin",
+  "Enter Cycle": "Döngü girin",
+  "Enter DB Name": "DB adı girin",
+  "Enter Delay": "Gecikme girin",
+  "Enter Delivery Mode": "Teslimat modu girin",
+  "Enter Destination Identifier": "Hedef tanımlayıcı girin",
+  "Enter Display Name": "Görünen ad girin",
+  "Enter DSN String": "DSN dizesi girin",
+  "Enter Endpoint": "Uç nokta girin",
+  "Enter Exchange": "Exchange girin",
+  "Enter Exchange Type": "Exchange türü girin",
+  "Enter Format": "Biçim girin",
+  "Enter Host": "Ana bilgisayar girin",
+  "Enter Index": "Dizin girin",
+  "Enter Kafka Broker": "Kafka aracısı girin",
+  "Enter Kafka Topic": "Kafka konusu girin",
+  "Enter Kafka Version": "Kafka sürümü girin",
+  "Enter Keep Alive Interval": "Canlı tutma aralığı girin",
+  "Enter Key": "Anahtar girin",
+  "Enter Max IO": "Maks. IO girin",
+  "Enter Max Sleep Duration": "Maks. bekleme süresi girin",
+  "Enter Max Wait": "Maks. bekleme girin",
+  "Enter Name (Eg. REMOTE-TIER)": "Ad girin (Örn. REMOTE-TIER)",
+  "Enter NATS password": "NATS şifresi girin",
+  "Enter NATS Subject": "NATS konusu girin",
+  "Enter NATS token": "NATS jetonu girin",
+  "Enter NATS Username": "NATS kullanıcı adı girin",
+  "Enter New Tag Key": "Yeni etiket anahtarı girin",
+  "Enter New Tag Label": "Yeni etiket değeri girin",
+  "Enter nsqd_address": "nsqd_address girin",
+  "Enter Password": "Şifre girin",
+  "Enter Path Prefix": "Yol öneki girin",
+  "Enter Ping Interval": "Ping aralığı girin",
+  "Enter Port": "Port girin",
+  "Enter Prefix": "Önek girin",
+  "Enter QOS": "QOS girin",
+  "Enter Queue Dir": "Kuyruk dizini girin",
+  "Enter Queue Directory": "Kuyruk dizini girin",
+  "Enter Queue Limit": "Kuyruk sınırı girin",
+  "Enter Reconnect Interval": "Yeniden bağlanma aralığı girin",
+  "Enter Replication Failed Workers": "Başarısız çoğaltma çalışanı girin",
+  "Enter Replication Workers": "Çoğaltma çalışanı girin",
+  "Enter Requests Max": "Maks. istek girin",
+  "Enter Routing Key": "Yönlendirme anahtarı girin",
+  "Enter SASL Mechanism": "SASL mekanizması girin",
+  "Enter SASL Password": "SASL şifresi girin",
+  "Enter SASL Username": "SASL kullanıcı adı girin",
+  "Enter Secret Key": "Gizli anahtar girin",
+  "Enter SSL Mode": "SSL modu girin",
+  "Enter Storage Class": "Depolama sınıfı girin",
+  "Enter Streaming Cluster ID": "Yayın kümesi ID girin",
+  "Enter Streaming in flight value": "Devam eden akış değeri girin",
+  "Enter Table Name": "Tablo adı girin",
+  "Enter Tag Key": "Etiket anahtarı girin",
+  "Enter Tag Label": "Etiket değeri girin",
+  "Enter the new Folder Path": "Yeni klasör yolu girin",
+  "Enter TLS Client Auth": "TLS istemci doğrulaması girin",
+  "Enter TLS Client Cert": "TLS istemci sertifikası girin",
+  "Enter TLS Client Key": "TLS istemci anahtarı girin",
+  "Enter Topic": "Konu girin",
+  "Enter URL": "URL girin",
+  "Enter User": "Kullanıcı girin",
+  "Enter Username": "Kullanıcı adı girin",
   Entities: "Varlıklar",
-  "Erasure Health": "Sağlığı Silme",
+  "Erasure Health": "Silme Kodlaması Sağlığı",
   Error: "Hata",
   "Error - File size too large": "Hata - Dosya boyutu çok büyük",
   "Error retrieving access keys": "Erişim anahtarları alınırken hata oluştu",
@@ -1064,12 +1066,12 @@ const messages: Dictionary = {
   "Excluded Prefixes :": "Hariç Tutulan Önekler :",
   "Existing Objects": "Mevcut Nesneler",
   "Expand graph": "Grafiği genişlet",
-  "Expire All Versions": "Tüm Sürümlerin Süresi Doldu",
+  "Expire All Versions": "Tüm Sürümlerin Süresini Doldur",
   "Expire Delete Marker": "Süre Sonu Silme İşareti",
   "Expired All Versions": "Tüm Sürümlerin Süresi Dolmuş",
   "Expired Object Delete Marker": "Süresi Dolmuş Nesne Silme İşaretleyicisi",
-  Expiry: "Son kullanma tarihi",
-  "Expiry Days": "Son Kullanma Günleri",
+  Expiry: "Süre Sonu",
+  "Expiry Days": "Süre Sonu Günü",
   Export: "Dışa Aktar",
   Extensions: "Uzantılar",
   'Extensions to compress e.g. ".txt", ".log" or ".csv" -  you can write one per field':
@@ -1103,7 +1105,7 @@ const messages: Dictionary = {
   "For each write operation to the bucket, SILO checks all configured replication rules for the bucket and applies the matching rule with highest configured priority.":
     "Kovaya her yazma işlemi için, SILO kova için yapılandırılmış tüm çoğaltma kurallarını kontrol eder ve en yüksek yapılandırılmış önceliğe sahip eşleştirme kuralını uygular.",
   'For each write operation to this "source" bucket, SILO checks all configured replication rules and applies the matching rule with highest configured priority.':
-    'Bu "kaynak" grubuna yapılan her yazma işlemi için, SILO tüm yapılandırılmış çoğaltma kurallarını kontrol eder ve yapılandırılmış en yüksek önceliğe sahip eşleştirme kuralını uygular.',
+    'Bu "kaynak" kovaya yapılan her yazma işlemi için, SILO tüm yapılandırılmış çoğaltma kurallarını kontrol eder ve yapılandırılmış en yüksek önceliğe sahip eşleştirme kuralını uygular.',
   "For per-object retention settings, defer to the documentation for the PUT operation used by your preferred SDK.":
     "Nesne başına saklama ayarları için, tercih ettiğiniz SDK tarafından kullanılan PUT işlemine ilişkin belgelere başvurun.",
   "For SSE-S3 or SSE-KMS encryption via KMS, all sites must have access to a central KMS deployment server.":
@@ -1127,8 +1129,8 @@ const messages: Dictionary = {
     "Gruplar, ortak erişim kalıplarına ve iş yüklerine sahip kullanıcılar arasında paylaşılan izinleri yönetmek için basitleştirilmiş bir yöntem sağlar. Müşteri, kimlik olarak bir grubu kullanarak SILO dağıtımında kimlik doğrulaması yapamaz.",
   "Groups with this Policy associated": "Bu Politikayla ilişkili gruplar",
   "Guide to access policy structure": "Politika yapısına erişim kılavuzu",
-  hard: "zor",
-  Heal: "İyileşme",
+  hard: "kesin",
+  Heal: "Onarım",
   "Health Check Duration": "Sağlık Kontrolü Süresi",
   "Health Info (Preview)": "Sağlık Bilgisi (Önizleme)",
   "Health Report": "Sağlık Raporu",
@@ -1151,18 +1153,18 @@ const messages: Dictionary = {
   },
   Hours: "Saat",
   "IAM conditional statements": "IAM koşullu ifadeler",
-  "IAM Policy": "IAM Politika",
-  Id: "Kimlik",
+  "IAM Policy": "IAM Politikası",
+  Id: "ID",
   Identifier: "Tanımlayıcı",
   "Identity provider Client ID": "Kimlik sağlayıcı İstemci ID",
-  "Identity provider Client Secret": "Kimlik sağlayıcı Müşteri Sırrı",
+  "Identity provider Client Secret": "Kimlik sağlayıcı İstemci Gizli Anahtarı",
   "If the Health report cannot be generated at this time, please wait a moment and try again.":
     "Sağlık raporu şu anda oluşturulamıyorsa lütfen biraz bekleyip tekrar deneyin.",
   "If you are looking to change MINIO_ROOT_USER credentials,":
     "MINIO_ROOT_USER kimlik bilgilerini değiştirmek istiyorsanız,",
   "ILM - Object Transitioned": "ILM - Nesne Geçişi Yapıldı",
-  "ILM Rule": "ILM Kural",
-  Import: "İthalat",
+  "ILM Rule": "ILM Kuralı",
+  Import: "İçe Aktar",
   "incorporates and modifies": "içerir ve değiştirir",
   Index: "Dizin",
   "Initially, only one of the sites added for replication may have data. After site-replication is successfully configured, this data is replicated to the other (initially empty) sites. Subsequently, objects may be written to any of the sites, and they will be replicated to all other sites.":
@@ -1181,18 +1183,18 @@ const messages: Dictionary = {
   "Just now": "Az önce",
   "Kafka topic used for bucket notifications":
     "Kafka kova bildirimleri için kullanılan konu",
-  "Keep Alive Interval": "Hayatta Kalma Aralığı",
+  "Keep Alive Interval": "Canlı Tutma Aralığı",
   "Keep-alive interval for MQTT connections in s,m,h,d":
     "MQTT bağlantılar için s,m,h,d cinsinden canlı tutma aralığı",
   Key: "Anahtar",
   "Key Management Service Endpoints:": "Anahtar Yönetim Hizmeti Uç Noktaları:",
   "Key Name": "Anahtar Adı",
   "Key name cannot contain spaces": "Anahtar adı boşluk içeremez",
-  Keys: "Tuşlar",
+  Keys: "Anahtarlar",
   "KMS Key ID": "KMS Anahtar ID",
   "Last Modified": "Son Değiştirilme",
-  "Last modified:": "Son değiştirilme tarihi:",
-  "Last Modified:": "Son Değiştirilme Tarihi:",
+  "Last modified:": "Son değişiklik:",
+  "Last Modified:": "Son Değişiklik:",
   "Latency Histogram": "Gecikme Histogramı",
   "LDAP Enabled": "LDAP Etkin",
   "Learn more about {link}.": "{link} hakkında daha fazla bilgi edinin.",
@@ -1206,7 +1208,7 @@ const messages: Dictionary = {
   "Learn more about Policies": "Politikalar hakkında daha fazla bilgi edinin",
   "Learn more about the Users feature":
     "Kullanıcılar özelliği hakkında daha fazla bilgi edinin",
-  "Learn more about TIERS": "TIERS hakkında daha fazla bilgi edinin",
+  "Learn more about TIERS": "Katmanlar hakkında daha fazla bilgi edinin",
   "Legal Hold": "Yasal Saklama",
   "Legal Hold Status": "Yasal Saklama Durumu",
   "Legal Hold:": "Yasal Saklama:",
@@ -1241,13 +1243,13 @@ const messages: Dictionary = {
   "Max Sleep": "Maksimum Uyku",
   "Max Wait": "Maksimum Bekleme",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
-    "Nesneler arasında iyileştirme işlemini yavaşlatmak için maksimum IO isteğe izin verilir, ör. 3",
+    "Onarım işlemini yavaşlatmak için nesneler arasında izin verilen maksimum IO isteği, ör. 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
     "Teslim edilmeyen mesajlar için maksimum sınır, varsayılan olarak '10000'dir",
   "Maximum number of concurrent requests, e.g. '1600'":
     "Maksimum eşzamanlı istek sayısı, ör. '1600'",
   "Maximum sleep duration between objects to slow down heal operation, e.g. 2s":
-    "İyileştirme işlemini yavaşlatmak için nesneler arasındaki maksimum uyku süresi, ör. 2'ler",
+    "Onarım işlemini yavaşlatmak için nesneler arasındaki maksimum bekleme süresi, ör. 2s",
   "Maximum wait time between operations, defaults to '15s'":
     "İşlemler arasındaki maksimum bekleme süresi, varsayılan olarak '15s'dir",
   May: "Mayıs",
@@ -1284,13 +1286,13 @@ const messages: Dictionary = {
   Name: "İsim",
   "Name for identity provider configuration":
     "Kimlik sağlayıcı yapılandırmasının adı",
-  "Name of the AMQP exchange": "AMQP borsanın adı",
+  "Name of the AMQP exchange": "AMQP exchange adı",
   'Name of the location of the server e.g. "us-west-rack2"':
-    'Sunucu konumunun adı ör. "biz-batı-raf2"',
+    'Sunucu konumunun adı ör. "us-west-rack2"',
   "Name of the MQTT topic to publish": "Yayınlanacak MQTT konunun adı",
   "Name:": "İsim:",
   'Namespace prefix to isolate tenants e.g. "customer1/"':
-    'Kiracıları izole etmek için ad alanı öneki; "müşteri1/"',
+    'Kiracıları izole etmek için ad alanı öneki ör. "customer1/"',
   "NATS password": "NATS şifre",
   "NATS server address e.g. '0.0.0.0:4222'":
     "NATS sunucu adresi ör. '0.0.0.0:4222'",
@@ -1318,13 +1320,13 @@ const messages: Dictionary = {
   "No query results yet": "Henüz sorgu sonucu yok",
   "No Results Available": "Sonuç Yok",
   "No Users to display": "Görüntülenecek Kullanıcı yok",
-  "No Wait": "Beklemek Yok",
-  "no-expiry": "son kullanma tarihi yok",
+  "No Wait": "Bekleme Yok",
+  "no-expiry": "süresiz",
   "Nodes:": "Düğümler:",
   "Non-blocking message delivery when set to 'on', default is 'off'":
-    "Engellenmeyen mesaj iletimi 'açık' olarak ayarlandığında, varsayılan 'kapalı'dır",
+    "'on' olarak ayarlandığında engellenmeyen mesaj iletimi, varsayılan 'off'tur",
   "Non-Current": "Güncel Değil",
-  "Non-current Expiration Days": "Güncel Olmayan Son Kullanma Günleri",
+  "Non-current Expiration Days": "Eski sürümlerin bitişi (gün)",
   "Non-current Transition Days": "Güncel Olmayan Geçiş Günleri",
   "Non-Current Version": "Güncel Olmayan Sürüm",
   "Non-current Version Transition Storage Class":
@@ -1339,7 +1341,7 @@ const messages: Dictionary = {
     "NSQ sunucu adresi ör. '127.0.0.1:4150'",
   "NSQ topic": "NSQ konu",
   "NSQD Address": "NSQD Adres",
-  "NULL VERSION": "NULL VERSION",
+  "NULL VERSION": "BOŞ (NULL) SÜRÜM",
   "Number of {unit} must be less than or equal to 2147483647":
     "{unit} sayısı 2147483647'den küçük veya ona eşit olmalıdır",
   "Number of {unit} to retain must be greater than zero":
@@ -1363,7 +1365,7 @@ const messages: Dictionary = {
   "Objects List unavailable. Please review your WebSockets configuration and try again":
     "Nesne Listesi kullanılamıyor. Lütfen WebSockets yapılandırmanızı gözden geçirip tekrar deneyin",
   "Objects:": "Nesneler:",
-  "Objs/S": "Nesneler/S",
+  "Objs/S": "Nesne/sn",
   October: "Ekim",
   of: "/",
   "Only empty tiers can be deleted. If the tier has had objects transitioned into it, it cannot be removed.":
@@ -1371,7 +1373,7 @@ const messages: Dictionary = {
   "Opaque string or JWT authorization token":
     "Opak dize veya JWT yetkilendirme jetonu",
   "Open Dialog": "İletişim Kutusunu Aç",
-  "OpenID Configurations": "OpenID Yapılandırmalar",
+  "OpenID Configurations": "OpenID Yapılandırmaları",
   "OS Info": "OS Bilgi",
   other: "diğer",
   "Password for LDAP read-only service account used to perform DN and group lookups":
@@ -1395,12 +1397,12 @@ const messages: Dictionary = {
     "Tarayıcı sırasında nesneleri kontrol ederken disklerde bitrot taraması yapın",
   "Performance test": "Performans testi",
   "Persist queue across broker restarts when set to 'on', default is 'off'":
-    "'Açık' olarak ayarlandığında aracı yeniden başlatılırken kuyruğun devam etmesi, varsayılan olarak 'kapalı'dır",
+    "'on' olarak ayarlandığında aracı yeniden başlatmalarında kuyruğu koru, varsayılan 'off'tur",
   "Ping Interval": "Ping Aralığı",
   "Please avoid the use of root credentials for this feature":
     "Lütfen bu özellik için kök kimlik bilgilerinin kullanılmasından kaçının",
   "Please configure {entity} first to use this feature.":
-    "Bu özelliği kullanmak için lütfen önce {entity}'ı yapılandırın.",
+    "Bu özelliği kullanmak için lütfen önce {entity} yapılandırın.",
   "Please deploy a server in {distributedMode} to use these features.":
     "Bu özellikleri kullanmak için lütfen {distributedMode}'da bir sunucu konuşlandırın.",
   "Please deploy a server in {mode} to use this feature.":
@@ -1418,13 +1420,13 @@ const messages: Dictionary = {
   "Please refer to {link} credentials.":
     "Lütfen {link} kimlik bilgilerine bakın.",
   "Please select / type the desired remote bucket were you want the local data to be replicated.":
-    "Lütfen yerel verilerin çoğaltılmasını istediğiniz uzak grubu seçin / yazın.",
+    "Lütfen yerel verilerin çoğaltılmasını istediğiniz uzak kovayı seçin / yazın.",
   "Please select a valid duration.": "Lütfen geçerli bir süre seçin.",
   "Please select Groups on which you want to apply Policies":
     "Lütfen Politikaları uygulamak istediğiniz Grupları seçin",
   "Please verify that string is uppercase only and contains valid characters (numbers, dashes & underscores).":
     "Lütfen dizenin yalnızca büyük harf olduğunu ve geçerli karakterler (sayılar, tireler ve alt çizgiler) içerdiğini doğrulayın.",
-  Policy: "İlke",
+  Policy: "Politika",
   "Policy has no statements": "Politikada beyan yok",
   "Policy mapping": "Politika eşleme",
   "Policy Mappings": "Politika Eşlemeleri",
@@ -1432,7 +1434,7 @@ const messages: Dictionary = {
   "Policy name cannot be empty": "Politika adı boş olamaz",
   "Policy successfully updated": "Politika başarıyla güncellendi",
   "Policy Summary": "Politika Özeti",
-  "Portions © 2015–2026 MinIO, Inc.": "Porsiyonlar © 2015–2026 MinIO, Inc.",
+  "Portions © 2015–2026 MinIO, Inc.": "Kısımlar © 2015–2026 MinIO, Inc.",
   prefix: "öneki",
   Prefix: "Önek",
   "Preliminar Results:": "Ön Sonuçlar:",
@@ -1452,11 +1454,11 @@ const messages: Dictionary = {
   "Query Filters": "Sorgu Filtreleri",
   "Query Results": "Sorgu Sonuçları",
   Queue: "Sıra",
-  "Queue Dir": "Kuyruk Yönü",
+  "Queue Dir": "Kuyruk Dizini",
   "Queue Directory": "Kuyruk Dizini",
   "Queue Limit": "Sıra Limiti",
   "Quietly ignore undelivered messages when set to 'off', default is 'on'":
-    "'Kapalı' olarak ayarlandığında teslim edilmeyen mesajları sessizce yoksay, varsayılan olarak 'açık'tır",
+    "'off' olarak ayarlandığında teslim edilmeyen mesajları sessizce yoksay, varsayılan 'on'dur",
   quota: "kota",
   Quota: "Kota",
   "Quota:": "Kota:",
@@ -1470,10 +1472,10 @@ const messages: Dictionary = {
     "MQTT bağlantılar için s,m,h,d cinsinden yeniden bağlanma aralığı",
   "Redirect URI Dynamic": "Yönlendirme URI Dinamik",
   "Redis key to store/update events, key is auto-created":
-    "Redis olayları saklama/güncelleme tuşu, anahtar otomatik olarak oluşturulur",
+    "Olayları saklamak/güncellemek için Redis anahtarı, anahtar otomatik olarak oluşturulur",
   "Redis server password": "Redis sunucu şifresi",
   "Redis server's address e.g. `localhost:6379`":
-    "Redis sunucunun adresi ör. 'yerel ana makine:6379'",
+    "Redis sunucusunun adresi ör. `localhost:6379`",
   Refresh: "Yenile",
   "Refresh List": "Listeyi Yenile",
   Region: "Bölge",
@@ -1492,10 +1494,10 @@ const messages: Dictionary = {
   "Rename Download": "İndirmeyi Yeniden Adlandır",
   "REPLICA - Object Replicated": "REPLICA - Nesne Çoğaltıldı",
   "Replicate existing objects": "Mevcut nesneleri çoğaltın",
-  "Replicate soft deletes": "Geçici silme işlemlerini çoğaltma",
+  "Replicate soft deletes": "Yumuşak silme işlemlerini çoğaltın",
   "Replicate versioned deletes": "Sürümlendirilmiş silme işlemlerini çoğaltın",
   Replication: "Çoğaltma",
-  "Replication Failed Workers": "Çoğaltma Başarısız Çalışan İşçiler",
+  "Replication Failed Workers": "Başarısız Çoğaltma Çalışanları",
   "Replication Mode": "Çoğaltma Modu",
   "Replication Options": "Çoğaltma Seçenekleri",
   "Replication Rules": "Çoğaltma Kuralları",
@@ -1506,13 +1508,13 @@ const messages: Dictionary = {
   "Replication Workers": "Çoğaltma Çalışanları",
   "Replication:": "Çoğaltma:",
   "Reported Usage:": "Bildirilen Kullanım:",
-  "Request Content Length": "İçerik Uzunluğu İste",
+  "Request Content Length": "İstek İçeriği Uzunluğu",
   "Request ID": "Talep ID",
   "Requests Max": "Maksimum İstekler",
   "Requests that took T ms or less": "T ms veya daha az süren istekler",
   Reset: "Sıfırla",
   "Reset Configuration": "Yapılandırmayı Sıfırla",
-  "Reset Default Webhook": "Varsayılanı Sıfırla Webhook",
+  "Reset Default Webhook": "Varsayılan Webhook'u Sıfırla",
   "Resources:": "Kaynaklar:",
   "Response Content Length": "Yanıt İçerik Uzunluğu",
   "Response Status": "Yanıt Durumu",
@@ -1527,14 +1529,14 @@ const messages: Dictionary = {
   Retention: "Saklama",
   "Retention Mode": "Saklama Modu",
   "Retention Policy:": "Saklama Politikası:",
-  "Retention Unit": "Saklama Ünitesi",
+  "Retention Unit": "Saklama Birimi",
   "Retention Validity": "Saklama Geçerliliği",
   "Retention:": "Saklama:",
   Retest: "Tekrar Test Et",
   "Retry Health Report": "Sağlık Raporunu Yeniden Deneyin",
   Rewind: "Geri sarma",
   "Rewind - {bucket}": "Geri Sar - {bucket}",
-  "Rewind Bucket": "Geri Sarma Kovası",
+  "Rewind Bucket": "Kovayı Geri Sar",
   "Rewind to": "Geri sar",
   "Role Policy": "Rol Politikası",
   rotating: "dönen",
@@ -1557,14 +1559,14 @@ const messages: Dictionary = {
   "SCANNER - Object has too many versions / Prefixes has too many sub-folders":
     "SCANNER - Nesnenin çok fazla sürümü var / Öneklerin çok fazla alt klasörü var",
   "Scanner delay multiplier, defaults to '10.0'":
-    "Tarayıcı gecikme çarpanı, varsayılan olarak '10,0'dır",
+    "Tarayıcı gecikme çarpanı, varsayılan olarak '10.0'dır",
   Scopes: "Kapsamlar",
   Search: "Ara",
-  "Search Access Keys": "Arama Erişim Anahtarları",
+  "Search Access Keys": "Erişim Anahtarı Ara",
   "Search Groups": "Grupları Ara",
-  "Search Keys with pattern": "Desenli Arama Tuşları",
+  "Search Keys with pattern": "Desenle Anahtar Ara",
   "Search members": "Üyeleri ara",
-  "Search Policies": "Arama Politikaları",
+  "Search Policies": "Politika Ara",
   "Search target": "Arama hedefi",
   "Search Users": "Kullanıcıları Ara",
   second: "saniye",
@@ -1575,10 +1577,10 @@ const messages: Dictionary = {
   "Secret Key": "Gizli Anahtar",
   "SecretKey is required": "SecretKey gereklidir",
   "Select {expiry} to delete Objects per this rule. Select {transition} to move Objects to a remote storage {tier} per this rule.":
-    "Nesneleri bu kurala göre silmek için {expiry} seçeneğini seçin. Bu kurala göre Nesneleri uzak bir depolama birimine {tier} taşımak için {transition} öğesini seçin.",
+    "Nesneleri bu kurala göre silmek için {expiry} seçeneğini seçin. Bu kurala göre Nesneleri uzak bir {tier} hedefine taşımak için {transition} öğesini seçin.",
   "Select Bucket": "Kova Seçin",
   "Select from the list of displayed users to assign users to the new group at creation. These users inherit the policies assigned to the group.":
-    "Oluşturma sırasında kullanıcıları yeni gruba atamak için görüntülenen kullanıcılar listesinden seçim yapın. Bu kullanıcılar gruba atanan ilkeleri devralır.",
+    "Oluşturma sırasında kullanıcıları yeni gruba atamak için görüntülenen kullanıcılar listesinden seçim yapın. Bu kullanıcılar gruba atanan politikaları devralır.",
   "Select Groups to delete": "Silinecek Grupları seçin",
   "Select Multiple Versions": "Birden Çok Sürüm Seçin",
   "Select Policy": "Politika Seçin",
@@ -1590,7 +1592,7 @@ const messages: Dictionary = {
   "Select Users to delete": "Silinecek Kullanıcıları seçin",
   "Select Users to group": "Gruplanacak Kullanıcıları seçin",
   "Select whether to apply the rule to current or non-current Object {versions}":
-    "Kuralın geçerli veya geçerli olmayan Nesneye uygulanıp uygulanmayacağını seçin {versions}",
+    "Kuralın güncel veya güncel olmayan Nesne {versions} için uygulanacağını seçin",
   "Selected Group": "Seçilen Grup",
   "Selected Groups": "Seçilen Gruplar",
   "Selected Object": "Seçilen Nesne",
@@ -1608,7 +1610,7 @@ const messages: Dictionary = {
   "Server Location": "Sunucu Konumu",
   "server-side bucket replication": "sunucu tarafı kova çoğaltması",
   "Server, client and Console are all AGPLv3. SILO's documentation is CC BY 4.0 — {licensing}.":
-    "Sunucu, istemci ve Konsolun tümü AGPLv3'tür. SILO'in belgeleri CC BY 4.0 — {licensing}'dir.",
+    "Sunucu, istemci ve Konsolun tümü AGPLv3'tür. SILO'nun belgeleri CC BY 4.0 — {licensing}'dir.",
   Service: "Servis",
   "Service Accounts": "Hizmet Hesapları",
   Services: "Hizmetler",
@@ -1618,7 +1620,7 @@ const messages: Dictionary = {
   "Set Groups": "Grupları Ayarla",
   "Set Legal Hold": "Yasal Saklamayı Ayarla",
   "Set Lifecycle to multiple buckets":
-    "Yaşam Döngüsünü birden fazla gruba ayarlayın",
+    "Birden fazla kovaya Yaşam Döngüsü ayarlayın",
   "Set Multiple Bucket Replication": "Çoklu Kova Çoğaltma Ayarla",
   "Set Non-current Version Transition Storage Class":
     "Güncel Olmayan Sürüm Geçişi Depolama Sınıfını Ayarlayın",
@@ -1630,17 +1632,17 @@ const messages: Dictionary = {
   "Set to '1' for non-persistent or '2' for persistent queue":
     "Kalıcı olmayan kuyruk için '1'e veya kalıcı kuyruk için '2'ye ayarlayın",
   "Set to 'on' for exchange to be not used directly by publishers, but only when bound to other exchanges":
-    "Exchange'in doğrudan yayıncılar tarafından değil, yalnızca diğer exchange'lere bağlandığında kullanılması için 'açık' olarak ayarlayın",
+    "Exchange'in doğrudan yayıncılar tarafından değil, yalnızca diğer exchange'lere bağlandığında kullanılması için 'on' olarak ayarlayın",
   "Set to 'on' to enable asynchronous publish":
-    "Eşzamansız yayınlamayı etkinleştirmek için 'açık' olarak ayarlayın",
+    "Eşzamansız yayınlamayı etkinleştirmek için 'on' olarak ayarlayın",
   "Set to 'on' to enable SASL authentication":
-    "SASL kimlik doğrulamayı etkinleştirmek için 'açık' olarak ayarlayın",
+    "SASL kimlik doğrulamayı etkinleştirmek için 'on' olarak ayarlayın",
   "Set to 'on' to enable TLS":
-    "Etkinleştirmek için 'açık' olarak ayarlayın TLS",
+    "TLS'yi etkinleştirmek için 'on' olarak ayarlayın",
   "Set to 'on' to use streaming NATS server":
-    "Akış NATS sunucusunu kullanmak için 'açık' olarak ayarlayın",
+    "NATS akış sunucusunu kullanmak için 'on' olarak ayarlayın",
   "Setting a {quota} assigns a hard limit to a bucket beyond which SILO does not allow writes.":
-    "Bir {quota} ayarlamak, bir gruba kesin bir sınır atar ve bunun ötesinde SILO yazmalara izin vermez.",
+    "Bir {quota} ayarlamak, bir kovaya kesin bir sınır atar ve bunun ötesinde SILO yazmalara izin vermez.",
   "Setting an {anonymous} policy allows clients to access the Bucket or prefix contents and perform actions consistent with the specified policy without authentication.":
     "Bir {anonymous} politikasının ayarlanması, istemcilerin Kova veya önek içeriklerine erişmesine ve kimlik doğrulaması olmadan belirtilen politikayla tutarlı eylemler gerçekleştirmesine olanak tanır.",
   Share: "Paylaş",
@@ -1648,7 +1650,7 @@ const messages: Dictionary = {
   "Share Selected File": "Seçilen Dosyayı Paylaş",
   "Share this File": "Bu Dosyayı Paylaş",
   "Share this version": "Bu sürümü paylaş",
-  "Share URL Copied to clipboard": "Paylaş URL Panoya kopyalandı",
+  "Share URL Copied to clipboard": "Paylaşım URL'si panoya kopyalandı",
   'Shared bucket DNS records, default is "/skydns"':
     'Paylaşılan kova DNS kayıtları, varsayılan "/skydns"dir',
   "Show advanced Filters": "Gelişmiş Filtreleri Göster",
@@ -1665,7 +1667,7 @@ const messages: Dictionary = {
   "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.":
     "SILO kova bildirimleri, yöneticilerin belirli nesne veya kova olaylarında desteklenen harici hizmetlere bildirim göndermesine olanak tanır. SILO, Amazon S3 Etkinlik Bildirimlerine benzer şekilde kova ve nesne düzeyinde S3 olaylarını destekler.",
   "SILO derives its behavior and syntax from {s3Lifecycle} for compatibility in migrating workloads and lifecycle rules from S3 to SILO.":
-    "SILO, iş yüklerinin ve yaşam döngüsü kurallarının S3'den SILO'ye taşınmasında uyumluluk için davranışını ve sözdizimini {s3Lifecycle}'den alır.",
+    "SILO, iş yüklerinin ve yaşam döngüsü kurallarının S3'ten SILO'ya taşınmasında uyumluluk için davranışını ve sözdizimini {s3Lifecycle}'den alır.",
   "SILO does not enable existing object replication by default. Objects created before replication was configured or while replication is disabled are not synchronized to the target deployment unless replication of existing objects is enabled.":
     "SILO varsayılan olarak mevcut nesne çoğaltmayı etkinleştirmez. Çoğaltma yapılandırılmadan önce veya çoğaltma devre dışı bırakıldığında oluşturulan nesneler, mevcut nesnelerin çoğaltılması etkinleştirilmediği sürece hedef dağıtımla eşitlenmez.",
   "SILO Health Info": "SILO Sağlık Bilgileri",
@@ -1681,15 +1683,15 @@ const messages: Dictionary = {
   "SILO requires versioning to support replication.":
     "SILO çoğaltmayı desteklemek için sürüm oluşturmayı gerektirir.",
   "SILO supports automatically replicating existing objects in a bucket; this setting is enabled by default. Please note that objects created before replication was configured or while replication is disabled are not synchronized to the target deployment in case this setting is not enabled.":
-    "SILO bir kovateki mevcut nesnelerin otomatik olarak çoğaltılmasını destekler; bu ayar varsayılan olarak etkindir. Çoğaltma yapılandırılmadan önce veya çoğaltma devre dışı bırakıldığında oluşturulan nesnelerin, bu ayarın etkinleştirilmemesi durumunda hedef dağıtımla senkronize edilmeyeceğini lütfen unutmayın.",
+    "SILO bir kovadaki mevcut nesnelerin otomatik olarak çoğaltılmasını destekler; bu ayar varsayılan olarak etkindir. Çoğaltma yapılandırılmadan önce veya çoğaltma devre dışı bırakıldığında oluşturulan nesnelerin, bu ayarın etkinleştirilmemesi durumunda hedef dağıtımla senkronize edilmeyeceğini lütfen unutmayın.",
   "SILO supports creating object transition lifecycle management rules, where SILO can automatically move an object to a remote storage “tier”.":
     'SILO, nesne geçişi yaşam döngüsü yönetimi kurallarının oluşturulmasını destekler; burada SILO bir nesneyi otomatik olarak uzak bir depolama "katmanına" taşıyabilir.',
   "SILO supports enabling automatic {sseKms} and {sseS3} encryption of all objects written to a bucket using a specific External Key (EK) stored on the external KMS.":
-    "SILO, harici KMS üzerinde depolanan belirli bir Harici Anahtar (EK) kullanılarak bir gruba yazılan tüm nesnelerin otomatik {sseKms} ve {sseS3} şifrelemesinin etkinleştirilmesini destekler.",
+    "SILO, harici KMS üzerinde depolanan belirli bir Harici Anahtar (EK) kullanılarak bir kovaya yazılan tüm nesnelerin otomatik {sseKms} ve {sseS3} şifrelemesinin etkinleştirilmesini destekler.",
   "SILO supports enabling replication of existing objects in a bucket.":
-    "SILO bir kovateki mevcut nesnelerin çoğaltılmasını etkinleştirmeyi destekler.",
+    "SILO bir kovadaki mevcut nesnelerin çoğaltılmasını etkinleştirmeyi destekler.",
   "SILO supports keeping multiple {versions} of an object in a single bucket.":
-    "SILO bir nesnenin birden fazla {versions}'sini tek bir kovada tutmayı destekler.",
+    "SILO bir nesnenin birden fazla {versions} kopyasını tek bir kovada tutmayı destekler.",
   "SILO supports replicating delete operations, where SILO synchronizes deleting specific object versions and new delete markers. Delete operation replication uses the same replication process as all other replication operations.":
     "SILO silme işlemlerini kopyalamayı destekler; burada SILO belirli nesne sürümlerinin ve yeni silme işaretlerinin silinmesini senkronize eder. Silme işlemi çoğaltması, diğer tüm çoğaltma işlemleriyle aynı çoğaltma işlemini kullanır.",
   "SILO supports server-side and client-side replication of objects between source and destination buckets.":
@@ -1699,12 +1701,12 @@ const messages: Dictionary = {
   "SILO supports the following Tier types:":
     "SILO aşağıdaki Katman türlerini destekler:",
   "SILO supports using an Active Directory or LDAP (AD/LDAP) service for external management of user identities. Configuring an external IDentity Provider (IDP) enables Single-Sign On (SSO) workflows, where applications authenticate against the external IDP before accessing SILO.":
-    "SILO, kullanıcı kimliklerinin harici yönetimi için bir Active Directory veya LDAP (AD/LDAP) hizmetinin kullanılmasını destekler. Harici bir Kimlik Sağlayıcıyı (IDP) yapılandırmak, uygulamaların SILO'ye erişmeden önce harici IDP'ya göre kimlik doğrulaması yaptığı Tek Oturum Açma (SSO) iş akışlarını etkinleştirir.",
+    "SILO, kullanıcı kimliklerinin harici yönetimi için bir Active Directory veya LDAP (AD/LDAP) hizmetinin kullanılmasını destekler. Harici bir Kimlik Sağlayıcıyı (IDP) yapılandırmak, uygulamaların SILO'ya erişmeden önce harici IDP'ye göre kimlik doğrulaması yaptığı Tek Oturum Açma (SSO) iş akışlarını etkinleştirir.",
   "SILO uses buckets to organize objects. A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.":
     "SILO nesneleri düzenlemek için kovaları kullanır. Bir kova, her bir kovanın isteğe bağlı sayıda nesneyi tutabildiği bir dosya sistemindeki bir klasöre veya dizine benzer.",
   "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.":
     "SILO, kimliği doğrulanmış bir kullanıcının erişim sahibi olduğu yetkili eylemleri ve kaynakları tanımlamak için Politika Tabanlı Erişim Kontrolünü (PBAC) kullanır. Her politika, bir kullanıcının veya kullanıcı grubunun izinlerinin ana hatlarını çizen bir veya daha fazla eylemi ve koşulu açıklar.",
-  "SILO VERSION": "SILO VERSION",
+  "SILO VERSION": "SILO SÜRÜMÜ",
   "Site Name": "Site Adı",
   "Site:": "Sitesi:",
   Size: "Boyut",
@@ -1721,8 +1723,8 @@ const messages: Dictionary = {
   Speedtest: "Hız testi",
   "Speedtest in progress...": "Hız testi devam ediyor...",
   "Staging directory for undelivered messages e.g. '/home/events'":
-    "Teslim edilmeyen mesajlar için hazırlama dizini, ör. '/ev/etkinlikler'",
-  "STANDARD_IA,REDUCED_REDUNDANCY etc": "STANDART_IA,REDUCED_REDUNDANCY vb.",
+    "Teslim edilmeyen mesajlar için hazırlama dizini, ör. '/home/events'",
+  "STANDARD_IA,REDUCED_REDUNDANCY etc": "STANDARD_IA,REDUCED_REDUNDANCY vb.",
   Start: "Başlat",
   "Start Health Report": "Sağlık Raporunu Başlat",
   "Start Logs": "Günlükleri Başlat",
@@ -1731,7 +1733,7 @@ const messages: Dictionary = {
   "Start typing to filter objects in the bucket":
     "Kovadaki nesneleri filtrelemek için yazmaya başlayın",
   "Start typing to filter versions of {file}":
-    "{file} versiyonlarını filtrelemek için yazmaya başlayın",
+    "{file} sürümlerini filtrelemek için yazmaya başlayın",
   "Start typing to search for a Policy":
     "Politika aramak için yazmaya başlayın",
   "Start typing to search for Groups": "Grupları aramak için yazmaya başlayın",
@@ -1739,14 +1741,15 @@ const messages: Dictionary = {
   Status: "Durum",
   "Status Code": "Durum Kodu",
   Stop: "Durdur",
-  "Stop Logs": "Durdurma Günlükleri",
+  "Stop Logs": "Günlükleri Durdur",
   "Stop Profiling": "Profil Oluşturmayı Durdur",
   Storage: "Depolama",
   "Storage Class": "Depolama Sınıfı",
   Streaming: "Yayın",
   "Streaming async": "Eşzamansız akış",
   "Streaming Cluster ID": "Yayın Kümesi ID",
-  "Streaming max publish ACKS in flight": "Uçuşta maksimum yayın akışı ACKS",
+  "Streaming max publish ACKS in flight":
+    "Devam eden maksimum yayın ACK sayısı",
   Subject: "Konu",
   "Subscribe To Bucket Events": "Kova Etkinliklerine Abone Olun",
   "Subscribe to Event": "Etkinliğe Abone Ol",
@@ -1757,15 +1760,15 @@ const messages: Dictionary = {
   "Successfully updated the password.": "Şifre başarıyla güncellendi.",
   Suffix: "Sonek",
   Summary: "Özet",
-  "Supported API endpoints": "Desteklenen API uç noktalar",
+  "Supported API endpoints": "Desteklenen API uç noktaları",
   Suspended: "Askıya alındı",
-  Synced: "Senkronize edildi",
+  Synced: "Eşitlendi",
   Synchronous: "Senkron",
   "System Health Info": "Sistem Sağlık Bilgisi",
   Table: "Tablo",
   "Tag for: {object}": "Etiket: {object}",
   "Tag Key": "Etiket Anahtarı",
-  "Tag Label": "Etiket Etiket",
+  "Tag Label": "Etiket Değeri",
   "Tag Value": "Etiket Değeri",
   Tags: "Etiketler",
   "Tags for: {object}": "Etiketler: {object}",
@@ -1779,7 +1782,7 @@ const messages: Dictionary = {
   "The file you are trying to download has a long name.":
     "İndirmeye çalıştığınız dosyanın adı uzun.",
   "The following Bucket features will NOT be replicated":
-    "Aşağıdaki kova özellikleri çoğaltılmayacaktır",
+    "Aşağıdaki Kova özellikleri KOPYALANMAYACAKTIR",
   "The following changes are replicated to all other sites":
     "Aşağıdaki değişiklikler diğer tüm sitelere çoğaltılır",
   "The following URL lets you share this object without requiring a login.":
@@ -1791,7 +1794,7 @@ const messages: Dictionary = {
   "This server does not expose object versions; only the current object can be shared.":
     "Bu sunucu nesne sürümlerini açığa çıkarmaz; yalnızca geçerli nesne paylaşılabilir.",
   "The instance needs to be restarted for configuration changes to take effect.":
-    "Yapılandırma değişikliklerinin etkili olması için örneğin yeniden başlatılması gerekiyor.",
+    "Yapılandırma değişikliklerinin geçerli olması için sunucu örneğinin yeniden başlatılması gerekiyor.",
   "The MinIO name is used here solely to identify the origin of the source code and to describe compatibility — {notice}.":
     "MinIO adı burada yalnızca kaynak kodunun kaynağını tanımlamak ve uyumluluğu açıklamak için kullanılmıştır — {notice}.",
   "The selected users were added to the following groups.":
@@ -1817,9 +1820,9 @@ const messages: Dictionary = {
     "Politika oluşturulurken bir hata oluştu",
   "There was an error creating a Policy: {details}. Please check Policy syntax.":
     "Politika oluşturulurken bir hata oluştu: {details}. Lütfen Politika sözdizimini kontrol edin.",
-  "There was an error deleting the tier": "Seviye silinirken bir hata oluştu",
+  "There was an error deleting the tier": "Katman silinirken bir hata oluştu",
   "There was an error retrieving tier information":
-    "Seviye bilgileri alınırken bir hata oluştu",
+    "Katman bilgileri alınırken bir hata oluştu",
   "There was an error updating the Policy ":
     "Politika güncellenirken bir hata oluştu",
   "There was an error updating the Policy: {details}. Please check Policy syntax.":
@@ -1839,14 +1842,14 @@ const messages: Dictionary = {
   "This feature is not available.": "Bu özellik mevcut değil.",
   "This field is required": "Bu alan zorunludur",
   "This is a File Preview for the first {count} pages of the document, if you wish to work with the full document please download instead.":
-    "Bu, belgenin ilk {count} sayfaları için bir Dosya Önizlemesidir, belgenin tamamıyla çalışmak istiyorsanız lütfen bunun yerine indirin.",
+    "Bu, belgenin ilk {count} sayfası için bir Dosya Önizlemesidir; belgenin tamamıyla çalışmak istiyorsanız lütfen bunun yerine indirin.",
   "This location is empty": "Bu konum boş",
   "This location is empty, please try uploading a new file":
     "Bu konum boş, lütfen yeni bir dosya yüklemeyi deneyin",
   "This Site": "Bu Site",
   "This site/cluster": "Bu site/küme",
   "This Usage value is comparable to {command} which represents the size of all object versions that exist in the buckets.":
-    "Bu Kullanım değeri, kovalarde bulunan tüm nesne versiyonlarının boyutunu temsil eden {command} ile karşılaştırılabilir.",
+    "Bu Kullanım değeri, kovalarda bulunan tüm nesne sürümlerinin boyutunu temsil eden {command} ile karşılaştırılabilir.",
   "This value is set from the {env} environment variable":
     "Bu değer {env} ortam değişkeninden ayarlanır",
   "This value is set from the {name} environment variable":
@@ -1856,34 +1859,34 @@ const messages: Dictionary = {
   "This will change your Console password. Please note your new password down, as it will be required to log into Console after this session.":
     "Bu Konsol şifrenizi değiştirecektir. Bu oturumdan sonra Konsol'da oturum açmanız gerekeceğinden lütfen yeni şifrenizi bir kenara not edin.",
   "This will remove the object as well as all of its versions,":
-    "Bu, nesneyi ve tüm versiyonlarını kaldıracaktır,",
+    "Bu işlem, nesneyi ve tüm sürümlerini kaldıracaktır,",
   "This will remove the objects as well as all of their versions,":
-    "Bu, nesneleri ve onların tüm versiyonlarını kaldıracaktır,",
-  Tier: "Depolama Katmanı",
-  "Tier Name": "Seviye Adı",
+    "Bu işlem, nesneleri ve tüm sürümlerini kaldıracaktır,",
+  Tier: "Katman",
+  "Tier Name": "Katman Adı",
   "Tier Types": "Katman Türleri",
   "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.":
     "Katmanlar, nesnelerin zaman veya tarih bazlı otomatik geçişi veya sona ermesi için kurallar oluşturmaya izin veren SILO Nesne Yaşam Döngüsü Yönetimi tarafından kullanılır. Nesne geçişi için SILO nesneyi otomatik olarak yapılandırılmış bir uzak depolama katmanına taşır.",
   "Time duration between scanner cycles, defaults to '1m'":
-    "Tarayıcı döngüleri arasındaki süre, varsayılan olarak '1 dakika'dır",
+    "Tarayıcı döngüleri arasındaki süre, varsayılan olarak '1m'dir",
   "Time to Response NS": "Yanıt Zamanı NS",
   Timestamp: "Zaman Damgası",
-  "TLS Client Auth": "TLS Müşteri Kimlik Doğrulaması",
+  "TLS Client Auth": "TLS İstemci Kimlik Doğrulaması",
   "TLS skip verify": "TLS doğrulamayı atla",
   "TLS Skip Verify": "TLS Doğrulamayı Atla",
   "To allow Bucket access without credentials, use the {anonymous} setting":
-    "Kimlik bilgileri olmadan Bucket erişimine izin vermek için {anonymous} ayarını kullanın",
+    "Kimlik bilgileri olmadan Kova erişimine izin vermek için {anonymous} ayarını kullanın",
   "To continue please type {phrase} in the box.":
     "Devam etmek için lütfen kutuya {phrase} yazın.",
   "To enable this feature you need to enable versioning on the bucket before creation":
-    "Bu özelliği etkinleştirmek için oluşturmadan önce kovate sürüm oluşturmayı etkinleştirmeniz gerekir",
-  "To Tier": "Seviyeye",
+    "Bu özelliği etkinleştirmek için oluşturmadan önce kovada sürüm oluşturmayı etkinleştirmeniz gerekir",
+  "To Tier": "Hedef Katman",
   "Today, {time}": "Bugün, {time}",
   "Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable":
-    "Konsol ve nesne sunucusu URL arasında Paylaşımı URL değiştirin. CONSOLE_SHARE_MINIO_URL ortam değişkeniyle varsayılanı değiştirin",
+    "Paylaşım URL'sini Konsol ve nesne sunucusu URL'si arasında değiştirin. CONSOLE_SHARE_MINIO_URL ortam değişkeniyle varsayılanı değiştirin",
   Token: "Jeton",
-  "Toogle JSON": "Geçiş JSON",
-  "Toogle Share URL": "Toogle Paylaş URL",
+  "Toogle JSON": "JSON Görünümünü Değiştir",
+  "Toogle Share URL": "Paylaşım URL'sini Değiştir",
   Topic: "Konu",
   "Trace Results": "İzleme Sonuçları",
   "trademark notice": "ticari marka bildirimi",
@@ -1891,9 +1894,9 @@ const messages: Dictionary = {
   "Transition Days": "Geçiş Günleri",
   True: "Doğru",
   "Trust server TLS without verification":
-    "Doğrulama olmadan sunucuya güven TLS",
+    "Doğrulama olmadan sunucu TLS sertifikasına güven",
   'Trust server TLS without verification, defaults to "on" (verify)':
-    'Sunucuya güven TLS doğrulama olmadan, varsayılan olarak "açık"tır (doğrula)',
+    'Doğrulama olmadan sunucu TLS sertifikasına güven, varsayılan olarak "on"dur (doğrula)',
   Type: "Tür",
   "Type New Password Again": "Yeni Şifrenizi Tekrar Yazın",
   "Type of Lifecycle": "Yaşam Döngüsü Türü",
@@ -1902,9 +1905,9 @@ const messages: Dictionary = {
   "Unable to download widget data - data not available":
     "Widget verileri indirilemiyor - veriler mevcut değil",
   "Under section 13 of the AGPL, the corresponding source for this running version is offered to every user who interacts with it over a network, at no charge.":
-    "AGPL'nın 13. bölümü altında, bu çalışan sürüme karşılık gelen kaynak, bir ağ üzerinden onunla etkileşime giren her kullanıcıya ücretsiz olarak sunulmaktadır.",
+    "AGPL'nin 13. bölümü uyarınca, bu çalışan sürüme karşılık gelen kaynak kodu, bir ağ üzerinden onunla etkileşime giren her kullanıcıya ücretsiz olarak sunulmaktadır.",
   "Understand which {policies} and {users} are authorized to access this Bucket.":
-    "Hangi {policies} ve {users}'nin bu Kovaya erişim yetkisine sahip olduğunu anlayın.",
+    "Hangi {policies} ve {users} öğelerinin bu Kovaya erişim yetkisine sahip olduğunu anlayın.",
   "Unexpected response, download incomplete.":
     "Beklenmeyen yanıt, indirme işlemi tamamlanmadı.",
   Unhealthy: "Sağlıksız",
@@ -1916,20 +1919,20 @@ const messages: Dictionary = {
   "Upload File": "Dosya Yükle",
   "Upload Files": "Dosya Yükle",
   "upload files to this bucket": "dosyaları bu kovaya yükle",
-  "Upload Folder": "Yükleme Klasörü",
+  "Upload Folder": "Klasör Yükle",
   "Upload is restricted.": "Yükleme sınırlıdır.",
   "Upload not allowed": "Yüklemeye izin verilmiyor",
   "upload objects to this location": "nesneleri bu konuma yükleyin",
   "Upstream copyright, authorship and license notices are retained in the repository's {credits} and {notice}. See the {attribution}.":
-    "Yukarı akış telif hakkı, yazarlık ve lisans bildirimleri veri deposunun {credits} ve {notice}'lerinde tutulur. {attribution}'ye bakın.",
+    "Yukarı akış telif hakkı, yazarlık ve lisans bildirimleri veri deposunun {credits} ve {notice} dosyalarında tutulur. Bkz. {attribution}.",
   "upstream MinIO code": "yukarı akış MinIO kodu",
   "Usage Data Age": "Kullanım Verileri Yaşı",
   "Usage:": "Kullanımı:",
   "Use Original Name": "Orijinal Adını Kullan",
-  "Use SASL": "Kullan SASL",
+  "Use SASL": "SASL Kullan",
   "Use secure medium to share this key.":
     "Bu anahtarı paylaşmak için güvenli ortamı kullanın.",
-  "Use TLS": "Kullan TLS",
+  "Use TLS": "TLS Kullan",
   "Used to confirm a non-idempotent action.":
     "İdempotent olmayan bir eylemi onaylamak için kullanılır.",
   "User Access Keys": "Kullanıcı Erişim Anahtarları",
@@ -1963,12 +1966,12 @@ const messages: Dictionary = {
     one: "sürüm",
     other: "sürüm",
   },
-  "Versions:": "Versiyonlar:",
+  "Versions:": "Sürümler:",
   View: "Görüntüle",
   "View across sites": "Siteler arasında görüntüle",
   "View Bucket Naming Rules": "Kova Adlandırma Kurallarını Görüntüle",
-  "View env variable Webhook": "Ortam değişkenini görüntüle Webhook",
-  "view Objects in this bucket": "bu kovateki Nesneleri görüntüle",
+  "View env variable Webhook": "Ortam değişkeni Webhook'unu görüntüle",
+  "view Objects in this bucket": "bu kovadaki Nesneleri görüntüleme",
   "view Policy details": "Politika ayrıntılarını görüntüle",
   "View Replication Status for a:":
     "Aşağıdakiler için Çoğaltma Durumunu Görüntüle:",
@@ -1990,8 +1993,9 @@ const messages: Dictionary = {
     one: "hafta",
     other: "hafta",
   },
-  "What are Event Destinations?": "Etkinlik Destinasyonları Nelerdir?",
-  "Would you like to encrypt {object}?": "{object}'ı şifrelemek ister misiniz?",
+  "What are Event Destinations?": "Etkinlik Hedefleri Nelerdir?",
+  "Would you like to encrypt {object}?":
+    "{object} nesnesini şifrelemek ister misiniz?",
   "Write Policy": "Yazma Politikası",
   "Write these down, as this is the only time the secret will be displayed.":
     "Bunları bir yere yazın çünkü bu, sırrın görüntüleneceği tek zamandır.",
@@ -2006,7 +2010,7 @@ const messages: Dictionary = {
   "Yes, I am sure": "Evet eminim",
   "You can add a comment to this setting": "Bu ayara yorum ekleyebilirsiniz",
   "You can add policies to the group by selecting it from the Groups view after creation. The Policy view lets you manage the assigned policies for the group.":
-    "Gruba, oluşturulduktan sonra Gruplar görünümünden seçerek politikalar ekleyebilirsiniz. İlke görünümü, gruba atanmış ilkeleri yönetmenizi sağlar.",
+    "Gruba, oluşturulduktan sonra Gruplar görünümünden seçerek politikalar ekleyebilirsiniz. Politika görünümü, gruba atanmış politikaları yönetmenizi sağlar.",
   "You can choose to {excludePrefixes} from versioning if Object Locking is not enabled.":
     "Nesne Kilitleme etkin değilse sürüm oluşturmadan {excludePrefixes} seçeneğini seçebilirsiniz.",
   "You can download the the Health report JSON File.":
@@ -2020,11 +2024,11 @@ const messages: Dictionary = {
   "You can only enable {objectLocking} when first creating a bucket.":
     "{objectLocking}'yi yalnızca ilk kez bir kova oluştururken etkinleştirebilirsiniz.",
   "You can reset your session by logging out and logging back in to the web UI.":
-    "Oturumunuzu çıkış yapıp web'e tekrar giriş yaparak sıfırlayabilirsiniz UI.",
+    "Web arayüzünden (UI) çıkış yapıp tekrar giriş yaparak oturumunuzu sıfırlayabilirsiniz.",
   "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies.":
     "Erişim Anahtarı erişimini üst kullanıcı için açıkça izin verilen eylemlerin ve kaynakların bir alt kümesiyle daha da kısıtlamak için isteğe bağlı bir JSON-biçimli IAM politika belirleyebilirsiniz. Bu politikalar aracılığıyla ana kullanıcının erişiminin ötesinde ek erişim uygulanamaz.",
   "You can use '*' to match any character, '.' to signify a single character or '\\' to scape an special character (E.g. mybucket-*)":
-    "'*' karakterini herhangi bir '.' karakteriyle eşleştirmek için kullanabilirsiniz. tek bir karakteri belirtmek için veya özel bir karakterden kaçmak için '\\' (Örn. mybucket-*)",
+    "Herhangi bir karakterle eşleştirmek için '*', tek bir karakteri belirtmek için '.' veya özel bir karakteri kaçırmak için '\\' kullanabilirsiniz (Örn. mybucket-*)",
   "You can use {mcShare} as an alternative to this UI, where the session length does not limit the URL validity.":
     "Oturum uzunluğunun URL geçerliliğini sınırlamadığı bu UI'ye alternatif olarak {mcShare} kullanabilirsiniz.",
   "You cannot delete the currently logged in User":
@@ -2032,7 +2036,7 @@ const messages: Dictionary = {
   "You cannot enable or disable the currently logged in User":
     "Şu anda oturum açmış olan Kullanıcıyı etkinleştiremez veya devre dışı bırakamazsınız",
   "You cannot modify the optional Access Key IAM policy after saving.":
-    "İsteğe bağlı Erişim Anahtarı IAM ilkesini kaydettikten sonra değiştiremezsiniz.",
+    "İsteğe bağlı Erişim Anahtarı IAM politikasını kaydettikten sonra değiştiremezsiniz.",
   "You may only have write access on a limited set of subpaths within this path. Please carefully review your User permissions to understand the paths to which you may write.":
     "Bu yol içindeki yalnızca sınırlı sayıda alt yola yazma erişiminiz olabilir. Yazabileceğiniz yolları anlamak için lütfen Kullanıcı izinlerinizi dikkatlice inceleyin.",
   "You must apply a valid name to the bucket":
@@ -2048,16 +2052,16 @@ const messages: Dictionary = {
   "You require additional permissions in order to {name}. Please ask your SILO administrator to grant you {scopes} permissions in order to {name}.":
     "{name} için ek izinlere ihtiyacınız var. Lütfen SILO yöneticinizden {name} için size {scopes} izinleri vermesini isteyin.",
   "You require additional permissions in order to create a new Tier. Please ask your SILO administrator to grant you {permission} permission in order to create a Tier.":
-    "Yeni bir Seviye oluşturmak için ek izinlere ihtiyacınız var. Lütfen SILO yöneticinizden bir Kademe oluşturmak için size {permission} izni vermesini isteyin.",
+    "Yeni bir Katman oluşturmak için ek izinlere ihtiyacınız var. Lütfen SILO yöneticinizden bir Katman oluşturmak için size {permission} izni vermesini isteyin.",
   "File is empty": "Dosya boş",
   "Invalid UTF-8 or binary content": "Geçersiz UTF-8 veya ikili içerik",
   "Loading text preview…": "Metin önizlemesi yükleniyor…",
-  "Object not found or changed": "Nesne bulunamadı veya değiştirilmedi",
+  "Object not found or changed": "Nesne bulunamadı veya değişti",
   "Text preview content": "Metin önizleme içeriği",
   "Text preview failed": "Metin önizlemesi başarısız oldu",
   "Text preview forbidden": "Metin önizlemesi yasaktır",
   "The object could not be found or changed while the preview was loading.":
-    "Önizleme yüklenirken nesne bulunamadı veya değiştirilemedi.",
+    "Önizleme yüklenirken nesne bulunamadı veya bu sırada değişti.",
   "The text preview could not be loaded because of a network or server error.":
     "Bir ağ veya sunucu hatası nedeniyle metin önizlemesi yüklenemedi.",
   "This object is not valid UTF-8 text or contains binary data. Download it to inspect the original bytes.":
@@ -2070,11 +2074,11 @@ const messages: Dictionary = {
   "The exact corresponding source is not available for this build: {reason}. See the NOTICE for how to obtain it.":
     "Bu yapı için tam karşılık gelen kaynak mevcut değil: {reason}. Nasıl elde edileceğini öğrenmek için NOTICE'ye bakın.",
   "Source: not available for this build": "Kaynak: bu yapı için mevcut değil",
-  "Items per page": "Sayfa başına öğe sayısı",
+  "Items per page": "Sayfa başına öğe",
   "First page": "İlk sayfa",
   "Previous page": "Önceki sayfa",
   "Next page": "Sonraki sayfa",
-  "{count} items in total": "{count} toplam ürün",
+  "{count} items in total": "Toplam {count} öğe",
   "Page {page} · {count} on this page": "Sayfa {page} · {count} bu sayfada",
   "Sorting, filtering and select all apply to this page only.":
     "Sıralama, filtreleme ve tümünü seçme yalnızca bu sayfa için geçerlidir.",
@@ -2082,16 +2086,16 @@ const messages: Dictionary = {
   "No objects on this page match the filter":
     "Bu sayfada filtreyle eşleşen nesne yok",
   "Showing the first {count} entries; the listing stopped at the row or time limit.":
-    "İlk {count} girişler gösteriliyor; listeleme satırda veya zaman sınırında durduruldu.",
+    "İlk {count} giriş gösteriliyor; listeleme satır veya süre sınırında durduruldu.",
   "Start typing to filter objects on this page":
     "Bu sayfadaki nesneleri filtrelemek için yazmaya başlayın",
   "Lists and tabs": "Listeler ve sekmeler",
   "Move through rows with the pointer or keyboard. Arrow keys focus tabs; Enter or Space opens them.":
-    "İşaretçiyi veya klavyeyi kullanarak satırlar arasında hareket edin. Ok tuşları odak sekmeleri; Enter veya Space bunları açar.",
+    "İşaretçiyi veya klavyeyi kullanarak satırlar arasında hareket edin. Ok tuşları sekmelere odaklanır; Enter veya Space bunları açar.",
   "Browse and select stored objects.": "Saklanan nesnelere göz atın ve seçin.",
   "Review stored object versions.": "Saklanan nesne sürümlerini inceleyin.",
   "Manage bucket settings.": "Kova ayarlarını yönetin.",
-  "Compact section tabs": "Kompakt bölüm tırnakları",
+  "Compact section tabs": "Kompakt bölüm sekmeleri",
   "Storage and object usage": "Depolama ve nesne kullanımı",
   "Recent storage activity": "Son depolama etkinliği",
   "Example buckets": "Örnek kovalar",
@@ -2110,9 +2114,9 @@ const messages: Dictionary = {
   "Create user": "Kullanıcı oluştur",
   "No access keys yet": "Henüz erişim anahtarı yok",
   "Access keys let applications connect with the permissions of your account.":
-    "Erişim tuşları, uygulamaların hesabınızın izinlerine bağlanmasını sağlar.",
+    "Erişim anahtarları, uygulamaların hesabınızın izinleriyle bağlanmasını sağlar.",
   "Access keys let applications connect with the permissions assigned to this user.":
-    "Erişim tuşları, uygulamaların bu kullanıcıya atanan izinlere bağlanmasına olanak tanır.",
+    "Erişim anahtarları, uygulamaların bu kullanıcıya atanan izinlerle bağlanmasına olanak tanır.",
   "No groups assigned": "Hiçbir grup atanmadı",
   "Add this user to a group to share its access policies.":
     "Erişim politikalarını paylaşmak için bu kullanıcıyı bir gruba ekleyin.",
@@ -2121,7 +2125,7 @@ const messages: Dictionary = {
     "Politikalar bu kullanıcının hangi işlemlere ve kaynaklara erişebileceğini tanımlar.",
   "No members yet": "Henüz üye yok",
   "Add users to this group so they inherit its policies.":
-    "Kullanıcıları bu gruba ekleyerek ilkelerini devralmalarını sağlayın.",
+    "Kullanıcıları bu gruba ekleyerek politikalarını devralmalarını sağlayın.",
   "Policies attached to this group apply to all its members.":
     "Bu gruba eklenen politikalar tüm üyeler için geçerlidir.",
   "No encryption keys yet": "Henüz şifreleme anahtarı yok",
@@ -2135,13 +2139,13 @@ const messages: Dictionary = {
     "Kova ve nesne bildirimlerini almak için harici bir hizmete bağlanın.",
   "No storage tiers yet": "Henüz depolama katmanı yok",
   "Connect remote storage to transition objects using lifecycle rules.":
-    "Yaşam döngüsü kurallarını kullanarak uzak depolamayı geçiş nesnelerine bağlayın.",
+    "Yaşam döngüsü kurallarını kullanarak nesneleri taşımak için uzak depolama bağlayın.",
   "No event subscriptions yet": "Henüz etkinlik aboneliği yok",
   "Subscribe this bucket to send object events to an event destination.":
     "Nesne olaylarını bir olay hedefine göndermek için bu kovaya abone olun.",
   "No replication rules yet": "Henüz çoğaltma kuralı yok",
   "Replicate objects from this bucket to a destination bucket.":
-    "Nesneleri bu kovaten hedef kovaya kopyalayın.",
+    "Nesneleri bu kovadan hedef kovaya çoğaltın.",
   "No lifecycle rules yet": "Henüz yaşam döngüsü kuralı yok",
   "Create rules to expire objects or transition them to remote storage.":
     "Nesnelerin süresinin dolması veya uzak depolamaya aktarılması için kurallar oluşturun.",
@@ -2185,13 +2189,13 @@ const messages: Dictionary = {
     other: "{count} sürücü",
   },
   "Quota: {quota}": "Kota: {quota}",
-  "Open bucket {name}": "Açık kova {name}",
+  "Open bucket {name}": "{name} kovasını aç",
   "Recent buckets": "Son kovalar",
   "Read and write": "Okuma ve yazma",
   "Read only": "Salt okunur",
   "Write only": "Yalnızca yaz",
   "Created {date}": "Oluşturuldu {date}",
-  "{count} objects": "{count} nesneler",
+  "{count} objects": "{count} nesne",
   "Bucket actions": "Kova eylemleri",
   "Open menu": "Menüyü aç",
   "Page actions": "Sayfa işlemleri",

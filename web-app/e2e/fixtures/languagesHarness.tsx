@@ -4,7 +4,15 @@ import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
-import { CodeEditor, ReadBox, Switch, Menu, Tabs } from "mds";
+import {
+  CodeEditor,
+  ReadBox,
+  Switch,
+  Menu,
+  Tabs,
+  HealIcon,
+  UptimeIcon,
+} from "mds";
 import { store } from "../../src/store";
 import { useT, useTN } from "../../src/i18n";
 import { setLanguage } from "../../src/systemSlice";
@@ -14,10 +22,32 @@ import StyleHandler from "../../src/StyleHandler";
 import AddReplicationSites from "../../src/screens/Console/Configurations/SiteReplication/AddReplicationSites";
 import PageHeaderWrapper from "../../src/screens/Console/Common/PageHeaderWrapper/PageHeaderWrapper";
 import LogLine from "../../src/screens/Console/Logs/ErrorLogs/LogLine";
+import TimeStatItem from "../../src/screens/Console/Dashboard/TimeStatItem";
+import BulkLifecycleModal from "../../src/screens/Console/Buckets/ListBuckets/BulkLifecycleModal";
 const raw = "archive/日本語/ملف.json";
 store.dispatch(
   saveSessionResponse({ permissions: { "console-ui": ["admin:*"] } }),
 );
+function Metrics() {
+  const t = useT();
+  return (
+    <main style={{ padding: 16 }}>
+      <div style={{ width: 280, maxWidth: "100%" }}>
+        <TimeStatItem
+          icon={<UptimeIcon />}
+          label={t("Uptime")}
+          value="365d 12h 34m"
+        />
+        <TimeStatItem
+          icon={<HealIcon />}
+          label={t("Erasure Health")}
+          value={t("Unknown")}
+          status="muted"
+        />
+      </div>
+    </main>
+  );
+}
 function Data() {
   const t = useT(),
     tn = useTN();
@@ -90,12 +120,21 @@ function Data() {
 }
 async function start() {
   if (await initializePseudoLocale()) store.dispatch(setLanguage("en"));
+  const screen = new URLSearchParams(location.search).get("screen");
   createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <StyleHandler>
         <MemoryRouter initialEntries={["/settings/site-replication/add"]}>
-          {new URLSearchParams(location.search).get("screen") === "raw" ? (
+          {screen === "raw" ? (
             <Data />
+          ) : screen === "metrics" ? (
+            <Metrics />
+          ) : screen === "lifecycle" ? (
+            <BulkLifecycleModal
+              open
+              buckets={["archive"]}
+              closeModalAndRefresh={() => {}}
+            />
           ) : (
             <AddReplicationSites />
           )}

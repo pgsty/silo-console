@@ -41,7 +41,7 @@ const zhScreens: Record<string, string> = {
   Completed: "已完成",
   "No running tasks": "没有正在运行的任务",
   "No finished tasks": "没有已结束的任务",
-  "Clear finished": "清除已结束的任务",
+  "Clear finished": "清除已结束",
   "ZIP download": "ZIP 下载",
   "Browser handoff": "已交给浏览器",
   "Task progress": "任务进度",
@@ -80,7 +80,7 @@ const zhScreens: Record<string, string> = {
   // Deployment overview.
   "Cluster health": "集群健康",
   "servers online": "服务器在线",
-  "{count} drives online": "{count} 磁盘在线",
+  "{count} drives online": "{count} 块磁盘在线",
   "{count} server(s) offline": "{count} 台服务器离线",
   "{count} drive(s) offline": "{count} 块磁盘离线",
   "{count} drive(s) healing": "{count} 块磁盘修复中",
@@ -124,7 +124,7 @@ const zhScreens: Record<string, string> = {
   "Select {bucket}": "选择 {bucket}",
   "Object lock": "对象锁定",
   Created: "创建时间",
-  "Select all visible buckets": "选择所有显示的存储桶",
+  "Select all visible buckets": "全选可见存储桶",
   "Bucket rows": "存储桶列表行",
   "The bucket list could not be loaded.": "无法加载存储桶列表。",
   "Select one or more buckets first.": "请先选择一个或多个存储桶。",
@@ -221,7 +221,8 @@ const zhScreens: Record<string, string> = {
   // Shared SILO primitives and their development showcase.
   "Edit {label}": "编辑 {label}",
   "Calculating…": "统计中…",
-  "The server has not finished computing usage yet.": "服务端尚未完成用量统计",
+  "The server has not finished computing usage yet.":
+    "服务端尚未完成用量统计。",
   "Calculated {time}": "统计于 {time}",
   "Updated {time}": "更新于 {time}",
   "Permission required": "需要权限",
@@ -271,7 +272,7 @@ const zhScreens: Record<string, string> = {
   "Showing first 500 rows": "仅显示前 500 行",
   "Showing the first 100 columns. View Source or download the object to see all columns.":
     "仅显示前 100 列，切换到源码或下载对象查看全部列。",
-  Rendered: "渲染",
+  Rendered: "预览",
   "Wrap lines": "自动换行",
   Row: "行",
   "CSV preview content": "CSV 预览内容",
@@ -286,7 +287,7 @@ const zhScreens: Record<string, string> = {
   "You need s3:GetObject permission.": "需要 s3:GetObject 权限。",
   "You need s3:GetObjectVersion permission.": "需要 s3:GetObjectVersion 权限。",
   "Preview is not available for this file type.": "此文件类型不支持预览。",
-  "Object Lock is not enabled on this bucket.": "此存储桶未启用对象锁。",
+  "Object Lock is not enabled on this bucket.": "此存储桶未启用对象锁定。",
   "You need s3:PutObjectLegalHold permission.":
     "需要 s3:PutObjectLegalHold 权限。",
   "You need s3:PutObjectRetention permission.":
@@ -318,7 +319,7 @@ const zhScreens: Record<string, string> = {
   "There are no non-current versions to delete.": "没有可删除的历史版本。",
   "Invalid Endpoint": "无效的端点",
   Broker: "消息代理",
-  QOS: "服务质量",
+  QOS: "QoS",
   "Client ID": "客户端 ID",
   "Client Secret": "客户端密钥",
   "Redirect URI": "重定向 URI",
@@ -367,7 +368,7 @@ const zhScreens: Record<string, string> = {
   "API:": "API：",
   "Not available": "不可用",
 
-  " and ": " ",
+  " and ": " 和 ",
   "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'":
     "'namespace' 反映当前的存储桶/对象列表，'access' 反映对象操作的流水记录，默认为 'namespace'",
   "{compliance} lock protects Objects from write operations by all users, including the SILO root user.":
@@ -511,7 +512,7 @@ const zhScreens: Record<string, string> = {
   "Are you sure you want to delete Access Key {name}?":
     "确定要删除访问密钥 {name} 吗？",
   "Are you sure you want to delete all the non-current versions for: {object}?":
-    "确定要删除以下对象的全部非当前版本吗：{object}",
+    "确定要删除 {object} 的全部非当前版本吗？",
   "Are you sure you want to delete bucket {bucket}?":
     "确定要删除存储桶 {bucket} 吗？",
   "Are you sure you want to delete IDP {name} configuration?":
@@ -585,7 +586,7 @@ const zhScreens: Record<string, string> = {
   Bandwidth: "带宽",
   "Enter a non-negative bandwidth below 8 PiB/s, with at most two decimals (0 means unlimited).":
     "请输入非负且小于 8 PiB/s 的带宽，最多保留两位小数（0 表示不限速）。",
-  "Bitrot Scan": "位腐扫描",
+  "Bitrot Scan": "位衰减扫描",
   Brokers: "Broker 地址",
   "Browse Bucket": "浏览存储桶",
   Bucket: "存储桶",
@@ -688,7 +689,7 @@ const zhScreens: Record<string, string> = {
     "该 SILO 实例已设置 OpenID 环境变量，无法在此模块中编辑配置。",
   "Configuration saved successfully": "配置保存成功",
   "Configure a {remoteTier} to receive transitioned Objects":
-    "配置一个{remoteTier}以接收沉降的对象",
+    "配置一个{remoteTier}以接收转换的对象",
   "Configure Bucket": "配置存储桶",
   "Configuring an external IDP enables Single-Sign On workflows, where applications authenticate against the external IDP before accessing SILO.":
     "配置外部 IDP 后即可启用单点登录流程：应用在访问 SILO 之前先向外部 IDP 完成认证。",
@@ -1103,14 +1104,14 @@ const zhScreens: Record<string, string> = {
     "如果当前无法生成健康报告，请稍候片刻后重试。",
   "If you are looking to change MINIO_ROOT_USER credentials,":
     "如果你想修改 MINIO_ROOT_USER 凭证，",
-  "ILM - Object Transitioned": "ILM - 对象已沉降",
+  "ILM - Object Transitioned": "ILM - 对象已转换",
   "ILM Rule": "ILM 规则",
   Import: "导入",
   "incorporates and modifies": "包含并修改了",
   Index: "索引",
   "Initially, only one of the sites added for replication may have data. After site-replication is successfully configured, this data is replicated to the other (initially empty) sites. Subsequently, objects may be written to any of the sites, and they will be replicated to all other sites.":
     "初始时，参与复制的站点中只能有一个站点带有数据。站点复制配置成功后，这些数据会被复制到其他（初始为空的）站点。此后，对象可以写入任意站点，并会被复制到所有其他站点。",
-  "Inspect Decryption Key": "检查解密密钥",
+  "Inspect Decryption Key": "检查归档解密密钥",
   "Inspect Object": "检查对象",
   "Inspect this file": "检查此文件",
   Internal: "内部",
@@ -1494,7 +1495,7 @@ const zhScreens: Record<string, string> = {
   second: "秒",
   seconds: "秒",
   "Secret Key": "私有密钥",
-  "SecretKey is required": "私有访问密钥不能为空",
+  "SecretKey is required": "私有密钥为必填项",
   "Select {expiry} to delete Objects per this rule. Select {transition} to move Objects to a remote storage {tier} per this rule.":
     "选择{expiry}按此规则删除对象；选择{transition}按此规则将对象移动到远程存储{tier}。",
   "Select Bucket": "选择存储桶",
@@ -1587,7 +1588,7 @@ const zhScreens: Record<string, string> = {
     "SILO 默认不启用存量对象复制。除非启用了存量对象复制，否则在配置复制之前创建的对象、以及复制被禁用期间创建的对象，都不会同步到目标部署。",
   "SILO Health Info": "SILO 健康信息",
   "SILO Object Lifecycle Management allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.":
-    "SILO 对象生命周期管理支持创建基于时间或日期的规则，自动沉降或过期对象。对于对象沉降，SILO 会自动将对象移动到已配置的远程存储层。",
+    "SILO 对象生命周期管理支持创建基于时间或日期的规则，自动转换或过期对象。对于对象转换，SILO 会自动将对象移动到已配置的远程存储层。",
   "SILO or other S3-compatible storage": "SILO 或其他 S3 兼容存储",
   "SILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior.":
     "SILO 的 PBAC 在语法、结构与行为上均兼容 AWS IAM 策略。",
@@ -1600,7 +1601,7 @@ const zhScreens: Record<string, string> = {
   "SILO supports automatically replicating existing objects in a bucket; this setting is enabled by default. Please note that objects created before replication was configured or while replication is disabled are not synchronized to the target deployment in case this setting is not enabled.":
     "SILO 支持自动复制存储桶中的存量对象，该设置默认开启。请注意，若未启用该设置，在配置复制之前创建的对象、以及复制被禁用期间创建的对象，都不会同步到目标部署。",
   "SILO supports creating object transition lifecycle management rules, where SILO can automatically move an object to a remote storage “tier”.":
-    "SILO 支持创建对象转储的生命周期管理规则，SILO 可以据此自动把对象迁移到远程存储“层”。",
+    "SILO 支持创建对象转换的生命周期管理规则，SILO 可以据此自动把对象迁移到远程存储“层”。",
   "SILO supports enabling automatic {sseKms} and {sseS3} encryption of all objects written to a bucket using a specific External Key (EK) stored on the external KMS.":
     "SILO 支持为写入存储桶的所有对象自动启用 {sseKms} 与 {sseS3} 加密，使用存放在外部 KMS 上的指定外部密钥（EK）。",
   "SILO supports enabling replication of existing objects in a bucket.":
@@ -1771,7 +1772,7 @@ const zhScreens: Record<string, string> = {
   "Tier Name": "存储层名称",
   "Tier Types": "存储层类型",
   "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.":
-    "存储层由 SILO 对象生命周期管理使用，可以创建基于时间或日期的规则，自动转储或过期对象。对于对象转储，SILO 会自动把对象迁移到已配置的远程存储层。",
+    "存储层由 SILO 对象生命周期管理使用，可以创建基于时间或日期的规则，自动转换或过期对象。对于对象转换，SILO 会自动把对象迁移到已配置的远程存储层。",
   "Time duration between scanner cycles, defaults to '1m'":
     "扫描器两轮扫描之间的时间间隔，默认为 '1m'",
   "Time to Response NS": "响应耗时（纳秒）",
@@ -1785,7 +1786,7 @@ const zhScreens: Record<string, string> = {
     "如需继续，请在输入框中输入 {phrase}。",
   "To enable this feature you need to enable versioning on the bucket before creation":
     "要启用此功能，需要在创建存储桶前开启版本控制",
-  "To Tier": "沉降至存储层",
+  "To Tier": "目标存储层",
   "Today, {time}": "今天 {time}",
   "Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable":
     "在控制台地址与对象服务地址之间切换分享 URL。可通过 CONSOLE_SHARE_MINIO_URL 环境变量修改默认值",
@@ -2076,11 +2077,11 @@ const zhScreens: Record<string, string> = {
   "Page actions": "页面操作",
   "Selected actions": "已选操作",
   "Parent paths": "上级路径",
-  "create Groups": "创建组",
-  "view Group details": "查看组详情",
+  "create Groups": "创建用户组",
+  "view Group details": "查看用户组详情",
   "configure event destinations": "配置事件目标",
-  "update Tier credentials": "更新分层凭证",
-  "delete Tiers": "删除分层",
+  "update Tier credentials": "更新存储层凭证",
+  "delete Tiers": "删除存储层",
   "manage Access Keys": "管理访问密钥",
 };
 

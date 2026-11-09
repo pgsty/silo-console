@@ -171,7 +171,7 @@ test("actual inspect key remains named read-only across visibility changes", asy
     const currentPage = await mount("key", language, width);
     const input = currentPage.locator("#inspect-dec-key");
     await expect(input).toHaveAccessibleName(
-      language === "zh" ? "检查解密密钥" : "Inspect Decryption Key",
+      language === "zh" ? "检查归档解密密钥" : "Inspect Decryption Key",
     );
     await expect(input).toHaveJSProperty("readOnly", true);
     await expect(input).toHaveAttribute("type", "password");

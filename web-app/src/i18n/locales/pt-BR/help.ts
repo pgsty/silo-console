@@ -375,7 +375,7 @@ const ptHelp: Record<string, string> = {
   Performance: "Desempenho",
   "The performance section provides an interface for running a performance test of the deployment.":
     "A seção de desempenho oferece uma interface para executar um teste de desempenho da implantação.",
-  Profile: "Perfil de execução",
+  Profile: "Perfil",
   "The profile section provides an interface for running system profiling of the deployment. The results can provide insight into the SILO server process running on a given node.":
     "A seção de perfil de execução oferece uma interface para executar o perfil do sistema da implantação. Os resultados dão uma visão do processo do servidor SILO em execução em determinado nó.",
   Inspect: "Inspecionar",
@@ -388,9 +388,9 @@ const ptHelp: Record<string, string> = {
   "The trace section provides HTTP trace functionality for a bucket or buckets on the deployment.":
     "A seção de rastreamento oferece a funcionalidade de rastreamento HTTP para um ou mais buckets da implantação.",
   Users: "Usuários",
-  "What is Watch?": "O que é a observação?",
+  "What is Watch?": "O que é o Monitor (Watch)?",
   "The Watch section displays S3 events as they occur on the selected bucket.":
-    "A seção Observar exibe os eventos S3 à medida que ocorrem no bucket selecionado.",
+    "A seção Monitor exibe os eventos S3 à medida que ocorrem no bucket selecionado.",
   "Access Managemnt": "Gerenciamento de acesso",
   "Object Locking": "Bloqueio de objetos",
   "SILO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect versioned objects from deletion.":

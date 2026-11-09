@@ -79,7 +79,7 @@ test("missing, invalid and pending timestamps explain the calculation state", ()
     });
     expect(freshnessText({ at, language: "zh", now })).toEqual({
       label: "统计中…",
-      tooltip: "服务端尚未完成用量统计",
+      tooltip: "服务端尚未完成用量统计。",
       dateTime: undefined,
     });
   }

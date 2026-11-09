@@ -8,13 +8,13 @@ const messages: Dictionary = {
   "### Users\n\nA SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.\n\nGroups provide a simplified method for managing shared permissions among users with common access patterns and workloads.\n\nUsers inherit access permissions to data and resources through the groups they belong to.\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nEach user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
     "### ユーザー\n\nSILO ユーザーは、一意のアクセス キー (ユーザー名) と、対応する秘密キー (パスワード) で構成されます。クライアントは、既存の SILO ユーザーの有効なアクセス キー (ユーザー名) と対応する秘密キー (パスワード) の両方を指定して、アイデンティティを認証する必要があります。\n\nグループは、共通のアクセス パターンとワークロードを持つユーザー間の共有アクセス許可を管理するための簡略化された方法を提供します。\n\nユーザーは、所属するグループを通じてデータとリソースへのアクセス権限を継承します。\n\nSILO は、ポリシーベースのアクセス制御 (PBAC) を使用して、認証されたユーザーがアクセスできる許可されたアクションとリソースを定義します。各ポリシーには、ユーザーまたはユーザーのグループの権限の概要を示す 1 つ以上のアクションと条件が記述されています。\n\n各ユーザーは、組み込みロールによって明示的に付与されたリソースと操作のみにアクセスできます。 SILO は、デフォルトで他のリソースまたはアクションへのアクセスを拒否します。",
   "### IAM policies\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nSILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.":
-    "### IAM ポリシー\n\nSILO は、ポリシーベースのアクセス制御 (PBAC) を使用して、認証されたユーザーがアクセスできる許可されたアクションとリソースを定義します。各ポリシーには、ユーザーまたはユーザーのグループの権限の概要を示す 1 つ以上のアクションと条件が記述されています。\n\nSILO PBAC は、AWS IAM ポリシーの構文、構造、動作との互換性を考慮して構築されています。 SILOのドキュメントでは、IAM-の特定の動作と機能をカバーするために最善の努力が払われています。 AWS IAM- の特定のトピックに関するより完全なドキュメントについては、IAM のドキュメントを延期することを検討してください。",
+    "### IAM ポリシー\n\nSILO は、ポリシーベースのアクセス制御 (PBAC) を使用して、認証されたユーザーがアクセスできる許可されたアクションとリソースを定義します。各ポリシーには、ユーザーまたはユーザーのグループの権限の概要を示す 1 つ以上のアクションと条件が記述されています。\n\nSILO PBAC は、AWS IAM ポリシーの構文、構造、動作との互換性を考慮して構築されています。SILO ドキュメントでは、IAM 固有の動作と機能を可能な限りカバーしています。AWS IAM 固有のトピックに関するより完全なドキュメントについては、AWS IAM の公式ドキュメントをご参照ください。",
   "### Access keys\n\nSILO access keys are child identities of an authenticated SILO user, including externally managed identities. Each access key inherits its privileges based on the policies attached to it’s parent user or those groups in which the parent user has membership. Access Keys also support an optional inline policy which further restricts access to a subset of actions and resources available to the parent user.":
     "### アクセスキー\n\nSILO アクセス キーは、認証された SILO ユーザーの子 ID であり、外部で管理されている ID も含まれます。各アクセス キーは、その親ユーザー、または親ユーザーがメンバーシップを持っているグループにアタッチされているポリシーに基づいて権限を継承します。アクセス キーは、親ユーザーが利用できるアクションとリソースのサブセットへのアクセスをさらに制限するオプションのインライン ポリシーもサポートしています。",
   "### Event destinations\n\nSILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.":
-    "### イベントの目的地\n\nSILO バケット通知を使用すると、管理者は特定のオブジェクトまたはバケット イベントに関してサポートされている外部サービスに通知を送信できます。 SILO は、Amazon S3 イベント通知と同様のバケットおよびオブジェクトレベルの S3 イベントをサポートします。",
+    "### イベント送信先\n\nSILO バケット通知を使用すると、管理者は特定のオブジェクトまたはバケットイベントに関して、サポートされている外部サービスに通知を送信できます。SILO は、Amazon S3 イベント通知と同様のバケットおよびオブジェクトレベルの S3 イベントをサポートします。",
   "### Inspect examples\n\nDownload object metadata or constituent parts from the drives as a ZIP archive. Enable **Encrypt** to protect the downloaded archive; save the decryption key when it is shown.\n\n- **Object metadata:** Volume/Bucket `test-bucket`, Path `test*/xl.meta`.\n- **Object parts:** Volume/Bucket `test-bucket`, Path `test*/*/part.*`.\n- **Recursive prefix:** Volume/Bucket `test-bucket`, Path `test/**`.\n\n**Caution:** Recursive inspection can be expensive. Limit the bucket and path before starting; use recursive patterns only when necessary.":
-    "### 例を検査する\n\nオブジェクトのメタデータまたは構成部分をドライブから ZIP アーカイブとしてダウンロードします。ダウンロードしたアーカイブを保護するには、**暗号化** を有効にします。復号化キーが表示されたら保存します。\n\n- **オブジェクト メタデータ:** ボリューム/バケット `test-bucket`、パス `test*/xl.meta`。\n- **オブジェクト パーツ:** ボリューム/バケット `test-bucket`、パス `test*/*/part.*`。\n- **再帰プレフィックス:** ボリューム/バケット `test-bucket`、パス `test/**`。\n\n**注意:** 再帰検査には費用がかかる場合があります。開始する前にバケットとパスを制限します。必要な場合にのみ再帰パターンを使用してください。",
+    "### 検査の例\n\nオブジェクトのメタデータまたは構成パーツをドライブから ZIP アーカイブとしてダウンロードします。ダウンロードしたアーカイブを保護するには、**暗号化** を有効にします。復号キーが表示されたら保存してください。\n\n- **オブジェクトメタデータ:** ボリューム/バケット `test-bucket`、パス `test*/xl.meta`。\n- **オブジェクトパーツ:** ボリューム/バケット `test-bucket`、パス `test*/*/part.*`。\n- **再帰プレフィックス:** ボリューム/バケット `test-bucket`、パス `test/**`。\n\n**注意:** 再帰的な検査は高負荷になる場合があります。開始前にバケットとパスを制限し、再帰パターンは必要な場合にのみ使用してください。",
   Troubleshooting: "トラブルシューティング",
   "Need more help?  Check out additional Troubleshooting options":
     "さらにサポートが必要ですか?  追加のトラブルシューティング オプションを確認してください",
@@ -24,7 +24,7 @@ const messages: Dictionary = {
   "Policy based access control": "ポリシーベースのアクセス制御",
   "Learn how Policy-Based Access Control (PBAC)  is used to define the authorized actions and resources  to which an authenticated user has access":
     "ポリシーベースのアクセス制御 (PBAC) を使用して、認証されたユーザーがアクセスできる許可されたアクションとリソースを定義する方法を学習します。",
-  "OpenID Connect Access Management": "OpenID アクセス管理を接続する",
+  "OpenID Connect Access Management": "OpenID Connect アクセス管理",
   "Learn more about connecting SILO to OpenID for access management.":
     "アクセス管理のために SILO を OpenID に接続する方法について詳しく説明します。",
   "MinIO Identity and Access Management: Part 1 - Overview And Modification of Built In Policies":
@@ -61,7 +61,7 @@ const messages: Dictionary = {
     "このセッションでは、MinIO コンソールを使用して AWS S3 バケットとユーザーを作成する方法を説明します。",
   "Object Locking and Retention": "オブジェクトのロックと保持",
   "In this video we talk about object retention, WORM (Write Once Read Many), as well as duration based and legal holds.":
-    "このビデオでは、オブジェクトの保持、WORM (Write Once Read Many)、および期間ベースの保持と法的保持について説明します。",
+    "このビデオでは、オブジェクトの保持、WORM (Write Once Read Many)、および期間ベースの保持とリーガルホールドについて説明します。",
   "Object Locking and Retention Lab": "オブジェクトのロックと保持のラボ",
   "This lab demonstrates creation and removal of both bucket and object specific retention, compliance, and legal holds. ":
     "このラボでは、バケットおよびオブジェクト固有の保持、コンプライアンス、リーガルホールドの作成と削除を説明します。",
@@ -127,7 +127,7 @@ const messages: Dictionary = {
   "These configuration settings define runtime behavior of the SILO server process,  comparable to the mc admin config command":
     "これらの設定は、mc admin config コマンドと同様に、SILO サーバープロセスの実行時の動作を定義します。",
   "Where can I see current Heal status?":
-    "現在の治癒ステータスはどこで確認できますか?",
+    "現在の修復ステータスはどこで確認できますか？",
   "Check under Monitoring/Drives on the left hand  menu to see Drive and Bucket Healing status":
     "左側のメニューの [監視/ドライブ] をチェックして、ドライブとバケットの修復ステータスを確認します。",
   "How is Erasure Coding used to Protect Data?":
@@ -139,19 +139,19 @@ const messages: Dictionary = {
     "展開トポロジと選択した消去コード パリティに応じて、SILO は、オブジェクトへの読み取りアクセスを維持しながら、展開内の最大半分のドライブまたはノードの損失を許容できます。",
   "Site Failure Recovery": "サイト障害の回復",
   "SILO can make the loss of an entire site, while  significant, a relatively minor incident. Site recovery depends on the replication option you use for the site.":
-    "SILO により、サイト全体が失われる可能性はありますが、重大ではありますが、比較的軽微な出来事です。サイトの回復は、サイトで使用するレプリケーション オプションによって異なります。",
+    "サイト全体の喪失は重大な事象ですが、SILO では影響を最小限に抑えることができます。サイトの復旧方法は、使用しているレプリケーション構成によって異なります。",
   "Node Failure Recovery": "ノード障害の回復",
   "If a SILO node suffers complete hardware failure, the node begins healing operations once it rejoins the  deployment.":
     "SILO ノードに完全なハードウェア障害が発生した場合、ノードはデプロイメントに再参加すると修復操作を開始します。",
-  "What is SILO Healing?": "SILOヒーリングとは？",
+  "What is SILO Healing?": "SILO の修復（ヒーリング）とは？",
   "Healing is SILO’s ability to restore data after some event causes data loss. Data loss can come from bit rot, drive loss, or node loss.":
     "ヒーリングとは、何らかのイベントによりデータ損失が発生した後にデータを復元する SILO の機能です。データ損失は、ビットの破損、ドライブの損失、またはノードの損失によって発生する可能性があります。",
-  "Understand SILO Healing Using mc": "SILO mc を使用したヒーリングを理解する",
+  "Understand SILO Healing Using mc": "mc を使用した SILO の修復を理解する",
   "The mc admin heal command scans for objects that are damaged or corrupted and heals those objects.":
-    "mc admin heal コマンドは破損したオブジェクトを検出して修復します。",
+    "mc admin heal コマンドは、破損したオブジェクトをスキャンして修復します。",
   "What is Bit Rot?": "ビットロットとは何ですか?",
   "Bit rot is data corruption that occurs without the user’s knowledge. SILO combats bit rot with hashing and erasure coding.":
-    "ビット腐敗とは、ユーザーの知らないうちに発生するデータ破損です。 SILO は、ハッシュとイレイジャー コーディングを使用してビット腐敗と闘います。",
+    "ビットロット（データ劣化）とは、ユーザーが気づかないうちに発生するデータ破損です。SILO はハッシュとイレイジャーコーディングでビットロットに対処します。",
   "These configuration settings define runtime behavior of the SILO server process, comparable to the mc admin config command":
     "これらの設定は、mc admin config コマンドと同様に、SILO サーバープロセスの実行時の動作を定義します。",
   "Overview of MinIO Erasure Coding": "MinIO イレイジャーコーディングの概要",
@@ -162,7 +162,7 @@ const messages: Dictionary = {
     "スキャナーがライフサイクル ルールに基づいてオブジェクトの移行と有効期限をチェックする方法の詳細をご覧ください",
   "What is the Scanner?": "スキャナーとは何ですか?",
   "One of several low-priority processes SILO runs to check lifecycle management rules, bucket or site replication status, as well as object bit rot and healing":
-    "いくつかの優先度の低いプロセスの 1 つ SILO が、ライフサイクル管理ルール、バケットまたはサイトのレプリケーション ステータス、オブジェクト ビットの破損と修復をチェックするために実行されます。",
+    "ライフサイクル管理ルール、バケットやサイトのレプリケーション状態、およびオブジェクトのビットロットと修復をチェックするために SILO が実行する低優先度プロセスの 1 つです。",
   "Lifecycle Management Object Scanner Considerations":
     "ライフサイクル管理オブジェクト スキャナーの考慮事項",
   "SILO uses a scanner process to check objects against all configured lifecycle management rules. High IO workloads or limited system resources may delay application of lifecycle management rules":
@@ -262,7 +262,7 @@ const messages: Dictionary = {
   "User Management": "ユーザー管理",
   "Each user can have one or more assigned policies that explicitly list the actions and resources to which that user has access. Users can also inherit policies from the groups in which they have membership.":
     "各ユーザーは、そのユーザーがアクセスできるアクションとリソースを明示的にリストするポリシーを 1 つ以上割り当てることができます。ユーザーは、メンバーシップを持っているグループからポリシーを継承することもできます。",
-  "Group Management": "グループ経営",
+  "Group Management": "グループ管理",
   "A group is a collection of users. Each group can have one or more assigned policies that explicitly list the actions and resources to which group members are allowed or denied access.":
     "グループはユーザーの集合です。各グループには、グループ メンバーにアクセスを許可または拒否するアクションとリソースを明示的にリストする 1 つ以上のポリシーを割り当てることができます。",
   "MinIO Identity and Access Management: Part 3 - Interfacing with OpenID and LDAP":
@@ -273,18 +273,18 @@ const messages: Dictionary = {
     "MinIO OpenID と Keycloak を使用した認証と認可",
   "In this video you will learn how to set up an OpenID service, Keycloak, to provide authentication and authorization as part of a MinIO deployment.":
     "このビデオでは、OpenID サービス Keycloak をセットアップして、MinIO 導入の一部として認証と認可を提供する方法を学びます。",
-  "Drive Healing": "ドライブヒーリング",
+  "Drive Healing": "ドライブの修復",
   "The Drives section displays the healing status for a bucket.":
     "「ドライブ」セクションには、バケットの修復ステータスが表示されます。",
   "Erasure Coding": "イレイジャーコーディング",
   "SILO Erasure Coding is a data redundancy and availability feature that allows SILO deployments to automatically reconstruct objects on-the-fly despite the loss of multiple drives or nodes in the cluster.":
     "SILO イレイジャー コーディングは、クラスター内の複数のドライブまたはノードが失われた場合でも、SILO 導入環境でオブジェクトをオンザフライで自動的に再構築できるようにするデータの冗長性および可用性機能です。",
-  "Site Healing": "サイトヒーリング",
+  "Site Healing": "サイトの修復",
   "Any SILO deployment in the site replication configuration can resynchronize damaged replica-eligible data from the peer with the most updated (“latest”) version of that data.":
-    "サイト レプリケーション構成内のすべての SILO 展開では、ピアからの破損したレプリカ適格データを、そのデータの最新 (「最新」) バージョンと再同期できます。",
-  Healing: "癒し",
+    "サイトレプリケーション構成内の任意の SILO デプロイメントは、破損したレプリケーション対象データを、最新バージョンを保持するピアから再同期できます。",
+  Healing: "修復",
   "SILO Automatically Heals Corrupt or Missing Data On-the-fly":
-    "SILO 破損または欠落したデータをオンザフライで自動的に修復します",
+    "SILO は破損または欠落したデータをオンザフライで自動修復します",
   "In this video, we will provide an overview of site-wide replication.":
     "このビデオでは、サイト全体のレプリケーションの概要を説明します。",
   Health: "稼働状態",
@@ -305,7 +305,7 @@ const messages: Dictionary = {
     "OpenID Connect (OIDC) プロトコル経由でユーザーを認証するための外部 ID プロバイダー (IDP) として Keycloak を使用するように SILO を構成できます。",
   "LDAP Configuration": "LDAP 構成",
   "SILO supports configuring a single Active Directory / LDAP Connect for external management of user identities.":
-    "SILO は、単一の Active Directory の構成をサポートします / LDAP ユーザー ID の外部管理用に接続します。",
+    "SILO は、ユーザー ID を外部管理するために単一の Active Directory / LDAP 接続の構成をサポートします。",
   "OIDC Configuration": "OIDC 構成",
   "SILO supports using an OpenID Connect (OIDC) compatible IDentity Provider (IDP) such as Okta, KeyCloak, Dex, Google, or Facebook for external management of user identities.":
     "SILO は、ユーザー ID の外部管理のために、Okta、KeyCloak、Dex、Google、Facebook などの OpenID Connect (OIDC) 互換 ID プロバイダー (IDP) の使用をサポートします。",
@@ -321,7 +321,7 @@ const messages: Dictionary = {
   "Audit Logs": "監査ログ",
   "You can configure an HTTP webhook endpoint to which SILO publishes audit logs using either environment variables or by setting runtime configuration settings.":
     "環境変数またはランタイム構成設定を使用して、SILO が監査ログを発行する HTTP Webhook エンドポイントを構成できます。",
-  "Object Lambda": "オブジェクトラムダ",
+  "Object Lambda": "Object Lambda",
   "SILO’s Object Lambda enables developers to programmatically transform objects on demand.":
     "SILO の Object Lambda を使用すると、開発者はオンデマンドでオブジェクトをプログラムで変換できます。",
   "MinIO Event Notifications - Overview": "MinIO イベント通知 - 概要",
@@ -364,12 +364,12 @@ const messages: Dictionary = {
     "検査セクションは、オブジェクトに関連付けられた消去符号化メタデータをキャプチャするためのインターフェイスを提供します。",
   "Encrypt Inspect Output": "検査結果を暗号化",
   "You can encrypt the output of the mc support inspect command for enhanced security when transferring the files off the deployment.":
-    "デプロイメントからファイルを転送する際の安全性を高めるため、mc support inspect の出力を暗号化できます。",
+    "デプロイメント外へファイルを転送する際のセキュリティを強化するため、mc support inspect コマンドの出力を暗号化できます。",
   "What is Trace?": "トレースとは何ですか?",
   "The trace section provides HTTP trace functionality for a bucket or buckets on the deployment.":
     "トレース セクションは、展開上の 1 つまたは複数のバケットに対する HTTP トレース機能を提供します。",
   Users: "ユーザー",
-  "What is Watch?": "時計とは何ですか?",
+  "What is Watch?": "イベント監視（Watch）とは？",
   "The Watch section displays S3 events as they occur on the selected bucket.":
     "[監視] セクションには、選択したバケットで発生した S3 イベントが表示されます。",
   "Access Managemnt": "アクセス管理",

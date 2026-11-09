@@ -15,31 +15,31 @@ const messages: Dictionary = {
   "Access keys": "مفاتيح الوصول",
   "Configure a destination, then add bucket notification rules to send S3 events to it.":
     "اضبط وجهة، ثم أضف قواعد إشعارات الحاويات لإرسال أحداث S3 إليها.",
-  "Event destinations": "وجهات الفعاليات",
-  "SILO version": "SILO النسخة",
+  "Event destinations": "وجهات الأحداث",
+  "SILO version": "إصدار SILO",
   "Raw JSON": "JSON الخام",
   "Recursive inspections can be expensive. Limit the bucket and path before starting.":
-    "قد تكون عمليات التفتيش المتكررة باهظة الثمن. حدد الحاوية والمسار قبل البدء.",
+    "قد يستهلك الفحص المتكرر موارد كبيرة. حدّد الحاوية والمسار قبل البدء.",
   "Open Help for examples, or read the":
     "افتح المساعدة للحصول على أمثلة، أو اقرأ",
   Tasks: "المهام",
-  "Tasks: {count} running": "المهام: {count} الجري",
+  "Tasks: {count} running": "المهام: {count} قيد التشغيل",
   "Close Tasks": "إغلاق المهام",
   "Object operations": "عمليات الكائن",
-  Running: "الجري",
+  Running: "قيد التشغيل",
   Finished: "انتهى",
   Queued: "في قائمة الانتظار",
   Completed: "اكتملت",
   "No running tasks": "لا يوجد مهام قيد التشغيل",
   "No finished tasks": "لم يتم الانتهاء من المهام",
-  "Clear finished": "واضح الانتهاء",
-  "ZIP download": "ZIP تحميل",
+  "Clear finished": "مسح المكتملة",
+  "ZIP download": "تنزيل ZIP",
   "Browser handoff": "تسليم المتصفح",
   "Task progress": "تقدم المهمة",
   "Waiting for data": "في انتظار البيانات",
   "Remove task": "إزالة المهمة",
   "Cancel task": "إلغاء المهمة",
-  "Retry failed": "فشلت إعادة المحاولة",
+  "Retry failed": "إعادة محاولة الفاشلة",
   "Open bucket/prefix": "فتح الحاوية/البادئة",
   "{done}/{total} completed · {failed} failed · {cancelled} cancelled":
     "{done}/{total} مكتمل · {failed} فاشل · {cancelled} تم الإلغاء",
@@ -49,7 +49,7 @@ const messages: Dictionary = {
   "Counts represent selected targets. Progress within a folder or version cleanup is unavailable.":
     "الأعداد تمثل الأهداف المختارة. التقدم داخل مجلد أو تنظيف الإصدار غير متوفر.",
   "Completed changes remain in place. In-flight requests may have reached the server; inspect before repeating them.":
-    "التغييرات المكتملة تبقى في مكانها. ربما تكون الطلبات أثناء الرحلة قد وصلت إلى الخادم؛ فحص قبل تكرارها.",
+    "التغييرات المكتملة باقية. قد تكون الطلبات الجارية قد وصلت إلى الخادم؛ افحصها قبل تكرارها.",
   "Review {count} results": "مراجعة {count} نتائج",
   "Server outcome is unconfirmed. Inspect this object before another operation.":
     "نتيجة السيرفر غير مؤكدة. فحص هذا الكائن قبل عملية أخرى.",
@@ -59,7 +59,7 @@ const messages: Dictionary = {
   "The request failed. Inspect the object before trying again.":
     "فشل الطلب. افحص الكائن قبل المحاولة مرة أخرى.",
   "Tasks are still running": "المهام مازالت جارية",
-  "Stay here": "خليك هنا",
+  "Stay here": "البقاء في هذه الصفحة",
   "Cancel tasks and leave": "إلغاء المهام والمغادرة",
   "Leave page": "اترك الصفحة",
   "Leaving this session cancels queued and running tasks. Changes already completed on the server remain in place.":
@@ -67,9 +67,9 @@ const messages: Dictionary = {
   "Tasks will continue in this session. You can check their progress in Tasks on another page.":
     "ستستمر المهام في هذه الجلسة. يمكنك التحقق من تقدمهم في المهام على صفحة أخرى.",
   "Delete Versions": "حذف الإصدارات",
-  "Cluster health": "صحة الكتلة",
-  "servers online": "خوادم اونلاين",
-  "{count} drives online": "{count} يقود عبر الإنترنت",
+  "Cluster health": "حالة العنقود",
+  "servers online": "خوادم متصلة",
+  "{count} drives online": "{count} أقراص متصلة",
   "{count} server(s) offline": "عدد الخوادم غير المتصلة: {count}",
   "{count} drive(s) offline": "عدد الأقراص غير المتصلة: {count}",
   "{count} drive(s) healing": "عدد الأقراص الجاري إصلاحها: {count}",
@@ -83,22 +83,22 @@ const messages: Dictionary = {
     "بعض معلومات حالة الخوادم أو الأقراص غير متاحة.",
   "Capacity is incomplete. Only reported drive measurements are shown.":
     "السعة غير مكتملة. يتم عرض قياسات محرك الأقراص المبلغ عنها فقط.",
-  "Generate health report": "توليد تقرير صحي",
+  "Generate health report": "إنشاء تقرير حالة النظام",
   "No servers reported": "لم يتم الإبلاغ عن أي خوادم",
   Server: "خادم",
-  "Just started": "بدأت للتو",
+  "Just started": "بدأ للتو",
   "Hide drives for {server}": "إخفاء أقراص {server}",
   "Show drives for {server}": "عرض أقراص {server}",
   "No drive information available": "لا تتوفر معلومات عن الأقراص",
-  "Drives on {server}": "يقود على {server}",
-  "{used} / {total} used": "{used} / {total} مستعمل",
+  "Drives on {server}": "الأقراص في {server}",
+  "{used} / {total} used": "{used} / {total} مستخدم",
   "Drive usage: {drive}": "استخدام القرص: {drive}",
   "Refresh failed. The last received data is still shown.":
     "فشل التحديث. لا يزال يتم عرض آخر البيانات المستلمة.",
   "Could not load deployment information. Try refreshing.":
     "تعذر تحميل معلومات النشر. حاول التحديث.",
   "Deployment statistics": "إحصائيات النشر",
-  "of {total} raw capacity": "من {total} القدرة الخام",
+  "of {total} raw capacity": "من إجمالي السعة الخام البالغة {total}",
   "{available} available": "{available} متاح",
   Data: "بيانات",
   objects: "كائنات",
@@ -108,7 +108,7 @@ const messages: Dictionary = {
   "Quick actions": "إجراءات سريعة",
   "No quick actions available for your permissions.":
     "لا توجد إجراءات سريعة متاحة لأذوناتك.",
-  "Read & write": "إقرأ وأكتب",
+  "Read & write": "قراءة وكتابة",
   "Delete bucket": "حذف الحاوية",
   "Actions for {bucket}": "إجراءات لـ {bucket}",
   "Select {bucket}": "تحديد {bucket}",
@@ -117,9 +117,9 @@ const messages: Dictionary = {
   "Select all visible buckets": "تحديد جميع الحاويات الظاهرة",
   "Bucket rows": "صفوف الحاويات",
   "The bucket list could not be loaded.": "تعذّر تحميل قائمة الحاويات.",
-  "Select one or more buckets first.": "اختر حاويةًا واحدًا أو أكثر أولاً.",
+  "Select one or more buckets first.": "اختر حاوية واحدة أو أكثر أولًا.",
   "configure the selected buckets": "إعداد الحاويات المحددة",
-  "Search buckets": "حاويات البحث",
+  "Search buckets": "بحث في الحاويات",
   "Bucket view": "عرض حاوية",
   Cards: "بطاقات",
   "{count} buckets selected": {
@@ -130,12 +130,12 @@ const messages: Dictionary = {
     many: "{count} حاوية محددة",
     other: "{count} حاوية محددة",
   },
-  "{count} bucket selected": "{count} حاوية تم اختياره",
+  "{count} bucket selected": "{count} حاوية محددة",
   "No buckets match “{q}”": "لا توجد حاويات تطابق «{q}»",
-  "Clear filter": "تصفية واضحة",
+  "Clear filter": "مسح التصفية",
   "Built-in · Modified": "مدمج · تم التعديل",
   "Actions for {name}": "إجراءات لـ {name}",
-  "Reset to default": "إعادة الضبط إلى الإعداد الافتراضي",
+  "Reset to default": "استعادة الافتراضي",
   "Could not load policies": "تعذر تحميل السياسات",
   "Refresh to try again.": "قم بالتحديث للمحاولة مرة أخرى.",
   "Create a policy to define permissions for users and groups.":
@@ -145,10 +145,10 @@ const messages: Dictionary = {
     "هل تريد إعادة السياسة {name} إلى تعريفها الافتراضي؟",
   "The built-in policy will be restored to the SILO default definition.":
     "ستُستعاد السياسة المضمنة إلى تعريف SILO الافتراضي.",
-  "Loading attachment information…": "جاري تحميل معلومات المرفق...",
+  "Loading attachment information…": "جارٍ تحميل معلومات الارتباط…",
   "This policy has changed or is no longer available. Refresh the list.":
     "تغيّرت هذه السياسة أو لم تعد متاحة. حدّث القائمة.",
-  "Attachment information is unavailable.": "معلومات المرفقات غير متوفرة.",
+  "Attachment information is unavailable.": "معلومات الارتباط غير متاحة.",
   "This policy is attached to {users} users and {groups} groups.":
     "ترتبط هذه السياسة بعدد {users} من المستخدمين و{groups} من المجموعات.",
   "Their permissions will follow the default definition.":
@@ -188,7 +188,7 @@ const messages: Dictionary = {
   "You do not have permission to view this page":
     "ليس لديك صلاحية مشاهدة هذه الصفحة",
   "Ask your administrator for access. This page checks the following IAM actions:":
-    "اطلب من المسؤول الخاص بك الوصول. تتحقق هذه الصفحة من الإجراءات IAM التالية:",
+    "اطلب صلاحية الوصول من المسؤول. تتحقق هذه الصفحة من إجراءات IAM التالية:",
   "Required IAM actions": "إجراءات IAM المطلوبة",
   "Encryption is not configured": "لم يتم تكوين التشفير",
   "Configure KES or KMS on the SILO server to manage encryption keys in Console.":
@@ -213,7 +213,7 @@ const messages: Dictionary = {
   "Standalone Console": "لوحة تحكم مستقلة",
   "Console embedded in SILO": "لوحة التحكم المضمنة في SILO",
   "Optional standalone settings": "الإعدادات الاختيارية المستقلة",
-  "Bearer token: ": "الرمز المميز:",
+  "Bearer token: ": "رمز Bearer: ",
   "Or basic authentication: ": "أو المصادقة الأساسية:",
   "Embedded settings: ": "الإعدادات المضمنة:",
   Icons: "الأيقونات",
@@ -221,17 +221,17 @@ const messages: Dictionary = {
   "Edit {label}": "تعديل {label}",
   "Calculating…": "جاري الحساب…",
   "The server has not finished computing usage yet.":
-    "الخادم لم ينته من استخدام الحوسبة بعد.",
+    "لم ينتهِ الخادم من حساب الاستخدام بعد.",
   "Calculated {time}": "تم الحساب {time}",
   "Updated {time}": "تم التحديث {time}",
   "Permission required": "مطلوب إذن",
   "Ask your administrator to grant the following IAM actions.":
-    "اطلب من المسؤول الخاص بك منح الإجراءات IAM التالية.",
+    "اطلب من المسؤول منح إجراءات IAM التالية.",
   "More actions": "المزيد من الإجراءات",
   "Equivalent mcli command": "أمر mcli المكافئ",
   Copied: "تم النسخ",
   "Copy failed. Select and copy the command.": "فشل النسخ. حدد ونسخ الأمر.",
-  "Copy commands": "أوامر النسخ",
+  "Copy commands": "نسخ الأوامر",
   "Replace ALIAS with your configured mcli alias (for example, {alias}).":
     "استبدل ALIAS بالاسم المستعار mcli الذي تم تكوينه (على سبيل المثال، {alias}).",
   "Replace ALIAS with your configured mcli alias.":
@@ -240,21 +240,21 @@ const messages: Dictionary = {
   "SILO primitives": "مكوّنات SILO الأساسية",
   "Shared building blocks for storage, identity and monitoring.":
     "وحدات بناء مشتركة للتخزين والهوية والمراقبة.",
-  "Healthy capacity": "القدرة الصحية",
+  "Healthy capacity": "سعة سليمة",
   "Capacity warning": "تحذير السعة",
   "Above the 85% warning threshold": "فوق عتبة التحذير 85%",
-  "Capacity critical": "القدرة الحرجة",
+  "Capacity critical": "سعة حرجة",
   "Above the 95% critical threshold": "فوق العتبة الحرجة 95%",
   "Usage is calculated by the server.": "يتم احتساب الاستخدام من قبل السيرفر.",
   "View buckets": "عرض الحاويات",
   "Status and values": "الحالة والقيم",
   "Built-in": "مدمج",
-  "Freshness and actions": "نضارة وتصرفات",
+  "Freshness and actions": "حداثة البيانات والإجراءات",
   "Select an object to inspect its details.": "حدد كائنًا لتفحص تفاصيله.",
   "Object details": "تفاصيل الكائن",
   "Demo action completed.": "اكتمل الإجراء التجريبي.",
   "Select an object to download.": "حدد كائنًا لتنزيله.",
-  "Empty and unavailable states": "الولايات الفارغة وغير المتوفرة",
+  "Empty and unavailable states": "حالات الفراغ وعدم التوفر",
   "No buckets yet": "لا توجد حاويات بعد",
   "Create a bucket to start storing objects.":
     "أنشئ حاوية لبدء تخزين الكائنات.",
@@ -272,12 +272,12 @@ const messages: Dictionary = {
   "Showing the first 100 columns. View Source or download the object to see all columns.":
     "إظهار أول 100 عمود. قم بعرض المصدر أو تنزيل الكائن لرؤية كافة الأعمدة.",
   Rendered: "معروض",
-  "Wrap lines": "لف الخطوط",
+  "Wrap lines": "التفاف الأسطر",
   Row: "صف",
   "CSV preview content": "محتوى معاينة CSV",
-  "Markdown preview content": "محتوى معاينة تخفيض السعر",
+  "Markdown preview content": "محتوى معاينة Markdown",
   "Markdown rendering is unavailable for this content. Showing the source instead.":
-    "عرض تخفيض السعر غير متاح لهذا المحتوى. إظهار المصدر بدلا من ذلك.",
+    "تعذّر عرض تنسيق Markdown لهذا المحتوى. يُعرض النص المصدري بدلًا من ذلك.",
   "Image: {alt}": "صورة: {alt}",
   Image: "صورة",
   Actions: "الإجراءات",
@@ -309,16 +309,15 @@ const messages: Dictionary = {
     "يتطلب هذا الإجراء خادمًا موزعًا.",
   "You need s3:PutObjectTagging permission.":
     "أنت بحاجة إلى إذن s3:PutObjectTagging.",
-  "You need admin:InspectData permission.":
-    "أنت بحاجة إلى إذن المشرف: فحص البيانات.",
+  "You need admin:InspectData permission.": "تحتاج إلى إذن admin:InspectData.",
   "You need permission to view object versions.":
     "أنت بحاجة إلى إذن لعرض إصدارات الكائن.",
   "You need s3:DeleteObject permission.": "أنت بحاجة إلى إذن s3:DeleteObject.",
   "You need permission to change the bucket policy.":
-    "تحتاج إلى إذن لتغيير سياسة الجرافة.",
+    "تحتاج إلى إذن لتغيير سياسة الحاوية.",
   "You need permission to read objects and bucket versioning.":
-    "أنت بحاجة إلى إذن لقراءة الكائنات وإصدارات الجرافة.",
-  "You need s3:ListBucket permission.": "أنت بحاجة إلى s3:ListBucket إذن.",
+    "تحتاج إلى إذن لقراءة الكائنات وإدارة إصدارات الحاوية.",
+  "You need s3:ListBucket permission.": "تحتاج إلى إذن s3:ListBucket.",
   "You need permission to restore this version.":
     "تحتاج إلى إذن لاستعادة هذا الإصدار.",
   "You need permission to select this version.":
@@ -335,17 +334,17 @@ const messages: Dictionary = {
   "Client ID": "معرّف العميل",
   "Client Secret": "سر العميل",
   "Redirect URI": "عنوان URI لإعادة التوجيه",
-  "Lookup Bind DN": "الاسم المميّز للربط أثناء البحث",
+  "Lookup Bind DN": "DN الربط للبحث",
   "Lookup Bind Password": "كلمة مرور ربط البحث",
-  "User DN Search Base": "المستخدم DN قاعدة البحث",
-  "User DN Search Filter": "المستخدم DN فلتر البحث",
+  "User DN Search Base": "قاعدة البحث عن DN للمستخدم",
+  "User DN Search Filter": "مرشّح البحث عن DN للمستخدم",
   "Group Search Base DN": "قاعدة بحث المجموعة DN",
   "Group Search Filter": "فلتر بحث المجموعة",
   "Sign Out": "تسجيل الخروج",
   "Remove transfer": "إزالة النقل",
   "Cancel transfer": "إلغاء التحويل",
   "This download has already started. Dismiss its transfer entry to start it again.":
-    "لقد بدأ هذا التنزيل بالفعل. ارفض إدخال النقل الخاص به لبدء تشغيله مرة أخرى.",
+    "بدأ هذا التنزيل بالفعل. أزِل سجل النقل الخاص به لبدئه من جديد.",
   "Track or cancel this download in your browser's download manager.":
     "قم بتتبع هذا التنزيل أو إلغائه في مدير التنزيلات بمتصفحك.",
   "For selections above 5 GiB or of unknown size, MCLI is recommended. This ZIP will stream without buffering in memory.":
@@ -354,14 +353,14 @@ const messages: Dictionary = {
   "Set replication": "تعيين النسخ المتماثل",
   "Refresh buckets": "تحديث الحاويات",
   "Close details": "إغلاق التفاصيل",
-  "Copy share URL": "نسخ مشاركة URL",
+  "Copy share URL": "نسخ رابط المشاركة",
   "Select multiple versions": "حدد إصدارات متعددة",
   "Delete selected versions": "حذف الإصدارات المحددة",
   "Delete non-current versions": "حذف الإصدارات غير الحالية",
   "Copy code": "انسخ الكود",
   "Delete group": "حذف المجموعة",
   "Refresh list": "تحديث القائمة",
-  "Copy path": "مسار النسخ",
+  "Copy path": "نسخ المسار",
   "Delete user": "حذف المستخدم",
   "Change password": "تغيير كلمة المرور",
   "Copy {label}": "نسخ {label}",
@@ -370,16 +369,16 @@ const messages: Dictionary = {
   "Delete selected users": "حذف المستخدمين المحددين",
   "View All": "عرض الكل",
   "Deployment ID:": "معرّف النشر:",
-  "Request ID:": "الطلب ID:",
+  "Request ID:": "معرّف الطلب:",
   "Remote host:": "المضيف البعيد:",
   "User agent:": "وكيل المستخدم:",
   "Backtrace:": "التتبع الخلفي:",
   "Time:": "الوقت:",
   "API:": "API:",
   "Not available": "غير متوفر",
-  " and ": "و",
+  " and ": " و ",
   "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'":
-    '"مساحة الاسم" تعكس قائمة المجموعة/الكائنات الحالية ويعكس "الوصول" مجلة عمليات الكائن، والإعدادات الافتراضية هي "مساحة الاسم"\nقفل',
+    "تعكس القيمة 'namespace' قائمة الحاويات والكائنات الحالية، وتعكس القيمة 'access' سجل عمليات الكائنات، والقيمة الافتراضية هي 'namespace'",
   "{compliance} lock protects Objects from write operations by all users, including the SILO root user.":
     "يحمي قفل {compliance} العناصر من عمليات الكتابة التي يجريها جميع المستخدمين، بما في ذلك المستخدم الجذر في SILO.",
   "{count} days": {
@@ -438,7 +437,7 @@ const messages: Dictionary = {
     "يفرض {retention} قواعد تمنع حذف العناصر لفترة زمنية محددة. يجب تفعيل إدارة الإصدارات لتعيين سياسات الاحتفاظ للحاوية.",
   "{service} which is {status}": "{service} وهو {status}",
   "{silo} is an independently maintained continuation of the {minio} object storage project, carried forward by the {pigsty} community since 2026. Its {code} {incorporates} {upstream}, and the complete work remains licensed under the {agpl}.":
-    "{silo} امتداد مستقل الصيانة لمشروع تخزين الكائنات {minio}، يواصل مجتمع {pigsty} تطويره منذ عام 2026. وتتضمن {code} الخاصة به {incorporates} {upstream}، ويظل العمل الكامل مرخصًا بموجب {agpl}.",
+    "{silo} امتداد مستقل الصيانة لمشروع تخزين الكائنات {minio}، يواصل مجتمع {pigsty} تطويره منذ عام 2026. إنّ {code} الخاص به {incorporates} {upstream}، ويظل العمل الكامل مرخصًا بموجب {agpl}.",
   "{target} Event Destination": "وجهة أحداث {target}",
   "{time} ago": "منذ {time}",
   "{type}: {name} not found.": "لم يُعثر على {type}: {name}.",
@@ -499,7 +498,7 @@ const messages: Dictionary = {
   "Add Members": "إضافة أعضاء",
   "Add New Tag": "إضافة علامة جديدة",
   "Add New Tag ": "إضافة علامة جديدة",
-  "Add new Webhook": "إضافة جديد Webhook",
+  "Add new Webhook": "إضافة Webhook جديد",
   "Add Replication Rule": "إضافة قاعدة النسخ",
   "Add Replication Site": "إضافة موقع للنسخ المتماثل",
   "Add Replication Sites": "إضافة مواقع للنسخ المتماثل",
@@ -524,7 +523,7 @@ const messages: Dictionary = {
     "يجب أن تستخدم جميع المواقع بيانات اعتماد النشر نفسها، أي MINIO_ROOT_USER وMINIO_ROOT_PASSWORD.",
   "All User Agents": "جميع وكلاء المستخدم",
   "Amazon Resource Name": "اسم مورد Amazon",
-  "AMQP exchange type": "AMQP نوع الصرف",
+  "AMQP exchange type": "نوع مُبدّل AMQP",
   "AMQP server endpoint e.g. `amqp://myuser:mypassword@localhost:5672`":
     "نقطة نهاية خادم AMQP، مثل `amqp://myuser:mypassword@localhost:5672`",
   "An error occurred": "حدث خطأ",
@@ -602,18 +601,18 @@ const messages: Dictionary = {
   "Assign Custom IAM Policies for Group": "تعيين سياسات IAM مخصصة للمجموعة",
   "Assign groups": "تخصيص المجموعات",
   "Assign Groups": "تخصيص المجموعات",
-  "assign policies": "سياسات التعيين",
-  "assign Policies": "سياسات التعيين",
+  "assign policies": "تعيين السياسات",
+  "assign Policies": "تعيين السياسات",
   "Assign Policies": "تعيين السياسات",
   "Assign Policy": "تعيين سياسة",
   "Assign Users": "تعيين المستخدمين",
   Asynchronous: "غير متزامن",
-  "Audit Kafka": "التدقيق Kafka",
-  "Audit Webhook": "التدقيق Webhook",
-  August: "آب",
+  "Audit Kafka": "تدقيق Kafka",
+  "Audit Webhook": "Webhook التدقيق",
+  August: "أغسطس",
   "Auth Token": "رمز المصادقة",
   "Auto delete queue when set to 'on', when there are no consumers":
-    'حذف قائمة الانتظار تلقائيًا عند ضبطها على "تشغيل"، في حالة عدم وجود مستهلكين',
+    "حذف قائمة الانتظار تلقائيًا عند الضبط على 'on' في حال عدم وجود مستهلكين",
   "Auto Deleted": "الحذف التلقائي",
   "Available Capacity": "السعة المتوفرة",
   Back: "رجوع",
@@ -627,10 +626,10 @@ const messages: Dictionary = {
   Bucket: "حاوية",
   "Bucket Assignments": "تعيينات الحاويات",
   "Bucket Encryption configuration": "إعدادات تشفير الحاوية",
-  "Bucket lifecycle (ILM) configuration": "تكوين دورة حياة الجرافة (ILM).",
+  "Bucket lifecycle (ILM) configuration": "إعدادات دورة حياة الحاوية (ILM)",
   "Bucket Name": "اسم الحاوية",
   "Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).":
-    "يمكن أن تتكون أسماء المجموعة فقط من أحرف صغيرة وأرقام ونقاط (.) وواصلات (-).",
+    "لا يمكن أن تتكون أسماء الحاويات إلا من أحرف صغيرة وأرقام ونقاط (.) وشرطات (-).",
   "Bucket names must be between 3 (min) and 63 (max) characters long.":
     "يجب أن يتراوح طول اسم الحاوية بين 3 و63 حرفًا.",
   "Bucket names must be unique within a partition.":
@@ -638,13 +637,13 @@ const messages: Dictionary = {
   "Bucket names must not be formatted as an IP address (for example, 192.168.5.4).":
     "يجب ألا يكون اسم الحاوية بصيغة عنوان IP، مثل 192.168.5.4.",
   "Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.":
-    "يجب ألا تحتوي أسماء المجموعة على فترتين متجاورتين، أو فترة مجاورة لواصلة.",
+    "يجب ألا تحتوي أسماء الحاويات على نقطتين متجاورتين، أو نقطة مجاورة لشرطة.",
   "Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.":
-    "يجب ألا تنتهي أسماء المجموعة باللاحقة -s3alias. هذه اللاحقة محجوزة للأسماء المستعارة لنقاط الوصول.",
+    "يجب ألا تنتهي أسماء الحاويات باللاحقة -s3alias. فهذه اللاحقة محجوزة للأسماء المستعارة لنقاط الوصول.",
   "Bucket names must not start with the prefix xn--.":
-    "يجب ألا تبدأ أسماء المجموعة بالبادئة xn--.",
-  "Bucket notification configuration": "تكوين إشعار الجرافة",
-  "bucket notifications": "حاوية الإشعارات",
+    "يجب ألا تبدأ أسماء الحاويات بالبادئة xn--.",
+  "Bucket notification configuration": "إعدادات إشعارات الحاوية",
+  "bucket notifications": "إشعارات الحاوية",
   "Bucket Object-Lock configurations": "إعدادات قفل كائنات الحاوية",
   "Bucket Policies": "سياسات الحاوية",
   "Bucket Replication Configuration": "إعدادات النسخ المتماثل للحاوية",
@@ -654,7 +653,7 @@ const messages: Dictionary = {
   "Buckets:": "الحاويات:",
   "Bypass Governance Mode": "تجاوز وضع الحوكمة",
   Bytes: "بايت",
-  "Calls to Trace": "مكالمات للتتبع",
+  "Calls to Trace": "الاستدعاءات المراد تتبعها",
   Cancelled: "ملغى",
   "Cannot delete currently logged in user":
     "لا يمكن حذف المستخدم الذي قام بتسجيل الدخول حاليًا",
@@ -690,7 +689,7 @@ const messages: Dictionary = {
   "Client cert key for mTLS authentication": "مفتاح شهادة العميل لمصادقة mTLS",
   "Client cert key for NATS mTLS authorization":
     "مفتاح شهادة العميل للحصول على تفويض NATS mTLS",
-  "Client ID is required": "مطلوب عميل ID",
+  "Client ID is required": "معرّف العميل مطلوب",
   "Client Key": "مفتاح العميل",
   "Client ping commands interval in s,m,h,d. Disabled by default":
     "الفاصل الزمني لأوامر ping للعميل في s,m,h,d. معطل افتراضيا",
@@ -698,7 +697,7 @@ const messages: Dictionary = {
   "Client Secret must be re-entered to change OpenID configurations":
     "يجب إعادة إدخال سر العميل لتغيير إعدادات OpenID",
   "client TLS cert": "شهادة TLS للعميل",
-  "client TLS key": "العميل TLS مفتاح",
+  "client TLS key": "مفتاح TLS للعميل",
   "ClientAuth determines the Kafka server's policy for TLS client authorization":
     "يحدد ClientAuth سياسة خادم Kafka لتفويض عملاء TLS",
   "Cluster Health Report will be generated, you will be able to download the JSON File.":
@@ -735,7 +734,7 @@ const messages: Dictionary = {
   "connected server": "خادم متصل",
   "Connection String": "سلسلة الاتصال",
   "Console Credentials": "بيانات اعتماد وحدة التحكم",
-  "Console LICENSE": "الكونسول LICENSE",
+  "Console LICENSE": "ترخيص Console",
   "Console portions © Georg Mangold and contributors.":
     "أجزاء وحدة التحكم © Georg Mangold والمساهمين.",
   "Console predecessor": "سلف الكونسول",
@@ -745,11 +744,11 @@ const messages: Dictionary = {
   "Cors Allow Origin": "المصدر المسموح به في CORS",
   "Could not process drag and drop.": "لا يمكن معالجة السحب والإسقاط.",
   "CPU Info": "معلومات المعالج",
-  "Create {idpType} configuration": "إنشاء {idpType} التكوين",
+  "Create {idpType} configuration": "إنشاء إعدادات {idpType}",
   "create a bucket": "إنشاء حاوية",
   "Create a new cryptographic key in the Key Management Service server connected to SILO.":
     "أنشئ مفتاح تشفير جديدًا في خادم خدمة إدارة المفاتيح المتصل بـ SILO.",
-  "create a new path": "أنشئ طريقًا جديدًا",
+  "create a new path": "إنشاء مسار جديد",
   "create a Policy": "إنشاء سياسة",
   "Create access key": "إنشاء مفتاح وصول",
   "Create Access Key": "إنشاء مفتاح وصول",
@@ -777,7 +776,7 @@ const messages: Dictionary = {
   "Creation and deletion of service accounts (except those owned by the root user)":
     "إنشاء وحذف حسابات الخدمة (ما عدا تلك المملوكة للمستخدم الجذر)",
   "Creation of STS credentials": "إنشاء بيانات اعتماد STS",
-  Credentials: "أوراق الاعتماد",
+  Credentials: "بيانات الاعتماد",
   current: "الحالي",
   Current: "الحالي",
   "Current Endpoint:": "نقطة النهاية الحالية:",
@@ -790,7 +789,7 @@ const messages: Dictionary = {
   "Current User Policy - edit the JSON to remove permissions for this Access Key":
     "سياسة المستخدم الحالي — عدّل JSON لإزالة صلاحيات مفتاح الوصول هذا",
   "Current Version": "الإصدار الحالي",
-  "CURRENT VERSION": "CURRENT VERSION",
+  "CURRENT VERSION": "الإصدار الحالي",
   "Currently Configured Endpoints": "نقاط النهاية التي تم تكوينها حاليًا",
   custom: "مخصص",
   Custom: "مخصص",
@@ -808,7 +807,7 @@ const messages: Dictionary = {
   },
   Days: "أيام",
   "DB table name to store/update events, table is auto-created":
-    "DB اسم الجدول لتخزين/تحديث الأحداث، يتم إنشاء الجدول تلقائيًا",
+    "اسم جدول قاعدة البيانات لتخزين الأحداث وتحديثها، ويُنشأ تلقائيًا",
   December: "ديسمبر",
   Default: "افتراضي",
   "Default Key ID:": "معرّف المفتاح الافتراضي:",
@@ -852,15 +851,15 @@ const messages: Dictionary = {
   "Delete version": "حذف النسخة",
   "Delete Webhook": "حذف Webhook",
   Deleted: "محذوف",
-  DELETED: "DELETED",
-  Deletes: "يحذف",
+  DELETED: "محذوف",
+  Deletes: "عمليات الحذف",
   "Delivery Mode": "طريقة التوصيل",
   Description: "الوصف",
   Destination: "الوجهة",
   "Detailed Results:": "النتائج التفصيلية:",
   Disable: "تعطيل",
   "Disable LDAP": "تعطيل LDAP",
-  "Disable SSL certificate verification ": "تعطيل SSL التحقق من الشهادة",
+  "Disable SSL certificate verification ": "تعطيل التحقق من شهادة SSL",
   "disable users": "تعطيل المستخدمين",
   Disabled: "معطّل",
   "Display Name": "اسم العرض",
@@ -875,11 +874,11 @@ const messages: Dictionary = {
   Done: "تم",
   "Download all access credentials": "قم بتنزيل كافة بيانات اعتماد الوصول",
   "Download all access credentials to a JSON file. NOTE: This file is not formatted for import using mc alias import. If you plan to import this alias from the file, please use the Download for Import button. ":
-    "نزّل جميع بيانات اعتماد الوصول إلى ملف JSON. ملاحظة: هذا الملف غير مهيأ للاستيراد باستخدام mc alias import. لاستيراد الاسم المستعار من ملف، استخدم زر «تنزيل للاستيراد».",
+    "نزّل جميع بيانات اعتماد الوصول في ملف JSON. ملاحظة: هذا الملف غير منسّق للاستيراد باستخدام الأمر mc alias import. إذا كنت تخطط لاستيراد هذا الاسم المستعار من الملف، فاستخدم زر «التنزيل للاستيراد».",
   "Download as CSV": "تحميل كـ CSV",
   "Download as PNG": "تحميل كـ PNG",
   "Download credentials in a JSON file formatted for import using mc alias import. This will only include the default login credentials.":
-    "نزّل بيانات الاعتماد بصيغة JSON المتوافقة مع mc alias import. يتضمن الملف بيانات تسجيل الدخول الافتراضية فقط.",
+    "نزّل بيانات الاعتماد في ملف JSON منسّق للاستيراد باستخدام الأمر mc alias import. سيتضمن هذا بيانات اعتماد تسجيل الدخول الافتراضية فقط.",
   "Download File": "تنزيل الملف",
   "Download for import": "تحميل للاستيراد",
   "Download JSON": "تحميل JSON",
@@ -891,7 +890,7 @@ const messages: Dictionary = {
   "Download this Object": "قم بتنزيل هذا الكائن",
   "Download this version": "قم بتنزيل هذا الإصدار",
   "Download widget data": "تنزيل بيانات القطعة",
-  "Downloads / Uploads": "التنزيلات / التحميلات",
+  "Downloads / Uploads": "التنزيلات / عمليات الرفع",
   "Drives Partitions Info": "معلومات أقسام الأقراص",
   "Drives:": "محركات الأقراص:",
   "DSN String": "سلسلة DSN",
@@ -899,7 +898,7 @@ const messages: Dictionary = {
   Duration: "المدة",
   "During the speed test all your production traffic will be temporarily suspended.":
     "أثناء اختبار السرعة، سيتم تعليق جميع حركة الإنتاج الخاصة بك مؤقتًا.",
-  "e.g. 503": "على سبيل المثال. 503",
+  "e.g. 503": "مثلاً 503",
   "e.g. FunctionName2055": "مثال: FunctionName2055",
   "e.g. Method 2056": "مثال: Method 2056",
   "e.g. my-bucket/my-prefix/*": "مثال: my-bucket/my-prefix/*",
@@ -926,9 +925,9 @@ const messages: Dictionary = {
   "Edit Webhook": "تعديل Webhook",
   "Effect:": "التأثير:",
   "Elasticsearch index to store/update events, index is auto-created":
-    "Elasticsearch فهرس لتخزين/تحديث الأحداث، يتم إنشاء الفهرس تلقائيًا",
+    "فهرس Elasticsearch لتخزين الأحداث وتحديثها، ويُنشأ تلقائيًا",
   "Elasticsearch server's address, with optional authentication info":
-    "Elasticsearch عنوان الخادم، مع معلومات المصادقة الاختيارية",
+    "عنوان خادم Elasticsearch، مع معلومات مصادقة اختيارية",
   Enable: "تفعيل",
   "Enable audit_kafka target": "تفعيل هدف Audit_kafka",
   "Enable Bucket Encryption": "تفعيل تشفير الحاوية",
@@ -952,7 +951,7 @@ const messages: Dictionary = {
   endpoints: "نقاط النهاية",
   Endpoints: "نقاط النهاية",
   "Enter '/' to apply the rule to all prefixes and objects at the bucket root. Do not include the wildcard asterisk '*' as part of the prefix *unless* it is an explicit part of the prefix name. The Console automatically appends an asterisk to the appropriate sections of the resulting IAM policy.":
-    "أدخل \"/\" لتطبيق القاعدة على جميع البادئات والكائنات في جذر المجموعة. لا تقم بتضمين علامة النجمة البدل '*' كجزء من البادئة *ما لم* تكون جزءًا صريحًا من اسم البادئة. تقوم وحدة التحكم تلقائيًا بإلحاق علامة النجمة بالأقسام المناسبة لسياسة IAM الناتجة.",
+    "أدخل '/' لتطبيق القاعدة على جميع البادئات والكائنات في جذر الحاوية. لا تُدرج رمز النجمة '*' ضمن البادئة *إلا* إذا كان جزءًا صريحًا من اسم البادئة. تُلحق لوحة التحكم علامة النجمة تلقائيًا بالأقسام المناسبة من سياسة IAM الناتجة.",
   "Enter a comment": "أدخل تعليق",
   "Enter a description": "أدخل الوصف",
   "Enter a Mime Type": "أدخل نوع MIME",
@@ -987,7 +986,7 @@ const messages: Dictionary = {
   "Enter DSN String": "أدخل سلسلة DSN",
   "Enter Endpoint": "أدخل نقطة النهاية",
   "Enter Exchange": "أدخل المُبدّل",
-  "Enter Exchange Type": "أدخل نوع الصرف",
+  "Enter Exchange Type": "أدخل نوع المُبدّل",
   "Enter Format": "أدخل التنسيق",
   "Enter Host": "أدخل المضيف",
   "Enter Index": "أدخل الفهرس",
@@ -996,13 +995,13 @@ const messages: Dictionary = {
   "Enter Kafka Version": "أدخل إصدار Kafka",
   "Enter Keep Alive Interval": "أدخل فترة إبقاء الاتصال حيًا",
   "Enter Key": "أدخل المفتاح",
-  "Enter Max IO": "أدخل الحد الأقصى للإدخال والإخراج",
+  "Enter Max IO": "أدخل أقصى IO",
   "Enter Max Sleep Duration": "أدخل أقصى مدة للسكون",
-  "Enter Max Wait": "أدخل ماكس انتظر",
+  "Enter Max Wait": "أدخل أقصى انتظار",
   "Enter Name (Eg. REMOTE-TIER)": "أدخل الاسم (مثال: REMOTE-TIER)",
-  "Enter NATS password": "أدخل NATS كلمة المرور",
-  "Enter NATS Subject": "أدخل NATS الموضوع",
-  "Enter NATS token": "أدخل NATS رمز مميز",
+  "Enter NATS password": "أدخل كلمة مرور NATS",
+  "Enter NATS Subject": "أدخل موضوع NATS",
+  "Enter NATS token": "أدخل رمز NATS",
   "Enter NATS Username": "أدخل اسم مستخدم NATS",
   "Enter New Tag Key": "أدخل مفتاح الوسم الجديد",
   "Enter New Tag Label": "أدخل تسمية الوسم الجديد",
@@ -1012,15 +1011,14 @@ const messages: Dictionary = {
   "Enter Ping Interval": "أدخل فترة اختبار الاتصال",
   "Enter Port": "أدخل المنفذ",
   "Enter Prefix": "أدخل البادئة",
-  "Enter QOS": "أدخل مستوى جودة الخدمة",
+  "Enter QOS": "أدخل QoS",
   "Enter Queue Dir": "أدخل دليل قائمة الانتظار",
   "Enter Queue Directory": "أدخل دليل قائمة الانتظار",
   "Enter Queue Limit": "أدخل حد قائمة الانتظار",
   "Enter Reconnect Interval": "أدخل الفاصل الزمني لإعادة الاتصال",
-  "Enter Replication Failed Workers":
-    "أدخل عدد عمّال إعادة محاولة النسخ المتماثل الفاشل",
+  "Enter Replication Failed Workers": "أدخل عمّال النسخ الفاشل",
   "Enter Replication Workers": "أدخل عدد عمّال النسخ المتماثل",
-  "Enter Requests Max": "أدخل الطلبات كحد أقصى",
+  "Enter Requests Max": "أدخل أقصى عدد للطلبات",
   "Enter Routing Key": "أدخل مفتاح التوجيه",
   "Enter SASL Mechanism": "أدخل آلية SASL",
   "Enter SASL Password": "أدخل كلمة مرور SASL",
@@ -1029,7 +1027,7 @@ const messages: Dictionary = {
   "Enter SSL Mode": "أدخل وضع SSL",
   "Enter Storage Class": "أدخل فئة التخزين",
   "Enter Streaming Cluster ID": "أدخل معرّف عنقود البث",
-  "Enter Streaming in flight value": "أدخل البث في قيمة الرحلة",
+  "Enter Streaming in flight value": "أدخل قيمة الرسائل الجارية للبث",
   "Enter Table Name": "أدخل اسم الجدول",
   "Enter Tag Key": "أدخل مفتاح الوسم",
   "Enter Tag Label": "أدخل تسمية الوسم",
@@ -1052,8 +1050,8 @@ const messages: Dictionary = {
   "ETAG:": "ETAG:",
   Event: "الحدث",
   "Event Notifications": "إشعارات الأحداث",
-  Exchange: "صرف",
-  "Exchange Type": "نوع الصرف",
+  Exchange: "المُبدّل",
+  "Exchange Type": "نوع المُبدّل",
   "Exclude Folders": "استبعاد المجلدات",
   "exclude folders and prefixes": "استبعاد المجلدات والبادئات",
   "Exclude folders and prefixes": "استبعاد المجلدات والبادئات",
@@ -1098,11 +1096,11 @@ const messages: Dictionary = {
   "Folder cannot have the same name as an existing file":
     "لا يمكن أن يحمل المجلد نفس اسم الملف الموجود",
   "For each write operation to the bucket, SILO checks all configured replication rules for the bucket and applies the matching rule with highest configured priority.":
-    "لكل عملية كتابة في المجموعة، SILO يتحقق من جميع قواعد النسخ المتماثل المكونة للحاوية ويطبق قاعدة المطابقة ذات الأولوية الأعلى المكونة.",
+    "عند كل عملية كتابة في الحاوية، يتحقق SILO من جميع قواعد النسخ المتماثل المُعدّة للحاوية ويطبق القاعدة المطابقة ذات الأولوية الأعلى.",
   'For each write operation to this "source" bucket, SILO checks all configured replication rules and applies the matching rule with highest configured priority.':
-    'لكل عملية كتابة إلى مجموعة "المصدر" هذه، SILO يتحقق من كافة قواعد النسخ المتماثل التي تم تكوينها ويطبق قاعدة المطابقة ذات الأولوية الأعلى التي تم تكوينها.',
+    "عند كل عملية كتابة في حاوية «المصدر» هذه، يتحقق SILO من جميع قواعد النسخ المتماثل المُعدّة ويطبق القاعدة المطابقة ذات الأولوية الأعلى.",
   "For per-object retention settings, defer to the documentation for the PUT operation used by your preferred SDK.":
-    "بالنسبة لإعدادات الاحتفاظ لكل كائن، قم بالتأجيل إلى الوثائق الخاصة بعملية PUT التي تستخدمها SDK المفضلة لديك.",
+    "لبعض إعدادات الاحتفاظ على مستوى الكائن، راجع وثائق عملية PUT الخاصة بحزمة SDK المفضلة لديك.",
   "For SSE-S3 or SSE-KMS encryption via KMS, all sites must have access to a central KMS deployment server.":
     "للتشفير باستخدام SSE-S3 أو SSE-KMS عبر KMS، يجب أن تتمكن جميع المواقع من الوصول إلى خادم KMS مركزي.",
   Format: "التنسيق",
@@ -1124,8 +1122,8 @@ const messages: Dictionary = {
     "توفر المجموعات طريقة مبسطة لإدارة الأذونات المشتركة بين المستخدمين الذين لديهم أنماط وصول وأعباء عمل مشتركة. لا يمكن للعميل المصادقة على نشر SILO باستخدام مجموعة كهوية.",
   "Groups with this Policy associated": "المجموعات المرتبطة بهذه السياسة",
   "Guide to access policy structure": "دليل بنية سياسة الوصول",
-  hard: "صعب",
-  Heal: "شفاء",
+  hard: "صارم",
+  Heal: "إصلاح",
   "Health Check Duration": "مدة الفحص الصحي",
   "Health Info (Preview)": "معلومات صحية (معاينة)",
   "Health Report": "التقرير الصحي",
@@ -1150,11 +1148,11 @@ const messages: Dictionary = {
     other: "ساعة",
   },
   Hours: "الساعات",
-  "IAM conditional statements": "IAM الجمل الشرطية",
-  "IAM Policy": "IAM سياسة",
-  Id: "معرف",
+  "IAM conditional statements": "العبارات الشرطية لـ IAM",
+  "IAM Policy": "سياسة IAM",
+  Id: "ID",
   Identifier: "المعرّف",
-  "Identity provider Client ID": "عميل مزود الهوية ID",
+  "Identity provider Client ID": "معرّف عميل موفّر الهوية",
   "Identity provider Client Secret": "سرّ العميل لموفّر الهوية",
   "If the Health report cannot be generated at this time, please wait a moment and try again.":
     "إذا تعذر إنشاء تقرير الصحة في هذا الوقت، يرجى الانتظار لحظة والمحاولة مرة أخرى.",
@@ -1181,19 +1179,19 @@ const messages: Dictionary = {
   "Just now": "الآن",
   "Kafka topic used for bucket notifications":
     "موضوع Kafka المستخدم لإشعارات الحاويات",
-  "Keep Alive Interval": "الفاصل الزمني للمحافظة على الحياة",
+  "Keep Alive Interval": "فاصل إبقاء الاتصال نشطًا",
   "Keep-alive interval for MQTT connections in s,m,h,d":
-    "الفاصل الزمني للمحافظة على MQTT الاتصالات في s,m,h,d",
+    "فاصل إبقاء اتصالات MQTT نشطة بوحدات s,m,h,d",
   Key: "المفتاح",
   "Key Management Service Endpoints:": "نقاط نهاية خدمة إدارة المفاتيح:",
-  "Key Name": "الاسم الرئيسي",
-  "Key name cannot contain spaces": "لا يمكن أن يحتوي الاسم الرئيسي على مسافات",
+  "Key Name": "اسم المفتاح",
+  "Key name cannot contain spaces": "لا يمكن أن يحتوي اسم المفتاح على مسافات",
   Keys: "مفاتيح",
   "KMS Key ID": "معرّف مفتاح KMS",
   "Last Modified": "آخر تعديل",
   "Last modified:": "آخر تعديل:",
   "Last Modified:": "آخر تعديل:",
-  "Latency Histogram": "الرسم البياني الكمون",
+  "Latency Histogram": "مدرج تكراري لزمن الاستجابة",
   "LDAP Enabled": "LDAP مفعّل",
   "Learn more about {link}.": "اعرف المزيد عن {link}.",
   "Learn more about Access Keys": "تعرّف على مفاتيح الوصول",
@@ -1235,18 +1233,18 @@ const messages: Dictionary = {
   "Manually Configure String": "تكوين السلسلة يدويًا",
   March: "مارس",
   "Max IO": "الحد الأقصى IO",
-  "Max Sleep": "ماكس النوم",
-  "Max Wait": "ماكس انتظر",
+  "Max Sleep": "أقصى مدة سكون",
+  "Max Wait": "أقصى مدة انتظار",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
-    "الحد الأقصى IO للطلبات المسموح بها بين الكائنات لإبطاء عملية الشفاء، على سبيل المثال. 3",
+    "الحد الأقصى لطلبات IO المسموح بها بين الكائنات لإبطاء عملية الإصلاح، مثل: 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
     'الحد الأقصى للرسائل التي لم يتم تسليمها، الافتراضي هو "10000"',
   "Maximum number of concurrent requests, e.g. '1600'":
     'الحد الأقصى لعدد الطلبات المتزامنة، على سبيل المثال. "1600"',
   "Maximum sleep duration between objects to slow down heal operation, e.g. 2s":
-    "الحد الأقصى لمدة النوم بين الأشياء لإبطاء عملية الشفاء، على سبيل المثال. 2 ثانية",
+    "أقصى مدة سكون بين الكائنات لإبطاء عملية الإصلاح، مثل: 2s",
   "Maximum wait time between operations, defaults to '15s'":
-    'الحد الأقصى لوقت الانتظار بين العمليات، الافتراضي هو "15 ثانية"',
+    "أقصى وقت انتظار بين العمليات، القيمة الافتراضية هي '15s'",
   May: "مايو",
   "May try again or download Health report JSON File.":
     "يمكنك إعادة المحاولة أو تنزيل تقرير حالة النظام بصيغة JSON.",
@@ -1255,9 +1253,9 @@ const messages: Dictionary = {
   Metadata: "البيانات الوصفية",
   "Metadata Sync": "مزامنة البيانات الوصفية",
   Method: "الطريقة",
-  "Mime Types": "أنواع التمثيل الصامت",
+  "Mime Types": "أنواع MIME",
   'Mime types e.g. "text/*", "application/json" or "application/xml" - you can write one per field':
-    'أنواع التمثيل الصامت على سبيل المثال. "text/*" أو "application/json" أو "application/xml" - يمكنك كتابة واحد في كل حقل',
+    'أنواع MIME مثل "text/*" أو "application/json" أو "application/xml" — يمكنك كتابة نوع واحد في كل حقل',
   minute: "دقيقة",
   minutes: {
     zero: "دقائق",
@@ -1283,24 +1281,24 @@ const messages: Dictionary = {
   "MQTT password": "كلمة مرور MQTT",
   "MQTT server endpoint e.g. `tcp://localhost:1883`":
     "نقطة نهاية خادم MQTT، مثل `tcp://localhost:1883`",
-  "MQTT username": "MQTT اسم المستخدم",
+  "MQTT username": "اسم مستخدم MQTT",
   "Multi Bucket lifecycle Assignments Results":
     "نتائج تعيين دورة الحياة لعدة حاويات",
   Name: "الاسم",
   "Name for identity provider configuration": "اسم تكوين موفر الهوية",
-  "Name of the AMQP exchange": "اسم الصرف AMQP",
+  "Name of the AMQP exchange": "اسم مُبدّل AMQP",
   'Name of the location of the server e.g. "us-west-rack2"':
-    'اسم موقع الخادم مثلاً: "الولايات المتحدة-الغرب-Rack2"',
+    'اسم موقع الخادم، مثل: "us-west-rack2"',
   "Name of the MQTT topic to publish": "إسم الموضوع MQTT المراد نشره",
   "Name:": "الاسم:",
   'Namespace prefix to isolate tenants e.g. "customer1/"':
-    'بادئة مساحة الاسم لعزل المستأجرين على سبيل المثال. "العميل1/"',
-  "NATS password": "NATS كلمة المرور",
+    'بادئة مساحة الاسم لعزل المستأجرين، مثل: "customer1/"',
+  "NATS password": "كلمة مرور NATS",
   "NATS server address e.g. '0.0.0.0:4222'":
-    "NATS عنوان الخادم على سبيل المثال. '0.0.0.0:4222'",
-  "NATS subscription subject": "NATS موضوع الإشتراك",
+    "عنوان خادم NATS، مثل: '0.0.0.0:4222'",
+  "NATS subscription subject": "موضوع اشتراك NATS",
   "NATS token": "رمز NATS",
-  "NATS username": "NATS اسم المستخدم",
+  "NATS username": "اسم مستخدم NATS",
   "Network Info": "معلومات الشبكة",
   "New {entity} Created": "تم إنشاء {entity} جديد",
   "New Audit Webhook": "Webhook تدقيق جديد",
@@ -1322,13 +1320,13 @@ const messages: Dictionary = {
   "No query results yet": "لا توجد نتائج استعلام بعد",
   "No Results Available": "لا توجد نتائج متاحة",
   "No Users to display": "لا يوجد مستخدمين لعرضهم",
-  "No Wait": "لا انتظر",
-  "no-expiry": "عدم انتهاء الصلاحية",
+  "No Wait": "دون انتظار",
+  "no-expiry": "بلا انتهاء",
   "Nodes:": "العقد:",
   "Non-blocking message delivery when set to 'on', default is 'off'":
-    'تسليم الرسائل غير المحظورة عند الضبط على "تشغيل"، الافتراضي هو "إيقاف"',
+    "تسليم الرسائل دون حظر عند الضبط على 'on'، والقيمة الافتراضية هي 'off'",
   "Non-Current": "غير جارية",
-  "Non-current Expiration Days": "أيام انتهاء الصلاحية غير الحالية",
+  "Non-current Expiration Days": "انتهاء الإصدارات السابقة (أيام)",
   "Non-current Transition Days": "الأيام الانتقالية غير الحالية",
   "Non-Current Version": "الإصدار غير الحالي",
   "Non-current Version Transition Storage Class":
@@ -1343,7 +1341,7 @@ const messages: Dictionary = {
     "NSQ عنوان الخادم على سبيل المثال. '127.0.0.1:4150'",
   "NSQ topic": "موضوع NSQ",
   "NSQD Address": "عنوان NSQD",
-  "NULL VERSION": "NULL VERSION",
+  "NULL VERSION": "إصدار NULL",
   "Number of {unit} must be less than or equal to 2147483647":
     "يجب ألا يتجاوز عدد {unit} القيمة 2147483647",
   "Number of {unit} to retain must be greater than zero":
@@ -1367,15 +1365,15 @@ const messages: Dictionary = {
   "Objects List unavailable. Please review your WebSockets configuration and try again":
     "قائمة الكائنات غير متاحة. راجع إعدادات WebSockets وأعد المحاولة",
   "Objects:": "الكائنات:",
-  "Objs/S": "كائنات/ثانية",
+  "Objs/S": "كائن/ث",
   October: "أكتوبر",
   of: "من",
   "Only empty tiers can be deleted. If the tier has had objects transitioned into it, it cannot be removed.":
     "لا يمكن حذف سوى طبقات التخزين الفارغة. إذا نُقلت عناصر إلى الطبقة من قبل، فلا يمكن إزالتها.",
   "Opaque string or JWT authorization token":
-    "سلسلة غير شفافة أو JWT رمز التفويض",
+    "سلسلة نصية مبهمة أو رمز تفويض JWT",
   "Open Dialog": "فتح مربع الحوار",
-  "OpenID Configurations": "OpenID التكوينات",
+  "OpenID Configurations": "إعدادات OpenID",
   "OS Info": "معلومات نظام التشغيل",
   other: "أخرى",
   "Password for LDAP read-only service account used to perform DN and group lookups":
@@ -1399,8 +1397,8 @@ const messages: Dictionary = {
     "إجراء فحص bitrot على الأقراص عند فحص الكائنات أثناء الماسح الضوئي",
   "Performance test": "اختبار الأداء",
   "Persist queue across broker restarts when set to 'on', default is 'off'":
-    'قائمة الانتظار المستمرة عبر إعادة تشغيل الوسيط عند التعيين على "تشغيل"، الافتراضي هو "إيقاف"',
-  "Ping Interval": "الفاصل الزمني بينج",
+    "الحفاظ على قائمة الانتظار عند إعادة تشغيل الوسيط عند الضبط على 'on'، والقيمة الافتراضية هي 'off'",
+  "Ping Interval": "فترة Ping",
   "Please avoid the use of root credentials for this feature":
     "يرجى تجنب استخدام بيانات اعتماد الجذر لهذه الميزة",
   "Please configure {entity} first to use this feature.":
@@ -1422,15 +1420,15 @@ const messages: Dictionary = {
   "Please refer to {link} credentials.":
     "يرجى الرجوع إلى {link} بيانات الاعتماد.",
   "Please select / type the desired remote bucket were you want the local data to be replicated.":
-    "يرجى تحديد / كتابة المجموعة البعيدة المطلوبة إذا كنت تريد تكرار البيانات المحلية.",
+    "يرجى اختيار أو كتابة الحاوية البعيدة المطلوب نسخ البيانات المحلية إليها.",
   "Please select a valid duration.": "الرجاء تحديد مدة صالحة.",
   "Please select Groups on which you want to apply Policies":
     "الرجاء تحديد المجموعات التي تريد تطبيق السياسات عليها",
   "Please verify that string is uppercase only and contains valid characters (numbers, dashes & underscores).":
     "يرجى التحقق من أن السلسلة مكتوبة بأحرف كبيرة فقط وتحتوي على أحرف صالحة (أرقام وشرطات وشرطات سفلية).",
   Policy: "سياسة",
-  "Policy has no statements": "السياسة ليس لها أي بيانات",
-  "Policy mapping": "رسم خرائط السياسة",
+  "Policy has no statements": "لا تحتوي السياسة على أي عبارات",
+  "Policy mapping": "تعيين السياسة",
   "Policy Mappings": "تعيينات السياسات",
   "Policy Name": "اسم السياسة",
   "Policy name cannot be empty": "لا يمكن أن يكون اسم السياسة فارغًا",
@@ -1460,7 +1458,7 @@ const messages: Dictionary = {
   "Queue Directory": "دليل قائمة الانتظار",
   "Queue Limit": "حد قائمة الانتظار",
   "Quietly ignore undelivered messages when set to 'off', default is 'on'":
-    'تجاهل الرسائل التي لم يتم تسليمها بهدوء عند ضبطها على "إيقاف"، الافتراضي هو "تشغيل"',
+    "تجاهل الرسائل غير المسلّمة بصمت عند الضبط على 'off'، والقيمة الافتراضية هي 'on'",
   quota: "حصة",
   Quota: "الحصة",
   "Quota:": "الحصة:",
@@ -1468,18 +1466,18 @@ const messages: Dictionary = {
     "يوصى باستخدام بيانات اعتماد الوصول العشوائي، ويتم توفيرها افتراضيًا. يمكنك استخدام مفتاح الوصول والمفتاح السري المخصصين لك عن طريق استبدال القيم الافتراضية. بعد إنشاء أي مفتاح وصول، ستُتاح لك الفرصة لعرض بيانات اعتماد الحساب وتنزيلها.",
   "Raw Policy": "نص السياسة الخام",
   readonly: "للقراءة فقط",
-  readwrite: "إقرأ أكتب",
+  readwrite: "قراءة وكتابة",
   "Reconnect Interval": "فترة إعادة الاتصال",
   "Reconnect interval for MQTT connections in s,m,h,d":
     "فترة إعادة اتصالات MQTT بوحدات s أو m أو h أو d",
   "Redirect URI Dynamic": "عنوان URI ديناميكي لإعادة التوجيه",
   "Redis key to store/update events, key is auto-created":
-    "Redis مفتاح لتخزين/تحديث الأحداث، يتم إنشاء المفتاح تلقائيًا",
-  "Redis server password": "Redis كلمة سر السيرفر",
+    "مفتاح Redis لتخزين الأحداث وتحديثها، ويُنشأ تلقائيًا",
+  "Redis server password": "كلمة مرور خادم Redis",
   "Redis server's address e.g. `localhost:6379`":
-    'Redis عنوان الخادم على سبيل المثال. "المضيف المحلي: 6379".',
+    "عنوان خادم Redis، مثل: `localhost:6379`",
   Refresh: "تحديث",
-  "Refresh List": "قائمة التحديث",
+  "Refresh List": "تحديث القائمة",
   Region: "المنطقة",
   "Remote Bucket Assignments": "تعيينات الحاويات البعيدة",
   "Remote Configuration": "الإعدادات البعيدة",
@@ -1499,7 +1497,7 @@ const messages: Dictionary = {
   "Replicate soft deletes": "نسخ عمليات الحذف المنطقي",
   "Replicate versioned deletes": "نسخ عمليات حذف الإصدارات",
   Replication: "النسخ المتماثل",
-  "Replication Failed Workers": "عمّال إعادة محاولة النسخ المتماثل الفاشل",
+  "Replication Failed Workers": "عمّال النسخ المتماثل الفاشل",
   "Replication Mode": "وضع النسخ المتماثل",
   "Replication Options": "خيارات النسخ المتماثل",
   "Replication Rules": "قواعد النسخ المتماثل",
@@ -1512,7 +1510,7 @@ const messages: Dictionary = {
   "Reported Usage:": "الاستخدام المبلغ عنه:",
   "Request Content Length": "طول محتوى الطلب",
   "Request ID": "معرّف الطلب",
-  "Requests Max": "يطلب الحد الأقصى",
+  "Requests Max": "الحد الأقصى للطلبات",
   "Requests that took T ms or less": "الطلبات التي استغرقت T مللي ثانية أو أقل",
   Reset: "إعادة الضبط",
   "Reset Configuration": "إعادة ضبط التكوين",
@@ -1526,7 +1524,7 @@ const messages: Dictionary = {
   "Restore Defaults": "استعادة الإعدادات الافتراضية",
   "Restore File Version": "استعادة إصدار الملف",
   "Restore this version": "استعادة هذا الإصدار",
-  "Restrict beyond user policy": "تقييد الصلاحيات بما يتجاوز سياسة المستخدم",
+  "Restrict beyond user policy": "تقييد إضافي فوق سياسة المستخدم",
   Results: "النتائج",
   Retention: "الاحتفاظ",
   "Retention Mode": "وضع الاحتفاظ",
@@ -1539,19 +1537,19 @@ const messages: Dictionary = {
   Rewind: "الاسترجاع الزمني",
   "Rewind - {bucket}": "الاسترجاع الزمني — {bucket}",
   "Rewind Bucket": "الاسترجاع الزمني للحاوية",
-  "Rewind to": "الترجيع إلى",
+  "Rewind to": "الاسترجاع الزمني إلى",
   "Role Policy": "سياسة الدور",
   rotating: "الدورية",
   "Routing Key": "مفتاح التوجيه",
   "Routing key for publishing": "مفتاح التوجيه للنشر",
-  "Rule State": "دولة القاعدة",
+  "Rule State": "حالة القاعدة",
   "Rule Type": "نوع القاعدة",
   "Running {mcDu} without the {flag} flag or {df} will provide different values corresponding to the size of all {current} versions and the physical disk space occupied respectively.":
     "تشغيل {mcDu} بدون العلم {flag} أو {df} سيوفر قيمًا مختلفة تتوافق مع حجم جميع إصدارات {current} ومساحة القرص الفعلية المشغولة على التوالي.",
-  "S3 lifecycle": "S3 دورة الحياة",
+  "S3 lifecycle": "دورة حياة S3",
   "SASL authentication mechanism": "آلية مصادقة SASL",
   "SASL authentication mechanism, default 'PLAIN'":
-    "SASL آلية المصادقة الافتراضية 'PLAIN'",
+    "آلية مصادقة SASL، القيمة الافتراضية 'PLAIN'",
   "SASL Mechanism": "آلية SASL",
   "SASL Password": "كلمة مرور SASL",
   "SASL Username": "اسم مستخدم SASL",
@@ -1561,17 +1559,17 @@ const messages: Dictionary = {
   "SCANNER - Object has too many versions / Prefixes has too many sub-folders":
     "SCANNER — للكائن إصدارات كثيرة جدًا، أو للبادئات مجلدات فرعية كثيرة جدًا",
   "Scanner delay multiplier, defaults to '10.0'":
-    'مضاعف تأخير الماسح الضوئي، القيمة الافتراضية هي "10.0"',
+    "مضاعف تأخير الماسح، القيمة الافتراضية هي '10.0'",
   Scopes: "النطاقات",
   Search: "بحث",
-  "Search Access Keys": "مفاتيح الوصول للبحث",
-  "Search Groups": "مجموعات البحث",
-  "Search Keys with pattern": "مفاتيح البحث بالنمط",
+  "Search Access Keys": "بحث في مفاتيح الوصول",
+  "Search Groups": "بحث في المجموعات",
+  "Search Keys with pattern": "بحث في المفاتيح بنمط",
   "Search members": "البحث عن الأعضاء",
-  "Search Policies": "سياسات البحث",
+  "Search Policies": "بحث في السياسات",
   "Search target": "هدف البحث",
-  "Search Users": "بحث المستخدمين",
-  second: "الثانية",
+  "Search Users": "بحث في المستخدمين",
+  second: "ثانية",
   seconds: {
     zero: "ثوانٍ",
     one: "ثانية",
@@ -1598,7 +1596,7 @@ const messages: Dictionary = {
   "Select Users to delete": "حدد المستخدمين المراد حذفهم",
   "Select Users to group": "حدد المستخدمين للتجميع",
   "Select whether to apply the rule to current or non-current Object {versions}":
-    "حدد ما إذا كنت تريد تطبيق القاعدة على الكائن الحالي أو غير الحالي {versions}",
+    "حدد ما إذا كنت تريد تطبيق القاعدة على {versions} الكائن الحالية أو غير الحالية",
   "Selected Group": "المجموعة المختارة",
   "Selected Groups": "المجموعات المختارة",
   "Selected Object": "الكائن المحدد",
@@ -1620,7 +1618,7 @@ const messages: Dictionary = {
   Service: "الخدمة",
   "Service Accounts": "حسابات الخدمة",
   Services: "الخدمات",
-  Set: "مجموعة",
+  Set: "تعيين",
   "Set Anonymous Access to this Folder":
     "قم بتعيين الوصول المجهول إلى هذا المجلد",
   "Set Bucket Replication": "تعيين النسخ المتماثل للحاوية",
@@ -1634,22 +1632,22 @@ const messages: Dictionary = {
   "Set Retention Configuration": "إعداد الاحتفاظ",
   "Set Retention Policy": "تعيين سياسة الاحتفاظ",
   "Set the quality of service priority, defaults to '0'":
-    'ضبط أولوية جودة الخدمة، القيمة الافتراضية هي "0"',
+    "ضبط أولوية جودة الخدمة، القيمة الافتراضية هي '0'",
   "Set to '1' for non-persistent or '2' for persistent queue":
-    'اضبط على "1" لقائمة الانتظار غير المستمرة أو "2" لقائمة الانتظار المستمرة',
+    "اضبط على '1' لقائمة الانتظار غير المستمرة أو '2' لقائمة الانتظار المستمرة",
   "Set to 'on' for exchange to be not used directly by publishers, but only when bound to other exchanges":
-    'اضبط على "تشغيل" حتى لا يتم استخدام التبادل مباشرة من قبل الناشرين، ولكن فقط عندما يكون مرتبطًا بتبادلات أخرى',
+    "اضبط على 'on' لعدم استخدام المُبدّل مباشرة من قِبل الناشرين، بل عند ربطه بمُبدّلات أخرى فقط",
   "Set to 'on' to enable asynchronous publish":
-    'اضبط على "تشغيل" لتمكين النشر غير المتزامن',
+    "اضبط على 'on' لتفعيل النشر غير المتزامن",
   "Set to 'on' to enable SASL authentication":
-    'اضبط على "تشغيل" لتمكين مصادقة SASL',
-  "Set to 'on' to enable TLS": 'اضبط على "تشغيل" للتمكين TLS',
+    "اضبط على 'on' لتفعيل مصادقة SASL",
+  "Set to 'on' to enable TLS": "اضبط على 'on' لتفعيل TLS",
   "Set to 'on' to use streaming NATS server":
-    'اضبط على "تشغيل" لاستخدام خادم البث NATS',
+    "اضبط على 'on' لاستخدام خادم بث NATS",
   "Setting a {quota} assigns a hard limit to a bucket beyond which SILO does not allow writes.":
-    "تعيين {quota} يعين حدًا صارمًا للحاوية الذي يتجاوزه SILO لا يسمح بالكتابة.",
+    "يؤدي تعيين {quota} إلى فرض حد صارم على الحاوية لا يسمح SILO بالكتابة بعد تجاوزه.",
   "Setting an {anonymous} policy allows clients to access the Bucket or prefix contents and perform actions consistent with the specified policy without authentication.":
-    "يتيح تعيين سياسة {anonymous} للعملاء الوصول إلى محتويات المجموعة أو البادئة وتنفيذ إجراءات تتوافق مع السياسة المحددة دون مصادقة.",
+    "يتيح تعيين سياسة {anonymous} للعملاء الوصول إلى محتويات الحاوية أو البادئة وتنفيذ إجراءات تتوافق مع السياسة المحددة دون مصادقة.",
   Share: "مشاركة",
   "Share File": "مشاركة الملف",
   "Share Selected File": "مشاركة الملف المحدد",
@@ -1711,7 +1709,7 @@ const messages: Dictionary = {
     "يستخدم SILO الحاويات لتنظيم الكائنات. تشبه الحاوية مجلدًا أو دليلًا في نظام الملفات، ويمكن لكل حاوية الاحتفاظ بعدد غير محدد من الكائنات.",
   "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.":
     "يستخدم SILO التحكم في الوصول المستند إلى السياسات (PBAC) لتحديد الإجراءات والموارد المتاحة للمستخدم الذي تمت مصادقته. تصف كل سياسة إجراءً واحدًا أو أكثر وشروطًا تحدد صلاحيات مستخدم أو مجموعة مستخدمين.",
-  "SILO VERSION": "SILO VERSION",
+  "SILO VERSION": "إصدار SILO",
   "Site Name": "اسم الموقع",
   "Site:": "الموقع:",
   Size: "الحجم",
@@ -1720,39 +1718,40 @@ const messages: Dictionary = {
   "something went wrong": "حدث خطأ ما",
   "Something went wrong.": "حدث خطأ ما.",
   "Sort by": "فرز حسب",
-  "Specify the version of the Kafka cluster": "حدد إصدار المجموعة Kafka",
+  "Specify the version of the Kafka cluster": "حدّد إصدار عنقود Kafka",
   "Specify the version of the Kafka cluster e.g '2.2.0'":
-    "حدد إصدار المجموعة Kafka على سبيل المثال '2.2.0'",
+    "حدّد إصدار عنقود Kafka، مثل: '2.2.0'",
   "Speed Test results:": "نتائج اختبار السرعة:",
   Speedtest: "اختبار السرعة",
   "Speedtest in progress...": "جاري اختبار السرعة...",
   "Staging directory for undelivered messages e.g. '/home/events'":
-    "دليل التدريج للرسائل التي لم يتم تسليمها على سبيل المثال. '/المنزل/الأحداث'",
+    "دليل التجهيز المؤقت للرسائل غير المسلّمة، مثل: '/home/events'",
   "STANDARD_IA,REDUCED_REDUNDANCY etc":
     "STANDARD_IA وREDUCED_REDUNDANCY وغيرها",
   Start: "البداية",
   "Start Health Report": "بدء التقرير الصحي",
   "Start Logs": "بدء السجلات",
-  "Start Profiling": "ابدأ التوصيف",
+  "Start Profiling": "بدء التوصيف",
   "Start Time:": "وقت البدء:",
   "Start typing to filter objects in the bucket":
-    "ابدأ الكتابة لتصفية الكائنات الموجودة في المجموعة",
+    "ابدأ الكتابة لتصفية الكائنات في الحاوية",
   "Start typing to filter versions of {file}":
     "ابدأ الكتابة لتصفية إصدارات {file}",
   "Start typing to search for a Policy": "ابدأ الكتابة للبحث عن سياسة",
   "Start typing to search for Groups": "ابدأ الكتابة للبحث عن المجموعات",
-  Statements: "تصريحات",
+  Statements: "العبارات",
   Status: "الحالة",
   "Status Code": "رمز الحالة",
   Stop: "توقف",
   "Stop Logs": "إيقاف السجلات",
-  "Stop Profiling": "توقف عن التنميط",
+  "Stop Profiling": "إيقاف التوصيف",
   Storage: "التخزين",
   "Storage Class": "فئة التخزين",
-  Streaming: "الجري",
+  Streaming: "البث المتدفق",
   "Streaming async": "بث غير متزامن",
   "Streaming Cluster ID": "معرّف عنقود البث",
-  "Streaming max publish ACKS in flight": "بث أقصى نشر ACKS في الرحلة",
+  "Streaming max publish ACKS in flight":
+    "أقصى عدد لإشعارات ACK الجارية أثناء البث",
   Subject: "الموضوع",
   "Subscribe To Bucket Events": "الاشتراك في أحداث الحاوية",
   "Subscribe to Event": "الاشتراك في الحدث",
@@ -1763,12 +1762,12 @@ const messages: Dictionary = {
   "Successfully updated the password.": "تم تحديث كلمة المرور بنجاح.",
   Suffix: "اللاحقة",
   Summary: "ملخص",
-  "Supported API endpoints": "دعم API نقاط النهاية",
+  "Supported API endpoints": "نقاط نهاية API المدعومة",
   Suspended: "معلق",
   Synced: "متزامنة",
   Synchronous: "متزامن",
   "System Health Info": "معلومات صحة النظام",
-  Table: "طاولة",
+  Table: "جدول",
   "Tag for: {object}": "وسم الكائن: {object}",
   "Tag Key": "مفتاح الوسم",
   "Tag Label": "تسمية الوسم",
@@ -1777,7 +1776,7 @@ const messages: Dictionary = {
   "Tags for: {object}": "وسوم الكائن: {object}",
   "Tags:": "العلامات:",
   "Target Bucket": "حاوية الهدف",
-  "Target URL": "الهدف URL",
+  "Target URL": "عنوان URL الهدف",
   "The bucket selected in this deployment acts as the “source” while the configured remote deployment acts as the “target”.":
     "تعمل الحاوية المحددة في هذه النشرة كمصدر، بينما تعمل النشرة البعيدة المُعدّة كوجهة.",
   "The file must be valid and  should have valid config values":
@@ -1789,7 +1788,7 @@ const messages: Dictionary = {
   "The following changes are replicated to all other sites":
     "تُنسخ التغييرات التالية إلى جميع المواقع الأخرى",
   "The following URL lets you share this object without requiring a login.":
-    "ما يلي URL يتيح لك مشاركة هذا الكائن دون الحاجة إلى تسجيل الدخول.",
+    "يتيح لك الرابط التالي مشاركة هذا الكائن دون الحاجة إلى تسجيل الدخول.",
   "The current version of this object is a delete marker and cannot be shared.":
     "الإصدار الحالي لهذا العنصر هو علامة حذف ولا يمكن مشاركته.",
   "The selected object version could not be found. Refresh the object list and try again.":
@@ -1837,7 +1836,7 @@ const messages: Dictionary = {
     "لا يمكن حذف هذا التكوين باستخدام هذه الوحدة حيث تم تعيينه باستخدام متغيرات البيئة OpenID.",
   "this Console": "هذه الكونسول",
   "This feature allows multiple independent SILO sites (or clusters) that are using the same external IDentity Provider (IDP) to be configured as replicas. In this situation the set of replica sites are referred to as peer sites or just sites.":
-    "تسمح هذه الميزة بتكوين مواقع (أو مجموعات) SILO مستقلة متعددة تستخدم نفس موفر الهوية الخارجي (IDP) كنسخ متماثلة. في هذه الحالة، تتم الإشارة إلى مجموعة مواقع النسخ المتماثلة على أنها مواقع نظيرة أو مجرد مواقع.",
+    "تتيح هذه الميزة إعداد عدة مواقع (أو عناقيد) مستقلة من SILO تستخدم موفّر الهوية الخارجي (IDP) نفسه كنسخ متماثلة. وفي هذه الحالة يُشار إلى مجموعة مواقع النسخ المتماثلة بالمواقع النظيرة أو المواقع.",
   "This feature is not available for a single-disk setup.":
     "هذه الميزة غير متوفرة لإعداد قرص واحد.",
   "This feature is not available.": "هذه الميزة غير متوفرة.",
@@ -1848,9 +1847,9 @@ const messages: Dictionary = {
   "This location is empty, please try uploading a new file":
     "هذا الموقع فارغ، يرجى محاولة تحميل ملف جديد",
   "This Site": "هذا الموقع",
-  "This site/cluster": "هذا الموقع/المجموعة",
+  "This site/cluster": "هذا الموقع/العنقود",
   "This Usage value is comparable to {command} which represents the size of all object versions that exist in the buckets.":
-    "قيمة الاستخدام هذه قابلة للمقارنة بـ {command} الذي يمثل حجم جميع إصدارات الكائنات الموجودة في المجموعات.",
+    "تعادل قيمة الاستخدام هذه أمر {command} الذي يمثل حجم جميع إصدارات الكائنات الموجودة في الحاويات.",
   "This value is set from the {env} environment variable":
     "يتم تعيين هذه القيمة من متغير البيئة {env}",
   "This value is set from the {name} environment variable":
@@ -1869,18 +1868,18 @@ const messages: Dictionary = {
   "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.":
     "تُستخدم طبقات التخزين في إدارة دورة حياة الكائنات في SILO، التي تتيح إنشاء قواعد للنقل أو انتهاء الصلاحية تلقائيًا استنادًا إلى المدة أو التاريخ. وعند النقل، ينقل SILO الكائن إلى طبقة تخزين بعيدة مُعدّة مسبقًا.",
   "Time duration between scanner cycles, defaults to '1m'":
-    'المدة الزمنية بين دورات الماسح الضوئي، القيمة الافتراضية هي "1m"',
+    "المدة الزمنية بين دورات الماسح، القيمة الافتراضية هي '1m'",
   "Time to Response NS": "وقت الرد NS",
   Timestamp: "الطابع الزمني",
   "TLS Client Auth": "مصادقة عميل TLS",
   "TLS skip verify": "TLS تخطي التحقق",
   "TLS Skip Verify": "تجاوز التحقق من TLS",
   "To allow Bucket access without credentials, use the {anonymous} setting":
-    "للسماح بالوصول إلى Bucket بدون بيانات الاعتماد، استخدم الإعداد {anonymous}",
+    "للسماح بالوصول إلى الحاوية دون بيانات اعتماد، استخدم إعداد {anonymous}",
   "To continue please type {phrase} in the box.":
     "للمتابعة يرجى كتابة {phrase} في المربع.",
   "To enable this feature you need to enable versioning on the bucket before creation":
-    "لتمكين هذه الميزة، تحتاج إلى تمكين الإصدار في المجموعة قبل الإنشاء",
+    "لتفعيل هذه الميزة، يجب تفعيل إدارة الإصدارات على الحاوية قبل الإنشاء",
   "To Tier": "إلى المستوى",
   "Today, {time}": "اليوم، {time}",
   "Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable":
@@ -1889,18 +1888,18 @@ const messages: Dictionary = {
   "Toogle JSON": "تبديل عرض JSON",
   "Toogle Share URL": "تبديل رابط المشاركة",
   Topic: "الموضوع",
-  "Trace Results": "تتبع النتائج",
+  "Trace Results": "نتائج التتبع",
   "trademark notice": "إشعار العلامة التجارية",
   Transition: "انتقال",
   "Transition Days": "الأيام الانتقالية",
   True: "صحيح",
-  "Trust server TLS without verification": "خادم الثقة TLS بدون التحقق",
+  "Trust server TLS without verification": "الوثوق بشهادة TLS للخادم دون تحقق",
   'Trust server TLS without verification, defaults to "on" (verify)':
-    'خادم الثقة TLS بدون التحقق، الإعداد الافتراضي هو "تشغيل" (تحقق)',
+    'الوثوق بشهادة TLS للخادم دون تحقق، القيمة الافتراضية هي "on" (التحقق)',
   Type: "النوع",
   "Type New Password Again": "اكتب كلمة المرور الجديدة مرة أخرى",
   "Type of Lifecycle": "نوع دورة الحياة",
-  "Types to profile:": "أنواع الملف الشخصي:",
+  "Types to profile:": "أنواع التوصيف:",
   "Unable to download widget data": "غير قادر على تنزيل بيانات القطعة",
   "Unable to download widget data - data not available":
     "غير قادر على تنزيل بيانات القطعة - البيانات غير متوفرة",
@@ -1918,7 +1917,7 @@ const messages: Dictionary = {
     "تحديث بيانات الاعتماد - {type} / {name}",
   "Upload File": "تحميل الملف",
   "Upload Files": "رفع الملفات",
-  "upload files to this bucket": "تحميل الملفات إلى هذه المجموعة",
+  "upload files to this bucket": "رفع الملفات إلى هذه الحاوية",
   "Upload Folder": "رفع مجلد",
   "Upload is restricted.": "التحميل مقيد.",
   "Upload not allowed": "التحميل غير مسموح",
@@ -1933,12 +1932,13 @@ const messages: Dictionary = {
   "Use secure medium to share this key.":
     "استخدم وسيلة آمنة لمشاركة هذا المفتاح.",
   "Use TLS": "استخدام TLS",
-  "Used to confirm a non-idempotent action.": "يستخدم لتأكيد الفعل غير العاجز.",
+  "Used to confirm a non-idempotent action.":
+    "يُستخدم لتأكيد إجراء غير متكرر الأثر (non-idempotent).",
   "User Access Keys": "مفاتيح وصول المستخدم",
   "User Agent": "وكيل المستخدم",
   "User Details - {user}": "تفاصيل المستخدم - {user}",
-  "User DN Search Base DN is required": "المستخدم DN قاعدة البحث DN مطلوب",
-  "User DN Search Filter is required": "المستخدم DN مطلوب فلتر البحث",
+  "User DN Search Base DN is required": "قاعدة البحث عن DN للمستخدم مطلوبة",
+  "User DN Search Filter is required": "مرشّح البحث عن DN للمستخدم مطلوب",
   "User Mappings": "تعيينات المستخدم",
   "User Name": "اسم المستخدم",
   "Username for SASL/PLAIN or SASL/SCRAM authentication":
@@ -1977,7 +1977,7 @@ const messages: Dictionary = {
   "View across sites": "عرض عبر المواقع",
   "View Bucket Naming Rules": "عرض قواعد تسمية الحاويات",
   "View env variable Webhook": "عرض Webhook المُعدّ بمتغير بيئة",
-  "view Objects in this bucket": "عرض الكائنات في هذه المجموعة",
+  "view Objects in this bucket": "عرض الكائنات في هذه الحاوية",
   "view Policy details": "عرض تفاصيل السياسة",
   "View Replication Status for a:": "عرض حالة النسخ المتماثل لـ:",
   "view User details": "عرض تفاصيل المستخدم",
@@ -2002,12 +2002,12 @@ const messages: Dictionary = {
     many: "أسبوعًا",
     other: "أسبوع",
   },
-  "What are Event Destinations?": "ما هي وجهات الفعاليات؟",
+  "What are Event Destinations?": "ما هي وجهات الأحداث؟",
   "Would you like to encrypt {object}?": "هل ترغب بتشفير {object}؟",
   "Write Policy": "كتابة سياسة",
   "Write these down, as this is the only time the secret will be displayed.":
     "أكتب هذه، فهذه هي المرة الوحيدة التي سيتم فيها عرض السر.",
-  writeonly: "أكتب فقط",
+  writeonly: "للكتابة فقط",
   year: "سنة",
   years: {
     zero: "سنوات",
@@ -2017,7 +2017,7 @@ const messages: Dictionary = {
     many: "سنة",
     other: "سنة",
   },
-  Years: "سنة",
+  Years: "سنوات",
   Yes: "نعم",
   "Yes, I am sure": "نعم أنا متأكد",
   "You can add a comment to this setting": "يمكنك إضافة تعليق على هذا الإعداد",
@@ -2033,7 +2033,7 @@ const messages: Dictionary = {
     "يمكنك معرفة المزيد على {documentation}.",
   "You can learn more at the {link}.": "يمكنك معرفة المزيد على {link}.",
   "You can only enable {objectLocking} when first creating a bucket.":
-    "يمكنك فقط تمكين {objectLocking} عند إنشاء المجموعة لأول مرة.",
+    "لا يمكن تفعيل {objectLocking} إلا عند إنشاء الحاوية لأول مرة.",
   "You can reset your session by logging out and logging back in to the web UI.":
     "يمكنك إعادة تعيين جلستك عن طريق تسجيل الخروج وتسجيل الدخول مرة أخرى إلى الويب UI.",
   "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies.":
@@ -2076,7 +2076,7 @@ const messages: Dictionary = {
   "The text preview could not be loaded because of a network or server error.":
     "تعذّر تحميل معاينة النص بسبب خطأ في الشبكة أو الخادم.",
   "This object is not valid UTF-8 text or contains binary data. Download it to inspect the original bytes.":
-    "هذا الكائن غير صالح UTF-8 نص أو يحتوي على بيانات ثنائية. قم بتنزيله لفحص البايتات الأصلية.",
+    "هذا الكائن ليس نص UTF-8 صالحًا أو يحتوي على بيانات ثنائية. نزّله لفحص البايتات الأصلية.",
   "You do not have permission to preview this object.":
     "ليس لديك إذن لمعاينة هذا الكائن.",
   Trademark: "علامة تجارية",
@@ -2090,8 +2090,7 @@ const messages: Dictionary = {
   "Previous page": "الصفحة السابقة",
   "Next page": "الصفحة التالية",
   "{count} items in total": "{count} مجموع العناصر",
-  "Page {page} · {count} on this page":
-    "الصفحة {page} · عدد الكائنات في هذه الصفحة: {count}",
+  "Page {page} · {count} on this page": "الصفحة {page} · {count} في هذه الصفحة",
   "Sorting, filtering and select all apply to this page only.":
     "الفرز والتصفية والاختيار الكل ينطبق على هذه الصفحة فقط.",
   "No objects match the filter": "لا توجد كائنات تطابق المرشّح",
@@ -2103,7 +2102,7 @@ const messages: Dictionary = {
     "ابدأ الكتابة لتصفية الكائنات في هذه الصفحة",
   "Lists and tabs": "القوائم وعلامات التبويب",
   "Move through rows with the pointer or keyboard. Arrow keys focus tabs; Enter or Space opens them.":
-    "التنقل بين الصفوف باستخدام المؤشر أو لوحة المفاتيح. علامات تبويب التركيز على مفاتيح الأسهم؛ أدخل أو الفضاء يفتح لهم.",
+    "تنقّل بين الصفوف باستخدام المؤشر أو لوحة المفاتيح. تنقل مفاتيح الأسهم التركيز بين علامات التبويب، ويفتحها مفتاح Enter أو المسافة (Space).",
   "Browse and select stored objects.": "تصفّح الكائنات المخزّنة وحددها.",
   "Review stored object versions.": "مراجعة إصدارات الكائنات المخزنة.",
   "Manage bucket settings.": "إدارة إعدادات الحاوية.",
@@ -2163,7 +2162,7 @@ const messages: Dictionary = {
     "أنشئ قواعد لإنهاء صلاحية الكائنات أو نقلها إلى تخزين بعيد.",
   "No anonymous access rules": "لا توجد قواعد وصول مجهولة",
   "This bucket has no prefix rules for access without credentials.":
-    "لا تحتوي هذه المجموعة على قواعد بادئة للوصول بدون بيانات اعتماد.",
+    "لا تحتوي هذه الحاوية على قواعد بادئات للوصول دون بيانات اعتماد.",
   "No policies grant access": "لا توجد سياسات تمنح الوصول",
   "No listed policy currently grants access to this bucket.":
     "لا توجد سياسة مدرجة تمنح حاليًا الوصول إلى هذه الحاوية.",
@@ -2187,9 +2186,9 @@ const messages: Dictionary = {
   "Waiting for trace events": "في انتظار أحداث التتبع",
   "Trace is not running": "التتبع لا يعمل",
   "Requests matching the selected calls and filters will appear here.":
-    "ستظهر هنا الطلبات المطابقة للمكالمات والمرشحات المحددة.",
+    "ستظهر هنا الطلبات المطابقة للاستدعاءات والمرشحات المحددة.",
   "Choose the calls and filters, then start tracing to inspect live requests.":
-    "اختر المكالمات والمرشحات، ثم ابدأ في التتبع لفحص الطلبات المباشرة.",
+    "اختر الاستدعاءات والمرشحات، ثم ابدأ التتبع لفحص الطلبات المباشرة.",
   "{count} node": "عقدة واحدة ({count})",
   "{count} nodes": {
     zero: "{count} عقد",
@@ -2199,7 +2198,7 @@ const messages: Dictionary = {
     many: "{count} عقدة",
     other: "{count} عقدة",
   },
-  "{count} drive": "{count} القيادة",
+  "{count} drive": "قرص واحد ({count})",
   "{count} drives": {
     zero: "{count} أقراص",
     one: "{count} قرص",
@@ -2211,16 +2210,16 @@ const messages: Dictionary = {
   "Quota: {quota}": "الحصة: {quota}",
   "Open bucket {name}": "فتح الحاوية {name}",
   "Recent buckets": "الحاويات الأخيرة",
-  "Read and write": "إقرأ وأكتب",
+  "Read and write": "قراءة وكتابة",
   "Read only": "للقراءة فقط",
-  "Write only": "أكتب فقط",
+  "Write only": "للكتابة فقط",
   "Created {date}": "أُنشئ {date}",
   "{count} objects": "{count} كائنات",
-  "Bucket actions": "تصرفات حاوية",
+  "Bucket actions": "إجراءات الحاوية",
   "Open menu": "فتح القائمة",
   "Page actions": "إجراءات الصفحة",
-  "Selected actions": "أعمال مختارة",
-  "Parent paths": "مسارات الوالدين",
+  "Selected actions": "الإجراءات المحددة",
+  "Parent paths": "المسارات الأب",
   "create Groups": "إنشاء المجموعات",
   "view Group details": "عرض تفاصيل المجموعة",
   "configure event destinations": "تكوين وجهات الأحداث",

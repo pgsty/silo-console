@@ -6,9 +6,9 @@ import type { Dictionary } from "../../catalog";
 
 const messages: Dictionary = {
   "### Users\n\nA SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.\n\nGroups provide a simplified method for managing shared permissions among users with common access patterns and workloads.\n\nUsers inherit access permissions to data and resources through the groups they belong to.\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nEach user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
-    "### المستخدمين\n\nيتكون مستخدم SILO من مفتاح وصول فريد (اسم المستخدم) ومفتاح سري مطابق (كلمة المرور). يجب على العملاء التحقق من هويتهم عن طريق تحديد مفتاح وصول صالح (اسم المستخدم) والمفتاح السري المقابل (كلمة المرور) لمستخدم SILO موجود.\n\nتوفر المجموعات طريقة مبسطة لإدارة الأذونات المشتركة بين المستخدمين الذين لديهم أنماط وصول وأحمال عمل مشتركة.\n\nيرث المستخدمون أذونات الوصول إلى البيانات والموارد من خلال المجموعات التي ينتمون إليها.\n\nSILO يستخدم التحكم في الوصول المستند إلى السياسة (PBAC) لتحديد الإجراءات والموارد المصرح بها التي يمكن للمستخدم المصادق عليه الوصول إليها. تصف كل سياسة واحدًا أو أكثر من الإجراءات والشروط التي تحدد أذونات المستخدم أو مجموعة المستخدمين.\n\nيمكن لكل مستخدم الوصول فقط إلى تلك الموارد والعمليات التي يمنحها الدور المدمج بشكل صريح. SILO يرفض الوصول إلى أي مورد أو إجراء آخر بشكل افتراضي.",
+    "### المستخدمون\n\nيتكون مستخدم SILO من مفتاح وصول فريد (اسم المستخدم) ومفتاح سري مطابق (كلمة المرور). يجب على العملاء إثبات هويتهم بتحديد مفتاح وصول صالح (اسم المستخدم) والمفتاح السري المقابل (كلمة المرور) لمستخدم SILO موجود.\n\nتوفر المجموعات طريقة مبسطة لإدارة الأذونات المشتركة بين المستخدمين الذين لديهم أنماط وصول وأحمال عمل مشتركة.\n\nيرث المستخدمون أذونات الوصول إلى البيانات والموارد من خلال المجموعات التي ينتمون إليها.\n\nيستخدم SILO التحكم في الوصول المستند إلى السياسات (PBAC) لتحديد الإجراءات والموارد المصرح بها التي يمكن للمستخدم المصادق عليه الوصول إليها. تصف كل سياسة إجراءً واحدًا أو أكثر وشروطًا تحدد أذونات المستخدم أو مجموعة المستخدمين.\n\nيمكن لكل مستخدم الوصول فقط إلى الموارد والعمليات الممنوحة صراحةً بواسطة الدور المدمج. ويرفض SILO الوصول إلى أي مورد أو إجراء آخر افتراضيًا.",
   "### IAM policies\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nSILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.":
-    "### IAM السياسات\n\nSILO يستخدم التحكم في الوصول المستند إلى السياسة (PBAC) لتحديد الإجراءات والموارد المصرح بها التي يمكن للمستخدم المصادق عليه الوصول إليها. تصف كل سياسة واحدًا أو أكثر من الإجراءات والشروط التي تحدد أذونات المستخدم أو مجموعة المستخدمين.\n\nتم تصميم SILO PBAC للتوافق مع AWS IAM بناء جملة السياسة وبنيتها وسلوكها. تبذل وثائق SILO قصارى جهدها لتغطية سلوك ووظائف IAM- محددة. فكر في الرجوع إلى وثائق IAM للحصول على وثائق أكثر اكتمالاً حول AWS IAM- موضوعات محددة.",
+    "### سياسات IAM\n\nيستخدم SILO التحكم في الوصول المستند إلى السياسات (PBAC) لتحديد الإجراءات والموارد المصرح بها التي يمكن للمستخدم المصادق عليه الوصول إليها. تصف كل سياسة إجراءً واحدًا أو أكثر وشروطًا تحدد أذونات المستخدم أو مجموعة المستخدمين.\n\nصُمم SILO PBAC للتوافق مع صياغة سياسات AWS IAM وبنيتها وسلوكها. تبذل وثائق SILO قصارى جهدها لتغطية السلوك والوظائف الخاصة بـ IAM. راجع وثائق IAM للحصول على تفاصيل أشمل حول الموضوعات الخاصة بـ AWS IAM.",
   "### Access keys\n\nSILO access keys are child identities of an authenticated SILO user, including externally managed identities. Each access key inherits its privileges based on the policies attached to it’s parent user or those groups in which the parent user has membership. Access Keys also support an optional inline policy which further restricts access to a subset of actions and resources available to the parent user.":
     "### مفاتيح الوصول\n\nمفاتيح الوصول في SILO هي هويات فرعية لمستخدم SILO تمت مصادقته، بما في ذلك الهويات المُدارة خارجيًا. يرث كل مفتاح وصول صلاحياته من السياسات المرتبطة بالمستخدم الأصلي أو بالمجموعات التي ينتمي إليها. وتدعم مفاتيح الوصول أيضًا سياسة مضمنة اختيارية تقيّد الوصول إلى مجموعة فرعية من الإجراءات والموارد المتاحة للمستخدم الأصلي.",
   "### Event destinations\n\nSILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.":
@@ -45,12 +45,12 @@ const messages: Dictionary = {
     "يوضّح هذا التدريب العملي الربط مع OpenID وLDAP. ",
   "# Bucket \n A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.":
     "# الحاوية\nتشبه الحاوية مجلدًا أو دليلًا في نظام الملفات، ويمكن لكل حاوية الاحتفاظ بعدد غير محدد من الكائنات.",
-  "Bucket Versioning": "إصدار الجرافة",
+  "Bucket Versioning": "إدارة إصدارات الحاوية",
   "SILO supports keeping multiple “versions” of an object in a single bucket. SILO versioning protects from unintended overwrites and deletions while providing support for “undoing” a write operation.":
     "يدعم SILO الاحتفاظ بإصدارات متعددة من الكائن داخل حاوية واحدة. وتحمي إدارة الإصدارات من الاستبدال والحذف غير المقصودين، وتتيح التراجع عن عمليات الكتابة.",
   Buckets: "الحاويات",
   "Learn about using Console to create and manage Buckets with SILO":
-    "تعرف على استخدام وحدة التحكم لإنشاء وإدارة المستودعات باستخدام SILO",
+    "تعرّف على استخدام لوحة التحكم لإنشاء الحاويات وإدارتها في SILO",
   "Creating Buckets and Users through the MinIO Console":
     "إنشاء الحاويات والمستخدمين من خلال لوحة تحكم MinIO",
   "Learn how to manage your storage buckets and objects with a hands-on introduction to the MinIO Console and SDKs.":
@@ -68,18 +68,18 @@ const messages: Dictionary = {
     "يوضّح هذا التدريب إنشاء إعدادات الاحتفاظ والامتثال والاحتفاظ القانوني وإزالتها على مستوى الحاويات والكائنات. ",
   "Versioning and Lifecycle Management": "إدارة الإصدارات ودورة الحياة",
   "In this video, we will focus on versioning and lifecycle management.":
-    "في هذا الفيديو سنركز على الإصدار وإدارة دورة الحياة.",
+    "في هذا الفيديو سنركز على إدارة الإصدارات وإدارة دورة الحياة.",
   Versioning: "إدارة الإصدارات",
   "Learn how Versioning gives access to the full history of an object from its creation through each update.":
     "تعرّف على كيفية الوصول إلى السجل الكامل للكائن، منذ إنشائه وخلال كل تحديث، باستخدام إدارة الإصدارات.",
   "Learn how versioning protects your data from unintended overwrites and deletions":
-    "تعرف على كيفية حماية الإصدار لبياناتك من عمليات الكتابة والحذف غير المقصودة",
+    "تعرّف على كيفية حماية إدارة الإصدارات لبياناتك من الكتابة الفوقية والحذف غير المقصودين",
   "Learn how to create and manage Buckets": "تعرّف على إنشاء الحاويات وإدارتها",
   "In this video, we will focus on versioning  and lifecycle management.":
-    "في هذا الفيديو، سنركز على الإصدار وإدارة دورة الحياة.",
+    "في هذا الفيديو، سنركز على إدارة الإصدارات وإدارة دورة الحياة.",
   "Policy Document Structure": "هيكل وثيقة السياسة",
   "SILO policy documents use the same schema as AWS IAM Policy documents. See policy templates and allowed S3 Policy actions and condition keys in our docs.":
-    "SILO تستخدم مستندات السياسة نفس المخطط مثل AWS IAM مستندات السياسة. راجع قوالب السياسة المسموح بها S3 إجراءات السياسة ومفاتيح الشروط في مستنداتنا.",
+    "تستخدم مستندات السياسات في SILO نفس مخطط مستندات سياسات AWS IAM. راجع قوالب السياسات وإجراءات سياسات S3 المسموح بها ومفاتيح الشروط في وثائقنا.",
   "Access Keys": "مفاتيح الوصول",
   "Access Keys support providing applications authentication credentials which inherit permissions from the “parent” user.":
     'تدعم مفاتيح الوصول توفير بيانات اعتماد مصادقة التطبيقات التي ترث الأذونات من المستخدم "الأصل".',
@@ -94,10 +94,10 @@ const messages: Dictionary = {
     "اطّلع على الشروط التي يدعمها SILO عند تعريف سياسات إجراءات الإدارة.",
   "Supported S3 Policy Condition Keys": "مفاتيح شروط سياسات S3 المدعومة",
   "SILO policy documents support IAM conditional statements.":
-    "SILO دعم وثائق السياسة IAM البيانات الشرطية.",
+    "تدعم مستندات السياسات في SILO العبارات الشرطية لـ IAM.",
   "Supported S3 Policy Actions": "إجراءات سياسات S3 المدعومة",
   "SILO policy documents support a subset of IAM S3 Action keys.":
-    "SILO تدعم وثائق السياسة مجموعة فرعية من IAM S3 مفاتيح الإجراءات.",
+    "تدعم مستندات السياسات في SILO مجموعة فرعية من مفاتيح إجراءات IAM S3.",
   "MinIO Identity and Access Management: Part 2 - Using IDP to Manage Users And Groups":
     "إدارة الهوية والوصول في MinIO: الجزء 2 — استخدام موفّر الهوية لإدارة المستخدمين والمجموعات",
   "This video discusses Users and Groups, and how policies can be applied to them to enable specific permissions.":
@@ -110,25 +110,26 @@ const messages: Dictionary = {
     "إنشاء حاوية جديدة في منطقة محددة",
   "A Bucket can be created in a specified region":
     "يمكن إنشاء الحاوية في منطقة محددة",
-  "What are Settings and Configurations?": "ما هي الإعدادات والإعدادات؟",
+  "What are Settings and Configurations?": "ما هي الإعدادات والتهيئة؟",
   "These configuration settings define runtime  behavior of the SILO server process,  comparable to the mc admin config command":
     "تحدد هذه الإعدادات سلوك عملية خادم SILO أثناء التشغيل، على غرار الأمر mc admin config.",
   "MinIO Feature Overview: Active-Active Replication":
     "نظرة عامة على ميزات MinIO: النسخ المتماثل النشط-النشط",
   "Learn about MinIO's object replication capabilities and how MinIO provides resilience to common storage disruption scenarios.":
     "تعرف على إمكانيات النسخ المتماثل للكائنات MinIO وكيف يوفر MinIO المرونة في مواجهة سيناريوهات انقطاع التخزين الشائعة.",
-  "How is failed replication handled?": "كيف يتم التعامل مع فشل النسخ؟",
+  "How is failed replication handled?":
+    "كيف يتم التعامل مع فشل النسخ المتماثل؟",
   "SILO queues failed replication operations and retries those operations until replication succeeds.":
     "يضع SILO عمليات النسخ المتماثل الفاشلة في قائمة انتظار، ويعيد محاولتها حتى تنجح.",
-  "What are Replication Workers?": "ما هي عمال النسخ؟",
+  "What are Replication Workers?": "ما هم عمّال النسخ المتماثل؟",
   "SILO uses a replication queuing system with multiple concurrent replication workers operating on that queue.":
     "يستخدم SILO قائمة انتظار للنسخ المتماثل، تعمل عليها عدة عمليات نسخ بالتزامن.",
   "These configuration settings define runtime behavior of the SILO server process,  comparable to the mc admin config command":
     "تحدد هذه الإعدادات سلوك عملية خادم SILO أثناء التشغيل، على غرار الأمر mc admin config.",
   "Where can I see current Heal status?":
-    "أين يمكنني رؤية حالة الشفاء الحالية؟",
+    "أين يمكنني رؤية حالة الإصلاح الحالية؟",
   "Check under Monitoring/Drives on the left hand  menu to see Drive and Bucket Healing status":
-    "تحقق من المراقبة/محركات الأقراص في القائمة اليسرى لمعرفة حالة معالجة المحرك والحاوية",
+    "تحقق من «المراقبة / الأقراص» في القائمة الجانبية لمعرفة حالة إصلاح الأقراص والحاويات",
   "How is Erasure Coding used to Protect Data?":
     "كيف يتم استخدام تشفير المحو لحماية البيانات؟",
   "SILO erasure coding is a data redundancy and  availability feature that allows SILO deployments to  automatically reconstruct objects on-the-fly despite  the loss of multiple drives or nodes in the cluster.":
@@ -136,30 +137,30 @@ const messages: Dictionary = {
   "Recover After Hardware failure": "الاسترداد بعد فشل الأجهزة",
   "Depending on the deployment topology and  selected erasure code parity, SILO can tolerate loss  of up to half the drives or nodes in the deployment  while maintaining read access to objects.":
     "اعتمادًا على طبولوجيا النشر وتكافؤ كود المسح المحدد، يمكن أن يتحمل SILO فقدان ما يصل إلى نصف محركات الأقراص أو العقد في النشر مع الحفاظ على الوصول للقراءة إلى الكائنات.",
-  "Site Failure Recovery": "استعادة فشل الموقع",
+  "Site Failure Recovery": "التعافي من تعطل الموقع",
   "SILO can make the loss of an entire site, while  significant, a relatively minor incident. Site recovery depends on the replication option you use for the site.":
     "يمكن لـ SILO الحد من أثر فقدان موقع كامل، رغم خطورة ذلك. وتعتمد استعادة الموقع على خيار النسخ المتماثل المستخدم له.",
-  "Node Failure Recovery": "استعادة فشل العقدة",
+  "Node Failure Recovery": "التعافي من تعطل العقدة",
   "If a SILO node suffers complete hardware failure, the node begins healing operations once it rejoins the  deployment.":
     "إذا كانت العقدة SILO تعاني من فشل كامل في الأجهزة، فستبدأ العقدة في عمليات الإصلاح بمجرد انضمامها مرة أخرى إلى النشر.",
-  "What is SILO Healing?": "ما هو SILO الشفاء؟",
+  "What is SILO Healing?": "ما هو الإصلاح الذاتي (Healing) في SILO؟",
   "Healing is SILO’s ability to restore data after some event causes data loss. Data loss can come from bit rot, drive loss, or node loss.":
-    "الشفاء هو قدرة SILO على استعادة البيانات بعد أن تسبب حدث ما في فقدان البيانات. يمكن أن يأتي فقدان البيانات من تعفن البتات أو فقدان محرك الأقراص أو فقدان العقدة.",
-  "Understand SILO Healing Using mc": "فهم SILO العلاج باستخدام mc",
+    "الإصلاح الذاتي هو قدرة SILO على استعادة البيانات بعد وقوع حادث يسبب فقدانها، سواء بسبب تلف البتات أو فقدان قرص أو عقدة.",
+  "Understand SILO Healing Using mc": "فهم عملية الإصلاح في SILO باستخدام mc",
   "The mc admin heal command scans for objects that are damaged or corrupted and heals those objects.":
     "يفحص الأمر mc admin heal الكائنات التالفة ويصلحها.",
-  "What is Bit Rot?": "ما هو البيت روت؟",
+  "What is Bit Rot?": "ما هو تلف البتات (Bit Rot)؟",
   "Bit rot is data corruption that occurs without the user’s knowledge. SILO combats bit rot with hashing and erasure coding.":
-    "تعفن البت هو تلف البيانات الذي يحدث دون علم المستخدم. SILO يكافح تعفن البتات باستخدام تشفير التجزئة والمحو.",
+    "تلف البتات هو فساد للبيانات يحدث دون علم المستخدم. يكافح SILO تلف البتات باستخدام التجزئة (Hashing) وترميز المحو.",
   "These configuration settings define runtime behavior of the SILO server process, comparable to the mc admin config command":
     "تحدد هذه الإعدادات سلوك عملية خادم SILO أثناء التشغيل، على غرار الأمر mc admin config.",
   "Overview of MinIO Erasure Coding": "نظرة عامة على ترميز المحو في MinIO",
   "Through this MinIO video you will learn about MinIO erasure coding, including erasure sets, erasure parity, and stripe size. You will also learn about how the Reed-Solomon algorithm can be optimized for storage efficiency (yielding cost savings) or data lost protection (number of servers and drives that can fail). The video also walks through the MinIO Erasure Code calculator, considerations for cluster design and the command line syntax needed to establish an erasure code deployment. ":
-    "من خلال هذا الفيديو MinIO ستتعرف على ترميز المحو MinIO، بما في ذلك مجموعات المحو وتكافؤ المحو وحجم الشريط. ستتعرف أيضًا على كيفية تحسين خوارزمية Reed-Solomon لتحقيق كفاءة التخزين (مما يؤدي إلى توفير التكاليف) أو حماية البيانات المفقودة (عدد الخوادم ومحركات الأقراص التي يمكن أن تفشل). يستعرض الفيديو أيضًا حاسبة MinIO رمز المحو، والاعتبارات المتعلقة بتصميم المجموعة وبناء جملة سطر الأوامر اللازم لإنشاء نشر رمز المحو.",
+    "ستتعرف من خلال فيديو MinIO هذا على ترميز المحو في MinIO، بما في ذلك مجموعات المحو وتكافؤ المحو وحجم الشريحة (Stripe). وستتعرف أيضًا على كيفية تحسين خوارزمية Reed-Solomon لكفاءة التخزين (توفير التكاليف) أو للحماية من فقدان البيانات (عدد الخوادم والأقراص التي يمكن تحمل تعطلها). كما يستعرض الفيديو حاسبة ترميز المحو في MinIO، واعتبارات تصميم العنقود، وصياغة سطر الأوامر اللازمة لإنشاء نشرة بترميز المحو.",
   "Object Scanner": "ماسح الكائنات",
   "Learn more about how the scanner checks Objects for transition and expiry based on lifecycle rules":
     "تعرّف على كيفية فحص الكائنات لتحديد النقل وانتهاء الصلاحية استنادًا إلى قواعد دورة الحياة.",
-  "What is the Scanner?": "ما هو الماسح الضوئي؟",
+  "What is the Scanner?": "ما هو الماسح (Scanner)؟",
   "One of several low-priority processes SILO runs to check lifecycle management rules, bucket or site replication status, as well as object bit rot and healing":
     "إحدى العمليات منخفضة الأولوية التي يشغّلها SILO للتحقق من قواعد إدارة دورة الحياة وحالة النسخ المتماثل للحاويات أو المواقع، وكذلك تلف بيانات الكائنات وإصلاحها.",
   "Lifecycle Management Object Scanner Considerations":
@@ -171,9 +172,9 @@ const messages: Dictionary = {
     "استخدم عميل MinIO لعرض قواعد انتهاء الصلاحية والماسح ونقل الكائنات إلى طبقات التخزين البعيدة.",
   "What is etcd?": "ما هو etcd؟",
   "etcd is a strongly consistent, distributed key-value  store that provides a reliable way to store data that  needs to be accessed by a distributed system or  cluster of machines.":
-    "etcd هو مخزن ذو قيمة رئيسية متسق وموزع يوفر طريقة موثوقة لتخزين البيانات التي يجب الوصول إليها بواسطة نظام موزع أو مجموعة من الأجهزة.",
+    "etcd هو مخزن مفتاح-قيمة موزّع ومتسق بقوة يوفر طريقة موثوقة لتخزين البيانات التي يحتاج نظام موزّع أو عنقود أجهزة إلى الوصول إليها.",
   "What is the logger_webhook Environment Variable?":
-    "ما هو logger_webhook متغير البيئة؟",
+    "ما هو متغير البيئة logger_webhook؟",
   "The top-level configuration key for defining an  HTTP webhook target for publishing SILO logs.":
     "مفتاح الإعدادات الأعلى مستوى لتعريف وجهة HTTP webhook لنشر سجلات SILO.",
   "Publish Server Logs to HTTP Webhook": "نشر سجلات الخادم إلى HTTP Webhook",
@@ -202,10 +203,10 @@ const messages: Dictionary = {
   "Learn about environment variables for configuring a Kafka service as a target for Bucket Nofitications.":
     "تعرّف على متغيرات البيئة لإعداد خدمة Kafka كوجهة لإشعارات الحاويات.",
   "Kafka Service Configuration Settings": "إعدادات خدمة Kafka",
-  "Supported Bucket Notification Targets": "أهداف إشعارات الجرافة المدعومة",
+  "Supported Bucket Notification Targets": "وجهات إشعارات الحاويات المدعومة",
   "Learn which notification targets are supported by SILO.":
     "تعرّف على وجهات الإشعارات التي يدعمها SILO.",
-  "Bucket Notifications": "حاوية الإشعارات",
+  "Bucket Notifications": "إشعارات الحاويات",
   "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events.":
     "تتيح إشعارات الحاويات في SILO للمسؤولين إرسال إشعارات إلى خدمات خارجية مدعومة عند وقوع أحداث معينة تخص الكائنات أو الحاويات.",
   "Need more help? Check out additional Troubleshooting options":
@@ -230,7 +231,7 @@ const messages: Dictionary = {
   "Transition from SILO to S3": "الانتقال من SILO إلى S3",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a SILO bucket to a remote storage tier on the Amazon Web Services S3 storage backend or an S3-compatible service.":
     "اطّلع على خطوات إنشاء قاعدة جديدة لدورة حياة الكائنات تنقلها من حاوية SILO إلى طبقة تخزين بعيدة على Amazon Web Services S3 أو خدمة متوافقة مع S3.",
-  "Transition to Remote SILO Deployment": "الانتقال إلى البعيد SILO النشر",
+  "Transition to Remote SILO Deployment": "النقل إلى نشرة SILO بعيدة",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a bucket on a primary SILO deployment to a bucket on a remote SILO deployment. ":
     "اطّلع على خطوات إنشاء قاعدة جديدة لدورة حياة الكائنات تنقلها من حاوية في نشرة SILO أساسية إلى حاوية في نشرة SILO بعيدة. ",
   "Object Lifecycle Management": "إدارة دورة حياة الكائن",
@@ -243,7 +244,7 @@ const messages: Dictionary = {
   "Lifecycle Management I - Tiers": "إدارة دورة الحياة 1 — طبقات التخزين",
   "In this video we will cover expiration and transition of objects to an alternate tier of storage.":
     "سنغطي في هذا الفيديو انتهاء صلاحية الكائنات وانتقالها إلى مستوى تخزين بديل.",
-  Tiers: "طبقات التخزين",
+  Tiers: "الطبقات",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a SILO bucket to a remote storage tier on the Azure storage backend.":
     "اطّلع على خطوات إنشاء قاعدة جديدة لدورة حياة الكائنات تنقلها من حاوية SILO إلى طبقة تخزين بعيدة على Azure.",
   "Console Metrics Dashboard": "لوحة مؤشرات التحكم",
@@ -280,7 +281,7 @@ const messages: Dictionary = {
   "Site Healing": "إصلاح الموقع",
   "Any SILO deployment in the site replication configuration can resynchronize damaged replica-eligible data from the peer with the most updated (“latest”) version of that data.":
     'يمكن لأي نشر SILO في تكوين النسخ المتماثل للموقع إعادة مزامنة البيانات التالفة المؤهلة للنسخ المتماثل من النظير باستخدام الإصدار الأحدث ("الأحدث") من تلك البيانات.',
-  Healing: "شفاء",
+  Healing: "الإصلاح الذاتي",
   "SILO Automatically Heals Corrupt or Missing Data On-the-fly":
     "يصلح SILO البيانات التالفة أو المفقودة تلقائيًا أثناء التشغيل",
   "In this video, we will provide an overview of site-wide replication.":
@@ -295,10 +296,10 @@ const messages: Dictionary = {
   "SILO includes a built-in IDentity Provider (IDP) that provides core identity management functionality.":
     "يتضمن SILO موفّر هوية (IDP) مدمجًا يوفر الوظائف الأساسية لإدارة الهوية.",
   "Active Directory / LDAP Access Management":
-    "Active Directory / LDAP إدارة الوصول",
+    "إدارة الوصول عبر Active Directory / LDAP",
   "For identities managed by the external AD/LDAP provider, SILO uses the user’s Distinguished Name and attempts to map it against an existing policy.":
     "بالنسبة للهويات التي يديرها الموفر الخارجي AD/LDAP، يستخدم SILO الاسم المميز للمستخدم ويحاول تعيينه مقابل سياسة موجودة.",
-  "Keycloak configuration": "Keycloak التكوين",
+  "Keycloak configuration": "إعدادات Keycloak",
   "You can configure SILO to use Keycloak as an external IDentity Provider (IDP) for authentication of users via the OpenID Connect (OIDC) protocol.":
     "يمكن إعداد SILO لاستخدام Keycloak كموفّر هوية خارجي لمصادقة المستخدمين عبر بروتوكول OpenID Connect ‏(OIDC).",
   "LDAP Configuration": "إعدادات LDAP",
@@ -307,9 +308,9 @@ const messages: Dictionary = {
   "OIDC Configuration": "إعدادات OIDC",
   "SILO supports using an OpenID Connect (OIDC) compatible IDentity Provider (IDP) such as Okta, KeyCloak, Dex, Google, or Facebook for external management of user identities.":
     "يدعم SILO موفّري هوية متوافقين مع OpenID Connect ‏(OIDC)، مثل Okta وKeycloak وDex وGoogle وFacebook، لإدارة هويات المستخدمين خارجيًا.",
-  "KMS overview": "KMS نظرة عامة\nيشارك خبير التشفير",
+  "KMS overview": "نظرة عامة على KMS",
   "MinIO's cryptographic expert shares why MinIO built KES, what it is used for and how it fits into the MinIO architecture.":
-    "MinIO سبب بناء MinIO KES، وما يتم استخدامه من أجله وكيف يتناسب مع بنية MinIO.",
+    "يشارك خبير التشفير في MinIO سبب بناء KES، وفيما يُستخدم، وكيف يتكامل مع بنية MinIO.",
   "Learn about key management using KMS.":
     "تعرف على إدارة المفاتيح باستخدام KMS.",
   "Text snippet that will be relevant to the user will  go here  made to look nice in the helpitem size  on two-three lines":
@@ -356,7 +357,7 @@ const messages: Dictionary = {
     "قسم الأداء يوفر واجهة لتشغيل اختبار أداء النشر.",
   Profile: "الملف التعريفي",
   "The profile section provides an interface for running system profiling of the deployment. The results can provide insight into the SILO server process running on a given node.":
-    "يوفر قسم الملف الشخصي واجهة لتشغيل ملف تعريف النظام الخاص بالنشر. يمكن أن توفر النتائج نظرة ثاقبة لعملية الخادم SILO التي تعمل على عقدة معينة.",
+    "يوفر قسم التوصيف واجهة لتشغيل توصيف أداء النظام للنشرة. وتساعد النتائج على فهم أداء عملية خادم SILO العاملة على عقدة معينة.",
   Inspect: "فحص",
   "The inspect section provides an interface for capturing the erasure-coded metadata associated to an object or objects.":
     "يوفر قسم الفحص واجهة لالتقاط البيانات الوصفية المرمّزة بترميز المحو والمرتبطة بكائن واحد أو عدة كائنات.",
@@ -365,20 +366,20 @@ const messages: Dictionary = {
     "يمكنك تشفير مخرجات الأمر mc support inspect لتعزيز الأمان عند نقل الملفات خارج النشر.",
   "What is Trace?": "ما هو التتبع؟",
   "The trace section provides HTTP trace functionality for a bucket or buckets on the deployment.":
-    "يوفر قسم التتبع HTTP وظيفة التتبع لحاوية أو حاويات عند النشر.",
+    "يوفر قسم التتبع وظيفة تتبع طلبات HTTP لحاوية أو أكثر في النشرة.",
   Users: "المستخدمون",
-  "What is Watch?": "ما هي الساعة؟",
+  "What is Watch?": "ما هو رصد الأحداث (Watch)؟",
   "The Watch section displays S3 events as they occur on the selected bucket.":
     "يعرض قسم المراقبة أحداث S3 عند وقوعها في الحاوية المحددة.",
   "Access Managemnt": "إدارة الوصول",
   "Object Locking": "قفل الكائنات",
   "SILO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect versioned objects from deletion.":
-    'SILO قفل الكائنات ("الاحتفاظ بالكائن") يفرض ثبات الكتابة مرة واحدة للقراءة المتعددة (WORM) لحماية الكائنات التي تم إصدارها من الحذف.',
+    "يفرض قفل الكائنات («الاحتفاظ بالكائنات») في SILO عدم القابلية للتغيير وفق نموذج الكتابة مرة واحدة والقراءة مرات متعددة (WORM) لحماية الكائنات ذات الإصدارات من الحذف.",
   Encryption: "التشفير",
   "SILO Server-Side Encryption (SSE) protects objects as part of write operations, allowing clients to take advantage of server processing power to secure objects at the storage layer (encryption-at-rest).":
     "يحمي التشفير من جانب الخادم (SSE) في SILO الكائنات أثناء الكتابة، ليستفيد العملاء من قدرة معالجة الخادم على تأمين الكائنات في طبقة التخزين، أي تشفير البيانات أثناء السكون.",
   "Learn how to use Console to manage Buckets":
-    "تعرف على كيفية استخدام وحدة التحكم لإدارة الجرافات",
+    "تعرّف على كيفية استخدام لوحة التحكم لإدارة الحاويات",
   "Bucket Replication": "نسخ الحاوية",
   "SILO server-side bucket replication is an automatic bucket-level configuration that synchronizes objects between a source and destination bucket.":
     "النسخ المتماثل للحاويات من جانب الخادم في SILO إعداد تلقائي على مستوى الحاوية يزامن الكائنات بين حاوية مصدر وحاوية وجهة.",
@@ -387,12 +388,12 @@ const messages: Dictionary = {
   "Versioning Lab": "تدريب عملي على إدارة الإصدارات",
   "This demo will take you through the steps to manage versioned objects using the MinIO command line tools.":
     "سيأخذك هذا العرض التوضيحي عبر خطوات إدارة الكائنات التي تم إصدارها باستخدام أدوات سطر الأوامر MinIO.",
-  "Bucket Replication Requirements": "متطلبات نسخ الجرافة",
+  "Bucket Replication Requirements": "متطلبات النسخ المتماثل للحاوية",
   "Check here to ensure you meet the prerequisites before setting up any replication configurations.":
     "ضع علامة هنا للتأكد من استيفاء المتطلبات الأساسية قبل إعداد أي تكوينات للنسخ المتماثل.",
-  "Bucket Replication Overview": "نظرة عامة على النسخ المتماثل للجرافة",
+  "Bucket Replication Overview": "نظرة عامة على النسخ المتماثل للحاوية",
   "In this video, we will cover bucket level replication, both active-passive and active-active.":
-    "في هذا الفيديو، سنغطي النسخ المتماثل على مستوى الجرافة، سواء النشط أو السلبي أو النشط.",
+    "في هذا الفيديو، سنغطي النسخ المتماثل على مستوى الحاوية، بنمطَي نشط-سلبي ونشط-نشط.",
   "Replication Lab I": "تدريب عملي على النسخ المتماثل 1",
   "Demonstrates bucket replication concepts using MinIO Client, including active-passive and active-active replication.":
     "يوضّح مفاهيم النسخ المتماثل للحاويات باستخدام عميل MinIO، بما فيها النسخ النشط-السلبي والنشط-النشط.",

@@ -14,33 +14,33 @@ const messages: Dictionary = {
     "Las claves de acceso heredan los permisos de sus usuarios principales. Una política en línea sólo puede restringirlos aún más.",
   "Access keys": "Claves de acceso",
   "Configure a destination, then add bucket notification rules to send S3 events to it.":
-    "Configure un destino y luego agregue reglas de notificación de depósito para enviarle S3 eventos.",
+    "Configure un destino y luego agregue reglas de notificación de bucket para enviarle eventos S3.",
   "Event destinations": "Destinos de eventos",
-  "SILO version": "SILO versión",
-  "Raw JSON": "Crudo JSON",
+  "SILO version": "Versión de SILO",
+  "Raw JSON": "JSON sin formato",
   "Recursive inspections can be expensive. Limit the bucket and path before starting.":
     "Las inspecciones recursivas pueden resultar costosas. Limite el bucket y el camino antes de comenzar.",
   "Open Help for examples, or read the":
-    "Abra la Ayuda para ver ejemplos o lea el",
+    "Abra la Ayuda para ver ejemplos o consulte la",
   Tasks: "Tareas",
   "Tasks: {count} running": "Tareas: {count} ejecutando",
   "Close Tasks": "Cerrar tareas",
   "Object operations": "Operaciones con objetos",
-  Running: "Corriendo",
+  Running: "En ejecución",
   Finished: "Terminado",
   Queued: "En cola",
   Completed: "Completado",
   "No running tasks": "No hay tareas en ejecución",
   "No finished tasks": "No hay tareas terminadas",
-  "Clear finished": "Claro terminado",
-  "ZIP download": "ZIP descargar",
+  "Clear finished": "Limpiar terminadas",
+  "ZIP download": "Descarga ZIP",
   "Browser handoff": "Transferencia del navegador",
   "Task progress": "Progreso de la tarea",
   "Waiting for data": "Esperando datos",
   "Remove task": "Eliminar tarea",
   "Cancel task": "Cancelar tarea",
-  "Retry failed": "Reintento fallido",
-  "Open bucket/prefix": "Abrir depósito/prefijo",
+  "Retry failed": "Reintentar fallidas",
+  "Open bucket/prefix": "Abrir bucket/prefijo",
   "{done}/{total} completed · {failed} failed · {cancelled} cancelled":
     "{done}/{total} completado · {failed} fallido · {cancelled} cancelado",
   "{bytes} bytes received": "{bytes} bytes recibidos",
@@ -49,7 +49,7 @@ const messages: Dictionary = {
   "Counts represent selected targets. Progress within a folder or version cleanup is unavailable.":
     "Los recuentos representan objetivos seleccionados. El progreso dentro de una carpeta o limpieza de versión no está disponible.",
   "Completed changes remain in place. In-flight requests may have reached the server; inspect before repeating them.":
-    "Los cambios completados permanecen vigentes. Es posible que las solicitudes en vuelo hayan llegado al servidor; Inspeccione antes de repetirlos.",
+    "Los cambios completados permanecen vigentes. Las solicitudes en curso pueden haber llegado al servidor; inspeccione antes de repetirlas.",
   "Review {count} results": "Revisar {count} resultados",
   "Server outcome is unconfirmed. Inspect this object before another operation.":
     "El resultado del servidor no está confirmado. Inspeccione este objeto antes de otra operación.",
@@ -73,7 +73,7 @@ const messages: Dictionary = {
   "{count} drives online": "{count} unidades en línea",
   "{count} server(s) offline": "{count} servidor(es) fuera de línea",
   "{count} drive(s) offline": "{count} unidades fuera de línea",
-  "{count} drive(s) healing": "{count} impulso(s) de curación",
+  "{count} drive(s) healing": "{count} unidad(es) en reparación",
   "Drive {drive} is at least 95% full. The server may reject writes.":
     "La unidad {drive} está llena al menos en un 95%. El servidor puede rechazar escrituras.",
   "Drive {drive} is at least 85% full.":
@@ -83,7 +83,7 @@ const messages: Dictionary = {
   "Some server or drive health information is unavailable.":
     "Parte de la información sobre el estado del servidor o de la unidad no está disponible.",
   "Capacity is incomplete. Only reported drive measurements are shown.":
-    "La capacidad está incompleta. Sólo se muestran las mediciones de conducción informadas.",
+    "La capacidad está incompleta. Solo se muestran las mediciones informadas de los discos.",
   "Generate health report": "Generar informe de salud",
   "No servers reported": "No se informaron servidores",
   Server: "Servidor",
@@ -97,7 +97,7 @@ const messages: Dictionary = {
   "Refresh failed. The last received data is still shown.":
     "Error al actualizar. Los últimos datos recibidos todavía se muestran.",
   "Could not load deployment information. Try refreshing.":
-    "No se pudo cargar la información de implementación. Intenta refrescarte.",
+    "No se pudo cargar la información del despliegue. Intente actualizar.",
   "Deployment statistics": "Estadísticas de implementación",
   "of {total} raw capacity": "de {total} capacidad bruta",
   "{available} available": "{available} disponible",
@@ -110,19 +110,18 @@ const messages: Dictionary = {
   "No quick actions available for your permissions.":
     "No hay acciones rápidas disponibles para sus permisos.",
   "Read & write": "Leer y escribir",
-  "Delete bucket": "Eliminar depósito",
+  "Delete bucket": "Eliminar bucket",
   "Actions for {bucket}": "Acciones para {bucket}",
   "Select {bucket}": "Seleccione {bucket}",
   "Object lock": "Bloqueo de objetos",
   Created: "Creado",
-  "Select all visible buckets": "Seleccionar todos los depósitos visibles",
-  "Bucket rows": "Filas de cucharones",
+  "Select all visible buckets": "Seleccionar todos los buckets visibles",
+  "Bucket rows": "Filas de buckets",
   "The bucket list could not be loaded.":
-    "No se pudo cargar la lista de deseos.",
-  "Select one or more buckets first.":
-    "Seleccione primero uno o más depósitos.",
-  "configure the selected buckets": "configurar los depósitos seleccionados",
-  "Search buckets": "Buscar depósitos",
+    "No se pudo cargar la lista de buckets.",
+  "Select one or more buckets first.": "Seleccione primero uno o más buckets.",
+  "configure the selected buckets": "configurar los buckets seleccionados",
+  "Search buckets": "Buscar buckets",
   "Bucket view": "Vista de bucket",
   Cards: "Tarjetas",
   "{count} buckets selected": {
@@ -130,12 +129,12 @@ const messages: Dictionary = {
     many: "{count} buckets seleccionados",
     other: "{count} buckets seleccionados",
   },
-  "{count} bucket selected": "{count} depósito seleccionado",
-  "No buckets match “{q}”": "Ningún depósito coincide con “{q}”",
+  "{count} bucket selected": "{count} bucket seleccionado",
+  "No buckets match “{q}”": "Ningún bucket coincide con “{q}”",
   "Clear filter": "Borrar filtro",
   "Built-in · Modified": "Incorporado · Modificado",
   "Actions for {name}": "Acciones para {name}",
-  "Reset to default": "Restablecer los valores predeterminados",
+  "Reset to default": "Valores predeterminados",
   "Could not load policies": "No se pudieron cargar las políticas",
   "Refresh to try again.": "Actualiza para volver a intentarlo.",
   "Create a policy to define permissions for users and groups.":
@@ -145,12 +144,11 @@ const messages: Dictionary = {
     "¿Restablecer la política {name} a su definición predeterminada?",
   "The built-in policy will be restored to the SILO default definition.":
     "La política integrada se restaurará a la definición predeterminada SILO.",
-  "Loading attachment information…":
-    "Cargando información del archivo adjunto...",
+  "Loading attachment information…": "Cargando información de vinculación…",
   "This policy has changed or is no longer available. Refresh the list.":
     "Esta política ha cambiado o ya no está disponible. Actualiza la lista.",
   "Attachment information is unavailable.":
-    "La información del archivo adjunto no está disponible.",
+    "La información de vinculación no está disponible.",
   "This policy is attached to {users} users and {groups} groups.":
     "Esta política se adjunta a {users} usuarios y {groups} grupos.",
   "Their permissions will follow the default definition.":
@@ -166,7 +164,7 @@ const messages: Dictionary = {
     "No se pudieron cargar grupos para esta política",
   "Built-in policies can be overridden by saving a modified version; you can reset it later.":
     "Las políticas integradas se pueden anular guardando una versión modificada; puedes restablecerlo más tarde.",
-  "Override policy": "Política de anulación",
+  "Override policy": "Sobrescribir política",
   "Cancel editing": "Cancelar edición",
   "Direct policies": "Políticas directas",
   "Policies inherited through groups": "Políticas heredadas a través de grupos",
@@ -189,14 +187,14 @@ const messages: Dictionary = {
   "Could not update user status": "No se pudo actualizar el estado del usuario",
   "Edit replication": "Editar replicación",
   "Page not found": "Página no encontrada",
-  "Go to Buckets": "Ir a depósitos",
+  "Go to Buckets": "Ir a buckets",
   "Go back": "Volver",
   "Read the documentation": "Leer la documentación",
   "You do not have permission to view this page":
     "No tienes permiso para ver esta página",
   "Ask your administrator for access. This page checks the following IAM actions:":
-    "Solicite acceso a su administrador. Esta página verifica las siguientes IAM acciones:",
-  "Required IAM actions": "Requeridas IAM acciones",
+    "Solicite acceso a su administrador. Esta página verifica las siguientes acciones IAM:",
+  "Required IAM actions": "Acciones IAM requeridas",
   "Encryption is not configured": "El cifrado no está configurado",
   "Configure KES or KMS on the SILO server to manage encryption keys in Console.":
     "Configure KES o KMS en el servidor SILO para administrar las claves de cifrado en la consola.",
@@ -230,12 +228,12 @@ const messages: Dictionary = {
   "Edit {label}": "Editar {label}",
   "Calculating…": "Calculando…",
   "The server has not finished computing usage yet.":
-    "El servidor aún no ha finalizado su uso informático.",
+    "El servidor aún no ha terminado de calcular el uso.",
   "Calculated {time}": "Calculado {time}",
   "Updated {time}": "Actualizado {time}",
   "Permission required": "Se requiere permiso",
   "Ask your administrator to grant the following IAM actions.":
-    "Pídele a tu administrador que otorgue las siguientes IAM acciones.",
+    "Solicite a su administrador que otorgue las siguientes acciones IAM.",
   "More actions": "Más acciones",
   "Equivalent mcli command": "Comando mcli equivalente",
   Copied: "Copiado",
@@ -257,7 +255,7 @@ const messages: Dictionary = {
   "Capacity critical": "Capacidad crítica",
   "Above the 95% critical threshold": "Por encima del umbral crítico del 95%",
   "Usage is calculated by the server.": "El uso lo calcula el servidor.",
-  "View buckets": "Ver depósitos",
+  "View buckets": "Ver buckets",
   "Status and values": "Estado y valores",
   "Built-in": "Incorporado",
   "Freshness and actions": "Frescura y acciones",
@@ -267,9 +265,9 @@ const messages: Dictionary = {
   "Demo action completed.": "Acción de demostración completada.",
   "Select an object to download.": "Seleccione un objeto para descargar.",
   "Empty and unavailable states": "Estados vacíos y no disponibles",
-  "No buckets yet": "Aún no hay depósitos",
+  "No buckets yet": "Aún no hay buckets",
   "Create a bucket to start storing objects.":
-    "Crea un depósito para comenzar a almacenar objetos.",
+    "Crea un bucket para comenzar a almacenar objetos.",
   "No matching objects": "No hay objetos coincidentes",
   "Try a different name or clear the search filter.":
     "Pruebe con un nombre diferente o borre el filtro de búsqueda.",
@@ -283,10 +281,10 @@ const messages: Dictionary = {
   "Showing first 500 rows": "Mostrando las primeras 500 filas",
   "Showing the first 100 columns. View Source or download the object to see all columns.":
     "Mostrando las primeras 100 columnas. Ver código fuente o descargar el objeto para ver todas las columnas.",
-  Rendered: "Rendido",
-  "Wrap lines": "Líneas envolventes",
+  Rendered: "Renderizado",
+  "Wrap lines": "Ajustar líneas",
   Row: "Fila",
-  "CSV preview content": "CSV vista previa del contenido",
+  "CSV preview content": "Contenido de la vista previa CSV",
   "Markdown preview content": "Contenido de vista previa de Markdown",
   "Markdown rendering is unavailable for this content. Showing the source instead.":
     "La representación Markdown no está disponible para este contenido. Mostrando la fuente en su lugar.",
@@ -310,7 +308,7 @@ const messages: Dictionary = {
   "Tags can only be changed on the current version.":
     "Las etiquetas solo se pueden cambiar en la versión actual.",
   "Versioning is not enabled on this bucket.":
-    "El control de versiones no está habilitado en este depósito.",
+    "El control de versiones no está habilitado en este bucket.",
   "Select one or more objects first.": "Seleccione uno o más objetos primero.",
   "Select a single object first.": "Primero seleccione un solo objeto.",
   "Select a file instead of a folder.":
@@ -324,14 +322,14 @@ const messages: Dictionary = {
   "You need s3:PutObjectTagging permission.":
     "Necesitas permiso s3:PutObjectTagging.",
   "You need admin:InspectData permission.":
-    "Necesita administrador: permiso InspectData.",
+    "Necesita el permiso admin:InspectData.",
   "You need permission to view object versions.":
     "Necesita permiso para ver las versiones de los objetos.",
   "You need s3:DeleteObject permission.": "Necesitas permiso s3:DeleteObject.",
   "You need permission to change the bucket policy.":
-    "Necesita permiso para cambiar la política del depósito.",
+    "Necesita permiso para cambiar la política del bucket.",
   "You need permission to read objects and bucket versioning.":
-    "Necesita permiso para leer objetos y controlar las versiones del depósito.",
+    "Necesita permiso para leer objetos y controlar las versiones del bucket.",
   "You need s3:ListBucket permission.": "Necesitas permiso s3:ListBucket.",
   "You need permission to restore this version.":
     "Necesita permiso para restaurar esta versión.",
@@ -346,9 +344,9 @@ const messages: Dictionary = {
   "Invalid Endpoint": "Punto final no válido",
   Broker: "Corredor",
   QOS: "QOS",
-  "Client ID": "Cliente ID",
+  "Client ID": "ID de cliente",
   "Client Secret": "Secreto del cliente",
-  "Redirect URI": "Redirigir URI",
+  "Redirect URI": "URI de redirección",
   "Lookup Bind DN": "Enlace de búsqueda DN",
   "Lookup Bind Password": "Buscar contraseña de enlace",
   "User DN Search Base": "Usuario DN Base de búsqueda",
@@ -366,9 +364,9 @@ const messages: Dictionary = {
     "Para selecciones superiores a 5 GiB o de tamaño desconocido, se recomienda MCLI. Este ZIP se transmitirá sin almacenamiento en la memoria intermedia.",
   "Set lifecycle": "Establecer ciclo de vida",
   "Set replication": "Establecer replicación",
-  "Refresh buckets": "Actualizar depósitos",
+  "Refresh buckets": "Actualizar buckets",
   "Close details": "Cerrar detalles",
-  "Copy share URL": "Copiar compartir URL",
+  "Copy share URL": "Copiar URL de uso compartido",
   "Select multiple versions": "Seleccione varias versiones",
   "Delete selected versions": "Eliminar versiones seleccionadas",
   "Delete non-current versions": "Eliminar versiones no actuales",
@@ -383,17 +381,17 @@ const messages: Dictionary = {
   "Remove site": "Eliminar sitio",
   "Delete selected users": "Eliminar usuarios seleccionados",
   "View All": "Ver todo",
-  "Deployment ID:": "Despliegue ID:",
-  "Request ID:": "Solicitud ID:",
+  "Deployment ID:": "ID de despliegue:",
+  "Request ID:": "ID de solicitud:",
   "Remote host:": "Host remoto:",
   "User agent:": "Agente de usuario:",
-  "Backtrace:": "Rastreo hacia atrás:",
+  "Backtrace:": "Traza de pila:",
   "Time:": "Hora:",
   "API:": "API:",
   "Not available": "No disponible",
-  " and ": "y",
+  " and ": " y ",
   "'namespace' reflects current bucket/object list and 'access' reflects a journal of object operations, defaults to 'namespace'":
-    "'espacio de nombres' refleja la lista actual de depósitos/objetos y 'acceso' refleja un diario de operaciones de objetos; el valor predeterminado es 'espacio de nombres'",
+    "'namespace' refleja la lista actual de buckets/objetos y 'access' refleja un registro de operaciones de objetos; el valor predeterminado es 'namespace'",
   "{compliance} lock protects Objects from write operations by all users, including the SILO root user.":
     "El bloqueo {compliance} protege los objetos de las operaciones de escritura de todos los usuarios, incluido el usuario raíz de SILO.",
   "{count} days": {
@@ -417,12 +415,11 @@ const messages: Dictionary = {
   },
   "{count} versions, {size}": "{count} versiones, {size}",
   "{custom} policy can be written to define which accounts are authorized to access this Bucket":
-    "Se puede escribir una política {custom} para definir qué cuentas están autorizadas a acceder a este depósito.",
+    "Se puede escribir una política {custom} para definir qué cuentas están autorizadas a acceder a este bucket.",
   "{entity} not available": "{entity} no disponible",
-  "{entity} will be available until:":
-    "{entity} estará disponible hasta:\nLas opciones",
+  "{entity} will be available until:": "{entity} estará disponible hasta:",
   "{excludeFolders} options will not be available if this option is enabled.":
-    "{excludeFolders} no estarán disponibles si esta opción está habilitada.",
+    "Las opciones de {excludeFolders} no estarán disponibles si esta opción está habilitada.",
   "{file} - Versions": "{file} - Versiones",
   "{governance} lock protects Objects from write operations by non-privileged users.":
     "El bloqueo {governance} protege los objetos de las operaciones de escritura de usuarios sin privilegios.",
@@ -439,14 +436,14 @@ const messages: Dictionary = {
   "{public} policy anyone will be able to upload, download and delete files from this Bucket once logged in":
     "Con la política {public}, cualquiera que inicie sesión podrá subir, descargar y eliminar archivos de este bucket",
   "{quota} limits the amount of data in the bucket.":
-    "{quota} limita la cantidad de datos en el depósito.",
+    "{quota} limita la cantidad de datos en el bucket.",
   "{retention} imposes rules to prevent object deletion for a period of time. Versioning must be enabled in order to set bucket retention policies.":
     "{retention} establece reglas que impiden eliminar objetos durante un período. El control de versiones debe estar habilitado para configurar políticas de retención del bucket.",
   "{service} which is {status}": "{service} que es {status}",
   "{silo} is an independently maintained continuation of the {minio} object storage project, carried forward by the {pigsty} community since 2026. Its {code} {incorporates} {upstream}, and the complete work remains licensed under the {agpl}.":
-    "{silo} es una continuación mantenida de forma independiente del proyecto de almacenamiento de objetos {minio}, llevado a cabo por la comunidad {pigsty} desde 2026. Es {code} {incorporates} {upstream}, y el trabajo completo sigue estando bajo la licencia {agpl}.",
+    "{silo} es una continuación mantenida de forma independiente del proyecto de almacenamiento de objetos {minio}, llevada adelante por la comunidad {pigsty} desde 2026. Su {code} {incorporates} {upstream}, y toda la obra permanece licenciada bajo {agpl}.",
   "{target} Event Destination": "{target} Destino del evento",
-  "{time} ago": "{time} hace",
+  "{time} ago": "hace {time}",
   "{type}: {name} not found.": "{type}: {name} no encontrado.",
   "{versioning} allows to keep multiple versions of the same object under the same key.":
     "{versioning} permite mantener múltiples versiones del mismo objeto bajo la misma clave.",
@@ -455,9 +452,9 @@ const messages: Dictionary = {
   "# Associated Access Keys": "# Claves de acceso asociadas",
   "© 2026 Ruohang Feng / PGSTY and the SILO contributors.":
     "© 2026 Ruohang Feng / PGSTY y los contribuyentes SILO.",
-  "<Day>": "<Day>",
-  "<Month>": "<Month>",
-  "<Year>": "<Year>",
+  "<Day>": "<Día>",
+  "<Month>": "<Mes>",
+  "<Year>": "<Año>",
   "A bucket can only be deleted if it's empty.":
     "Solo se puede eliminar un bucket si está vacío.",
   "A group can have one attached IAM policy, where all users with membership in that group inherit that policy. Groups support more simplified management of user permissions on the SILO Tenant.":
@@ -500,7 +497,7 @@ const messages: Dictionary = {
   "Add Access Rule": "Agregar regla de acceso",
   "Add Anonymous Access Rule": "Agregar regla de acceso anónimo",
   "Add Bucket Replication Rule - {bucket}":
-    "Agregar regla de replicación de depósito - {bucket}",
+    "Agregar regla de replicación de bucket - {bucket}",
   "Add Event Destination": "Agregar destino del evento",
   "Add key": "Agregar clave",
   "Add Lifecycle Rule": "Agregar regla de ciclo de vida",
@@ -532,9 +529,9 @@ const messages: Dictionary = {
     "Todos los sitios deben tener las mismas credenciales de implementación (es decir, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD).",
   "All User Agents": "Todos los agentes de usuario",
   "Amazon Resource Name": "Nombre del recurso de Amazon",
-  "AMQP exchange type": "AMQP tipo de cambio",
+  "AMQP exchange type": "Tipo de exchange AMQP",
   "AMQP server endpoint e.g. `amqp://myuser:mypassword@localhost:5672`":
-    "AMQP punto final del servidor, p. `amqp://miusuario:micontraseña@localhost:5672`",
+    "Endpoint del servidor AMQP, p. ej. `amqp://myuser:mypassword@localhost:5672`",
   "An error occurred": "Ocurrió un error",
   "An error occurred while getting the Health Report file.":
     "Se produjo un error al obtener el archivo del Informe de salud.",
@@ -548,7 +545,7 @@ const messages: Dictionary = {
   "Anonymous Access": "Acceso anónimo",
   "API Name": "API Nombre",
   "API Requests": "API Solicitudes",
-  Application: "Solicitud",
+  Application: "Aplicación",
   "apply policies to Groups": "aplicar políticas a Grupos",
   April: "abril",
   "Are you sure you want to continue?":
@@ -601,11 +598,11 @@ const messages: Dictionary = {
   "Are you sure you want to remove the replication site: {name}?":
     "¿Está seguro de que desea eliminar el sitio de replicación: {name}?",
   "Are you sure you want to remove the selected replication rules for bucket {bucket}?":
-    "¿Está seguro de que desea eliminar las reglas de replicación seleccionadas para el depósito {bucket}?",
+    "¿Está seguro de que desea eliminar las reglas de replicación seleccionadas para el bucket {bucket}?",
   "Are you sure you want to reset the Default {name}?":
     "¿Está seguro de que desea restablecer el valor predeterminado {name}?",
   "Are you sure you want to restore {object} with Version ID: {version}?":
-    "¿Está seguro de que desea restaurar {object} con la Versión ID: {version}?",
+    "¿Está seguro de que desea restaurar {object} con el ID de versión {version}?",
   "Are you sure you want to restore these configurations to default values?":
     "¿Está seguro de que desea restaurar estas configuraciones a los valores predeterminados?",
   "Assign Access Policies": "Asignar políticas de acceso",
@@ -625,7 +622,7 @@ const messages: Dictionary = {
   August: "agosto",
   "Auth Token": "Token de autenticación",
   "Auto delete queue when set to 'on', when there are no consumers":
-    "Eliminación automática de cola cuando está activado, cuando no hay consumidores",
+    "Elimina automáticamente la cola cuando se establece en 'on' y no hay consumidores",
   "Auto Deleted": "Eliminación automática",
   "Available Capacity": "Capacidad disponible",
   Back: "Volver",
@@ -635,36 +632,35 @@ const messages: Dictionary = {
     "Ingrese un ancho de banda no negativo inferior a 8 PiB/s, con dos decimales como máximo (0 significa ilimitado).",
   "Bitrot Scan": "Escaneo Bitrot",
   Brokers: "Corredores",
-  "Browse Bucket": "Explorar depósito",
+  "Browse Bucket": "Explorar bucket",
   Bucket: "Bucket",
-  "Bucket Assignments": "Asignaciones de depósitos",
-  "Bucket Encryption configuration": "Configuración de cifrado de depósito",
+  "Bucket Assignments": "Asignaciones de buckets",
+  "Bucket Encryption configuration": "Configuración de cifrado de bucket",
   "Bucket lifecycle (ILM) configuration":
-    "Configuración del ciclo de vida del depósito (ILM)",
-  "Bucket Name": "Nombre del depósito",
+    "Configuración del ciclo de vida del bucket (ILM)",
+  "Bucket Name": "Nombre del bucket",
   "Bucket names can consist only of lowercase letters, numbers, dots (.), and hyphens (-).":
-    "Los nombres de los depósitos solo pueden constar de letras minúsculas, números, puntos (.) y guiones (-).",
+    "Los nombres de los buckets solo pueden constar de letras minúsculas, números, puntos (.) y guiones (-).",
   "Bucket names must be between 3 (min) and 63 (max) characters long.":
-    "Los nombres de los depósitos deben tener entre 3 (mínimo) y 63 (máximo) caracteres.",
+    "Los nombres de los buckets deben tener entre 3 (mínimo) y 63 (máximo) caracteres.",
   "Bucket names must be unique within a partition.":
-    "Los nombres de los depósitos deben ser únicos dentro de una partición.",
+    "Los nombres de los buckets deben ser únicos dentro de una partición.",
   "Bucket names must not be formatted as an IP address (for example, 192.168.5.4).":
-    "Los nombres de los depósitos no deben tener el formato de dirección IP (por ejemplo, 192.168.5.4).",
+    "Los nombres de los buckets no deben tener el formato de dirección IP (por ejemplo, 192.168.5.4).",
   "Bucket names must not contain two adjacent periods, or a period adjacent to a hyphen.":
-    "Los nombres de los depósitos no deben contener dos puntos adyacentes ni un punto adyacente a un guión.",
+    "Los nombres de los buckets no deben contener dos puntos adyacentes ni un punto adyacente a un guión.",
   "Bucket names must not end with the suffix -s3alias. This suffix is reserved for access point alias names.":
-    "Los nombres de los depósitos no deben terminar con el sufijo -s3alias. Este sufijo está reservado para nombres de alias de puntos de acceso.",
+    "Los nombres de los buckets no deben terminar con el sufijo -s3alias. Este sufijo está reservado para nombres de alias de puntos de acceso.",
   "Bucket names must not start with the prefix xn--.":
-    "Los nombres de los depósitos no deben comenzar con el prefijo xn--.",
+    "Los nombres de los buckets no deben comenzar con el prefijo xn--.",
   "Bucket notification configuration":
-    "Configuración de notificación de depósito",
-  "bucket notifications": "notificaciones de depósito",
+    "Configuración de notificación de bucket",
+  "bucket notifications": "notificaciones de bucket",
   "Bucket Object-Lock configurations": "Configuraciones de bucket Object-Lock",
-  "Bucket Policies": "Políticas de depósito",
-  "Bucket Replication Configuration":
-    "Configuración de replicación de depósito",
+  "Bucket Policies": "Políticas de bucket",
+  "Bucket Replication Configuration": "Configuración de replicación de bucket",
   "Bucket Tags": "Etiquetas de bucket",
-  "bucket-default": "depósito predeterminado",
+  "bucket-default": "bucket predeterminado",
   "Buckets Results": "Resultados de buckets",
   "Buckets:": "Buckets:",
   "Bypass Governance Mode": "Omitir el modo de gobernanza",
@@ -687,13 +683,13 @@ const messages: Dictionary = {
   "Change Tags for this File": "Cambiar etiquetas para este archivo",
   "Change User Password": "Cambiar contraseña de usuario",
   "Changes to Bucket features such as":
-    "Cambios en las funciones del depósito, como",
+    "Cambios en las funciones del bucket, como",
   "Choose or create a new path": "Elige o crea una nueva ruta",
   "Claim from which SILO will read the policy or role to use":
-    "Reclamo del cual SILO leerá la política o rol a utilizar",
-  "Claim Name": "Nombre del reclamo",
-  "Claim Prefix": "Prefijo de reclamo",
-  "Claim User Info": "Reclamar información de usuario",
+    "Claim desde el cual SILO lee la política o el rol que se utilizará",
+  "Claim Name": "Nombre del claim",
+  "Claim Prefix": "Prefijo del claim",
+  "Claim User Info": "Claim de información del usuario",
   Clear: "Limpiar",
   "Click on a user to view the full listing of associated Access Keys. All Access Keys associated with a user will be deleted along with the user.":
     "Haga clic en un usuario para ver la lista completa de claves de acceso asociadas. Todas las claves de acceso asociadas con un usuario se eliminarán junto con el usuario.",
@@ -710,7 +706,7 @@ const messages: Dictionary = {
     "Clave de certificado de cliente para autenticación mTLS",
   "Client cert key for NATS mTLS authorization":
     "Clave de certificado de cliente para NATS autorización mTLS",
-  "Client ID is required": "Se requiere cliente ID",
+  "Client ID is required": "El ID de cliente es obligatorio",
   "Client Key": "Clave de cliente",
   "Client ping commands interval in s,m,h,d. Disabled by default":
     "Intervalo de comandos de ping del cliente en s,m,h,d. Deshabilitado por defecto",
@@ -733,10 +729,10 @@ const messages: Dictionary = {
   "Concurrent:": "Concurrente:",
   Config: "Configuración",
   "Config Name is required": "Se requiere el nombre de configuración",
-  "Config URL": "Configuración URL",
+  "Config URL": "URL de configuración",
   "Config URL for identity provider configuration":
-    "Config URL para la configuración del proveedor de identidad",
-  "Config URL is required": "Se requiere configuración URL",
+    "URL de configuración del proveedor de identidad",
+  "Config URL is required": "La URL de configuración es obligatoria",
   "Configuration cannot be disabled / enabled in this module as LDAP environment variables are set for this SILO instance.":
     "La configuración no se puede desactivar/activar en este módulo ya que LDAP variables de entorno están configuradas para esta instancia SILO.",
   "Configuration cannot be disabled / enabled in this module as OpenID environment variables are set for this SILO instance.":
@@ -748,25 +744,25 @@ const messages: Dictionary = {
   "Configuration saved successfully": "Configuración guardada exitosamente",
   "Configure a {remoteTier} to receive transitioned Objects":
     "Configure un {remoteTier} para recibir Objetos transicionados",
-  "Configure Bucket": "Configurar depósito",
+  "Configure Bucket": "Configurar bucket",
   "Configuring an external IDP enables Single-Sign On workflows, where applications authenticate against the external IDP before accessing SILO.":
     "La configuración de un IDP externo habilita flujos de trabajo de inicio de sesión único, donde las aplicaciones se autentican en el IDP externo antes de acceder a SILO.",
   "Confirm Dialogs": "Confirmar cuadros de diálogo",
   "connected server": "servidor conectado",
   "Connection String": "Cadena de conexión",
   "Console Credentials": "Credenciales de consola",
-  "Console LICENSE": "Consola LICENSE",
+  "Console LICENSE": "LICENCIA de la consola",
   "Console portions © Georg Mangold and contributors.":
     "Porciones de consola © Georg Mangold y colaboradores.",
   "Console predecessor": "Predecesor de la consola",
   "Copy to Clipboard": "Copiar al portapapeles",
   Copyright: "Derechos de autor",
   "Coredns Path": "Camino Coredns",
-  "Cors Allow Origin": "Cors permite origen",
+  "Cors Allow Origin": "Origen permitido CORS",
   "Could not process drag and drop.": "No se pudo procesar arrastrar y soltar.",
   "CPU Info": "CPU Información",
   "Create {idpType} configuration": "Crear configuración {idpType}",
-  "create a bucket": "crear un depósito",
+  "create a bucket": "crear un bucket",
   "Create a new cryptographic key in the Key Management Service server connected to SILO.":
     "Cree una nueva clave criptográfica en el servidor del Servicio de administración de claves conectado a SILO.",
   "create a new path": "crear una nueva ruta",
@@ -791,12 +787,12 @@ const messages: Dictionary = {
   "Created At": "Creado en",
   "Created By": "Creado por",
   "Creation and deletion of all IAM users, groups, policies and their mappings to users or groups":
-    "Creación y eliminación de todos los IAM usuarios, grupos, políticas y sus asignaciones a usuarios o grupos",
+    "Creación y eliminación de todos los usuarios, grupos y políticas IAM y sus asignaciones",
   "Creation and deletion of buckets and objects":
-    "Creación y eliminación de depósitos y objetos.",
+    "Creación y eliminación de buckets y objetos.",
   "Creation and deletion of service accounts (except those owned by the root user)":
     "Creación y eliminación de cuentas de servicio (excepto aquellas propiedad del usuario root)",
-  "Creation of STS credentials": "Creación de STS credenciales",
+  "Creation of STS credentials": "Creación de credenciales STS",
   Credentials: "Credenciales",
   current: "actual",
   Current: "Actual",
@@ -810,7 +806,7 @@ const messages: Dictionary = {
   "Current User Policy - edit the JSON to remove permissions for this Access Key":
     "Política de usuario actual: edite el JSON para eliminar permisos para esta clave de acceso",
   "Current Version": "Versión actual",
-  "CURRENT VERSION": "CURRENT VERSION",
+  "CURRENT VERSION": "VERSIÓN ACTUAL",
   "Currently Configured Endpoints": "Puntos finales actualmente configurados",
   custom: "personalizado",
   Custom: "Personalizado",
@@ -825,10 +821,10 @@ const messages: Dictionary = {
   },
   Days: "Días",
   "DB table name to store/update events, table is auto-created":
-    "DB nombre de la tabla para almacenar/actualizar eventos, la tabla se crea automáticamente",
+    "Nombre de tabla de BD para almacenar/actualizar eventos (se crea automáticamente)",
   December: "diciembre",
   Default: "Predeterminado",
-  "Default Key ID:": "Clave predeterminada ID:",
+  "Default Key ID:": "ID de clave predeterminada:",
   "Define which actions are permitted on a specified resource.":
     "Defina qué acciones están permitidas en un recurso específico.",
   "Delay Multiplier": "Multiplicador de retraso",
@@ -839,7 +835,7 @@ const messages: Dictionary = {
   "Delete All": "Eliminar todo",
   "Delete All Versions": "Eliminar todas las versiones",
   "Delete Anonymous Access Rule": "Eliminar regla de acceso anónimo",
-  "Delete Bucket": "Eliminar depósito",
+  "Delete Bucket": "Eliminar bucket",
   "Delete Configuration": "Eliminar configuración",
   "Delete Endpoint": "Eliminar punto final",
   "Delete Event": "Eliminar evento",
@@ -870,8 +866,8 @@ const messages: Dictionary = {
   "Delete version": "Eliminar versión",
   "Delete Webhook": "Eliminar Webhook",
   Deleted: "Eliminado",
-  DELETED: "DELETED",
-  Deletes: "Elimina",
+  DELETED: "ELIMINADO",
+  Deletes: "Eliminaciones",
   "Delivery Mode": "Modo de entrega",
   Description: "Descripción",
   Destination: "Destino",
@@ -879,7 +875,7 @@ const messages: Dictionary = {
   Disable: "Deshabilitar",
   "Disable LDAP": "Desactivar LDAP",
   "Disable SSL certificate verification ":
-    "Desactivar SSL verificación de certificado",
+    "Desactivar verificación de certificado SSL",
   "disable users": "desactivar usuarios",
   Disabled: "Deshabilitado",
   "Display Name": "Nombre para mostrar",
@@ -895,11 +891,11 @@ const messages: Dictionary = {
   "Download all access credentials":
     "Descargar todas las credenciales de acceso",
   "Download all access credentials to a JSON file. NOTE: This file is not formatted for import using mc alias import. If you plan to import this alias from the file, please use the Download for Import button. ":
-    "Descargue todas las credenciales de acceso en un archivo JSON. Nota: Este archivo no tiene el formato de mc alias import. Para importar este alias, use el botón «Descargar para importar».",
+    "Descargue todas las credenciales de acceso en un archivo JSON. NOTA: Este archivo no tiene formato para importarse mediante mc alias import. Si planea importar este alias desde el archivo, utilice el botón Descargar para importar.",
   "Download as CSV": "Descargar como CSV",
   "Download as PNG": "Descargar como PNG",
   "Download credentials in a JSON file formatted for import using mc alias import. This will only include the default login credentials.":
-    "Descargue las credenciales en un archivo JSON compatible con mc alias import. Solo incluye las credenciales de inicio de sesión predeterminadas.",
+    "Descargue las credenciales en un archivo JSON con formato para importarse mediante mc alias import. Esto solo incluirá las credenciales de inicio de sesión predeterminadas.",
   "Download File": "Descargar archivo",
   "Download for import": "Descargar para importar",
   "Download JSON": "Descargar JSON",
@@ -914,16 +910,16 @@ const messages: Dictionary = {
   "Downloads / Uploads": "Descargas / Cargas",
   "Drives Partitions Info": "Información de particiones de unidades",
   "Drives:": "Unidades:",
-  "DSN String": "DSN Cadena",
+  "DSN String": "Cadena DSN",
   Durable: "Duradero",
   Duration: "Duración",
   "During the speed test all your production traffic will be temporarily suspended.":
     "Durante la prueba de velocidad, todo el tráfico de producción se suspenderá temporalmente.",
-  "e.g. 503": "p.ej. 503",
-  "e.g. FunctionName2055": "p.ej. Nombre de función2055",
-  "e.g. Method 2056": "p.ej. Método 2056",
-  "e.g. my-bucket/my-prefix/*": "p.ej. mi-bucket/mi-prefijo/*",
-  "e.g. us-west-rack-2": "p.ej. nosotros-oeste-rack-2",
+  "e.g. 503": "p. ej. 503",
+  "e.g. FunctionName2055": "p. ej. FunctionName2055",
+  "e.g. Method 2056": "p. ej. Method 2056",
+  "e.g. my-bucket/my-prefix/*": "p. ej. my-bucket/my-prefix/*",
+  "e.g. us-west-rack-2": "p. ej. us-west-rack-2",
   "Each user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
     "Cada usuario puede acceder solo a aquellos recursos y operaciones que la función incorporada otorga explícitamente. SILO niega el acceso a cualquier otro recurso o acción de forma predeterminada.",
   Edit: "Editar",
@@ -931,7 +927,7 @@ const messages: Dictionary = {
   "Edit Anonymous Access Rule for {target}":
     "Editar regla de acceso anónimo para {target}",
   "Edit Audit Webhook": "Editar auditoría Webhook",
-  "Edit Bucket Replication": "Editar replicación de depósito",
+  "Edit Bucket Replication": "Editar replicación de bucket",
   "Edit Configuration": "Editar configuración",
   "Edit details of - {name}": "Editar detalles de - {name}",
   "Edit Endpoint": "Editar punto final",
@@ -953,8 +949,8 @@ const messages: Dictionary = {
     "Elasticsearch dirección del servidor, con información de autenticación opcional",
   Enable: "Habilitar",
   "Enable audit_kafka target": "Habilitar objetivo audit_kafka",
-  "Enable Bucket Encryption": "Habilitar cifrado de depósito",
-  "Enable Bucket Quota": "Habilitar cuota de depósito",
+  "Enable Bucket Encryption": "Habilitar cifrado de bucket",
+  "Enable Bucket Quota": "Habilitar cuota de bucket",
   "Enable LDAP": "Habilitar LDAP",
   "enable or disable Groups": "habilitar o deshabilitar grupos",
   "enable or disable users": "habilitar o deshabilitar usuarios",
@@ -975,98 +971,97 @@ const messages: Dictionary = {
   endpoints: "puntos finales",
   Endpoints: "Puntos finales",
   "Enter '/' to apply the rule to all prefixes and objects at the bucket root. Do not include the wildcard asterisk '*' as part of the prefix *unless* it is an explicit part of the prefix name. The Console automatically appends an asterisk to the appropriate sections of the resulting IAM policy.":
-    "Ingrese '/' para aplicar la regla a todos los prefijos y objetos en la raíz del depósito. No incluya el asterisco comodín '*' como parte del prefijo *a menos* que sea una parte explícita del nombre del prefijo. La Consola agrega automáticamente un asterisco a las secciones apropiadas de la política IAM resultante.",
+    "Ingrese '/' para aplicar la regla a todos los prefijos y objetos en la raíz del bucket. No incluya el asterisco comodín '*' como parte del prefijo *a menos* que sea una parte explícita del nombre del prefijo. La Consola agrega automáticamente un asterisco a las secciones apropiadas de la política IAM resultante.",
   "Enter a comment": "Introduce un comentario",
-  "Enter a description": "Ingrese una descripción",
-  "Enter a Mime Type": "Ingrese un tipo de Mime",
-  "Enter a name": "Ingrese un nombre",
+  "Enter a description": "Ingresar descripción",
+  "Enter a Mime Type": "Ingresar tipo de Mime",
+  "Enter a name": "Ingresar nombre",
   "Enter Access Key": "Ingresar clave de acceso",
-  "Enter Account Key": "Ingrese la clave de cuenta",
-  "Enter Account Name": "Ingrese el nombre de la cuenta",
-  "Enter Address": "Ingrese la dirección",
+  "Enter Account Key": "Ingresar clave de cuenta",
+  "Enter Account Name": "Ingresar nombre de la cuenta",
+  "Enter Address": "Ingresar dirección",
   "Enter allowed origin e.g. https://example.com":
-    "Ingrese el origen permitido, p. https://example.com",
-  "Enter an Extension": "Ingrese una extensión",
-  "Enter Auth Token": "Ingrese el token de autenticación",
-  "Enter auth_token": "Ingrese auth_token",
-  "Enter Brokers": "Ingrese a los corredores",
-  "Enter Bucket": "Ingresar al depósito",
-  "Enter Cert Authority": "Ingrese la autoridad de certificación",
-  "Enter Claim Name": "Ingrese el nombre del reclamo",
-  "Enter Claim Prefix": "Ingrese el prefijo de reclamo",
-  "Enter Client Cert": "Ingrese el certificado del cliente",
-  "Enter Client Cert Key": "Ingrese la clave de certificado del cliente",
-  "Enter Client ID": "Ingrese Cliente ID",
-  "Enter Client Key": "Ingrese la clave del cliente",
-  "Enter Client Secret": "Ingrese el secreto del cliente",
-  "Enter Coredns Path": "Ingrese la ruta de Coredns",
-  "Enter custom notes if any": "Ingrese notas personalizadas, si corresponde",
+    "Ingresar origen permitido, p. https://example.com",
+  "Enter an Extension": "Ingresar extensión",
+  "Enter Auth Token": "Ingresar token de autenticación",
+  "Enter auth_token": "Ingresar auth_token",
+  "Enter Brokers": "Ingresar los corredores",
+  "Enter Bucket": "Ingresar bucket",
+  "Enter Cert Authority": "Ingresar autoridad de certificación",
+  "Enter Claim Name": "Ingresar nombre del claim",
+  "Enter Claim Prefix": "Ingresar prefijo del claim",
+  "Enter Client Cert": "Ingresar certificado del cliente",
+  "Enter Client Cert Key": "Ingresar clave de certificado del cliente",
+  "Enter Client ID": "Ingresar ID de cliente",
+  "Enter Client Key": "Ingresar clave del cliente",
+  "Enter Client Secret": "Ingresar secreto del cliente",
+  "Enter Coredns Path": "Ingresar ruta de Coredns",
+  "Enter custom notes if any": "Ingresar notas personalizadas, si corresponde",
   "Enter Cycle": "Ingresar ciclo",
-  "Enter DB Name": "Ingrese DB Nombre",
+  "Enter DB Name": "Ingresar nombre de BD",
   "Enter Delay": "Ingresar retraso",
-  "Enter Delivery Mode": "Ingrese al modo de entrega",
-  "Enter Destination Identifier": "Ingrese el identificador de destino",
-  "Enter Display Name": "Ingrese el nombre para mostrar",
-  "Enter DSN String": "Ingrese DSN Cadena",
+  "Enter Delivery Mode": "Ingresar modo de entrega",
+  "Enter Destination Identifier": "Ingresar identificador de destino",
+  "Enter Display Name": "Ingresar nombre para mostrar",
+  "Enter DSN String": "Ingresar cadena DSN",
   "Enter Endpoint": "Ingresar punto final",
-  "Enter Exchange": "Ingresar a Intercambio",
-  "Enter Exchange Type": "Ingrese el tipo de cambio",
+  "Enter Exchange": "Ingresar exchange",
+  "Enter Exchange Type": "Ingresar tipo de exchange",
   "Enter Format": "Ingresar formato",
   "Enter Host": "Ingresar anfitrión",
   "Enter Index": "Ingresar índice",
-  "Enter Kafka Broker": "Ingrese Kafka Agente",
-  "Enter Kafka Topic": "Ingrese Kafka Tema",
-  "Enter Kafka Version": "Ingrese Kafka Versión",
-  "Enter Keep Alive Interval":
-    "Introduzca el intervalo de mantenimiento de actividad",
+  "Enter Kafka Broker": "Ingresar broker de Kafka",
+  "Enter Kafka Topic": "Ingresar tema de Kafka",
+  "Enter Kafka Version": "Ingresar versión de Kafka",
+  "Enter Keep Alive Interval": "Ingresar intervalo keep-alive",
   "Enter Key": "Ingresar clave",
-  "Enter Max IO": "Ingrese Máximo IO",
-  "Enter Max Sleep Duration": "Ingrese la duración máxima del sueño",
-  "Enter Max Wait": "Ingrese la espera máxima",
-  "Enter Name (Eg. REMOTE-TIER)": "Ingrese el nombre (Ej. REMOTE-TIER)",
-  "Enter NATS password": "Ingrese NATS contraseña",
-  "Enter NATS Subject": "Ingrese NATS Asunto",
-  "Enter NATS token": "Ingrese el token NATS",
-  "Enter NATS Username": "Ingrese NATS Nombre de usuario",
-  "Enter New Tag Key": "Ingrese la nueva clave de etiqueta",
-  "Enter New Tag Label": "Ingrese nueva etiqueta de etiqueta",
-  "Enter nsqd_address": "Ingrese nsqd_address",
-  "Enter Password": "Ingrese la contraseña",
-  "Enter Path Prefix": "Ingrese el prefijo de ruta",
-  "Enter Ping Interval": "Ingrese el intervalo de ping",
+  "Enter Max IO": "Ingresar Máximo IO",
+  "Enter Max Sleep Duration": "Ingresar pausa máxima",
+  "Enter Max Wait": "Ingresar espera máxima",
+  "Enter Name (Eg. REMOTE-TIER)": "Ingresar nombre (Ej. REMOTE-TIER)",
+  "Enter NATS password": "Ingresar contraseña de NATS",
+  "Enter NATS Subject": "Ingresar asunto de NATS",
+  "Enter NATS token": "Ingresar token de NATS",
+  "Enter NATS Username": "Ingresar usuario de NATS",
+  "Enter New Tag Key": "Ingresar nueva clave de etiqueta",
+  "Enter New Tag Label": "Ingresar nueva etiqueta de etiqueta",
+  "Enter nsqd_address": "Ingresar nsqd_address",
+  "Enter Password": "Ingresar contraseña",
+  "Enter Path Prefix": "Ingresar prefijo de ruta",
+  "Enter Ping Interval": "Ingresar intervalo de ping",
   "Enter Port": "Ingresar puerto",
   "Enter Prefix": "Ingresar prefijo",
-  "Enter QOS": "Ingrese QOS",
+  "Enter QOS": "Ingresar QOS",
   "Enter Queue Dir": "Ingresar directorio de cola",
-  "Enter Queue Directory": "Ingresar al directorio de cola",
+  "Enter Queue Directory": "Ingresar directorio de cola",
   "Enter Queue Limit": "Ingresar límite de cola",
-  "Enter Reconnect Interval": "Ingrese el intervalo de reconexión",
+  "Enter Reconnect Interval": "Ingresar intervalo de reconexión",
   "Enter Replication Failed Workers":
-    "Ingrese trabajadores fallidos en la replicación",
-  "Enter Replication Workers": "Ingrese a los trabajadores de replicación",
+    "Ingresar trabajadores fallidos en la replicación",
+  "Enter Replication Workers": "Ingresar los trabajadores de replicación",
   "Enter Requests Max": "Ingresar solicitudes máx.",
   "Enter Routing Key": "Ingresar clave de ruta",
-  "Enter SASL Mechanism": "Ingrese SASL Mecanismo",
-  "Enter SASL Password": "Ingrese SASL Contraseña",
-  "Enter SASL Username": "Ingrese SASL Nombre de usuario",
-  "Enter Secret Key": "Ingrese la clave secreta",
-  "Enter SSL Mode": "Ingrese al modo SSL",
+  "Enter SASL Mechanism": "Ingresar mecanismo SASL",
+  "Enter SASL Password": "Ingresar contraseña SASL",
+  "Enter SASL Username": "Ingresar usuario SASL",
+  "Enter Secret Key": "Ingresar clave secreta",
+  "Enter SSL Mode": "Ingresar modo SSL",
   "Enter Storage Class": "Ingresar clase de almacenamiento",
-  "Enter Streaming Cluster ID": "Ingrese al grupo de transmisión ID",
-  "Enter Streaming in flight value": "Ingresar Streaming en valor de vuelo",
-  "Enter Table Name": "Ingrese el nombre de la tabla",
+  "Enter Streaming Cluster ID": "Ingresar ID del clúster de streaming",
+  "Enter Streaming in flight value": "Ingresar valor de streaming en curso",
+  "Enter Table Name": "Ingresar nombre de la tabla",
   "Enter Tag Key": "Ingresar clave de etiqueta",
-  "Enter Tag Label": "Ingresar etiqueta de etiqueta",
-  "Enter the new Folder Path": "Ingrese la nueva ruta de la carpeta",
-  "Enter TLS Client Auth": "Ingrese TLS Autenticación del cliente",
-  "Enter TLS Client Cert": "Ingrese TLS Certificado de cliente",
-  "Enter TLS Client Key": "Ingrese TLS Clave de cliente",
+  "Enter Tag Label": "Ingresar valor de etiqueta",
+  "Enter the new Folder Path": "Ingresar nueva ruta de la carpeta",
+  "Enter TLS Client Auth": "Ingresar autenticación de cliente TLS",
+  "Enter TLS Client Cert": "Ingresar certificado de cliente TLS",
+  "Enter TLS Client Key": "Ingresar clave de cliente TLS",
   "Enter Topic": "Ingresar tema",
-  "Enter URL": "Ingrese URL",
+  "Enter URL": "Ingresar URL",
   "Enter User": "Ingresar Usuario",
-  "Enter Username": "Ingrese el nombre de usuario",
+  "Enter Username": "Ingresar nombre de usuario",
   Entities: "Entidades",
-  "Erasure Health": "Estado de codificación de borrado",
+  "Erasure Health": "Estado EC",
   Error: "Error",
   "Error - File size too large":
     "Error: el tamaño del archivo es demasiado grande",
@@ -1086,8 +1081,8 @@ const messages: Dictionary = {
   "Excluded Prefixes :": "Prefijos excluidos:",
   "Existing Objects": "Objetos existentes",
   "Expand graph": "Ampliar gráfico",
-  "Expire All Versions": "Caducan todas las versiones",
-  "Expire Delete Marker": "Caducar Eliminar marcador",
+  "Expire All Versions": "Expirar todas las versiones",
+  "Expire Delete Marker": "Expirar marcador de eliminación",
   "Expired All Versions": "Todas las versiones caducadas",
   "Expired Object Delete Marker": "Marcador de eliminación de objeto caducado",
   Expiry: "Caducidad",
@@ -1123,9 +1118,9 @@ const messages: Dictionary = {
   "Folder cannot have the same name as an existing file":
     "La carpeta no puede tener el mismo nombre que un archivo existente",
   "For each write operation to the bucket, SILO checks all configured replication rules for the bucket and applies the matching rule with highest configured priority.":
-    "Para cada operación de escritura en el depósito, SILO verifica todas las reglas de replicación configuradas para el depósito y aplica la regla coincidente con la prioridad configurada más alta.",
+    "Para cada operación de escritura en el bucket, SILO verifica todas las reglas de replicación configuradas para el bucket y aplica la regla coincidente con la prioridad configurada más alta.",
   'For each write operation to this "source" bucket, SILO checks all configured replication rules and applies the matching rule with highest configured priority.':
-    'Para cada operación de escritura en este depósito "fuente", SILO verifica todas las reglas de replicación configuradas y aplica la regla coincidente con la prioridad configurada más alta.',
+    'Para cada operación de escritura en este bucket "fuente", SILO verifica todas las reglas de replicación configuradas y aplica la regla coincidente con la prioridad configurada más alta.',
   "For per-object retention settings, defer to the documentation for the PUT operation used by your preferred SDK.":
     "Para la configuración de retención por objeto, consulte la documentación para la operación PUT utilizada por su SDK preferido.",
   "For SSE-S3 or SSE-KMS encryption via KMS, all sites must have access to a central KMS deployment server.":
@@ -1149,9 +1144,9 @@ const messages: Dictionary = {
     "Los grupos proporcionan un método simplificado para administrar permisos compartidos entre usuarios con patrones de acceso y cargas de trabajo comunes. Los clientes no pueden autenticarse en una implementación SILO utilizando un grupo como identidad.",
   "Groups with this Policy associated": "Grupos con esta Política asociada",
   "Guide to access policy structure":
-    "Guía para acceder a la estructura de políticas",
-  hard: "duro",
-  Heal: "Sanar",
+    "Guía de estructura de políticas de acceso",
+  hard: "estricto",
+  Heal: "Reparar",
   "Health Check Duration": "Duración del control de estado",
   "Health Info (Preview)": "Información de salud (vista previa)",
   "Health Report": "Informe de salud",
@@ -1165,7 +1160,7 @@ const messages: Dictionary = {
     "Se inició el informe de salud. No actualice la página durante el diagnóstico.",
   Healthy: "Correcto",
   "Hide advanced Filters": "Ocultar filtros avanzados",
-  "Hide Bucket Naming Rules": "Ocultar reglas de nomenclatura de depósitos",
+  "Hide Bucket Naming Rules": "Ocultar reglas de nomenclatura de buckets",
   "Hide Object Versions": "Ocultar versiones de objetos",
   hour: "hora",
   hours: {
@@ -1176,9 +1171,9 @@ const messages: Dictionary = {
   Hours: "Horas",
   "IAM conditional statements": "IAM declaraciones condicionales",
   "IAM Policy": "IAM Política",
-  Id: "Identificación",
+  Id: "ID",
   Identifier: "Identificador",
-  "Identity provider Client ID": "Proveedor de identidad Cliente ID",
+  "Identity provider Client ID": "ID de cliente del proveedor de identidad",
   "Identity provider Client Secret":
     "Secreto del cliente del proveedor de identidad",
   "If the Health report cannot be generated at this time, please wait a moment and try again.":
@@ -1196,7 +1191,7 @@ const messages: Dictionary = {
   "Inspect Object": "Inspeccionar objeto",
   "Inspect this file": "Inspeccionar este archivo",
   Internal: "Interno",
-  "Invalid bucket name": "Nombre de depósito no válido",
+  "Invalid bucket name": "Nombre de bucket no válido",
   "Invalid Endpoint set": "Conjunto de puntos finales no válido",
   "Invalid Name": "Nombre no válido",
   January: "enero",
@@ -1205,8 +1200,8 @@ const messages: Dictionary = {
   June: "junio",
   "Just now": "Justo ahora",
   "Kafka topic used for bucket notifications":
-    "Kafka tema utilizado para notificaciones de depósitos",
-  "Keep Alive Interval": "Intervalo de mantenimiento de actividad",
+    "Kafka tema utilizado para notificaciones de buckets",
+  "Keep Alive Interval": "Intervalo keep-alive",
   "Keep-alive interval for MQTT connections in s,m,h,d":
     "Intervalo de mantenimiento de conexión para MQTT conexiones en s,m,h,d",
   Key: "Clave",
@@ -1216,7 +1211,7 @@ const messages: Dictionary = {
   "Key name cannot contain spaces":
     "El nombre de la clave no puede contener espacios",
   Keys: "Claves",
-  "KMS Key ID": "KMS Tecla ID",
+  "KMS Key ID": "ID de clave KMS",
   "Last Modified": "Última modificación",
   "Last modified:": "Última modificación:",
   "Last Modified:": "Última modificación:",
@@ -1233,7 +1228,7 @@ const messages: Dictionary = {
   "Learn more about Policies": "Obtenga más información sobre las políticas",
   "Learn more about the Users feature":
     "Obtenga más información sobre la función Usuarios",
-  "Learn more about TIERS": "Más información sobre TIERS",
+  "Learn more about TIERS": "Más información sobre NIVELES",
   "Legal Hold": "Retención legal",
   "Legal Hold Status": "Estado de retención legal",
   "Legal Hold:": "Retención Legal:",
@@ -1251,7 +1246,7 @@ const messages: Dictionary = {
   "Load more Versions": "Cargar más versiones",
   "Load Time": "Tiempo de carga",
   "Loading nodes": "Cargando nodos",
-  "Local Buckets to replicate": "Depósitos locales para replicar",
+  "Local Buckets to replicate": "Buckets locales para replicar",
   Location: "Ubicación",
   Locking: "Bloqueo",
   "Log Details": "Detalles del registro",
@@ -1266,18 +1261,18 @@ const messages: Dictionary = {
   "Manually Configure String": "Configurar cadena manualmente",
   March: "marzo",
   "Max IO": "Máx. IO",
-  "Max Sleep": "Sueño máximo",
+  "Max Sleep": "Pausa máx.",
   "Max Wait": "Espera máxima",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
-    "Máximo IO solicitudes permitidas entre objetos para ralentizar la operación de curación, p. 3",
+    "Máximo de solicitudes de E/S permitidas entre objetos para ralentizar la reparación, p. ej. 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
     "Límite máximo de mensajes no entregados, el valor predeterminado es '10000'",
   "Maximum number of concurrent requests, e.g. '1600'":
     "Número máximo de solicitudes simultáneas, p. '1600'",
   "Maximum sleep duration between objects to slow down heal operation, e.g. 2s":
-    "Duración máxima del sueño entre objetos para ralentizar la operación de curación, p. 2s",
+    "Duración máxima de pausa entre objetos para ralentizar la reparación, p. ej. 2s",
   "Maximum wait time between operations, defaults to '15s'":
-    "Tiempo máximo de espera entre operaciones, el valor predeterminado es '15 s'",
+    "Tiempo máximo de espera entre operaciones, predeterminado '15s'",
   May: "mayo",
   "May try again or download Health report JSON File.":
     "Puede intentarlo nuevamente o descargar el archivo Informe de salud JSON.",
@@ -1286,9 +1281,9 @@ const messages: Dictionary = {
   Metadata: "Metadatos",
   "Metadata Sync": "Sincronización de metadatos",
   Method: "Método",
-  "Mime Types": "Tipos de mimo",
+  "Mime Types": "Tipos MIME",
   'Mime types e.g. "text/*", "application/json" or "application/xml" - you can write one per field':
-    'Tipos de mimo, p. "text/*", "application/json" o "application/xml" - puedes escribir uno por campo',
+    'Tipos MIME, p. ej. "text/*", "application/json" o "application/xml" - uno por campo',
   minute: "minuto",
   minutes: {
     one: "minuto",
@@ -1310,22 +1305,22 @@ const messages: Dictionary = {
     "MQTT punto final del servidor, p. `tcp://localhost:1883`",
   "MQTT username": "MQTT nombre de usuario",
   "Multi Bucket lifecycle Assignments Results":
-    "Resultados de las asignaciones del ciclo de vida de varios depósitos",
+    "Resultados de las asignaciones del ciclo de vida de varios buckets",
   Name: "Nombre",
   "Name for identity provider configuration":
     "Nombre para la configuración del proveedor de identidad",
   "Name of the AMQP exchange": "Nombre del intercambio AMQP",
   'Name of the location of the server e.g. "us-west-rack2"':
-    'Nombre de la ubicación del servidor, p. "nosotros-oeste-rack2"',
+    'Nombre de la ubicación del servidor, p. ej. "us-west-rack2"',
   "Name of the MQTT topic to publish": "Nombre del MQTT tema a publicar",
   "Name:": "Nombre:",
   'Namespace prefix to isolate tenants e.g. "customer1/"':
-    'Prefijo de espacio de nombres para aislar a los inquilinos, p. "cliente1/"',
+    'Prefijo de espacio de nombres para aislar inquilinos, p. ej. "customer1/"',
   "NATS password": "NATS contraseña",
   "NATS server address e.g. '0.0.0.0:4222'":
     "NATS dirección del servidor, p. '0.0.0.0:4222'",
   "NATS subscription subject": "NATS asunto de suscripción",
-  "NATS token": "NATS ficha",
+  "NATS token": "Token de NATS",
   "NATS username": "NATS nombre de usuario",
   "Network Info": "Información de red",
   "New {entity} Created": "Nuevo {entity} Creado",
@@ -1337,7 +1332,7 @@ const messages: Dictionary = {
   "New Password": "Nueva Contraseña",
   "New passwords don't match": "Las nuevas contraseñas no coinciden",
   "New Tag Key": "Nueva clave de etiqueta",
-  "New Tag Label": "Nueva etiqueta de etiqueta",
+  "New Tag Label": "Nuevo valor de etiqueta",
   Next: "Siguiente",
   No: "No",
   "No changes applied": "No se aplicaron cambios",
@@ -1352,10 +1347,10 @@ const messages: Dictionary = {
   "no-expiry": "sin caducidad",
   "Nodes:": "Nodos:",
   "Non-blocking message delivery when set to 'on', default is 'off'":
-    "Entrega de mensajes sin bloqueo cuando está activado, el valor predeterminado es desactivado",
-  "Non-Current": "No corriente",
-  "Non-current Expiration Days": "Días de Vencimiento No Corrientes",
-  "Non-current Transition Days": "Días de transición no corrientes",
+    "Entrega de mensajes sin bloqueo cuando se establece en 'on', predeterminado 'off'",
+  "Non-Current": "No actual",
+  "Non-current Expiration Days": "Expirar versiones previas (días)",
+  "Non-current Transition Days": "Días de transición (no actuales)",
   "Non-Current Version": "Versión no actual",
   "Non-current Version Transition Storage Class":
     "Clase de almacenamiento de transición de versión no actual",
@@ -1369,7 +1364,7 @@ const messages: Dictionary = {
     "NSQ dirección del servidor, p. '127.0.0.1:4150'",
   "NSQ topic": "NSQ tema",
   "NSQD Address": "NSQD Dirección",
-  "NULL VERSION": "NULL VERSION",
+  "NULL VERSION": "VERSIÓN NULA",
   "Number of {unit} must be less than or equal to 2147483647":
     "El número de {unit} debe ser menor o igual a 2147483647",
   "Number of {unit} to retain must be greater than zero":
@@ -1425,7 +1420,7 @@ const messages: Dictionary = {
     "Realice un escaneo bitrot en discos al verificar objetos durante el escaneo",
   "Performance test": "Prueba de rendimiento",
   "Persist queue across broker restarts when set to 'on', default is 'off'":
-    "La cola persistente entre intermediarios se reinicia cuando está configurada en 'activada', la opción predeterminada es 'desactivada'",
+    "Mantener la cola tras reinicios del broker cuando se establece en 'on', predeterminado 'off'",
   "Ping Interval": "Intervalo de ping",
   "Please avoid the use of root credentials for this feature":
     "Evite el uso de credenciales de root para esta función",
@@ -1447,7 +1442,7 @@ const messages: Dictionary = {
     "Tenga en cuenta que esto puede provocar que su sistema no sea accesible",
   "Please refer to {link} credentials.": "Consulte las credenciales {link}.",
   "Please select / type the desired remote bucket were you want the local data to be replicated.":
-    "Seleccione/escriba el depósito remoto deseado donde desea que se repliquen los datos locales.",
+    "Seleccione/escriba el bucket remoto deseado donde desea que se repliquen los datos locales.",
   "Please select a valid duration.": "Seleccione una duración válida.",
   "Please select Groups on which you want to apply Policies":
     "Seleccione los grupos a los que desea aplicar políticas",
@@ -1486,7 +1481,7 @@ const messages: Dictionary = {
   "Queue Directory": "Directorio de colas",
   "Queue Limit": "Límite de cola",
   "Quietly ignore undelivered messages when set to 'off', default is 'on'":
-    'Ignora silenciosamente los mensajes no entregados cuando está "desactivado", el valor predeterminado es "activado"',
+    "Ignorar silenciosamente mensajes no entregados cuando se establece en 'off', predeterminado 'on'",
   quota: "cuota",
   Quota: "Cuota",
   "Quota:": "Cuota:",
@@ -1498,7 +1493,7 @@ const messages: Dictionary = {
   "Reconnect Interval": "Intervalo de reconexión",
   "Reconnect interval for MQTT connections in s,m,h,d":
     "Intervalo de reconexión para conexiones MQTT en s,m,h,d",
-  "Redirect URI Dynamic": "Redireccionamiento URI Dinámico",
+  "Redirect URI Dynamic": "URI de redirección dinámica",
   "Redis key to store/update events, key is auto-created":
     "Redis clave para almacenar/actualizar eventos, la clave se crea automáticamente",
   "Redis server password": "Redis contraseña del servidor",
@@ -1507,7 +1502,7 @@ const messages: Dictionary = {
   Refresh: "Actualizar",
   "Refresh List": "Actualizar lista",
   Region: "Región",
-  "Remote Bucket Assignments": "Asignaciones de depósitos remotos",
+  "Remote Bucket Assignments": "Asignaciones de buckets remotos",
   "Remote Configuration": "Configuración Remota",
   "Remote Endpoint Configuration": "Configuración de punto final remoto",
   "Remote Host": "Host remoto",
@@ -1520,7 +1515,7 @@ const messages: Dictionary = {
     "Eliminar la referencia al objeto si no quedan versiones",
   "Removes all the versions of the object already expired":
     "Elimina todas las versiones del objeto que ya han caducado",
-  "Rename Download": "Cambiar nombre Descargar",
+  "Rename Download": "Renombrar descarga",
   "REPLICA - Object Replicated": "REPLICA - Objeto replicado",
   "Replicate existing objects": "Replicar objetos existentes",
   "Replicate soft deletes": "Replicar eliminaciones lógicas",
@@ -1538,8 +1533,8 @@ const messages: Dictionary = {
   "Replication Workers": "Trabajadores de replicación",
   "Replication:": "Replicación:",
   "Reported Usage:": "Uso reportado:",
-  "Request Content Length": "Solicitar longitud del contenido",
-  "Request ID": "Solicitud ID",
+  "Request Content Length": "Longitud del contenido de la solicitud",
+  "Request ID": "ID de solicitud",
   "Requests Max": "Solicitudes máx.",
   "Requests that took T ms or less": "Solicitudes que tardaron T ms o menos",
   Reset: "Restablecer",
@@ -1551,7 +1546,7 @@ const messages: Dictionary = {
   "Response Status Code": "Código de estado de respuesta",
   "Response Threshold": "Umbral de respuesta",
   Restart: "Reiniciar",
-  "Restore Defaults": "Restaurar valores predeterminados",
+  "Restore Defaults": "Restaurar predeterminados",
   "Restore File Version": "Restaurar versión del archivo",
   "Restore this version": "Restaurar esta versión",
   "Restrict beyond user policy":
@@ -1567,10 +1562,10 @@ const messages: Dictionary = {
   "Retry Health Report": "Reintentar informe de estado",
   Rewind: "Rebobinar",
   "Rewind - {bucket}": "Rebobinar - {bucket}",
-  "Rewind Bucket": "Bucket de rebobinado",
+  "Rewind Bucket": "Rebobinar bucket",
   "Rewind to": "Rebobinar a",
   "Role Policy": "Política de roles",
-  rotating: "girando",
+  rotating: "la rotación",
   "Routing Key": "Clave de enrutamiento",
   "Routing key for publishing": "Clave de enrutamiento para publicación",
   "Rule State": "Estado de regla",
@@ -1578,12 +1573,12 @@ const messages: Dictionary = {
   "Running {mcDu} without the {flag} flag or {df} will provide different values corresponding to the size of all {current} versions and the physical disk space occupied respectively.":
     "Ejecutar {mcDu} sin el indicador {flag} o {df} proporcionará diferentes valores correspondientes al tamaño de todas las versiones {current} y el espacio en disco físico ocupado, respectivamente.",
   "S3 lifecycle": "S3 ciclo de vida",
-  "SASL authentication mechanism": "SASL mecanismo de autenticación",
+  "SASL authentication mechanism": "Mecanismo de autenticación SASL",
   "SASL authentication mechanism, default 'PLAIN'":
     "SASL mecanismo de autenticación, predeterminado 'PLAIN'",
-  "SASL Mechanism": "SASL Mecanismo",
-  "SASL Password": "SASL Contraseña",
-  "SASL Username": "SASL Nombre de usuario",
+  "SASL Mechanism": "Mecanismo SASL",
+  "SASL Password": "Contraseña SASL",
+  "SASL Username": "Usuario SASL",
   "Save Event Destination": "Guardar destino del evento",
   "Save Tier Configuration": "Guardar configuración de nivel",
   Scanner: "Escáner",
@@ -1595,9 +1590,9 @@ const messages: Dictionary = {
   Search: "Buscar",
   "Search Access Keys": "Buscar claves de acceso",
   "Search Groups": "Buscar grupos",
-  "Search Keys with pattern": "Claves de búsqueda con patrón",
+  "Search Keys with pattern": "Buscar claves por patrón",
   "Search members": "Buscar miembros",
-  "Search Policies": "Políticas de búsqueda",
+  "Search Policies": "Buscar políticas",
   "Search target": "Objetivo de búsqueda",
   "Search Users": "Buscar usuarios",
   second: "segundo",
@@ -1610,7 +1605,7 @@ const messages: Dictionary = {
   "SecretKey is required": "SecretKey es obligatorio",
   "Select {expiry} to delete Objects per this rule. Select {transition} to move Objects to a remote storage {tier} per this rule.":
     "Seleccione {expiry} para eliminar objetos según esta regla. Seleccione {transition} para mover Objetos a un almacenamiento remoto {tier} según esta regla.",
-  "Select Bucket": "Seleccionar depósito",
+  "Select Bucket": "Seleccionar bucket",
   "Select from the list of displayed users to assign users to the new group at creation. These users inherit the policies assigned to the group.":
     "Seleccione de la lista de usuarios mostrados para asignar usuarios al nuevo grupo en el momento de la creación. Estos usuarios heredan las políticas asignadas al grupo.",
   "Select Groups to delete": "Seleccionar grupos para eliminar",
@@ -1631,8 +1626,8 @@ const messages: Dictionary = {
   "Selected Objects:": "Objetos seleccionados:",
   "Selected User": "Usuario seleccionado",
   "Selected Users": "Usuarios seleccionados",
-  September: "Septiembre\nSerie",
-  Series: "Series",
+  September: "septiembre",
+  Series: "Serie",
   server: "servidor",
   "Server Address": "Dirección del servidor",
   "Server Address is required": "Se requiere la dirección del servidor",
@@ -1641,22 +1636,22 @@ const messages: Dictionary = {
   "Server Insecure": "Servidor inseguro",
   "Server Location": "Ubicación del servidor",
   "server-side bucket replication":
-    "replicación de depósitos del lado del servidor",
+    "replicación de buckets del lado del servidor",
   "Server, client and Console are all AGPLv3. SILO's documentation is CC BY 4.0 — {licensing}.":
     "El servidor, el cliente y la consola son todos AGPLv3. La documentación de SILO es CC BY 4.0 - {licensing}.",
   Service: "Servicio",
   "Service Accounts": "Cuentas de servicio",
   Services: "Servicios",
-  Set: "Conjunto",
+  Set: "Establecer",
   "Set Anonymous Access to this Folder":
     "Establecer acceso anónimo a esta carpeta",
-  "Set Bucket Replication": "Establecer replicación de depósito",
+  "Set Bucket Replication": "Establecer replicación de bucket",
   "Set Groups": "Establecer grupos",
   "Set Legal Hold": "Establecer retención legal",
   "Set Lifecycle to multiple buckets":
-    "Establecer ciclo de vida en varios depósitos",
+    "Establecer ciclo de vida en varios buckets",
   "Set Multiple Bucket Replication":
-    "Establecer replicación de depósitos múltiples",
+    "Establecer replicación de buckets múltiples",
   "Set Non-current Version Transition Storage Class":
     "Establecer clase de almacenamiento de transición de versión no actual",
   "Set Policies": "Establecer políticas",
@@ -1667,39 +1662,40 @@ const messages: Dictionary = {
   "Set to '1' for non-persistent or '2' for persistent queue":
     "Establecer en '1' para cola no persistente o '2' para cola persistente",
   "Set to 'on' for exchange to be not used directly by publishers, but only when bound to other exchanges":
-    "Establezca esta opción en 'activado' para que los editores no utilicen el intercambio directamente, sino solo cuando esté vinculado a otros intercambios.",
+    "Establecer en 'on' para que el exchange no sea usado directamente por publicadores, sino solo vinculado con otros exchanges",
   "Set to 'on' to enable asynchronous publish":
-    "Establezca en 'activado' para habilitar la publicación asincrónica",
+    "Establecer en 'on' para habilitar la publicación asíncrona",
   "Set to 'on' to enable SASL authentication":
-    "Establezca en 'activado' para habilitar la autenticación SASL",
-  "Set to 'on' to enable TLS": "Establezca en 'activado' para habilitar TLS",
+    "Establecer en 'on' para habilitar la autenticación SASL",
+  "Set to 'on' to enable TLS": "Establecer en 'on' para habilitar TLS",
   "Set to 'on' to use streaming NATS server":
-    "Configúrelo en 'activado' para usar el servidor de transmisión NATS",
+    "Establecer en 'on' para usar el servidor NATS de streaming",
   "Setting a {quota} assigns a hard limit to a bucket beyond which SILO does not allow writes.":
-    "Establecer un {quota} asigna un límite estricto a un depósito más allá del cual SILO no permite escrituras.",
+    "Establecer un {quota} asigna un límite estricto a un bucket más allá del cual SILO no permite escrituras.",
   "Setting an {anonymous} policy allows clients to access the Bucket or prefix contents and perform actions consistent with the specified policy without authentication.":
-    "Establecer una política {anonymous} permite a los clientes acceder al contenido del depósito o del prefijo y realizar acciones consistentes con la política especificada sin autenticación.",
+    "Establecer una política {anonymous} permite a los clientes acceder al contenido del bucket o del prefijo y realizar acciones consistentes con la política especificada sin autenticación.",
   Share: "Compartir",
   "Share File": "Compartir archivo",
   "Share Selected File": "Compartir archivo seleccionado",
   "Share this File": "Comparte este archivo",
   "Share this version": "Comparte esta versión",
-  "Share URL Copied to clipboard": "Compartir URL Copiado al portapapeles",
+  "Share URL Copied to clipboard":
+    "URL de uso compartido copiada al portapapeles",
   'Shared bucket DNS records, default is "/skydns"':
-    'Registros compartidos DNS, el valor predeterminado es "/skydns"',
+    'Registros DNS de buckets compartidos, predeterminado "/skydns"',
   "Show advanced Filters": "Mostrar filtros avanzados",
   "Show Current Data": "Mostrar datos actuales",
   "Show deleted objects": "Mostrar objetos eliminados",
   "Show Rewind Data": "Mostrar datos de rebobinado",
   "Show/Hide": "Mostrar/Ocultar",
   "SILO {bucketNotifications} allow administrators to send notifications to supported external services on certain object or bucket events.":
-    "SILO {bucketNotifications} permite a los administradores enviar notificaciones a servicios externos compatibles sobre ciertos eventos de objetos o depósitos.",
+    "SILO {bucketNotifications} permite a los administradores enviar notificaciones a servicios externos compatibles sobre ciertos eventos de objetos o buckets.",
   "SILO {objectLocking} enforces Write-Once Read-Many (WORM) immutability to protect versioned objects from deletion.":
     "SILO {objectLocking} aplica la inmutabilidad de escritura única y lectura múltiple (WORM) para proteger los objetos versionados contra la eliminación.",
   "SILO {serverSideReplication} is an automatic bucket-level configuration that synchronizes objects between a source and destination bucket.":
-    "SILO {serverSideReplication} es una configuración automática a nivel de depósito que sincroniza objetos entre un depósito de origen y de destino.",
+    "SILO {serverSideReplication} es una configuración automática a nivel de bucket que sincroniza objetos entre un bucket de origen y de destino.",
   "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.":
-    "SILO Las notificaciones de depósito permiten a los administradores enviar notificaciones a servicios externos compatibles sobre ciertos objetos o eventos de depósito. SILO admite eventos S3 a nivel de depósito y de objeto similares a las notificaciones de eventos S3 de Amazon.",
+    "SILO Las notificaciones de bucket permiten a los administradores enviar notificaciones a servicios externos compatibles sobre ciertos objetos o eventos de bucket. SILO admite eventos S3 a nivel de bucket y de objeto similares a las notificaciones de eventos S3 de Amazon.",
   "SILO derives its behavior and syntax from {s3Lifecycle} for compatibility in migrating workloads and lifecycle rules from S3 to SILO.":
     "SILO deriva su comportamiento y sintaxis de {s3Lifecycle} para lograr compatibilidad en la migración de cargas de trabajo y reglas de ciclo de vida de S3 a SILO.",
   "SILO does not enable existing object replication by default. Objects created before replication was configured or while replication is disabled are not synchronized to the target deployment unless replication of existing objects is enabled.":
@@ -1718,19 +1714,19 @@ const messages: Dictionary = {
   "SILO requires versioning to support replication.":
     "SILO requiere control de versiones para admitir la replicación.",
   "SILO supports automatically replicating existing objects in a bucket; this setting is enabled by default. Please note that objects created before replication was configured or while replication is disabled are not synchronized to the target deployment in case this setting is not enabled.":
-    "SILO admite la replicación automática de objetos existentes en un depósito; esta configuración está habilitada de forma predeterminada. Tenga en cuenta que los objetos creados antes de configurar la replicación o mientras la replicación está deshabilitada no se sincronizan con la implementación de destino en caso de que esta configuración no esté habilitada.",
+    "SILO admite la replicación automática de objetos existentes en un bucket; esta configuración está habilitada de forma predeterminada. Tenga en cuenta que los objetos creados antes de configurar la replicación o mientras la replicación está deshabilitada no se sincronizan con la implementación de destino en caso de que esta configuración no esté habilitada.",
   "SILO supports creating object transition lifecycle management rules, where SILO can automatically move an object to a remote storage “tier”.":
     'SILO admite la creación de reglas de gestión del ciclo de vida de transición de objetos, donde SILO puede mover automáticamente un objeto a un "nivel" de almacenamiento remoto.',
   "SILO supports enabling automatic {sseKms} and {sseS3} encryption of all objects written to a bucket using a specific External Key (EK) stored on the external KMS.":
-    "SILO admite la habilitación del cifrado automático {sseKms} y {sseS3} de todos los objetos escritos en un depósito utilizando una clave externa específica (EK) almacenada en el KMS externo.",
+    "SILO admite la habilitación del cifrado automático {sseKms} y {sseS3} de todos los objetos escritos en un bucket utilizando una clave externa específica (EK) almacenada en el KMS externo.",
   "SILO supports enabling replication of existing objects in a bucket.":
-    "SILO admite la habilitación de la replicación de objetos existentes en un depósito.",
+    "SILO admite la habilitación de la replicación de objetos existentes en un bucket.",
   "SILO supports keeping multiple {versions} of an object in a single bucket.":
-    "SILO admite mantener varios {versions} de un objeto en un solo depósito.",
+    "SILO admite mantener varios {versions} de un objeto en un solo bucket.",
   "SILO supports replicating delete operations, where SILO synchronizes deleting specific object versions and new delete markers. Delete operation replication uses the same replication process as all other replication operations.":
     "SILO admite la replicación de operaciones de eliminación, donde SILO sincroniza la eliminación de versiones de objetos específicos y nuevos marcadores de eliminación. La replicación de la operación de eliminación utiliza el mismo proceso de replicación que todas las demás operaciones de replicación.",
   "SILO supports server-side and client-side replication of objects between source and destination buckets.":
-    "SILO admite la replicación de objetos del lado del servidor y del lado del cliente entre los depósitos de origen y destino.",
+    "SILO admite la replicación de objetos del lado del servidor y del lado del cliente entre los buckets de origen y destino.",
   "SILO supports setting both {bucketDefault} and per-object retention rules.":
     "SILO admite el establecimiento de reglas de retención tanto {bucketDefault} como por objeto.",
   "SILO supports the following Tier types:":
@@ -1738,15 +1734,15 @@ const messages: Dictionary = {
   "SILO supports using an Active Directory or LDAP (AD/LDAP) service for external management of user identities. Configuring an external IDentity Provider (IDP) enables Single-Sign On (SSO) workflows, where applications authenticate against the external IDP before accessing SILO.":
     "SILO admite el uso de un servicio Active Directory o LDAP (AD/LDAP) para la gestión externa de las identidades de los usuarios. La configuración de un proveedor de identidad externo (IDP) habilita flujos de trabajo de inicio de sesión único (SSO), donde las aplicaciones se autentican en el IDP externo antes de acceder a SILO.",
   "SILO uses buckets to organize objects. A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.":
-    "SILO utiliza buckets para organizar objetos. Un depósito es similar a una carpeta o directorio en un sistema de archivos, donde cada depósito puede contener una cantidad arbitraria de objetos.",
+    "SILO utiliza buckets para organizar objetos. Un bucket es similar a una carpeta o directorio en un sistema de archivos, donde cada bucket puede contener una cantidad arbitraria de objetos.",
   "SILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.":
     "SILO utiliza control de acceso basado en políticas (PBAC) para definir las acciones y recursos autorizados a los que tiene acceso un usuario autenticado. Cada política describe una o más acciones y condiciones que describen los permisos de un usuario o grupo de usuarios.",
-  "SILO VERSION": "SILO VERSION",
+  "SILO VERSION": "VERSIÓN DE SILO",
   "Site Name": "Nombre del sitio",
   "Site:": "Sitio:",
   Size: "Tamaño",
   "Size:": "Tamaño:",
-  "Skip TLS Verification": "Saltar TLS Verificación",
+  "Skip TLS Verification": "Omitir verificación TLS",
   "something went wrong": "algo salió mal",
   "Something went wrong.": "Algo salió mal.",
   "Sort by": "Ordenar por",
@@ -1758,16 +1754,15 @@ const messages: Dictionary = {
   Speedtest: "Prueba de velocidad",
   "Speedtest in progress...": "Prueba de velocidad en progreso...",
   "Staging directory for undelivered messages e.g. '/home/events'":
-    "Directorio provisional para mensajes no entregados, p. '/inicio/eventos'",
-  "STANDARD_IA,REDUCED_REDUNDANCY etc":
-    "ESTÁNDAR_IA,REDUNDANCIA_REDUCIDA, etc.",
-  Start: "Inicio",
+    "Directorio temporal para mensajes no entregados, p. ej. '/home/events'",
+  "STANDARD_IA,REDUCED_REDUNDANCY etc": "STANDARD_IA, REDUCED_REDUNDANCY, etc.",
+  Start: "Iniciar",
   "Start Health Report": "Iniciar informe de salud",
-  "Start Logs": "Registros de inicio",
+  "Start Logs": "Iniciar registros",
   "Start Profiling": "Iniciar perfilado",
   "Start Time:": "Hora de inicio:",
   "Start typing to filter objects in the bucket":
-    "Comience a escribir para filtrar objetos en el depósito",
+    "Comience a escribir para filtrar objetos en el bucket",
   "Start typing to filter versions of {file}":
     "Comienza a escribir para filtrar versiones de {file}",
   "Start typing to search for a Policy":
@@ -1785,7 +1780,7 @@ const messages: Dictionary = {
   "Streaming async": "Transmisión asíncrona",
   "Streaming Cluster ID": "Clúster de transmisión ID",
   "Streaming max publish ACKS in flight":
-    "Transmisión máxima de publicación ACKS en vuelo",
+    "Máx. de ACK de publicación en curso (streaming)",
   Subject: "Asunto",
   "Subscribe To Bucket Events": "Suscríbete a eventos de bucket",
   "Subscribe to Event": "Suscríbete al evento",
@@ -1797,29 +1792,29 @@ const messages: Dictionary = {
     "Se actualizó exitosamente la contraseña.",
   Suffix: "Sufijo",
   Summary: "Resumen",
-  "Supported API endpoints": "Soportados API puntos finales",
+  "Supported API endpoints": "Endpoints de API admitidos",
   Suspended: "Suspendido",
   Synced: "Sincronizado",
   Synchronous: "Sincrónico",
   "System Health Info": "Información sobre el estado del sistema",
-  Table: "Mesa",
+  Table: "Tabla",
   "Tag for: {object}": "Etiqueta para: {object}",
   "Tag Key": "Clave de etiqueta",
-  "Tag Label": "Etiqueta Etiqueta",
+  "Tag Label": "Valor de etiqueta",
   "Tag Value": "Valor de etiqueta",
   Tags: "Etiquetas",
   "Tags for: {object}": "Etiquetas para: {object}",
   "Tags:": "Etiquetas:",
   "Target Bucket": "Bucket objetivo",
-  "Target URL": "Objetivo URL",
+  "Target URL": "URL de destino",
   "The bucket selected in this deployment acts as the “source” while the configured remote deployment acts as the “target”.":
-    'El depósito seleccionado en esta implementación actúa como "fuente" mientras que la implementación remota configurada actúa como "destino".',
+    'El bucket seleccionado en esta implementación actúa como "fuente" mientras que la implementación remota configurada actúa como "destino".',
   "The file must be valid and  should have valid config values":
     "El archivo debe ser válido y tener valores de configuración válidos",
   "The file you are trying to download has a long name.":
     "El archivo que estás intentando descargar tiene un nombre largo.",
   "The following Bucket features will NOT be replicated":
-    "Las siguientes funciones del bucket no se replicarán",
+    "Las siguientes características del bucket NO se replicarán",
   "The following changes are replicated to all other sites":
     "Los siguientes cambios se replican en todos los demás sitios",
   "The following URL lets you share this object without requiring a login.":
@@ -1838,7 +1833,7 @@ const messages: Dictionary = {
     "Los usuarios seleccionados fueron agregados a los siguientes grupos.",
   "The server is restarting.": "El servidor se está reiniciando.",
   "The URL expires automatically at the earlier of your configured time ({time}) or the expiration of your current web session.":
-    "El URL caduca automáticamente a la hora configurada ({time}) o al vencimiento de su sesión web actual, lo que ocurra primero.",
+    "La URL caduca automáticamente a la hora configurada ({time}) o al vencimiento de su sesión web actual, lo que ocurra primero.",
   "There are no Configurations yet.": "Aún no hay configuraciones.",
   "There are no endpoints yet.": "Aún no hay puntos finales.",
   "There are no Groups with this Policy associated yet.":
@@ -1887,7 +1882,7 @@ const messages: Dictionary = {
   "This Site": "Este sitio",
   "This site/cluster": "Este sitio/clúster",
   "This Usage value is comparable to {command} which represents the size of all object versions that exist in the buckets.":
-    "Este valor de uso es comparable a {command}, que representa el tamaño de todas las versiones de objetos que existen en los depósitos.",
+    "Este valor de uso es comparable a {command}, que representa el tamaño de todas las versiones de objetos que existen en los buckets.",
   "This value is set from the {env} environment variable":
     "Este valor se establece a partir de la variable de entorno {env}",
   "This value is set from the {name} environment variable":
@@ -1900,31 +1895,31 @@ const messages: Dictionary = {
     "Esto eliminará el objeto así como todas sus versiones.",
   "This will remove the objects as well as all of their versions,":
     "Esto eliminará los objetos así como todas sus versiones,",
-  Tier: "Nivel de almacenamiento",
+  Tier: "Nivel",
   "Tier Name": "Nombre del nivel",
   "Tier Types": "Tipos de niveles",
   "Tiers are used by the SILO Object Lifecycle Management which allows creating rules for time or date based automatic transition or expiry of objects. For object transition, SILO automatically moves the object to a configured remote storage tier.":
     "Los niveles son utilizados por SILO Gestión del ciclo de vida de objetos, lo que permite crear reglas para la transición o caducidad automática de objetos basada en hora o fecha. Para la transición de objetos, SILO mueve automáticamente el objeto a un nivel de almacenamiento remoto configurado.",
   "Time duration between scanner cycles, defaults to '1m'":
-    "Duración del tiempo entre ciclos del escáner, el valor predeterminado es '1 m'",
+    "Intervalo entre ciclos del escáner, predeterminado '1m'",
   "Time to Response NS": "Tiempo de respuesta NS",
   Timestamp: "Marca de tiempo",
   "TLS Client Auth": "TLS Autenticación del cliente",
   "TLS skip verify": "TLS omitir verificar",
   "TLS Skip Verify": "TLS Saltar Verificar",
   "To allow Bucket access without credentials, use the {anonymous} setting":
-    "Para permitir el acceso al depósito sin credenciales, use la configuración {anonymous}",
+    "Para permitir el acceso al bucket sin credenciales, use la configuración {anonymous}",
   "To continue please type {phrase} in the box.":
     "Para continuar, escriba {phrase} en el cuadro.",
   "To enable this feature you need to enable versioning on the bucket before creation":
-    "Para habilitar esta función, debe habilitar el control de versiones en el depósito antes de la creación.",
+    "Para habilitar esta función, debe habilitar el control de versiones en el bucket antes de la creación.",
   "To Tier": "Al nivel",
   "Today, {time}": "Hoy, {time}",
   "Toggle Share URL between Console and object server URL. Change default with CONSOLE_SHARE_MINIO_URL environment variable":
-    "Alternar Compartir URL entre Consola y servidor de objetos URL. Cambiar el valor predeterminado con la variable de entorno CONSOLE_SHARE_MINIO_URL",
-  Token: "Ficha",
-  "Toogle JSON": "Toogle JSON",
-  "Toogle Share URL": "Compartir en Toogle URL",
+    "Alternar URL de uso compartido entre consola y servidor de objetos. Valor predeterminado mediante CONSOLE_SHARE_MINIO_URL",
+  Token: "Token",
+  "Toogle JSON": "Alternar JSON",
+  "Toogle Share URL": "Alternar URL de uso compartido",
   Topic: "Tema",
   "Trace Results": "Resultados del seguimiento",
   "trademark notice": "aviso de marca registrada",
@@ -1932,9 +1927,9 @@ const messages: Dictionary = {
   "Transition Days": "Días de Transición",
   True: "Verdadero",
   "Trust server TLS without verification":
-    "Servidor de confianza TLS sin verificación",
+    "Confiar en el TLS del servidor sin verificación",
   'Trust server TLS without verification, defaults to "on" (verify)':
-    'Servidor de confianza TLS sin verificación, el valor predeterminado es "activado" (verificar)',
+    'Confiar en el TLS del servidor sin verificación, predeterminado "on" (verificar)',
   Type: "Tipo",
   "Type New Password Again": "Escriba nuevamente la nueva contraseña",
   "Type of Lifecycle": "Tipo de ciclo de vida",
@@ -1946,7 +1941,7 @@ const messages: Dictionary = {
   "Under section 13 of the AGPL, the corresponding source for this running version is offered to every user who interacts with it over a network, at no charge.":
     "Según la sección 13 del AGPL, la fuente correspondiente para esta versión en ejecución se ofrece a cada usuario que interactúa con ella a través de una red, sin costo alguno.",
   "Understand which {policies} and {users} are authorized to access this Bucket.":
-    "Comprenda cuáles {policies} y {users} están autorizados a acceder a este depósito.",
+    "Comprenda cuáles {policies} y {users} están autorizados a acceder a este bucket.",
   "Unexpected response, download incomplete.":
     "Respuesta inesperada, descarga incompleta.",
   Unhealthy: "Con problemas",
@@ -1958,7 +1953,7 @@ const messages: Dictionary = {
     "Actualizar credenciales - {type} / {name}",
   "Upload File": "Subir archivo",
   "Upload Files": "Subir archivos",
-  "upload files to this bucket": "subir archivos a este depósito",
+  "upload files to this bucket": "subir archivos a este bucket",
   "Upload Folder": "Subir carpeta",
   "Upload is restricted.": "La carga está restringida.",
   "Upload not allowed": "Subida no permitida",
@@ -1966,7 +1961,7 @@ const messages: Dictionary = {
   "Upstream copyright, authorship and license notices are retained in the repository's {credits} and {notice}. See the {attribution}.":
     "Los avisos de licencia, autoría y derechos de autor ascendentes se conservan en los {credits} y {notice} del repositorio. Ver el {attribution}.",
   "upstream MinIO code": "código ascendente MinIO",
-  "Usage Data Age": "Antigüedad de los datos de uso",
+  "Usage Data Age": "Edad de los datos",
   "Usage:": "Uso:",
   "Use Original Name": "Usar nombre original",
   "Use SASL": "Utilice SASL",
@@ -1992,10 +1987,10 @@ const messages: Dictionary = {
   Validity: "Validez",
   "Validity:": "Validez:",
   Version: "Versión",
-  "Version ID:": "Versión ID:",
+  "Version ID:": "ID de versión:",
   "Versioning is required to enable {objectLocking} and {retention}.":
     "El control de versiones es necesario para habilitar {objectLocking} y {retention}.",
-  "Versioning on Bucket": "Control de versiones en el depósito",
+  "Versioning on Bucket": "Control de versiones en el bucket",
   "Versioning setting cannot be changed as cluster replication is enabled for this site.":
     "La configuración de versiones no se puede cambiar ya que la replicación de clúster está habilitada para este sitio.",
   "Versioning Status": "Estado de versiones",
@@ -2012,16 +2007,16 @@ const messages: Dictionary = {
   "Versions:": "Versiones:",
   View: "Ver",
   "View across sites": "Ver en todos los sitios",
-  "View Bucket Naming Rules": "Ver reglas de nomenclatura de depósitos",
+  "View Bucket Naming Rules": "Ver reglas de nomenclatura de buckets",
   "View env variable Webhook": "Ver variable ambiental Webhook",
-  "view Objects in this bucket": "ver objetos en este depósito",
+  "view Objects in this bucket": "ver objetos en este bucket",
   "view Policy details": "ver detalles de la política",
   "View Replication Status for a:": "Ver el estado de replicación de:",
   "view User details": "ver detalles del usuario",
   "Visit the SILO website": "Visite el sitio web SILO",
-  "Volume or Bucket Name": "Nombre del volumen o depósito",
+  "Volume or Bucket Name": "Nombre del volumen o bucket",
   "Volume/Bucket name cannot start with /":
-    "El nombre del volumen/depósito no puede comenzar con /",
+    "El nombre del volumen/bucket no puede comenzar con /",
   Warning: "Advertencia",
   "Warning: One or more users selected has associated Access Keys.":
     "Advertencia: Uno o más usuarios seleccionados tienen claves de acceso asociadas.",
@@ -2063,11 +2058,11 @@ const messages: Dictionary = {
   "You can increase the maximum configuration time by setting the MINIO_STS_DURATION environment variable on all your nodes.":
     "Puede aumentar el tiempo máximo de configuración configurando la variable de entorno MINIO_STS_DURATION en todos sus nodos.",
   "You can learn more at the {documentation}.":
-    "Puedes obtener más información en el {documentation}.",
+    "Puede obtener más información en la {documentation}.",
   "You can learn more at the {link}.":
-    "Puedes obtener más información en el {link}.",
+    "Puede obtener más información en {link}.",
   "You can only enable {objectLocking} when first creating a bucket.":
-    "Solo puede habilitar {objectLocking} cuando crea un depósito por primera vez.",
+    "Solo puede habilitar {objectLocking} cuando crea un bucket por primera vez.",
   "You can reset your session by logging out and logging back in to the web UI.":
     "Puedes restablecer tu sesión cerrando sesión y volviendo a iniciar sesión en la web UI.",
   "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies.":
@@ -2085,7 +2080,7 @@ const messages: Dictionary = {
   "You may only have write access on a limited set of subpaths within this path. Please carefully review your User permissions to understand the paths to which you may write.":
     "Es posible que solo tenga acceso de escritura en un conjunto limitado de subrutas dentro de esta ruta. Revise cuidadosamente sus permisos de usuario para comprender las rutas en las que puede escribir.",
   "You must apply a valid name to the bucket":
-    "Debes aplicar un nombre válido al depósito",
+    "Debes aplicar un nombre válido al bucket",
   "You must disable Object Locking before Versioning can be disabled":
     "Debe desactivar el bloqueo de objetos antes de poder desactivar el control de versiones.",
   "You must disable Retention before Object Locking can be disabled":
@@ -2121,11 +2116,11 @@ const messages: Dictionary = {
     "La fuente correspondiente exacta no está disponible para esta compilación: {reason}. Consulte el NOTICE para saber cómo obtenerlo.",
   "Source: not available for this build":
     "Fuente: no disponible para esta compilación",
-  "Items per page": "Artículos por página",
+  "Items per page": "Elementos por página",
   "First page": "Primera página",
   "Previous page": "Página anterior",
   "Next page": "Página siguiente",
-  "{count} items in total": "{count} artículos en total",
+  "{count} items in total": "{count} elementos en total",
   "Page {page} · {count} on this page":
     "Página {page} · {count} en esta página",
   "Sorting, filtering and select all apply to this page only.":
@@ -2144,11 +2139,11 @@ const messages: Dictionary = {
     "Explora y selecciona objetos almacenados.",
   "Review stored object versions.":
     "Revisar las versiones de objetos almacenados.",
-  "Manage bucket settings.": "Administrar la configuración del depósito.",
+  "Manage bucket settings.": "Administrar la configuración del bucket.",
   "Compact section tabs": "Pestañas de sección compacta",
   "Storage and object usage": "Almacenamiento y uso de objetos",
   "Recent storage activity": "Actividad de almacenamiento reciente",
-  "Example buckets": "Ejemplos de depósitos",
+  "Example buckets": "Ejemplos de buckets",
   "Select all objects": "Seleccionar todos los objetos",
   Select: "Seleccionar",
   Settings: "Configuración",
@@ -2186,28 +2181,28 @@ const messages: Dictionary = {
     "Los grupos permiten a los usuarios compartir las mismas políticas de acceso.",
   "No event destinations yet": "Aún no hay destinos de eventos",
   "Connect an external service to receive bucket and object notifications.":
-    "Conecte un servicio externo para recibir notificaciones de depósitos y objetos.",
-  "No storage tiers yet": "Aún no hay niveles de almacenamiento",
+    "Conecte un servicio externo para recibir notificaciones de buckets y objetos.",
+  "No storage tiers yet": "Aún no hay niveles",
   "Connect remote storage to transition objects using lifecycle rules.":
-    "Conecte el almacenamiento remoto a objetos de transición mediante reglas de ciclo de vida.",
+    "Conecte almacenamiento remoto para transferir objetos mediante reglas de ciclo de vida.",
   "No event subscriptions yet": "Aún no hay suscripciones a eventos",
   "Subscribe this bucket to send object events to an event destination.":
-    "Suscríbase a este depósito para enviar eventos de objetos a un destino de evento.",
+    "Suscríbase a este bucket para enviar eventos de objetos a un destino de evento.",
   "No replication rules yet": "Aún no hay reglas de replicación",
   "Replicate objects from this bucket to a destination bucket.":
-    "Replica objetos de este depósito a un depósito de destino.",
+    "Replica objetos de este bucket a un bucket de destino.",
   "No lifecycle rules yet": "Aún no hay reglas de ciclo de vida",
   "Create rules to expire objects or transition them to remote storage.":
     "Cree reglas para caducar objetos o realizar su transición al almacenamiento remoto.",
   "No anonymous access rules": "Sin reglas de acceso anónimo",
   "This bucket has no prefix rules for access without credentials.":
-    "Este depósito no tiene reglas de prefijo para el acceso sin credenciales.",
+    "Este bucket no tiene reglas de prefijo para el acceso sin credenciales.",
   "No policies grant access": "Ninguna política otorga acceso",
   "No listed policy currently grants access to this bucket.":
-    "Actualmente, ninguna política enumerada otorga acceso a este depósito.",
+    "Actualmente, ninguna política enumerada otorga acceso a este bucket.",
   "No users have access": "Ningún usuario tiene acceso",
   "No listed user currently has a policy granting access to this bucket.":
-    "Ningún usuario incluido actualmente tiene una política que otorgue acceso a este depósito.",
+    "Ningún usuario incluido actualmente tiene una política que otorgue acceso a este bucket.",
   "View Policies": "Ver políticas",
   "View Users": "Ver usuarios",
   "Unable to load replication sites":
@@ -2235,7 +2230,7 @@ const messages: Dictionary = {
     other: "{count} nodos",
     many: "{count} nodos",
   },
-  "{count} drive": "{count} conducir",
+  "{count} drive": "{count} disco",
   "{count} drives": {
     one: "{count} unidad",
     other: "{count} unidades",
@@ -2243,13 +2238,13 @@ const messages: Dictionary = {
   },
   "Quota: {quota}": "Cuota: {quota}",
   "Open bucket {name}": "Abrir bucket {name}",
-  "Recent buckets": "Depósitos recientes",
+  "Recent buckets": "Buckets recientes",
   "Read and write": "Leer y escribir",
   "Read only": "Sólo lectura",
   "Write only": "Solo escribir",
   "Created {date}": "Creado {date}",
   "{count} objects": "{count} objetos",
-  "Bucket actions": "Acciones del depósito",
+  "Bucket actions": "Acciones del bucket",
   "Open menu": "Abrir menú",
   "Page actions": "Acciones de la página",
   "Selected actions": "Acciones seleccionadas",

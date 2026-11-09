@@ -5,7 +5,28 @@ import { LOCALES } from "../src/i18n/locales";
 import { readCatalogs, validateCatalogs } from "../hack/i18n-catalogs.mjs";
 
 test("all registered catalogs have valid partitions, placeholders and plural forms", () => {
-  expect(validateCatalogs(readCatalogs(), LOCALES)).toEqual([]);
+  const catalogs = readCatalogs();
+  expect(validateCatalogs(catalogs, LOCALES)).toEqual([]);
+  const anomalies: string[] = [];
+  for (const [lang, parts] of Object.entries(catalogs)) {
+    for (const [part, dict] of Object.entries(
+      parts as Record<string, Record<string, unknown>>,
+    )) {
+      for (const [key, value] of Object.entries(dict)) {
+        const forms =
+          typeof value === "string"
+            ? [value]
+            : Object.values(value as Record<string, string>);
+        for (const text of forms) {
+          if (text.includes("\n") && !key.includes("\n"))
+            anomalies.push(`${lang}/${part}: unexpected newline in ${key}`);
+          if (text.includes("\u200b"))
+            anomalies.push(`${lang}/${part}: zero-width space in ${key}`);
+        }
+      }
+    }
+  }
+  expect(anomalies).toEqual([]);
 });
 test("missing maintained copy is allowed, malformed translations are not", () => {
   const registry = {

@@ -127,6 +127,77 @@ test("menu is keyboard accessible, persists selection, and defaults to English i
     await page.close();
   }
 });
+
+for (const language of languages)
+  test(`compact metrics and lifecycle labels fit their controls in ${language}`, async () => {
+    const page = await browser.newPage();
+    try {
+      await setup(page, language);
+      await page.route("**/api/v1/admin/tiers**", (r) =>
+        r.fulfill({ json: { items: [] } }),
+      );
+      for (const width of [350, 768, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(
+          `${base}/e2e/fixtures/languages-harness.html?screen=metrics`,
+        );
+        await expect(page.locator(".dashboard-time-stat-item")).toHaveCount(2);
+        const metrics = await page
+          .locator(".dashboard-time-stat-item")
+          .evaluateAll((rows) =>
+            rows.map((row) => {
+              const label = row.querySelector<HTMLElement>(".timeStatLabel")!;
+              const value = row.querySelector<HTMLElement>(".timeStatValue")!;
+              const a = label.getBoundingClientRect(),
+                b = value.getBoundingClientRect();
+              return {
+                overflow: label.scrollWidth - label.clientWidth,
+                overlap: Math.min(a.right, b.right) - Math.max(a.left, b.left),
+                lines:
+                  a.height / parseFloat(getComputedStyle(label).lineHeight),
+                rowOverflow: row.scrollWidth - row.clientWidth,
+              };
+            }),
+          );
+        for (const metric of metrics) {
+          expect(metric.overflow).toBeLessThanOrEqual(1);
+          expect(metric.overlap).toBeLessThanOrEqual(0);
+          expect(metric.lines).toBeLessThanOrEqual(2.05);
+          expect(metric.rowOverflow).toBeLessThanOrEqual(1);
+        }
+        await page.goto(
+          `${base}/e2e/fixtures/languages-harness.html?screen=lifecycle`,
+        );
+        const input = page.locator("#noncurrentversion_expiration_days");
+        const label = page.locator(
+          'label[for="noncurrentversion_expiration_days"]',
+        );
+        await expect(input).toBeVisible();
+        await label.click();
+        await expect(input).toBeFocused();
+        const field = await label.evaluate((el) => {
+          const box = el.getBoundingClientRect();
+          const text = document.createRange();
+          text.selectNodeContents(el);
+          const bounds = text.getBoundingClientRect();
+          return {
+            left: bounds.left,
+            right: bounds.right,
+            clipped:
+              bounds.width > box.width + 1 || bounds.height > box.height + 1,
+            pageOverflow:
+              document.documentElement.scrollWidth - window.innerWidth,
+          };
+        });
+        expect(field.left).toBeGreaterThanOrEqual(0);
+        expect(field.right).toBeLessThanOrEqual(width);
+        expect(field.clipped).toBe(false);
+        expect(field.pageOverflow).toBeLessThanOrEqual(1);
+      }
+    } finally {
+      await page.close();
+    }
+  });
 test("all languages switch offline without discarding form input", async () => {
   const page = await browser.newPage();
   try {

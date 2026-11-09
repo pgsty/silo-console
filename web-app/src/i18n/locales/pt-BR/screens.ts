@@ -518,7 +518,7 @@ const ptScreens: Record<string, string> = {
   "All sites must have the same deployment credentials (i.e. MINIO_ROOT_USER, MINIO_ROOT_PASSWORD).":
     "Todos os sites devem ter as mesmas credenciais de implantação (ou seja, MINIO_ROOT_USER e MINIO_ROOT_PASSWORD).",
   "All User Agents": "Todos os user agents",
-  "Amazon Resource Name": "Amazon Resource Name",
+  "Amazon Resource Name": "Nome de Recurso da Amazon (ARN)",
   "AMQP exchange type": "Tipo de exchange do AMQP",
   "AMQP server endpoint e.g. `amqp://myuser:mypassword@localhost:5672`":
     "Endpoint do servidor AMQP, por exemplo `amqp://myuser:mypassword@localhost:5672`",
@@ -1044,7 +1044,7 @@ const ptScreens: Record<string, string> = {
   "Enter User": "Digite o usuário",
   "Enter Username": "Digite o nome de usuário",
   Entities: "Entidades",
-  "Erasure Health": "Integridade do erasure coding",
+  "Erasure Health": "Estado EC",
   Error: "Erro",
   "Error - File size too large": "Erro - arquivo muito grande",
   "Error retrieving access keys": "Erro ao obter as chaves de acesso",
@@ -1223,7 +1223,7 @@ const ptScreens: Record<string, string> = {
   "Loading nodes": "Carregando nós",
   "Local Buckets to replicate": "Buckets locais a replicar",
   Location: "Localização",
-  Locking: "Bloqueio de objetos",
+  Locking: "Bloqueio",
   "Log Details": "Detalhes do log",
   "Logger Webhook": "Webhook de logger",
   "Lookup Bind DN is required": "O DN de bind para consulta é obrigatório",
@@ -1232,7 +1232,7 @@ const ptScreens: Record<string, string> = {
   "Lookup Bind Password must be re-entered to change LDAP configurations":
     "A senha de bind para consulta precisa ser informada novamente para alterar as configurações LDAP",
   "Manage Groups": "Gerenciar grupos",
-  Mandatory: "Entrega obrigatória",
+  Mandatory: "Obrigatório",
   "Manually Configure String": "Configurar string manualmente",
   March: "Março",
   "Max IO": "E/S máxima",
@@ -1316,7 +1316,7 @@ const ptScreens: Record<string, string> = {
   "Non-blocking message delivery when set to 'on', default is 'off'":
     "Entrega de mensagens sem bloqueio quando definido como 'on'; o padrão é 'off'",
   "Non-Current": "Não atual",
-  "Non-current Expiration Days": "Dias até a expiração de não atuais",
+  "Non-current Expiration Days": "Expirar versões antigas (dias)",
   "Non-current Transition Days": "Dias até a transição de não atuais",
   "Non-Current Version": "Versão não atual",
   "Non-current Version Transition Storage Class":
@@ -1716,7 +1716,7 @@ const ptScreens: Record<string, string> = {
   Start: "Iniciar",
   "Start Health Report": "Iniciar relatório de integridade",
   "Start Logs": "Iniciar logs",
-  "Start Profiling": "Iniciar perfil de execução",
+  "Start Profiling": "Iniciar profiling",
   "Start Time:": "Hora de início:",
   "Start typing to filter objects in the bucket":
     "Comece a digitar para filtrar objetos no bucket",
@@ -1730,7 +1730,7 @@ const ptScreens: Record<string, string> = {
   "Status Code": "Código de status",
   Stop: "Parar",
   "Stop Logs": "Parar logs",
-  "Stop Profiling": "Parar perfil de execução",
+  "Stop Profiling": "Parar profiling",
   Storage: "Armazenamento",
   "Storage Class": "Classe de armazenamento",
   Streaming: "Streaming",
@@ -2120,7 +2120,7 @@ const ptScreens: Record<string, string> = {
   "No event destinations yet": "Ainda não há destinos de eventos",
   "Connect an external service to receive bucket and object notifications.":
     "Conecte um serviço externo para receber notificações de buckets e objetos.",
-  "No storage tiers yet": "Ainda não há camadas de armazenamento",
+  "No storage tiers yet": "Ainda não há camadas",
   "Connect remote storage to transition objects using lifecycle rules.":
     "Conecte um armazenamento remoto para fazer a transição de objetos com regras de ciclo de vida.",
   "No event subscriptions yet": "Ainda não há assinaturas de eventos",

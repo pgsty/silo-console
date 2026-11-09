@@ -6,15 +6,15 @@ import type { Dictionary } from "../../catalog";
 
 const messages: Dictionary = {
   "### Users\n\nA SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.\n\nGroups provide a simplified method for managing shared permissions among users with common access patterns and workloads.\n\nUsers inherit access permissions to data and resources through the groups they belong to.\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nEach user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
-    "### Utilisateurs\n\nUn utilisateur SILO se compose d'une clé d'accès unique (nom d'utilisateur) et d'une clé secrète correspondante (mot de passe). Les clients doivent authentifier leur identité en spécifiant à la fois une clé d'accès valide (nom d'utilisateur) et la clé secrète correspondante (mot de passe) d'un SILO utilisateur existant.\n\nLes groupes fournissent une méthode simplifiée pour gérer les autorisations partagées entre les utilisateurs ayant des modèles d'accès et des charges de travail communs.\n\nLes utilisateurs héritent des autorisations d'accès aux données et aux ressources via les groupes auxquels ils appartiennent.\n\nSILO utilise le contrôle d'accès basé sur des politiques (PBAC) pour définir les actions et ressources autorisées auxquelles un utilisateur authentifié a accès. Chaque stratégie décrit une ou plusieurs actions et conditions qui décrivent les autorisations d'un utilisateur ou d'un groupe d'utilisateurs.\n\nChaque utilisateur ne peut accéder qu'aux ressources et opérations explicitement accordées par le rôle intégré. SILO refuse l'accès à toute autre ressource ou action par défaut.",
+    "### Utilisateurs\n\nUn utilisateur SILO se compose d'une clé d'accès unique (nom d'utilisateur) et d'une clé secrète correspondante (mot de passe). Les clients doivent authentifier leur identité en spécifiant à la fois une clé d'accès valide (nom d'utilisateur) et la clé secrète correspondante (mot de passe) d'un SILO utilisateur existant.\n\nLes groupes fournissent une méthode simplifiée pour gérer les autorisations partagées entre les utilisateurs ayant des modèles d'accès et des charges de travail communs.\n\nLes utilisateurs héritent des autorisations d'accès aux données et aux ressources via les groupes auxquels ils appartiennent.\n\nSILO utilise le contrôle d'accès basé sur des politiques (PBAC) pour définir les actions et ressources autorisées auxquelles un utilisateur authentifié a accès. Chaque politique décrit une ou plusieurs actions et conditions qui décrivent les autorisations d'un utilisateur ou d'un groupe d'utilisateurs.\n\nChaque utilisateur ne peut accéder qu'aux ressources et opérations explicitement accordées par le rôle intégré. SILO refuse l'accès à toute autre ressource ou action par défaut.",
   "### IAM policies\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nSILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.":
-    "### IAM politiques\n\nSILO utilise le contrôle d'accès basé sur des politiques (PBAC) pour définir les actions et ressources autorisées auxquelles un utilisateur authentifié a accès. Chaque stratégie décrit une ou plusieurs actions et conditions qui décrivent les autorisations d'un utilisateur ou d'un groupe d'utilisateurs.\n\nSILO PBAC est conçu pour être compatible avec la syntaxe, la structure et le comportement des politiques AWS IAM. La documentation SILO fait de son mieux pour couvrir le comportement et les fonctionnalités spécifiques de IAM-. Pensez à vous reporter à la documentation IAM pour une documentation plus complète sur les sujets spécifiques au AWS IAM-.",
+    "### Politiques IAM\n\nSILO utilise le contrôle d’accès basé sur les politiques (PBAC) pour définir les actions et ressources autorisées auxquelles un utilisateur authentifié a accès. Chaque politique décrit une ou plusieurs actions et conditions définissant les privilèges d’un utilisateur ou d’un groupe d’utilisateurs.\n\nLe PBAC de SILO est conçu pour être compatible avec la syntaxe, la structure et le comportement des politiques AWS IAM. La documentation SILO s’efforce de couvrir au mieux les comportements et fonctionnalités propres à IAM. Consultez la documentation IAM pour des informations complètes sur les sujets propres à AWS IAM.",
   "### Access keys\n\nSILO access keys are child identities of an authenticated SILO user, including externally managed identities. Each access key inherits its privileges based on the policies attached to it’s parent user or those groups in which the parent user has membership. Access Keys also support an optional inline policy which further restricts access to a subset of actions and resources available to the parent user.":
-    "### Clés d'accès\n\nLes clés d'accès SILO sont des identités enfants d'un utilisateur SILO authentifié, y compris les identités gérées en externe. Chaque clé d'accès hérite de ses privilèges en fonction des politiques attachées à son utilisateur parent ou aux groupes dont l'utilisateur parent est membre. Les clés d'accès prennent également en charge une stratégie en ligne facultative qui restreint davantage l'accès à un sous-ensemble d'actions et de ressources disponibles pour l'utilisateur parent.",
+    "### Clés d'accès\n\nLes clés d'accès SILO sont des identités enfants d'un utilisateur SILO authentifié, y compris les identités gérées en externe. Chaque clé d'accès hérite de ses privilèges en fonction des politiques attachées à son utilisateur parent ou aux groupes dont l'utilisateur parent est membre. Les clés d'accès prennent également en charge une politique en ligne facultative qui restreint davantage l'accès à un sous-ensemble d'actions et de ressources disponibles pour l'utilisateur parent.",
   "### Event destinations\n\nSILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events. SILO supports bucket and object-level S3 events similar to the Amazon S3 Event Notifications.":
-    "### Destinations de l'événement\n\nSILO Les notifications de compartiment permettent aux administrateurs d'envoyer des notifications aux services externes pris en charge sur certains événements d'objet ou de compartiment. SILO prend en charge les événements S3 au niveau du compartiment et de l'objet similaires aux notifications d'événements Amazon S3.",
+    "### Destinations de l'événement\n\nSILO Les notifications de bucket permettent aux administrateurs d'envoyer des notifications aux services externes pris en charge sur certains événements d'objet ou de bucket. SILO prend en charge les événements S3 au niveau du bucket et de l'objet similaires aux notifications d'événements Amazon S3.",
   "### Inspect examples\n\nDownload object metadata or constituent parts from the drives as a ZIP archive. Enable **Encrypt** to protect the downloaded archive; save the decryption key when it is shown.\n\n- **Object metadata:** Volume/Bucket `test-bucket`, Path `test*/xl.meta`.\n- **Object parts:** Volume/Bucket `test-bucket`, Path `test*/*/part.*`.\n- **Recursive prefix:** Volume/Bucket `test-bucket`, Path `test/**`.\n\n**Caution:** Recursive inspection can be expensive. Limit the bucket and path before starting; use recursive patterns only when necessary.":
-    "### Inspecter des exemples\n\nTéléchargez les métadonnées des objets ou les éléments constitutifs des lecteurs sous forme d'archive ZIP. Activez **Encrypt** pour protéger l'archive téléchargée ; enregistrez la clé de déchiffrement lorsqu’elle est affichée.\n\n- **Métadonnées de l'objet :** Volume/Bucket `test-bucket`, Chemin `test*/xl.meta`.\n- **Parties d'objet :** Volume/Bucket `test-bucket`, Chemin `test*/*/part.*`.\n- **Préfixe récursif :** Volume/Bucket `test-bucket`, Chemin `test/**`.\n\n**Attention :** L'inspection récursive peut être coûteuse. Limitez le bucket et le chemin avant de commencer ; utilisez des modèles récursifs uniquement lorsque cela est nécessaire.",
+    "### Exemples d’inspection\n\nTéléchargez les métadonnées d’un objet ou ses parties constitutives depuis les disques sous forme d’archive ZIP. Activez **Chiffrer** pour protéger l’archive téléchargée ; conservez la clé de déchiffrement lorsqu’elle s’affiche.\n\n- **Métadonnées d’objet :** volume/bucket `test-bucket`, chemin `test*/xl.meta`.\n- **Parties d’objet :** volume/bucket `test-bucket`, chemin `test*/*/part.*`.\n- **Préfixe récursif :** volume/bucket `test-bucket`, chemin `test/**`.\n\n**Attention :** une inspection récursive peut être coûteuse. Limitez le bucket et le chemin avant de commencer, et n’utilisez les motifs récursifs qu’en cas de besoin.",
   Troubleshooting: "Dépannage",
   "Need more help?  Check out additional Troubleshooting options":
     "Besoin d'aide supplémentaire ?  Découvrez les options de dépannage supplémentaires",
@@ -24,30 +24,30 @@ const messages: Dictionary = {
   "Policy based access control": "Contrôle d'accès basé sur des règles",
   "Learn how Policy-Based Access Control (PBAC)  is used to define the authorized actions and resources  to which an authenticated user has access":
     "Découvrez comment le contrôle d'accès basé sur des politiques (PBAC) est utilisé pour définir les actions et ressources autorisées auxquelles un utilisateur authentifié a accès",
-  "OpenID Connect Access Management": "OpenID Connecter la gestion des accès",
+  "OpenID Connect Access Management": "Gestion des accès avec OpenID Connect",
   "Learn more about connecting SILO to OpenID for access management.":
     "En savoir plus sur la connexion de SILO à OpenID pour la gestion des accès.",
   "MinIO Identity and Access Management: Part 1 - Overview And Modification of Built In Policies":
     "MinIO Gestion des identités et des accès : Partie 1 - Présentation et modification des politiques intégrées",
   "This video introduces MinIO IAM policies, including an overview of the built-in policies, and how to create and remove a policy.":
-    "Cette vidéo présente les stratégies MinIO IAM, y compris un aperçu des stratégies intégrées et comment créer et supprimer une stratégie.",
+    "Cette vidéo présente les politiques MinIO IAM, y compris un aperçu des politiques intégrées et comment créer et supprimer une politique.",
   "MinIO Identity and Access Management: Part 4 - Lab - Setting Up Users, Groups, and Policies":
-    "MinIO Gestion des identités et des accès : Partie 4 – Laboratoire – Configuration des utilisateurs, des groupes et des stratégies",
+    "MinIO Gestion des identités et des accès : Partie 4 – Laboratoire – Configuration des utilisateurs, des groupes et des politiques",
   "This Lab video demonstrates setting up identity and access management based Users, Groups and Policies. ":
     "Cette vidéo de laboratoire montre la configuration des utilisateurs, des groupes et des politiques basés sur la gestion des identités et des accès.",
   "MinIO Identity and Access Management: Part 5 - Lab - Creating A Custom Policy":
     "MinIO Gestion des identités et des accès : Partie 5 - Laboratoire - Création d'une politique personnalisée",
   "This Lab video demonstrates creating custom IAM policies.":
-    "Cette vidéo de laboratoire montre la création de stratégies IAM personnalisées.",
+    "Cette vidéo de laboratoire montre la création de politiques IAM personnalisées.",
   "MinIO Identity and Access Management: Part 6 - Lab - Interfacing With OpenID and LDAP":
     "MinIO Gestion des identités et des accès : Partie 6 - Laboratoire - Interfaçage avec OpenID et LDAP",
   "This Lab video demonstrates interfacing with OpenID and LDAP. ":
     "Cette vidéo de laboratoire montre l'interfaçage avec OpenID et LDAP.",
   "# Bucket \n A bucket is similar to a folder or directory in a filesystem, where each bucket can hold an arbitrary number of objects.":
-    "# Bucket \n Un compartiment est similaire à un dossier ou un répertoire dans un système de fichiers, où chaque compartiment peut contenir un nombre arbitraire d'objets.",
-  "Bucket Versioning": "Gestion des versions du compartiment",
+    "# Bucket \n Un bucket est similaire à un dossier ou un répertoire dans un système de fichiers, où chaque bucket peut contenir un nombre arbitraire d'objets.",
+  "Bucket Versioning": "Gestion des versions du bucket",
   "SILO supports keeping multiple “versions” of an object in a single bucket. SILO versioning protects from unintended overwrites and deletions while providing support for “undoing” a write operation.":
-    "SILO prend en charge la conservation de plusieurs « versions » d'un objet dans un seul compartiment. SILO La gestion des versions protège contre les écrasements et les suppressions involontaires tout en prenant en charge « l'annulation » d'une opération d'écriture.",
+    "SILO prend en charge la conservation de plusieurs « versions » d'un objet dans un seul bucket. SILO La gestion des versions protège contre les écrasements et les suppressions involontaires tout en prenant en charge « l'annulation » d'une opération d'écriture.",
   Buckets: "Buckets",
   "Learn about using Console to create and manage Buckets with SILO":
     "Découvrez comment utiliser la console pour créer et gérer des buckets avec SILO",
@@ -65,7 +65,7 @@ const messages: Dictionary = {
   "Object Locking and Retention Lab":
     "Laboratoire de verrouillage et de rétention d'objets",
   "This lab demonstrates creation and removal of both bucket and object specific retention, compliance, and legal holds. ":
-    "Cet atelier démontre la création et la suppression de conservations, de conformité et de conservations légales spécifiques aux compartiments et aux objets.",
+    "Cet atelier démontre la création et la suppression de conservations, de conformité et de conservations légales spécifiques aux buckets et aux objets.",
   "Versioning and Lifecycle Management":
     "Gestion des versions et du cycle de vie",
   "In this video, we will focus on versioning and lifecycle management.":
@@ -79,18 +79,16 @@ const messages: Dictionary = {
     "Apprenez à créer et gérer des buckets",
   "In this video, we will focus on versioning  and lifecycle management.":
     "Dans cette vidéo, nous nous concentrerons sur le versioning et la gestion du cycle de vie.",
-  "Policy Document Structure":
-    "Structure du document de politique\nLes documents de stratégie",
+  "Policy Document Structure": "Structure des documents de politique",
   "SILO policy documents use the same schema as AWS IAM Policy documents. See policy templates and allowed S3 Policy actions and condition keys in our docs.":
-    "SILO utilisent le même schéma que les documents de stratégie AWS IAM. Consultez les modèles de stratégie et les S3 actions de stratégie et clés de condition autorisées dans nos documents.",
+    "Les documents de politique SILO utilisent le même schéma que ceux d’AWS IAM. Consultez dans notre documentation les modèles de politique ainsi que les actions et clés de condition S3 autorisées.",
   "Access Keys": "Clés d’accès",
   "Access Keys support providing applications authentication credentials which inherit permissions from the “parent” user.":
     "Les clés d'accès prennent en charge la fourniture d'informations d'authentification d'application qui héritent des autorisations de l'utilisateur « parent ».",
-  "Policy Variables": "Variables de stratégie",
+  "Policy Variables": "Variables de politique",
   "SILO supports using policy variables for automatically substituting context from the authenticated user and/or the operation into the user’s assigned policy or policies.":
-    "SILO prend en charge l'utilisation de variables de stratégie pour remplacer automatiquement le contexte de l'utilisateur authentifié et/ou l'opération dans la ou les stratégies attribuées à l'utilisateur.",
-  "Admin Policy Action Keys":
-    "Touches d'action de la politique d'administration",
+    "SILO prend en charge l'utilisation de variables de politique pour remplacer automatiquement le contexte de l'utilisateur authentifié et/ou l'opération dans la ou les politiques attribuées à l'utilisateur.",
+  "Admin Policy Action Keys": "Clés d’action des politiques d’administration",
   "See actions supported in defining policies for SILO admin operations. These actions are only valid for SILO deployments and are not intended for use with other S3-compatible services.":
     "Voir les actions prises en charge dans la définition des politiques pour les opérations d'administration SILO. Ces actions ne sont valables que pour les déploiements SILO et ne sont pas destinées à être utilisées avec d'autres services compatibles S3.",
   "Admin Policy Condition Keys":
@@ -98,17 +96,16 @@ const messages: Dictionary = {
   "See which conditions SILO supports for use with defining policies for admin actions.":
     "Découvrez quelles conditions SILO prennent en charge pour une utilisation avec la définition de politiques pour les actions d'administration.",
   "Supported S3 Policy Condition Keys":
-    "Prise en charge S3 Clés de condition de politique",
+    "Clés de condition de politique S3 prises en charge",
   "SILO policy documents support IAM conditional statements.":
-    "SILO les documents de stratégie prennent en charge les instructions conditionnelles IAM.",
-  "Supported S3 Policy Actions":
-    "Actions politiques S3 prises en charge\nLes documents de stratégie",
+    "SILO les documents de politique prennent en charge les instructions conditionnelles IAM.",
+  "Supported S3 Policy Actions": "Actions de politique S3 prises en charge",
   "SILO policy documents support a subset of IAM S3 Action keys.":
-    "SILO prennent en charge un sous-ensemble de IAM S3 clés d'action.",
+    "Les documents de politique SILO prennent en charge un sous-ensemble de clés d’action IAM S3.",
   "MinIO Identity and Access Management: Part 2 - Using IDP to Manage Users And Groups":
     "MinIO Gestion des identités et des accès : Partie 2 - Utilisation de IDP pour gérer les utilisateurs et les groupes",
   "This video discusses Users and Groups, and how policies can be applied to them to enable specific permissions.":
-    "Cette vidéo traite des utilisateurs et des groupes et de la manière dont des stratégies peuvent leur être appliquées pour activer des autorisations spécifiques.",
+    "Cette vidéo traite des utilisateurs et des groupes et de la manière dont des politiques peuvent leur être appliquées pour activer des autorisations spécifiques.",
   "SILO versioning protects from unintended overwrites and deletions while providing support for “undoing” a write operation.":
     "SILO la gestion des versions protège contre les écrasements et les suppressions involontaires tout en prenant en charge « l'annulation » d'une opération d'écriture.",
   "Lifecycle Management II - Versioning and Lifecycle Management":
@@ -135,26 +132,26 @@ const messages: Dictionary = {
   "These configuration settings define runtime behavior of the SILO server process,  comparable to the mc admin config command":
     "Ces paramètres définissent le comportement du processus serveur SILO à l’exécution, comme la commande mc admin config.",
   "Where can I see current Heal status?":
-    "Où puis-je voir l'état actuel de la guérison ?",
+    "Où puis-je voir l’état actuel de la réparation ?",
   "Check under Monitoring/Drives on the left hand  menu to see Drive and Bucket Healing status":
-    "Vérifiez sous Surveillance/Lecteurs dans le menu de gauche pour voir l'état de guérison du lecteur et du compartiment.",
+    "Consultez Surveillance/Disques dans le menu de gauche pour voir l’état de réparation des disques et des buckets.",
   "How is Erasure Coding used to Protect Data?":
     "Comment le codage d'effacement est-il utilisé pour protéger les données ?",
   "SILO erasure coding is a data redundancy and  availability feature that allows SILO deployments to  automatically reconstruct objects on-the-fly despite  the loss of multiple drives or nodes in the cluster.":
-    "SILO le codage d'effacement est une fonctionnalité de redondance et de disponibilité des données qui permet aux déploiements SILO de reconstruire automatiquement des objets à la volée malgré la perte de plusieurs lecteurs ou nœuds dans le cluster.",
+    "SILO le codage d'effacement est une fonctionnalité de redondance et de disponibilité des données qui permet aux déploiements SILO de reconstruire automatiquement des objets à la volée malgré la perte de plusieurs disques ou nœuds dans le cluster.",
   "Recover After Hardware failure": "Récupération après une panne matérielle",
   "Depending on the deployment topology and  selected erasure code parity, SILO can tolerate loss  of up to half the drives or nodes in the deployment  while maintaining read access to objects.":
-    "En fonction de la topologie de déploiement et de la parité du code d'effacement sélectionnée, SILO peut tolérer la perte jusqu'à la moitié des lecteurs ou nœuds du déploiement tout en conservant l'accès en lecture aux objets.",
+    "En fonction de la topologie de déploiement et de la parité du code d'effacement sélectionnée, SILO peut tolérer la perte jusqu'à la moitié des disques ou nœuds du déploiement tout en conservant l'accès en lecture aux objets.",
   "Site Failure Recovery": "Récupération en cas de panne de site",
   "SILO can make the loss of an entire site, while  significant, a relatively minor incident. Site recovery depends on the replication option you use for the site.":
     "SILO peut faire de la perte d'un site entier, bien qu'importante, un incident relativement mineur. La récupération du site dépend de l'option de réplication que vous utilisez pour le site.",
   "Node Failure Recovery": "Récupération en cas de panne de nœud",
   "If a SILO node suffers complete hardware failure, the node begins healing operations once it rejoins the  deployment.":
-    "Si un nœud SILO subit une panne matérielle complète, le nœud commence les opérations de guérison une fois qu'il rejoint le déploiement.",
-  "What is SILO Healing?": "Qu'est-ce que la guérison SILO ?",
+    "Si un nœud SILO subit une panne matérielle complète, il lance les opérations de réparation dès qu’il rejoint le déploiement.",
+  "What is SILO Healing?": "Qu’est-ce que la réparation SILO ?",
   "Healing is SILO’s ability to restore data after some event causes data loss. Data loss can come from bit rot, drive loss, or node loss.":
-    "La guérison est la capacité de SILO à restaurer des données après qu'un événement ait entraîné une perte de données. La perte de données peut provenir d’une pourriture des bits, d’une perte de lecteur ou d’une perte de nœud.",
-  "Understand SILO Healing Using mc": "Comprendre SILO Guérison à l'aide de mc",
+    "La réparation est la capacité de SILO à restaurer les données après une perte causée par le bit rot, la perte d’un disque ou la perte d’un nœud.",
+  "Understand SILO Healing Using mc": "Comprendre la réparation SILO avec mc",
   "The mc admin heal command scans for objects that are damaged or corrupted and heals those objects.":
     "La commande mc admin heal recherche les objets endommagés ou corrompus et les répare.",
   "What is Bit Rot?": "Qu'est-ce que Bit Rot ?",
@@ -171,7 +168,7 @@ const messages: Dictionary = {
     "En savoir plus sur la façon dont l'analyseur vérifie la transition et l'expiration des objets en fonction des règles de cycle de vie",
   "What is the Scanner?": "Qu'est-ce que le scanner ?",
   "One of several low-priority processes SILO runs to check lifecycle management rules, bucket or site replication status, as well as object bit rot and healing":
-    "L'un des nombreux processus de faible priorité SILO s'exécute pour vérifier les règles de gestion du cycle de vie, l'état de réplication du compartiment ou du site, ainsi que la pourriture et la guérison des bits d'objet.",
+    "L’un des processus de basse priorité exécutés par SILO pour vérifier les règles de cycle de vie, l’état de réplication des buckets ou des sites, ainsi que le bit rot et la réparation des objets.",
   "Lifecycle Management Object Scanner Considerations":
     "Considérations relatives au scanner d'objets de gestion du cycle de vie",
   "SILO uses a scanner process to check objects against all configured lifecycle management rules. High IO workloads or limited system resources may delay application of lifecycle management rules":
@@ -209,20 +206,20 @@ const messages: Dictionary = {
     "Les journaux d'audit sont des descriptions granulaires de chaque opération sur le déploiement SILO prenant en charge les normes et réglementations de sécurité qui nécessitent un suivi détaillé des opérations.",
   "Publish Events to Kafka": "Publier les événements sur Kafka",
   "SILO supports publishing bucket notification events to a Kafka service endpoint.":
-    "SILO prend en charge la publication des événements de notification de compartiment sur un point de terminaison de service Kafka.",
+    "SILO prend en charge la publication des événements de notification de bucket sur un point de terminaison de service Kafka.",
   "Kafka Service for Bucket Notifications":
-    "Kafka Service pour les notifications de compartiment",
+    "Kafka Service pour les notifications de bucket",
   "Learn about environment variables for configuring a Kafka service as a target for Bucket Nofitications.":
     "Découvrez les variables d'environnement pour configurer un service Kafka comme cible pour les notifications de bucket.",
   "Kafka Service Configuration Settings":
     "Kafka Paramètres de configuration du service",
   "Supported Bucket Notification Targets":
-    "Cibles de notification de compartiment prises en charge",
+    "Cibles de notification de bucket prises en charge",
   "Learn which notification targets are supported by SILO.":
     "Découvrez quelles cibles de notification sont prises en charge par SILO.",
-  "Bucket Notifications": "Notifications de compartiment",
+  "Bucket Notifications": "Notifications de bucket",
   "SILO bucket notifications allow administrators to send notifications to supported external services on certain object or bucket events.":
-    "SILO Les notifications de compartiment permettent aux administrateurs d'envoyer des notifications aux services externes pris en charge sur certains événements d'objet ou de compartiment.",
+    "SILO Les notifications de bucket permettent aux administrateurs d'envoyer des notifications aux services externes pris en charge sur certains événements d'objet ou de bucket.",
   "Need more help? Check out additional Troubleshooting options":
     "Besoin d'aide supplémentaire ? Découvrez les options de dépannage supplémentaires",
   "Site Replication Prerequisite":
@@ -233,23 +230,23 @@ const messages: Dictionary = {
     "La réplication de site configure plusieurs déploiements SILO indépendants en tant que cluster de répliques appelés sites homologues.",
   "Site Replication Overview": "Présentation de la réplication de sites",
   "See what changes are and are NOT replicated between peer sites":
-    "Consultez les modifications qui sont répliquées entre les sites pairs et celles qui ne le sont pas",
+    "Découvrez quels changements sont ou NE sont PAS répliqués entre les sites pairs",
   "Site Replication Tutorial": "Tutoriel de réplication de sites",
   "Learn how to set up site replication using Console and the SILO client (mc)":
     "Apprenez à configurer la réplication de site à l'aide de la console et du client SILO (mc)",
   "Transition from SILO to Azure": "Transition de SILO vers Azure",
   "See the procedure to create a new object lifecycle management rule that transition objects from a SILO bucket to a remote storage tier on the Azure storage backend.":
-    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un compartiment SILO vers un niveau de stockage distant sur le backend de stockage Azure.",
+    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un bucket SILO vers un niveau de stockage distant sur le backend de stockage Azure.",
   "Transition from SILO to GCS": "Transition du SILO au GCS",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a SILO bucket to a remote storage tier on the Google Cloud Storage backend.":
-    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un compartiment SILO vers un niveau de stockage distant sur le backend de Google Cloud Storage.",
+    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un bucket SILO vers un niveau de stockage distant sur le backend de Google Cloud Storage.",
   "Transition from SILO to S3": "Transition de SILO à S3",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a SILO bucket to a remote storage tier on the Amazon Web Services S3 storage backend or an S3-compatible service.":
-    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un compartiment SILO vers un niveau de stockage distant sur le backend de stockage Amazon Web Services S3 ou un service compatible S3.",
+    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un bucket SILO vers un niveau de stockage distant sur le backend de stockage Amazon Web Services S3 ou un service compatible S3.",
   "Transition to Remote SILO Deployment":
     "Transition vers le déploiement à distance SILO",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a bucket on a primary SILO deployment to a bucket on a remote SILO deployment. ":
-    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un compartiment sur un déploiement SILO principal vers un compartiment sur un déploiement SILO distant.",
+    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un bucket sur un déploiement SILO principal vers un bucket sur un déploiement SILO distant.",
   "Object Lifecycle Management": "Gestion du cycle de vie des objets",
   "Use SILO Object Lifecycle Management to create rules for time or date based automatic transition or expiry of objects.":
     "Utilisez SILO Gestion du cycle de vie des objets pour créer des règles pour la transition ou l'expiration automatique des objets en fonction de l'heure ou de la date.",
@@ -260,9 +257,9 @@ const messages: Dictionary = {
   "Lifecycle Management I - Tiers": "Gestion du cycle de vie I - Niveaux",
   "In this video we will cover expiration and transition of objects to an alternate tier of storage.":
     "Dans cette vidéo, nous couvrirons l'expiration et la transition des objets vers un autre niveau de stockage.",
-  Tiers: "Niveaux de stockage",
+  Tiers: "Tiers",
   "See the procedure to create a new object lifecycle management rule that transitions objects from a SILO bucket to a remote storage tier on the Azure storage backend.":
-    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un compartiment SILO vers un niveau de stockage distant sur le backend de stockage Azure.",
+    "Consultez la procédure pour créer une nouvelle règle de gestion du cycle de vie des objets qui fait la transition des objets d'un bucket SILO vers un niveau de stockage distant sur le backend de stockage Azure.",
   "Console Metrics Dashboard": "Tableau de bord des métriques de la console",
   "The SILO Console provides a point-in-time metrics dashboard by default, and also supports displaying time-series and historical data by querying a Prometheus service configured to scrape data from the SILO deployment.":
     "La console SILO fournit par défaut un tableau de bord de métriques ponctuelles et prend également en charge l'affichage de séries chronologiques et de données historiques en interrogeant un service Prometheus configuré pour extraire les données du déploiement SILO.",
@@ -276,10 +273,10 @@ const messages: Dictionary = {
     "Découvrez les fonctionnalités de surveillance disponibles dans votre console MinIO.",
   "User Management": "Gestion des utilisateurs",
   "Each user can have one or more assigned policies that explicitly list the actions and resources to which that user has access. Users can also inherit policies from the groups in which they have membership.":
-    "Chaque utilisateur peut se voir attribuer une ou plusieurs stratégies qui répertorient explicitement les actions et les ressources auxquelles cet utilisateur a accès. Les utilisateurs peuvent également hériter des politiques des groupes dont ils sont membres.",
+    "Chaque utilisateur peut se voir attribuer une ou plusieurs politiques qui répertorient explicitement les actions et les ressources auxquelles cet utilisateur a accès. Les utilisateurs peuvent également hériter des politiques des groupes dont ils sont membres.",
   "Group Management": "Gestion du groupe",
   "A group is a collection of users. Each group can have one or more assigned policies that explicitly list the actions and resources to which group members are allowed or denied access.":
-    "Un groupe est un ensemble d'utilisateurs. Chaque groupe peut se voir attribuer une ou plusieurs stratégies qui répertorient explicitement les actions et les ressources auxquelles les membres du groupe sont autorisés ou refusés à accéder.",
+    "Un groupe est un ensemble d'utilisateurs. Chaque groupe peut se voir attribuer une ou plusieurs politiques qui répertorient explicitement les actions et les ressources auxquelles les membres du groupe sont autorisés ou refusés à accéder.",
   "MinIO Identity and Access Management: Part 3 - Interfacing with OpenID and LDAP":
     "MinIO Gestion des identités et des accès : Partie 3 - Interfaçage avec OpenID et LDAP",
   "This video is focused on interfacing with OpenID and LDAP to manage access to MinIO.":
@@ -288,45 +285,45 @@ const messages: Dictionary = {
     "MinIO Authentification et autorisation à l'aide de OpenID et Keycloak",
   "In this video you will learn how to set up an OpenID service, Keycloak, to provide authentication and authorization as part of a MinIO deployment.":
     "Dans cette vidéo, vous apprendrez comment configurer un service OpenID, Keycloak, pour fournir une authentification et une autorisation dans le cadre d'un déploiement MinIO.",
-  "Drive Healing": "Favoriser la guérison",
+  "Drive Healing": "Réparation des disques",
   "The Drives section displays the healing status for a bucket.":
-    "La section Lecteurs affiche l'état de guérison d'un compartiment.",
+    "La section Disques affiche l’état de réparation d’un bucket.",
   "Erasure Coding": "Codage d'effacement",
   "SILO Erasure Coding is a data redundancy and availability feature that allows SILO deployments to automatically reconstruct objects on-the-fly despite the loss of multiple drives or nodes in the cluster.":
-    "SILO Erasure Coding est une fonctionnalité de redondance et de disponibilité des données qui permet aux déploiements SILO de reconstruire automatiquement des objets à la volée malgré la perte de plusieurs lecteurs ou nœuds dans le cluster.",
-  "Site Healing": "Guérison du site",
+    "SILO Erasure Coding est une fonctionnalité de redondance et de disponibilité des données qui permet aux déploiements SILO de reconstruire automatiquement des objets à la volée malgré la perte de plusieurs disques ou nœuds dans le cluster.",
+  "Site Healing": "Réparation de site",
   "Any SILO deployment in the site replication configuration can resynchronize damaged replica-eligible data from the peer with the most updated (“latest”) version of that data.":
     "Tout déploiement SILO dans la configuration de réplication de site peut resynchroniser les données endommagées éligibles à la réplique du homologue avec la version la plus mise à jour (« la plus récente ») de ces données.",
-  Healing: "Guérison",
+  Healing: "Réparation",
   "SILO Automatically Heals Corrupt or Missing Data On-the-fly":
     "SILO Répare automatiquement les données corrompues ou manquantes à la volée",
   "In this video, we will provide an overview of site-wide replication.":
     "Dans cette vidéo, nous fournirons un aperçu de la réplication à l'échelle du site.",
-  Health: "État de santé",
+  Health: "Santé",
   "The health section provides an interface for running a health diagnostic for the SILO Deployment. The report is generated on the deployment and downloaded directly to your browser.":
     "La section santé fournit une interface permettant d'exécuter un diagnostic de santé pour le déploiement SILO. Le rapport est généré sur le déploiement et téléchargé directement sur votre navigateur.",
-  "IDP Docs": "IDP Documents",
+  "IDP Docs": "Documentation IDP",
   "SILO supports multiple external identity managers through OpenID Connect-Compatible Active Directory / LDAP":
-    "SILO prend en charge plusieurs gestionnaires d'identité externes via OpenID Active Directory compatible Connect / LDAP",
-  "Built-in SILO IDP": "Intégré SILO IDP",
+    "Vous pouvez configurer SILO pour fournir la gestion des identités et des accès via OpenID Connect et Active Directory / LDAP.",
+  "Built-in SILO IDP": "IDP SILO intégré",
   "SILO includes a built-in IDentity Provider (IDP) that provides core identity management functionality.":
     "SILO inclut un fournisseur d'identité intégré (IDP) qui fournit une fonctionnalité de base de gestion des identités.",
   "Active Directory / LDAP Access Management":
     "Active Directory / LDAP Gestion des accès",
   "For identities managed by the external AD/LDAP provider, SILO uses the user’s Distinguished Name and attempts to map it against an existing policy.":
-    "Pour les identités gérées par le fournisseur externe AD/LDAP, SILO utilise le nom distinctif de l'utilisateur et tente de le mapper à une stratégie existante.",
-  "Keycloak configuration": "Keycloakconfiguration",
+    "Pour les identités gérées par le fournisseur externe AD/LDAP, SILO utilise le nom distinctif de l'utilisateur et tente de le mapper à une politique existante.",
+  "Keycloak configuration": "Configuration de Keycloak",
   "You can configure SILO to use Keycloak as an external IDentity Provider (IDP) for authentication of users via the OpenID Connect (OIDC) protocol.":
     "Vous pouvez configurer SILO pour utiliser Keycloak comme fournisseur d'identité externe (IDP) pour l'authentification des utilisateurs via le protocole OpenID Connect (OIDC).",
-  "LDAP Configuration": "LDAP Configuration",
+  "LDAP Configuration": "Configuration LDAP",
   "SILO supports configuring a single Active Directory / LDAP Connect for external management of user identities.":
     "SILO prend en charge la configuration d'un seul Active Directory / LDAP Connect pour la gestion externe des identités des utilisateurs.",
-  "OIDC Configuration": "OIDC Configuration",
+  "OIDC Configuration": "Configuration OIDC",
   "SILO supports using an OpenID Connect (OIDC) compatible IDentity Provider (IDP) such as Okta, KeyCloak, Dex, Google, or Facebook for external management of user identities.":
     "SILO prend en charge l'utilisation d'un fournisseur d'identité compatible OpenID Connect (OIDC) (IDP) tel que Okta, KeyCloak, Dex, Google ou Facebook pour la gestion externe des identités des utilisateurs.",
-  "KMS overview": "KMS aperçu\nL'expert en cryptographie de",
+  "KMS overview": "Présentation de KMS",
   "MinIO's cryptographic expert shares why MinIO built KES, what it is used for and how it fits into the MinIO architecture.":
-    "MinIO explique pourquoi MinIO a construit KES, à quoi il sert et comment il s'intègre dans l'architecture MinIO.",
+    "L’expert en cryptographie de MinIO explique pourquoi MinIO a conçu KES, à quoi il sert et comment il s’intègre dans l’architecture MinIO.",
   "Learn about key management using KMS.":
     "Découvrez la gestion des clés à l'aide de KMS.",
   "Text snippet that will be relevant to the user will  go here  made to look nice in the helpitem size  on two-three lines":
@@ -336,9 +333,9 @@ const messages: Dictionary = {
   "Audit Logs": "Journaux d’audit",
   "You can configure an HTTP webhook endpoint to which SILO publishes audit logs using either environment variables or by setting runtime configuration settings.":
     "Vous pouvez configurer un point de terminaison de webhook HTTP sur lequel SILO publie les journaux d'audit à l'aide de variables d'environnement ou en définissant les paramètres de configuration d'exécution.",
-  "Object Lambda": "Objet Lambda\nL'Object Lambda de",
+  "Object Lambda": "Object Lambda",
   "SILO’s Object Lambda enables developers to programmatically transform objects on demand.":
-    "SILO permet aux développeurs de transformer par programme des objets à la demande.",
+    "L’Object Lambda de SILO permet aux développeurs de transformer des objets à la demande par programmation.",
   "MinIO Event Notifications - Overview":
     "MinIO Notifications d'événements - Présentation",
   "Use the Event framework to see what's going on in the system using Bucket, Object, Replication and ILM events.":
@@ -366,9 +363,9 @@ const messages: Dictionary = {
   "A demo of Prefixes & Objects with examples of copying and deleting an object, as well as CopySource Object.":
     "Une démo de Préfixes et Objets avec des exemples de copie et de suppression d'un objet, ainsi que de l'Objet CopySource.",
   "Example Policy - Bucket Resource Access":
-    "Exemple de stratégie – Accès aux ressources du compartiment",
+    "Exemple de politique – Accès aux ressources du bucket",
   "An example policy demonstrating authorization  limited to a named bucket":
-    "Un exemple de stratégie démontrant une autorisation limitée à un compartiment nommé",
+    "Un exemple de politique démontrant une autorisation limitée à un bucket nommé",
   Performance: "Performances",
   "The performance section provides an interface for running a performance test of the deployment.":
     "La section performances fournit une interface pour exécuter un test de performances du déploiement.",
@@ -383,11 +380,11 @@ const messages: Dictionary = {
     "Vous pouvez chiffrer la sortie de mc support inspect pour renforcer la sécurité lors du transfert des fichiers hors du déploiement.",
   "What is Trace?": "Qu'est-ce que Trace ?",
   "The trace section provides HTTP trace functionality for a bucket or buckets on the deployment.":
-    "La section trace fournit HTTP une fonctionnalité de trace pour un ou plusieurs compartiments sur le déploiement.",
+    "La section trace fournit HTTP une fonctionnalité de trace pour un ou plusieurs buckets sur le déploiement.",
   Users: "Utilisateurs",
   "What is Watch?": "Qu'est-ce que Watch ?",
   "The Watch section displays S3 events as they occur on the selected bucket.":
-    "La section Watch affiche S3 les événements au fur et à mesure qu'ils se produisent sur le compartiment sélectionné.",
+    "La section Watch affiche S3 les événements au fur et à mesure qu'ils se produisent sur le bucket sélectionné.",
   "Access Managemnt": "Gestion des accès",
   "Object Locking": "Verrouillage des objets",
   "SILO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect versioned objects from deletion.":
@@ -397,7 +394,7 @@ const messages: Dictionary = {
     "SILO Le chiffrement côté serveur (SSE) protège les objets dans le cadre des opérations d'écriture, permettant aux clients de profiter de la puissance de traitement du serveur pour sécuriser les objets au niveau de la couche de stockage (chiffrement au repos).",
   "Learn how to use Console to manage Buckets":
     "Apprenez à utiliser la console pour gérer les buckets",
-  "Bucket Replication": "Réplication de compartiment",
+  "Bucket Replication": "Réplication de bucket",
   "SILO server-side bucket replication is an automatic bucket-level configuration that synchronizes objects between a source and destination bucket.":
     "SILO La réplication de bucket côté serveur est une configuration automatique au niveau du bucket qui synchronise les objets entre un bucket source et un bucket de destination.",
   "This video gives an overview of how to set up and use object versioning as part of a data lifecycle management strategy.":
@@ -405,16 +402,15 @@ const messages: Dictionary = {
   "Versioning Lab": "Laboratoire de gestion des versions",
   "This demo will take you through the steps to manage versioned objects using the MinIO command line tools.":
     "Cette démo vous guidera à travers les étapes de gestion des objets versionnés à l'aide des outils de ligne de commande MinIO.",
-  "Bucket Replication Requirements": "Exigences de réplication de compartiment",
+  "Bucket Replication Requirements": "Exigences de réplication de bucket",
   "Check here to ensure you meet the prerequisites before setting up any replication configurations.":
     "Cochez ici pour vous assurer que vous remplissez les conditions préalables avant de configurer des configurations de réplication.",
-  "Bucket Replication Overview":
-    "Présentation de la réplication de compartiment",
+  "Bucket Replication Overview": "Présentation de la réplication de bucket",
   "In this video, we will cover bucket level replication, both active-passive and active-active.":
     "Dans cette vidéo, nous couvrirons la réplication au niveau du bucket, à la fois active-passive et active-active.",
   "Replication Lab I": "Laboratoire de réplication I",
   "Demonstrates bucket replication concepts using MinIO Client, including active-passive and active-active replication.":
-    "Présente les concepts de réplication de compartiment à l'aide du client MinIO, y compris la réplication active-passive et active-active.",
+    "Présente les concepts de réplication de bucket à l'aide du client MinIO, y compris la réplication active-passive et active-active.",
   "Replication Lab II": "Laboratoire de réplication II",
   "Demonstrates site replication concepts using MinIO Client, including active-passive and active-active replication.":
     "Présente les concepts de réplication de site à l'aide de MinIO Client, y compris la réplication active-passive et active-active.",
@@ -433,7 +429,7 @@ const messages: Dictionary = {
     "Conseils sur la configuration de la réplication unidirectionnelle du bucket à l'aide de la console SILO.",
   "Two-way Bucket Replication": "Réplication de bucket bidirectionnelle",
   "Guidance on configuring two-way (active-active) Bucket replication using SILO Console.":
-    "Conseils sur la configuration de la réplication de compartiment bidirectionnelle (active-active) à l'aide de la console SILO.",
+    "Conseils sur la configuration de la réplication de bucket bidirectionnelle (active-active) à l'aide de la console SILO.",
 };
 
 export default messages;
