@@ -60,8 +60,8 @@ func scanBudgetConfig(t *testing.T) Config {
 	return c
 }
 
-// Each bucket needs about 1.5 s of listing, well within its 3 s budget, but
-// the four together need about 6 s of a single scan worker's time. Charging
+// Each bucket needs about 1–1.5 s of listing, well within its 3 s budget, but
+// the four together need over 4 s of a single scan worker's time. Charging
 // the wall clock since each scan started, as earlier releases did, ended all
 // four limited because each bucket also waited for the others' slices.
 func TestScanBudgetExcludesTimeQueuedBehindOtherBuckets(t *testing.T) {
@@ -76,7 +76,7 @@ func TestScanBudgetExcludesTimeQueuedBehindOtherBuckets(t *testing.T) {
 		}
 	}
 	done := make(chan struct{})
-	go func() { defer close(done); runScanWorker(ctx, s, slowListing(50*time.Millisecond), c) }()
+	go func() { defer close(done); runScanWorker(ctx, s, slowListing(30*time.Millisecond), c) }()
 	defer func() { cancel(); <-done }()
 	deadline := time.Now().Add(30 * time.Second)
 	for {
@@ -147,5 +147,53 @@ func TestScanBudgetLimitsABucketWhoseListingExceedsIt(t *testing.T) {
 			t.Fatalf("limited checkpoint must record the exhausted budget: %+v", record.Checkpoint)
 		}
 		return
+	}
+}
+
+// A worker stopping during a scan (a rolling restart) must not show the
+// bucket as failed or delay it by a retry backoff.
+func TestWorkerShutdownRequeuesScanWithItsCheckpoint(t *testing.T) {
+	s := integrationStore(t)
+	c := scanBudgetConfig(t)
+	c.ProgressInterval = 50 * time.Millisecond
+	c.ScanSlice = time.Minute
+	c.RetryInterval = time.Hour
+	c.MaxRetryInterval = time.Hour
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if err := s.Queue(ctx, "budget-restart", true, 0, 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan struct{})
+	go func() { defer close(done); runScanWorker(ctx, s, slowListing(100*time.Millisecond), c) }()
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		record, err := s.Get(context.Background(), "budget-restart")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if record.State == "running" && record.Checkpoint != nil && record.Checkpoint.LastKey != "" {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("scan never saved a checkpoint: %+v", record)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	cancel()
+	<-done
+	record, err := s.Get(context.Background(), "budget-restart")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.State != "queued" || record.ErrorCode != "" || record.Checkpoint == nil {
+		t.Fatalf("shutdown must requeue the scan with its checkpoint: %+v", record)
+	}
+	resumed, err := s.Claim(context.Background(), time.Minute)
+	if err != nil {
+		t.Fatalf("the next worker cannot resume at once: %v", err)
+	}
+	if resumed.Bucket != "budget-restart" || resumed.Checkpoint == nil || resumed.Checkpoint.LastKey != record.Checkpoint.LastKey {
+		t.Fatalf("resumed without the saved cursor: %+v", resumed)
 	}
 }

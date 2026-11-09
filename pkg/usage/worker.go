@@ -115,7 +115,13 @@ func runScanWorker(ctx context.Context, s *Store, client ListingClient, c Config
 				continue
 			}
 			operation, cancel := context.WithTimeout(context.Background(), c.Heartbeat)
-			persistErr := s.Fail(operation, job, failure.Code, failure.Limited, c.retry(job.Attempts))
+			var persistErr error
+			if failure.Code == "worker_shutdown" {
+				// Shutdown interrupts a healthy scan; the next worker resumes it.
+				persistErr = s.Release(operation, job)
+			} else {
+				persistErr = s.Fail(operation, job, failure.Code, failure.Limited, c.retry(job.Attempts))
+			}
 			cancel()
 			if persistErr != nil && !errors.Is(persistErr, ErrLeaseLost) {
 				log.Print("usage worker: state store unavailable while recording scan failure")

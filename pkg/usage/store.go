@@ -324,6 +324,23 @@ func (s *Store) Fail(ctx context.Context, job Record, code string, limited bool,
 	return nil
 }
 
+// Release hands a scan interrupted by worker shutdown back to the queue. It
+// keeps the checkpoint and visible progress so the next worker resumes at
+// once, and it is neither recorded as an error nor counted as an attempt,
+// so a rolling restart does not show buckets as failed.
+func (s *Store) Release(ctx context.Context, job Record) error {
+	command, err := s.pool.Exec(ctx, `UPDATE console_usage_buckets SET state='queued',error_code='',lease_token=NULL,lease_until=NULL,
+ next_run_at=clock_timestamp(),attempts=GREATEST(attempts-1,0)
+ WHERE scope=$1 AND bucket=$2 AND lease_token=$3 AND state='running' AND lease_until>clock_timestamp()`, s.scope, job.Bucket, job.LeaseToken)
+	if err != nil {
+		return err
+	}
+	if command.RowsAffected() != 1 {
+		return ErrLeaseLost
+	}
+	return nil
+}
+
 // Discover queues new buckets without invalidating healthy existing results.
 // Frequent inventory checks are cheap; full safety-net scans are independent.
 func (s *Store) Discover(ctx context.Context, bucket string, debounce time.Duration) error {
