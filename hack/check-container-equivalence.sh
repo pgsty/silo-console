@@ -36,5 +36,9 @@ go version -m "$work/console" | awk '$1 == "build" && $2 ~ /^-ldflags=/' > "$wor
 test -s "$work/release.ldflags" && test -s "$work/source.ldflags"
 diff -u "$work/release.ldflags" "$work/source.ldflags"
 docker buildx build --platform linux/amd64 --target web-assets --output "type=local,dest=$work/assets" .
-diff -r web-app/build "$work/assets/build"
+if ! diff -qr web-app/build "$work/assets/build"; then
+  echo "::error::Embedded frontend assets differ from a clean source build. Regenerate web-app/build with the Node version in .nvmrc, then commit the optimized assets in a separate commit."
+  echo "Run from web-app: corepack enable && yarn install --immutable && make build-static" >&2
+  exit 1
+fi
 echo "Source image and release binary/assets agree for $commit"
