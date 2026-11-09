@@ -197,3 +197,58 @@ func TestWorkerShutdownRequeuesScanWithItsCheckpoint(t *testing.T) {
 		t.Fatalf("resumed without the saved cursor: %+v", resumed)
 	}
 }
+
+// When the budget runs out, the SDK closes the listing channel at the same
+// time as the scan context expires, and select may take either. Both exits
+// must record the exhausted budget, or a retry lists again.
+func TestBudgetExhaustionIsRecordedOnEveryExit(t *testing.T) {
+	s := integrationStore(t)
+	c := scanBudgetConfig(t)
+	c.ScanTimeout = 20 * time.Millisecond
+	c.ScanSlice = time.Minute
+	ctx := context.Background()
+	// A steady stream keeps the scan loop busy until the budget expires; the
+	// lister then closes its channel like the SDK does, so both the closed
+	// channel and the expired context are ready. No progress tick persists
+	// the budget earlier.
+	busy := listingFunc(func(ctx context.Context, _ string, _ minio.ListObjectsOptions) <-chan minio.ObjectInfo {
+		objects := make(chan minio.ObjectInfo)
+		go func() {
+			defer close(objects)
+			for i := 0; ; i++ {
+				select {
+				case <-ctx.Done():
+					return
+				case objects <- minio.ObjectInfo{Key: fmt.Sprintf("k%09d", i), Size: 1, IsLatest: true}:
+				}
+			}
+		}()
+		return objects
+	})
+	for i := range 40 {
+		bucket := fmt.Sprintf("budget-exit-%02d", i)
+		if err := s.Queue(ctx, bucket, true, 0, 0, nil); err != nil {
+			t.Fatal(err)
+		}
+		job, err := s.Claim(ctx, time.Minute)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = s.RunSlice(ctx, busy, job, c)
+		var failure *ScanFailure
+		if job.Bucket != bucket || !errors.As(err, &failure) || failure.Code != "duration" {
+			t.Fatalf("expected limited/duration for %s, got %s: %v", bucket, job.Bucket, err)
+		}
+		// Keep earlier limited rows out of later claims.
+		if err = s.Fail(ctx, job, failure.Code, true, time.Hour); err != nil {
+			t.Fatal(err)
+		}
+		record, err := s.Get(ctx, bucket)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if record.Checkpoint == nil || record.Checkpoint.ListingTime < c.ScanTimeout {
+			t.Fatalf("attempt %d left the spent budget unrecorded: %+v", i, record.Checkpoint)
+		}
+	}
+}

@@ -131,6 +131,11 @@ func (s *Store) RunSlice(ctx context.Context, client ListingClient, job Record, 
 					if ctx.Err() != nil {
 						return &ScanFailure{Code: "worker_shutdown"}
 					}
+					// Record the exhausted budget, as the other duration
+					// exits do, so a retry ends limited without listing.
+					if err := persist(); err != nil {
+						return err
+					}
 					return &ScanFailure{Code: "duration", Limited: true}
 				}
 				return s.Complete(ctx, job, snapshot(), c.MinScanInterval)
