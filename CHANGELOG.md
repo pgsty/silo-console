@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- Adopt released silo-pkg v3.16.0 and mcli 20261109, pinning MC's calendar
+  release to `v0.0.0-20261109021353-e1d4cc5abfe0`. Record the release tags and
+  full source commits in `hack/deps-release.json` for downstream embedders.
+- Resolve cpuid/v2 v2.4.2, YAML v3.0.6 and gjson v1.20.1 through those
+  maintained components, retaining pretty v1.2.2 and its output formatting.
+  The module graph also advances go-jose/v4 to v4.1.9; JOSE is absent from the
+  standalone Console package dependency set, so this is not a claim of a
+  reachable JOSE vulnerability fix in that binary.
+- Retain Go 1.27.3, the verified upstream minio-go commit, x/net v0.62.0,
+  the existing x/crypto fix, and the tablewriter, runewidth and go-systemd
+  compatibility replacements. Console v2.6.0's dependency history is unchanged.
+
 ## Release v2.6.0
 
 - Add optional folder and bucket usage scans, retained-version totals, live

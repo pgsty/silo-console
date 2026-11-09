@@ -17,15 +17,63 @@
 package api
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
 	"reflect"
 	"testing"
 	"time"
 
 	madmin "github.com/minio/madmin-go/v3"
+	"github.com/minio/websocket"
+	"github.com/stretchr/testify/require"
 )
+
+// Decode the real MC-generated download, in addition to checking the streamed
+// report. Its version frame and full JSON body are consumed by diagnostic tools.
+func TestHealthDiagnosticDownloadContract(t *testing.T) {
+	originalHealth, originalWrite := minioServerHealthInfoMock, connWriteMessageMock
+	t.Cleanup(func() {
+		minioServerHealthInfoMock, connWriteMessageMock = originalHealth, originalWrite
+	})
+	for _, version := range []string{"2", "3"} {
+		t.Run(version, func(t *testing.T) {
+			payload := map[string]string{"version": version, "marker": "complete diagnostic"}
+			minioServerHealthInfoMock = func(context.Context, time.Duration) (interface{}, string, error) {
+				return payload, version, nil
+			}
+			var report struct {
+				Encoded          string            `json:"encoded"`
+				ServerHealthInfo map[string]string `json:"serverHealthInfo"`
+				ReportStatus     string            `json:"reportStatus"`
+			}
+			connWriteMessageMock = func(kind int, body []byte) error {
+				require.Equal(t, websocket.TextMessage, kind)
+				return json.Unmarshal(body, &report)
+			}
+			deadline := time.Second
+			require.NoError(t, startHealthInfo(context.Background(), mockConn{}, AdminClientMock{}, &deadline))
+			require.Equal(t, "ok", report.ReportStatus)
+			require.Equal(t, payload, report.ServerHealthInfo)
+			compressed, err := base64.StdEncoding.DecodeString(report.Encoded)
+			require.NoError(t, err)
+			reader, err := gzip.NewReader(bytes.NewReader(compressed))
+			require.NoError(t, err)
+			defer reader.Close()
+			decoder := json.NewDecoder(reader)
+			var header, decoded map[string]string
+			require.NoError(t, decoder.Decode(&header))
+			require.Equal(t, map[string]string{"version": version}, header)
+			require.NoError(t, decoder.Decode(&decoded))
+			require.Equal(t, payload, decoded)
+			require.ErrorIs(t, decoder.Decode(&decoded), io.EOF)
+		})
+	}
+}
 
 func Test_serverHealthInfo(t *testing.T) {
 	var testReceiver chan madmin.HealthInfo

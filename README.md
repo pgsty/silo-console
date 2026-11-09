@@ -34,27 +34,30 @@
 > sponsored by MinIO, Inc. The MinIO name is used only to identify the upstream
 > project and compatibility lineage.
 
-## Version 2.6.0 release candidate
+## Current source and released versions
 
-Version 2.6.0 is being prepared for a draft release. Formal publication requires
-maintainer approval; v2.5.1 remains the published stable release.
+The current source is an unreleased candidate. The latest published Console is
+[v2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0); adopting
+released dependencies does not publish a new Console binary or container image.
 
 [English](README.md) · [简体中文](README_ZH.md)
 
-**v2.6.0** uses **Go 1.27.3**, **silo-pkg v3.15.2** and the published mcli
-20261026 source (`20261026000000.0.0`). Exact dependency commits are recorded in
-[hack/deps-release.json](hack/deps-release.json). The upstream SDK is pinned to
+**Current source** uses **Go 1.27.3**, **silo-pkg v3.16.0** and the published
+**mcli 20261109** source (`e1d4cc5abfe0`). Exact dependency commits are recorded in
+[hack/deps-release.json](hack/deps-release.json). Console v2.6.0 retains its
+[original dependency record](https://github.com/pgsty/silo-console/blob/v2.6.0/hack/deps-release.json),
+including silo-pkg v3.15.2 and mcli 20261026. The upstream SDK remains pinned to
 `v7.4.2-0.20261025165926-320af050c445`, which accepts successful HTTP 204 responses
 when removing bucket replication.
 
-This release adds folder and bucket usage scans with on-demand refresh, durable
+Console v2.6.0 added folder and bucket usage scans with on-demand refresh, durable
 worker support, freshness metadata, and retained-version totals. It also hardens
 bucket numeric validation, quota and replication handling, locked-bucket
 versioning checks, and bucket table layout across widths and fallback fonts.
 The Go security graph includes the fixed x/crypto and x/net selections recorded
 in `go.mod`; existing policy semantics and output compatibility selections remain.
 See [GitHub Releases](https://github.com/pgsty/silo-console/releases) for publication
-status and artifacts, and [CHANGELOG.md](CHANGELOG.md#release-v260) for details.
+status and artifacts, and [CHANGELOG.md](CHANGELOG.md#unreleased) for pending changes.
 
 SILO Server 20261026 still embeds Console v2.5.1 and includes the IAM cache repair
 required by policy **Reset to default**. Updating standalone Console does not
@@ -217,7 +220,7 @@ and resolves `github.com/minio/minio-go/v7` upstream. The maintained mc source
 keeps the compatibility module path `github.com/minio/mc` and lives in
 `pgsty/mc`. Console pins an immutable Go pseudo-version: either a published
 calendar release or a commit accepted on main with successful CI. The current
-selection is the published mcli 20261026 source recorded in
+selection is the published mcli 20261109 source recorded in
 `hack/deps-release.json`. Selecting it
 as a dependency does not create another mcli release. An embedding server must
 copy this replacement because Go ignores replacements declared by dependency
@@ -226,7 +229,7 @@ modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
 )
 ```
 <!-- silo-replacements:end -->
@@ -244,8 +247,9 @@ package is an ordinary direct requirement and needs no downstream replacement:
 
 This is the coordinated own-module-path line introduced by silo-pkg v3.13.0.
 Console imports `github.com/pgsty/silo-pkg/v3` directly, while upstream
-dependencies that still use `github.com/minio/pkg/v3` may coexist as a distinct
-module. Compatibility with unmodified upstream MinIO and mc is maintained on a
+`github.com/minio/colorjson` still brings in an indirect `github.com/minio/pkg/v3`
+as a distinct module. Do not replace that legacy path with silo-pkg.
+Compatibility with unmodified upstream MinIO and mc is maintained on a
 best-effort basis and never overrides the SILO dependency graph. See
 [docs/Embedding.md](docs/Embedding.md).
 
