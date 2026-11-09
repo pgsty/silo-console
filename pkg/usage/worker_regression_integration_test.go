@@ -267,7 +267,10 @@ func TestObserverRenewsLeaseDuringInventory(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(t.Context())
 	done := make(chan struct{})
-	go func() { defer close(done); observeLease(ctx, s, c, "review-observer") }()
+	go func() {
+		defer close(done)
+		observeLease(ctx, s, c, "review-observer", &pendingChanges{buckets: map[string]pendingChange{}})
+	}()
 	defer func() { cancel(); <-done }()
 	select {
 	case <-inventoryStarted:
@@ -372,7 +375,10 @@ func TestObserverKeepsReadingEventsDuringSlowReconciliation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})
-	go func() { defer close(done); observeLease(ctx, s, c, "draining-observer") }()
+	go func() {
+		defer close(done)
+		observeLease(ctx, s, c, "draining-observer", &pendingChanges{buckets: map[string]pendingChange{}})
+	}()
 	defer func() { cancel(); <-done }()
 	deadline := time.Now().Add(30 * time.Second)
 	for {

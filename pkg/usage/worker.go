@@ -164,7 +164,13 @@ func reconcile(ctx context.Context, s *Store, client *minio.Client, c Config, fu
 
 func runObserver(ctx context.Context, s *Store, c Config) {
 	owner := uuid.NewString()
+	// Received changes that could not be persisted outlive an observer lease.
+	// Reconnect reconciliation re-queues every bucket, but it cannot tell that
+	// a bucket was deleted and re-created, so a lost deletion would leave the
+	// old bucket's totals in place.
+	pending := &pendingChanges{buckets: map[string]pendingChange{}}
 	for ctx.Err() == nil {
+		flushPending(ctx, s, pending, c)
 		operation, cancel := context.WithTimeout(ctx, c.Heartbeat)
 		acquired, err := s.AcquireObserver(operation, owner, c.Lease)
 		cancel()
@@ -174,14 +180,14 @@ func runObserver(ctx context.Context, s *Store, c Config) {
 			}
 			continue
 		}
-		observeLease(ctx, s, c, owner)
+		observeLease(ctx, s, c, owner, pending)
 		if !wait(ctx, c.RetryInterval) {
 			return
 		}
 	}
 }
 
-func observeLease(ctx context.Context, s *Store, c Config, owner string) {
+func observeLease(ctx context.Context, s *Store, c Config, owner string, pending *pendingChanges) {
 	streamCtx, cancel := context.WithCancel(ctx)
 	ctx = streamCtx
 	// Inventory may take longer than a lease. Renew independently of the event
@@ -248,7 +254,6 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	// reconciliation and database writes on the loop below cannot lose changes
 	// while coverage still reports a reconciled connection. Pending work is one
 	// entry per bucket, bounded by the inventory rather than the event rate.
-	pending := &pendingChanges{buckets: map[string]pendingChange{}}
 	streamDone = make(chan struct{})
 	go func() {
 		defer close(streamDone)
@@ -276,33 +281,7 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	defer flush.Stop()
 	connected := false
 	var observedEpoch uint64
-	flushEvents := func() bool {
-		batch := pending.take()
-		for bucket, change := range batch {
-			parent := ctx
-			if ctx.Err() != nil {
-				parent = context.Background()
-			}
-			operation, stop := context.WithTimeout(parent, c.Heartbeat)
-			var err error
-			if change.removed {
-				err = s.Removed(operation, bucket, c.EventDebounce)
-			}
-			if err == nil {
-				err = s.Queue(operation, bucket, false, c.EventDebounce, c.MinScanInterval, &change.at)
-			}
-			stop()
-			if err != nil {
-				pending.restore(batch)
-				if ctx.Err() == nil {
-					log.Print("usage observer: failed to persist changes; reconnect reconciliation required")
-				}
-				return false
-			}
-			delete(batch, bucket)
-		}
-		return true
-	}
+	flushEvents := func() bool { return flushPending(ctx, s, pending, c) }
 	doReconcile := func(full bool) bool {
 		operation, stop := context.WithTimeout(ctx, c.ScanTimeout)
 		defer stop()
@@ -376,6 +355,38 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 			observedEpoch = epoch
 		}
 	}
+}
+
+// flushPending persists received changes: a deletion first clears the
+// bucket's results, then the bucket is queued like any other change. What
+// cannot be persisted is restored for the next attempt. During shutdown the
+// writes use a fresh context so received changes are not dropped.
+func flushPending(ctx context.Context, s *Store, pending *pendingChanges, c Config) bool {
+	batch := pending.take()
+	for bucket, change := range batch {
+		parent := ctx
+		if ctx.Err() != nil {
+			parent = context.Background()
+		}
+		operation, stop := context.WithTimeout(parent, c.Heartbeat)
+		var err error
+		if change.removed {
+			err = s.Removed(operation, bucket, c.EventDebounce)
+		}
+		if err == nil {
+			err = s.Queue(operation, bucket, false, c.EventDebounce, c.MinScanInterval, &change.at)
+		}
+		stop()
+		if err != nil {
+			pending.restore(batch)
+			if ctx.Err() == nil {
+				log.Print("usage observer: failed to persist changes; they are kept for the next attempt")
+			}
+			return false
+		}
+		delete(batch, bucket)
+	}
+	return true
 }
 
 // pendingChange is the newest event time for a bucket and whether the

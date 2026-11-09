@@ -12,9 +12,11 @@ package usage
 import (
 	"context"
 	"errors"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/minio/minio-go/v7"
 )
 
@@ -79,5 +81,63 @@ func TestRemovedBucketForgetsTotalsAndFencesTheActiveScan(t *testing.T) {
 	}
 	if _, err = s.Get(ctx, "never-seen"); err == nil {
 		t.Fatal("removal created a row for an unknown bucket")
+	}
+}
+
+// A bucket left limited keeps its totals and an exhausted checkpoint, and
+// automatic re-queueing keeps both. If the deletion cannot be persisted at
+// first, it must survive for a later flush instead of being dropped when the
+// observer restarts.
+func TestUnpersistedBucketRemovalIsRetried(t *testing.T) {
+	s := integrationStore(t)
+	ctx := context.Background()
+	if err := s.Queue(ctx, "removed-limited", true, 0, 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	job, err := s.Claim(ctx, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Complete(ctx, job, observation(5)); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Queue(ctx, "removed-limited", true, 0, 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	if job, err = s.Claim(ctx, time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	spent := observation(1)
+	if err = s.SaveCheckpoint(ctx, job, Checkpoint{Generation: job.Generation, LastKey: "a", ListingTime: time.Hour, Snapshot: spent}, spent, time.Minute); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.Fail(ctx, job, "duration", true, time.Hour); err != nil {
+		t.Fatal(err)
+	}
+
+	c := scanBudgetConfig(t)
+	pending := &pendingChanges{buckets: map[string]pendingChange{}}
+	pending.add("removed-limited", pendingChange{at: time.Now().UTC(), removed: true})
+	unavailable, err := pgxpool.New(ctx, os.Getenv("TEST_USAGE_DATABASE_URL"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	unavailable.Close()
+	if flushPending(ctx, &Store{pool: unavailable, scope: s.scope}, pending, c) {
+		t.Fatal("a closed database accepted the deletion")
+	}
+	// Reconnect reconciliation alone keeps the limited row and its totals.
+	if err = s.Queue(ctx, "removed-limited", false, 0, 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	if !flushPending(ctx, s, pending, c) {
+		t.Fatal("the retained deletion was not persisted")
+	}
+	record, err := s.Get(ctx, "removed-limited")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.State != "queued" || record.LastGood != nil || record.Checkpoint != nil {
+		t.Fatalf("the deleted bucket's results survived: %+v", record)
 	}
 }
