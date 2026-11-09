@@ -37,6 +37,24 @@ export const BucketUsageProvider = UsageContext.Provider;
 export const useBucketUsageView = () => useContext(UsageContext);
 const usagePending = (row: BucketUsageRecord) =>
   row.state === "queued" || row.state === "running";
+// A busy server (429) is retried with jittered, capped backoff for about
+// half a minute before the bucket is reported as failed.
+const usageBusyAttempts = 8;
+const usageBusyWait = (attempt: number, signal: AbortSignal) =>
+  new Promise<boolean>((resolve) => {
+    if (signal.aborted) return resolve(false);
+    const cap = Math.min(8000, 1000 * 2 ** (attempt - 1));
+    const timer = setTimeout(finish, cap / 2 + (Math.random() * cap) / 2);
+    function finish() {
+      signal.removeEventListener("abort", abort);
+      resolve(!signal.aborted);
+    }
+    function abort() {
+      clearTimeout(timer);
+      finish();
+    }
+    signal.addEventListener("abort", abort, { once: true });
+  });
 const usageStates: readonly string[] = [
   "not_scanned",
   "queued",
@@ -186,70 +204,83 @@ export function useBucketUsage(names: string[]): UsageView {
               };
             });
           publish();
-          try {
-            let completed: BucketUsageSnapshot | undefined;
-            const response = await api.buckets.prefixUsage(
-              bucket,
-              { prefix: "", versions, folders: false },
-              { signal: controller.signal },
-            );
-            await readPrefixUsageStream(
-              response,
-              { bucket, prefix: "", mode: versions ? "versions" : "current" },
-              (frame) => {
-                const totals = {
-                  ...frame.totals,
-                  ...(versions
-                    ? {}
-                    : {
-                        retained_bytes: undefined,
-                        retained_versions: undefined,
-                        delete_markers: undefined,
-                      }),
-                };
-                const snapshot = {
-                  totals,
-                  scanned_entries: frame.scanned_entries,
-                  started_at: frame.started_at,
-                  updated_at: frame.updated_at,
-                };
+          for (let attempt = 1; ; attempt++) {
+            try {
+              let completed: BucketUsageSnapshot | undefined;
+              const response = await api.buckets.prefixUsage(
+                bucket,
+                { prefix: "", versions, folders: false },
+                { signal: controller.signal },
+              );
+              await readPrefixUsageStream(
+                response,
+                { bucket, prefix: "", mode: versions ? "versions" : "current" },
+                (frame) => {
+                  const totals = {
+                    ...frame.totals,
+                    ...(versions
+                      ? {}
+                      : {
+                          retained_bytes: undefined,
+                          retained_versions: undefined,
+                          delete_markers: undefined,
+                        }),
+                  };
+                  const snapshot = {
+                    totals,
+                    scanned_entries: frame.scanned_entries,
+                    started_at: frame.started_at,
+                    updated_at: frame.updated_at,
+                  };
+                  row = {
+                    ...row,
+                    state:
+                      frame.status === "scanning" || frame.status === "complete"
+                        ? "running"
+                        : frame.status === "failed"
+                          ? "error"
+                          : frame.status,
+                    progress: snapshot,
+                  };
+                  if (frame.status === "complete") completed = snapshot;
+                  publish();
+                },
+              );
+              // Only replace last-good after the entire stream validates. A
+              // malformed trailer or disconnect must not publish new totals.
+              if (completed) {
                 row = {
                   ...row,
-                  state:
-                    frame.status === "scanning" || frame.status === "complete"
-                      ? "running"
-                      : frame.status === "failed"
-                        ? "error"
-                        : frame.status,
-                  progress: snapshot,
+                  state: "complete",
+                  last_good: completed,
+                  last_completed_at: completed.updated_at,
                 };
-                if (frame.status === "complete") completed = snapshot;
                 publish();
-              },
-            );
-            // Only replace last-good after the entire stream validates. A
-            // malformed trailer or disconnect must not publish new totals.
-            if (completed) {
+              }
+              break;
+            } catch (error) {
+              const status = error instanceof Response ? error.status : 0;
+              // Prefix-usage slots are shared by every Console session, so a
+              // busy server answers 429. Wait and retry the same bucket
+              // instead of reporting it as failed.
+              if (
+                status === 429 &&
+                attempt < usageBusyAttempts &&
+                (await usageBusyWait(attempt, controller.signal))
+              )
+                continue;
               row = {
                 ...row,
-                state: "complete",
-                last_good: completed,
-                last_completed_at: completed.updated_at,
+                state:
+                  status === 401 || status === 403
+                    ? "forbidden"
+                    : status === 404
+                      ? "missing"
+                      : "error",
               };
               publish();
+              break;
             }
-          } catch (error) {
-            const status = error instanceof Response ? error.status : 0;
-            row = {
-              ...row,
-              state:
-                status === 401 || status === 403
-                  ? "forbidden"
-                  : status === 404
-                    ? "missing"
-                    : "error",
-            };
-            publish();
           }
         }
       };

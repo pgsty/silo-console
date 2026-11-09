@@ -235,6 +235,51 @@ test("without the persistent service, Refresh calculates current totals and neve
   expect(scans).toBe(1);
 });
 
+test("without the persistent service, a busy scanner (429) is retried instead of failing the bucket", async () => {
+  let scans = 0;
+  await page.route("**/api/v1/bucket-usage/*", (route) =>
+    route.fulfill({
+      json: { enabled: false, poll_after_ms: 250, buckets: [] },
+    }),
+  );
+  await page.route(
+    "**/api/v1/buckets/fixture-bucket/prefix-usage*",
+    (route) => {
+      scans++;
+      if (scans === 1)
+        return route.fulfill({
+          status: 429,
+          json: {
+            code: 429,
+            message: "Other size calculations are running. Try again shortly.",
+          },
+        });
+      return route.fulfill({
+        contentType: "application/x-ndjson",
+        body:
+          JSON.stringify({
+            ...snapshot,
+            bucket: "fixture-bucket",
+            prefix: "",
+            mode: "versions",
+            status: "complete",
+            folders: [],
+          }) + "\n",
+      });
+    },
+  );
+  await page.goto(base);
+  const row = page.getByRole("region", { name: "fixture-bucket" });
+  await expect(page.getByRole("status")).toContainText(
+    "Automatic updates are not configured",
+  );
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(row).toContainText("1.5 KiB");
+  await expect(row).toContainText("Updated");
+  await expect(row).not.toContainText("Update failed");
+  expect(scans).toBe(2);
+});
+
 for (const outcome of [
   "outage",
   "limited",
