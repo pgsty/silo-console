@@ -218,7 +218,7 @@ const ListUsers = () => {
               ...actionsTray.actionsTray,
               justifyContent: "flex-start",
               gap: 12,
-              "& button": { marginLeft: 0 },
+              "& button": { marginInlineStart: 0 },
             }}
           >
             <SearchBox
@@ -247,8 +247,8 @@ const ListUsers = () => {
                 flexGrow: 0,
                 flexShrink: 0,
                 gap: 8,
-                marginLeft: mobile ? 0 : 12,
-                marginRight: "auto",
+                marginInlineStart: mobile ? 0 : 12,
+                marginInlineEnd: "auto",
               }}
             />
             {mobile ? (

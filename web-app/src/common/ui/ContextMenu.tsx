@@ -68,7 +68,7 @@ const Item = styled.button<{ $danger?: boolean }>`
   padding: 4px 12px;
   border: 0;
   border-radius: var(--radius-control);
-  text-align: left;
+  text-align: start;
   background: transparent;
   cursor: pointer;
   color: ${({ $danger }) =>

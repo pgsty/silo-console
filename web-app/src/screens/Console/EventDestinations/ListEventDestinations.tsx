@@ -66,7 +66,7 @@ const StatusDisplay = styled.div(({ theme }) => ({
   alignItems: "center",
   "& svg": {
     width: 16,
-    marginRight: 5,
+    marginInlineEnd: 5,
     fill: get(theme, "signalColors.good", "#4CCB92"),
   },
   "& svg.offline": {
@@ -187,7 +187,7 @@ const ListEventDestinations = () => {
           sx={{
             ...actionsTray.actionsTray,
             gap: 12,
-            "& button": { marginLeft: 0 },
+            "& button": { marginInlineStart: 0 },
           }}
         >
           <SearchBox

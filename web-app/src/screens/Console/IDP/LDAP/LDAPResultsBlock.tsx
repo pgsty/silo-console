@@ -113,7 +113,7 @@ const LDAPResultsBlock = ({ entityName, results }: IResultBlock) => {
             display: "flex",
             alignItems: "center",
             "& svg": {
-              marginRight: 10,
+              marginInlineEnd: 10,
               color: "var(--brand)",
             },
           },

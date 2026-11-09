@@ -224,7 +224,7 @@ const EditEndpointModal = ({
                     sx={{
                       display: "flex",
                       justifyContent: "flex-end",
-                      paddingRight: "10px",
+                      paddingInlineEnd: "10px",
                     }}
                   >
                     <Tooltip
@@ -259,7 +259,7 @@ const EditEndpointModal = ({
                     sx={{
                       display: "flex",
                       justifyContent: "flex-end",
-                      paddingRight: "10px",
+                      paddingInlineEnd: "10px",
                     }}
                   >
                     <Tooltip
@@ -294,7 +294,7 @@ const EditEndpointModal = ({
                     sx={{
                       display: "flex",
                       justifyContent: "flex-end",
-                      paddingRight: "10px",
+                      paddingInlineEnd: "10px",
                     }}
                   >
                     <Tooltip

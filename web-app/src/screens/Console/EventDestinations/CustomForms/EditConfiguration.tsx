@@ -245,7 +245,7 @@ const EditConfiguration = ({
                     xs={12}
                     sx={{
                       paddingTop: 16,
-                      textAlign: "right" as const,
+                      textAlign: "end" as const,
                       display: "flex",
                       flexWrap: "wrap",
                       gap: 8,

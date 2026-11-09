@@ -216,7 +216,7 @@ const QueryMultiSelector = ({
           {tooltip !== "" && (
             <Box
               sx={{
-                marginLeft: 5,
+                marginInlineStart: 5,
                 display: "flex",
                 alignItems: "center",
                 "& .min-icon": {

@@ -21,18 +21,12 @@ import { useSelector } from "react-redux";
 import CommandBar from "./CommandBar";
 import { selFeatures } from "./consoleSlice";
 import TrafficMonitor from "./Common/ObjectManager/TrafficMonitor";
-import { AppState } from "../../store";
+import { AppState, useAppDispatch } from "../../store";
 import AnonymousAccess from "../AnonymousAccess/AnonymousAccess";
-import { registerScreenLoader, registerScreenTranslations } from "i18n/lang";
-import { zhScreens } from "i18n/zhScreens";
-
-registerScreenTranslations(zhScreens);
-registerScreenLoader(() =>
-  import("i18n/ptScreens").then((module) => module.ptScreens),
-);
 
 import { useNavigate } from "react-router-dom";
-import { useLanguage, useT } from "i18n";
+import { languages, LOCALES, storeLanguage, useLanguage, useT } from "i18n";
+import { setLanguage } from "../../systemSlice";
 import { useRouteContext } from "../../navigation/useRouteContext";
 import { routesAsKbarActions } from "./kbar-actions";
 import { hasCreateBucketPermission } from "../../common/SecureComponent/createBucketPermission";
@@ -49,6 +43,7 @@ const NavigationActions = () => {
   const navigate = useNavigate();
   const t = useT();
   const language = useLanguage();
+  const dispatch = useAppDispatch();
   const canCreate = useSelector((state: AppState) =>
     hasCreateBucketPermission(state.console.session?.permissions),
   );
@@ -59,8 +54,21 @@ const NavigationActions = () => {
     if (visualState === VisualState.showing) refresh();
   }, [visualState, refresh]);
   useRegisterActions(
-    routesAsKbarActions(recent, navigate, context, t, canCreate),
-    [recent, context, language, canCreate],
+    [
+      ...routesAsKbarActions(recent, navigate, context, t, canCreate),
+      { id: "language", name: t("Language"), keywords: "language locale" },
+      ...languages.map((value) => ({
+        id: `language-${value}`,
+        parent: "language",
+        name: LOCALES[value].label,
+        keywords: value,
+        perform: () => {
+          storeLanguage(value);
+          dispatch(setLanguage(value));
+        },
+      })),
+    ],
+    [recent, context, language, canCreate, t],
   );
   return null;
 };

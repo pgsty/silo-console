@@ -9,27 +9,13 @@ import React, { useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { useT } from "../../src/i18n";
-import { registerScreenLoader } from "../../src/i18n/lang";
-import { ptScreens } from "../../src/i18n/ptScreens";
 import LanguageActivator from "../../src/screens/Console/Common/LanguageActivator/LanguageActivator";
-import { store, syncLanguageCatalogBriefly } from "../../src/store";
+import { store } from "../../src/store";
 import StyleHandler from "../../src/StyleHandler";
 import { setLanguage } from "../../src/systemSlice";
 
-const pendingScreens: ((screens: Record<string, string>) => void)[] = [];
-registerScreenLoader(
-  () => new Promise((resolve) => pendingScreens.push(resolve)),
-);
-
 Object.assign(window, {
-  catalogHarness: {
-    pendingScreenLoads: () => pendingScreens.length,
-    releaseScreens: () => {
-      pendingScreens.forEach((resolve) => resolve(ptScreens));
-    },
-    setPortuguese: () => store.dispatch(setLanguage("pt")),
-    waitBriefly: syncLanguageCatalogBriefly,
-  },
+  catalogHarness: { setPortuguese: () => store.dispatch(setLanguage("pt-BR")) },
 });
 
 const Copy = () => {
@@ -37,6 +23,7 @@ const Copy = () => {
   const memoizedCopy = useMemo(() => t("Remote host:"), [t]);
   return (
     <>
+      <input id="unsaved" aria-label="Unsaved input" />
       <p id="common">{t("Login")}</p>
       <p id="screen">{memoizedCopy}</p>
     </>

@@ -1,4 +1,5 @@
 // Copyright (c) 2026 Pigsty
+// Brazilian Portuguese translation: Eduardo Andrade Machado (PR #83).
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -8,7 +9,7 @@
 // Brazilian Portuguese translations for helpTopics.json entries (titles, bodies,
 // markdown headers). Keys are the EXACT English source strings — do not edit or
 // re-wrap them.
-export const ptHelp: Record<string, string> = {
+const ptHelp: Record<string, string> = {
   "### Users\n\nA SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.\n\nGroups provide a simplified method for managing shared permissions among users with common access patterns and workloads.\n\nUsers inherit access permissions to data and resources through the groups they belong to.\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nEach user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
     "### Usuários\n\nUm usuário do SILO é formado por uma chave de acesso única (nome de usuário) e pela chave secreta correspondente (senha). Os clientes precisam se autenticar informando uma chave de acesso válida (nome de usuário) e a chave secreta correspondente (senha) de um usuário existente do SILO.\n\nOs grupos oferecem uma forma simples de gerenciar permissões compartilhadas entre usuários com padrões de acesso e cargas de trabalho em comum.\n\nOs usuários herdam permissões de acesso a dados e recursos por meio dos grupos a que pertencem.\n\nO SILO usa controle de acesso baseado em políticas (PBAC) para definir as ações e os recursos autorizados a que um usuário autenticado tem acesso. Cada política descreve uma ou mais ações e condições que delimitam as permissões de um usuário ou grupo de usuários.\n\nCada usuário só pode acessar os recursos e as operações concedidos explicitamente pelo papel embutido. Por padrão, o SILO nega o acesso a qualquer outro recurso ou ação.",
   "### IAM policies\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nSILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.":
@@ -436,3 +437,5 @@ export const ptHelp: Record<string, string> = {
   "Guidance on configuring two-way (active-active) Bucket replication using SILO Console.":
     "Orientações para configurar a replicação de bucket bidirecional (ativo-ativo) no Console do SILO.",
 };
+
+export default ptHelp;

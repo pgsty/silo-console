@@ -44,6 +44,7 @@ export function createLucideIcon(name: string, geometry: React.ReactNode) {
           focusable="false"
           role={role ?? (named ? "img" : undefined)}
           aria-hidden={hidden ?? (named ? undefined : true)}
+          data-directional={/^(LucideChevron(Left|Right)|LucideArrow(Left|Right)|LucideLog(Out|In))$/.test(name) || undefined}
           {...props}
           ref={ref}
           className={["min-icon", "lucide-icon", className].filter(Boolean).join(" ")}

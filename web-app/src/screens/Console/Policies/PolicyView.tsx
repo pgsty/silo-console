@@ -148,7 +148,7 @@ const PolicyView = ({
 
                       alignItems: "center",
                       "& .min-icon": {
-                        marginRight: "5px",
+                        marginInlineEnd: "5px",
                         fill: isAllow
                           ? "var(--success-text)"
                           : "var(--destructive-text)",

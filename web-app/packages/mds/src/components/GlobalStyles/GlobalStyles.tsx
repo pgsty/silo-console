@@ -70,14 +70,14 @@ const GlobalStyles = createGlobalStyle`
     
     hr {
         border-top: 0;
-        border-left: 0;
-        border-right: 0;
+        border-inline-start: 0;
+        border-inline-end: 0;
         border-color: ${get(theme, "borderColor", lightColors.borderColor)};
         background-color: transparent;
     }
     
     ul {
-        padding-left: 20px;
+        padding-inline-start: 20px;
         list-style: none;
         
         li:not([class*="Mui"])::before {
@@ -86,7 +86,7 @@ const GlobalStyles = createGlobalStyle`
           font-size: 20px;
           display: inline-block;
           width: 1em;
-          margin-left: -1em;
+          margin-inline-start: -1em;
         }
         
         ul {
@@ -97,7 +97,7 @@ const GlobalStyles = createGlobalStyle`
             font-size: 20px;
             display: inline-block;
             width: 1em;
-            margin-left: -1em;
+            margin-inline-start: -1em;
           }
         }
       }

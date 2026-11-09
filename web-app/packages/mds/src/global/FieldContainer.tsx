@@ -36,7 +36,7 @@ const MainContainer = styled.div<
     flexFlow: "column",
   },
   "& .tooltipContainer": {
-    marginLeft: 5,
+    marginInlineStart: 5,
     display: "flex",
     alignItems: "center",
     "& .min-icon": {

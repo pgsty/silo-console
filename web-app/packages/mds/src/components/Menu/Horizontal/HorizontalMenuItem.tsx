@@ -85,7 +85,7 @@ const MenuItemContainer = styled.div(({ theme }) => ({
     minWidth: 15,
     minHeight: 15,
     borderRadius: 2,
-    marginLeft: 5,
+    marginInlineStart: 5,
   },
 }));
 
@@ -129,7 +129,7 @@ const OptionElement = styled.span(({ theme }) => ({
       ),
       position: "absolute",
       top: 4,
-      right: 3,
+      insetInlineEnd: 3,
     },
   },
   "& .labelContainer": {

@@ -96,7 +96,7 @@ const Card = styled.div`
     color: var(--foreground);
   }
   .cardAccess {
-    ${typography.caption} text-align: right;
+    ${typography.caption} text-align: end;
     align-self: end;
   }
 `;
@@ -150,10 +150,10 @@ const BucketListItem = (props: BucketDisplayProps) => {
               to={`/browser/${encodeURIComponent(bucket.name)}`}
               onClick={(event) => event.stopPropagation()}
             >
-              {bucket.name}
+              <bdi dir="ltr">{bucket.name}</bdi>
             </Link>
           ) : (
-            bucket.name
+            <bdi dir="ltr">{bucket.name}</bdi>
           )}
         </h2>
         <BucketRowActions {...props} />

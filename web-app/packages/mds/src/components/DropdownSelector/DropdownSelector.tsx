@@ -14,59 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import React, {
-  lazy,
-  Suspense,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React from "react";
 import { DropdownSelectorProps } from "./DropdownSelector.types";
 import { useModalPresence } from "../../global/ModalState";
+import Popup from "./DropdownSelectorPopup";
 
-// Closed selectors do not need geometry, observers or popup styles on login.
-// Once opened, retain the popup component so it can finish its exit transition.
-const Popup = lazy(() => import("./DropdownSelectorPopup"));
-function PendingPopup({
-  open,
-  anchorEl,
-  hideTriggerAction,
-}: DropdownSelectorProps) {
-  useLayoutEffect(() => {
-    if (!open || !anchorEl) return;
-    const down = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      if (event.key === "Tab") hideTriggerAction();
-    };
-    const up = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        hideTriggerAction();
-      }
-    };
-    anchorEl.addEventListener("keydown", down);
-    anchorEl.addEventListener("keyup", up);
-    return () => {
-      anchorEl.removeEventListener("keydown", down);
-      anchorEl.removeEventListener("keyup", up);
-    };
-  }, [open, anchorEl, hideTriggerAction]);
-  return null;
-}
+// The language menu must work immediately, including without a network.
+// Keep the shared popup synchronous; useListPopup owns its exit transition.
 export default function DropdownSelector(props: DropdownSelectorProps) {
   const visible = useModalPresence();
-  const open = props.open && visible;
-  const [opened, setOpened] = useState(open);
-  useEffect(() => {
-    if (open) setOpened(true);
-  }, [open]);
-  return open || opened ? (
-    <Suspense fallback={<PendingPopup {...props} open={open} />}>
-      <Popup {...props} open={open} />
-    </Suspense>
-  ) : null;
+  return <Popup {...props} open={props.open && visible} />;
 }

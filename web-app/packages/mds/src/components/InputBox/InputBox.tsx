@@ -29,9 +29,9 @@ import Box from "../Box/Box";
 
 const InputBase = styled.input<InputBoxElement>`
   ${fieldChrome}
-  padding-left: ${({ startIcon }) =>
+  padding-inline-start: ${({ startIcon }) =>
     startIcon ? "36px" : "var(--control-padding,12px)"};
-  padding-right: ${({ overlayIcon, overlayObject, originType }) =>
+  padding-inline-end: ${({ overlayIcon, overlayObject, originType }) =>
     overlayIcon || overlayObject || originType === "password"
       ? "40px"
       : "var(--control-padding,12px)"};
@@ -58,13 +58,13 @@ const InputContainer = styled.div<
   },
   "& .overlayAction": {
     position: "absolute",
-    right: 5,
+    insetInlineEnd: 5,
     top: "calc(var(--field-height, var(--control-height,36px)) / 2)",
     transform: "translateY(-50%)",
   },
   "& .startOverlayIcon": {
     position: "absolute",
-    left: 10,
+    insetInlineStart: 10,
     top: "calc((var(--field-height, var(--control-height,36px)) - var(--icon-size,16px)) / 2)",
     "& svg": {
       width: 14,

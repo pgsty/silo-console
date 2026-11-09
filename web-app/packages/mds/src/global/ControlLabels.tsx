@@ -8,6 +8,7 @@
 import React, { createContext, ReactNode, useContext } from "react";
 const defaults = {
   close: "Close",
+  actions: "Actions:",
   showPassword: "Show password",
   hidePassword: "Hide password",
   inputAction: "Input action",
@@ -33,7 +34,7 @@ export const ControlLabelsProvider = ({
   labels,
   children,
 }: {
-  labels: typeof defaults;
+  labels: Partial<typeof defaults>;
   children: ReactNode;
-}) => <Labels.Provider value={labels}>{children}</Labels.Provider>;
+}) => <Labels.Provider value={{ ...defaults, ...labels }}>{children}</Labels.Provider>;
 export const useControlLabels = () => useContext(Labels);

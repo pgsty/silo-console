@@ -1,4 +1,5 @@
 // Copyright (c) 2026 Pigsty
+// Brazilian Portuguese translation: Eduardo Andrade Machado (PR #83).
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -8,7 +9,11 @@
 // Brazilian Portuguese dictionary for console chrome. Keys are the exact English
 // source strings — including any meaningful whitespace; never trim keys here.
 // Untranslated strings simply fall back to English at runtime.
-export const pt: Record<string, string> = {
+const pt: Record<string, string> = {
+  "{summary} {monitoring}": "{summary} {monitoring}",
+  "{summary} {warning}": "{summary} {warning}",
+  Language: "Idioma",
+  "Actions:": "Ações:",
   "Retained: {size}": "Retido: {size}",
   "Not scanned": "Não verificado",
   "Update queued": "Atualização na fila",
@@ -361,3 +366,5 @@ export const pt: Record<string, string> = {
   Progress: "Progresso",
   Remove: "Remover",
 };
+
+export default pt;

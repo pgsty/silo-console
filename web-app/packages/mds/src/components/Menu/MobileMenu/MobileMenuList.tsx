@@ -34,7 +34,7 @@ const MobileMenuContainer = styled.div<MenuConstructProps>(({ theme, sx }) => {
     overflow: "auto",
     position: "fixed",
     top: 0,
-    left: 0,
+    insetInlineStart: 0,
     background: get(
       theme,
       "menu.vertical.background",
@@ -48,7 +48,7 @@ const MobileMenuContainer = styled.div<MenuConstructProps>(({ theme, sx }) => {
       flexDirection: "column",
       "& .collapseButton": {
         position: "absolute",
-        right: 15,
+        insetInlineEnd: 15,
         top: 15,
         "& > svg": {
           width: 20,

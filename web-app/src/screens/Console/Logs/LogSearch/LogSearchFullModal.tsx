@@ -54,8 +54,8 @@ const LogSearchFullModal = ({
                     <th
                       style={{
                         fontWeight: 700,
-                        paddingRight: "10px",
-                        textAlign: "left",
+                        paddingInlineEnd: "10px",
+                        textAlign: "start",
                       }}
                     >
                       {t(get(LogSearchColumnLabels, objectKey, `${objectKey}`))}

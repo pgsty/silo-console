@@ -7,7 +7,7 @@
 
 // Chinese translations for helpTopics.json entries (titles, bodies, markdown headers).
 // Keys are the EXACT English source strings — do not edit or re-wrap them.
-export const zhHelp: Record<string, string> = {
+const zhHelp: Record<string, string> = {
   "### Users\n\nA SILO user consists of a unique access key (username) and corresponding secret key (password). Clients must authenticate their identity by specifying both a valid access key (username) and the corresponding secret key (password) of an existing SILO user.\n\nGroups provide a simplified method for managing shared permissions among users with common access patterns and workloads.\n\nUsers inherit access permissions to data and resources through the groups they belong to.\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nEach user can access only those resources and operations which are explicitly granted by the built-in role. SILO denies access to any other resource or action by default.":
     "### 用户\n\nSILO 用户由唯一的访问密钥（用户名）与对应的私有密钥（密码）组成。客户端必须同时提供某个已有 SILO 用户的有效访问密钥（用户名）与对应的私有密钥（密码）来验证身份。\n\n对于访问模式与工作负载相近的用户，用户组提供了一种更简便的共享权限管理方式。\n\n用户通过所属的用户组继承对数据与资源的访问权限。\n\nSILO 使用基于策略的访问控制（PBAC）来定义已认证用户可以访问的操作与资源。每条策略描述一个或多个操作与条件，用以界定单个用户或一组用户的权限。\n\n每个用户只能访问内置角色明确授予的资源与操作。SILO 默认拒绝对其他任何资源或操作的访问。",
   "### IAM policies\n\nSILO uses Policy-Based Access Control (PBAC) to define the authorized actions and resources to which an authenticated user has access. Each policy describes one or more actions and conditions that outline the permissions of a user or group of users.\n\nSILO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The SILO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the IAM documentation for more complete documentation on AWS IAM-specific topics.":
@@ -411,3 +411,5 @@ export const zhHelp: Record<string, string> = {
   "Guidance on configuring two-way (active-active) Bucket replication using SILO Console.":
     "使用 SILO 控制台配置双向（双活）存储桶复制的指引。",
 };
+
+export default zhHelp;

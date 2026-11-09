@@ -56,7 +56,7 @@ const CredentialItem = ({
                 );
               }}
               style={{
-                marginRight: "5px",
+                marginInlineEnd: "5px",
                 width: "28px",
                 height: "28px",
                 padding: "0px",

@@ -27,7 +27,7 @@ const BackLinkBasic = styled.button<BackLinkProps>(({ theme, sx }) => ({
   justifyContent: "center",
   flexDirection: "row",
   height: "30px",
-  paddingLeft: 0,
+  paddingInlineStart: 0,
   background: "transparent",
   border: 0,
   cursor: "pointer",
@@ -37,7 +37,7 @@ const BackLinkBasic = styled.button<BackLinkProps>(({ theme, sx }) => ({
     fontWeight: 600,
     lineHeight: 1,
     paddingTop: 1,
-    marginRight: 10,
+    marginInlineEnd: 10,
   },
   "&:hover .icon": {
     background: get(theme, "backLink.hover", "#eaedee"),
@@ -45,7 +45,7 @@ const BackLinkBasic = styled.button<BackLinkProps>(({ theme, sx }) => ({
   },
   "& .icon": {
     lineHeight: 1,
-    marginRight: "3px",
+    marginInlineEnd: "3px",
     display: "flex",
     alignItems: "center",
     width: "28px",

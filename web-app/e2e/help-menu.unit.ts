@@ -207,7 +207,7 @@ for (const language of ["en", "zh"] as const) {
         .all()) {
         await expect(link).toHaveAttribute(
           "href",
-          language === "zh" ? "https://pgsty.com/zh" : "https://pgsty.com/",
+          language === "zh" ? "https://pgsty.com/zh/" : "https://pgsty.com/",
         );
       }
       await expect(

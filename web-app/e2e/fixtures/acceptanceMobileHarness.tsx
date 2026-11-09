@@ -12,8 +12,6 @@ import { MemoryRouter } from "react-router-dom";
 import { store } from "../../src/store";
 import { menuOpen, setDarkMode, setLanguage } from "../../src/systemSlice";
 import { saveSessionResponse } from "../../src/screens/Console/consoleSlice";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import StyleHandler from "../../src/StyleHandler";
 import Trace from "../../src/screens/Console/Trace/Trace";
 import Profile from "../../src/screens/Console/Support/Profile";
@@ -21,7 +19,6 @@ import AddReplicationSites from "../../src/screens/Console/Configurations/SiteRe
 
 const query = new URLSearchParams(location.search);
 const screen = query.get("screen") || "trace";
-registerScreenTranslations(zhScreens);
 store.dispatch(setLanguage(query.get("lang") === "zh" ? "zh" : "en"));
 store.dispatch(setDarkMode(query.get("theme") === "dark"));
 store.dispatch(menuOpen(true));

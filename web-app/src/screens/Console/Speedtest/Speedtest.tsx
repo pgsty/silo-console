@@ -289,7 +289,7 @@ const Speedtest = () => {
                     pattern={"[0-9]*"}
                   />
                 </Box>
-                <Box sx={{ flexShrink: 0, marginLeft: "auto" }}>
+                <Box sx={{ flexShrink: 0, marginInlineStart: "auto" }}>
                   <Button
                     onClick={startSpeedtestButton}
                     color="primary"

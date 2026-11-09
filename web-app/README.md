@@ -267,20 +267,24 @@ English value until rendering. The explicit JSON paths in
 there is no second copy of the help prose to maintain. Live API/RSS values and
 technical examples such as URLs and LDAP filters are not static UI copy.
 
-Add feature-screen Chinese translations to `src/i18n/zhScreens.ts`; the Console
-boundary registers them with `registerScreenTranslations` from `src/i18n/lang.ts`.
-`zh.ts` and `zhHelp.ts` remain eager. Brazilian Portuguese mirrors this layout in
-`pt.ts`, `ptHelp.ts` and `ptScreens.ts`, with the same keys in each file. Login, anonymous/error pages and shared
-shell/control labels must work before Console loads, so put their keys in the
-eager dictionaries. Keep English keys unchanged, including whitespace, and use
-the project glossary. `untranslatable.ts` permits only documented brand/protocol
-names that retain their spelling in Chinese. Missing entries report every
-distinct file:line.
+The registry in `src/i18n/locales.ts` supports English, Chinese, French, German,
+Russian, Spanish, Brazilian Portuguese, Japanese, Arabic and Turkish. All
+catalogs are bundled statically from `src/i18n/locales/<id>/`. Put shared labels in
+`chrome.ts`, help copy in `help.ts`, and feature-screen copy in `screens.ts`.
+Use `tn(count, one, other)` for quantities and locale-specific plural forms.
 
-A full-catalog AST pass does not prove the cold loading boundary. Isolated
-feature harnesses must register the feature dictionary explicitly; cold public
-locale tests must not preload it. Keep the public-locale regressions alongside
-the coverage guard when changing dictionary placement.
+Chinese coverage remains a hard gate; missing maintained translations fall back
+to English. Run `yarn i18n:report` for coverage and contextual missing-key exports.
+The seven new catalogs are AI-assisted, with curated terminology and destructive
+operation copy; native-speaker corrections are welcome. See the [translation
+workflow](src/i18n/README.md) and [glossary](src/i18n/GLOSSARY.md) for validation,
+key migration, language ownership, RTL and development-only pseudo-locales.
+`untranslatable.ts` lists exact brand/protocol names kept in every language.
+
+All catalog parts are available at startup. Mounted-copy and browser regressions
+cover menu selection, offline switching, saved preferences and unsaved form data.
+Keep these alongside the coverage guard when changing the registry or catalog
+mapping.
 
 The orphan report searches all JS/TS/JSX/TSX/JSON string literals under `src`, including
 tests and generated code, excluding `src/i18n` so dictionaries and baselines
@@ -289,7 +293,7 @@ entries and shrink `orphanBaseline.ts` as old ones are reviewed. Some existing
 entries arrive from the server or constructed keys, so review before deleting.
 Do not expand the baseline to hide regressions. Different values for the same
 key are also checked against an exact-value baseline in that file; precedence is
-`zh > zhScreens > zhHelp`. Resolve new conflicts in the winning dictionary or
+`chrome > screens > help`. Resolve new conflicts in the winning dictionary or
 remove the redundant entry. Identical duplicate values are allowed.
 
 ## Learn More

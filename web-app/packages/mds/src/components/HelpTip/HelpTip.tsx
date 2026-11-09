@@ -73,7 +73,7 @@ const HelptipItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
     position: "absolute",
     pointerEvents: "none",
     borderWidth: tooltipArrowSize,
-    marginLeft: `calc(${tooltipArrowSize} * -1);`,
+    marginInlineStart: `calc(${tooltipArrowSize} * -1);`,
   };
 
   switch (placement) {
@@ -95,7 +95,7 @@ const HelptipItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
           left: `calc(${tooltipArrowSize} * -1)`,
           top: "50%",
           transform: "translateX(0) translateY(-50%)",
-          borderRightColor: background,
+          borderInlineEndColor: background,
         },
       };
       break;
@@ -108,7 +108,7 @@ const HelptipItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
           right: `calc(${tooltipArrowSize} * -2)`,
           top: "50%",
           transform: "translateX(0) translateY(-50%)",
-          borderLeftColor: background,
+          borderInlineStartColor: background,
         },
       };
       break;
@@ -151,7 +151,7 @@ const HelpTargetItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
     width: 0,
     position: "absolute",
     pointerEvents: "none",
-    marginLeft: `calc(${tooltipArrowSize} * -1);`,
+    marginInlineStart: `calc(${tooltipArrowSize} * -1);`,
   };
 
   switch (placement) {
@@ -173,7 +173,7 @@ const HelpTargetItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
           left: `calc(${tooltipArrowSize} * -1)`,
           top: "50%",
           transform: "translateX(0) translateY(-50%)",
-          borderRightColor: background,
+          borderInlineEndColor: background,
         },
       };
       break;
@@ -186,7 +186,7 @@ const HelpTargetItem = styled.div<HelpTipBuild>(({ theme, placement }) => {
           right: `calc(${tooltipArrowSize} * -2)`,
           top: "50%",
           transform: "translateX(0) translateY(-50%)",
-          borderLeftColor: background,
+          borderInlineStartColor: background,
         },
       };
       break;
@@ -213,24 +213,24 @@ const BaseHelpTip = styled.div(({ theme }) => ({
   border: `1px solid ${get(theme, "borderColor", "#E2E2E2")}`,
   borderRadius: 2,
   backgroundColor: get(theme, "boxBackground", "#FBFAFA"),
-  paddingLeft: 10,
+  paddingInlineStart: 10,
   paddingTop: 5,
   paddingBottom: 5,
-  paddingRight: 10,
+  paddingInlineEnd: 10,
   "& .leftItems": {
     fontSize: 16,
     fontWeight: "bold",
     display: "flex",
     alignItems: "center",
     "& .min-icon": {
-      marginRight: 5,
+      marginInlineEnd: 5,
       height: 28,
       width: 38,
     },
   },
   "& .helpText": {
     fontSize: 10,
-    paddingLeft: 5,
+    paddingInlineStart: 5,
     marginTop: 5,
     color: "black",
   },

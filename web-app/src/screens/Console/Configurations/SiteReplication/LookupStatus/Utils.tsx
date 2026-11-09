@@ -46,7 +46,11 @@ export const EntityNotFound = ({
         {
           name: (
             <Box
-              sx={{ marginLeft: "5px", marginRight: "5px", fontWeight: 600 }}
+              sx={{
+                marginInlineStart: "5px",
+                marginInlineEnd: "5px",
+                fontWeight: 600,
+              }}
             >
               {entityValue}
             </Box>

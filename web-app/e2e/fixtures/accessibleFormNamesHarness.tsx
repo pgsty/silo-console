@@ -9,8 +9,6 @@ import StyleHandler from "../../src/StyleHandler";
 import { store } from "../../src/store";
 import { setDarkMode, setLanguage } from "../../src/systemSlice";
 import { saveSessionResponse } from "../../src/screens/Console/consoleSlice";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import { useT } from "../../src/i18n";
 import RenameLongFileName from "../../src/screens/Console/ObjectBrowser/RenameLongFilename";
 import KeyRevealer from "../../src/screens/Console/Tools/KeyRevealer";
@@ -21,7 +19,6 @@ import ModalWrapper from "../../src/screens/Console/Common/ModalWrapper/ModalWra
 
 const query = new URLSearchParams(location.search);
 const originalName = `${"long-name-".repeat(24)}.txt`;
-registerScreenTranslations(zhScreens);
 store.dispatch(setLanguage(query.get("lang") === "zh" ? "zh" : "en"));
 store.dispatch(setDarkMode(query.get("lang") === "zh"));
 store.dispatch(

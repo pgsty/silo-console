@@ -156,9 +156,12 @@ explicitly configured.
 
 ### Multilingual
 
-The entire interface, including help content and documentation links, is
-available in English, Chinese and Brazilian Portuguese behind a per-page toggle,
-with no added runtime dependencies.
+The UI supports English, Chinese, French, German, Russian, Spanish, Brazilian
+Portuguese, Japanese, Arabic and Turkish through a shared language menu. English
+is the default and fallback; Chinese has complete first-party coverage. All
+dictionaries are bundled locally, so switching languages works offline without
+additional runtime dependencies. Documentation links use Chinese for Chinese
+and English for other languages. Server messages and log contents stay intact.
 
 ## Find the Right Resource
 

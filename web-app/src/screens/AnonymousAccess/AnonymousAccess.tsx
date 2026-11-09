@@ -61,8 +61,8 @@ const AnonymousAccess = () => {
           width: "100%",
           alignItems: "center",
           display: "flex",
-          paddingLeft: 16,
-          paddingRight: 16,
+          paddingInlineStart: 16,
+          paddingInlineEnd: 16,
         }}
       >
         <div style={{ width: 200, flexShrink: 1 }}>

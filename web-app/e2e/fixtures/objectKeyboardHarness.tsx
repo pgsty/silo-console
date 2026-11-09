@@ -16,8 +16,6 @@ import {
 import { AppState, store } from "../../src/store";
 import StyleHandler from "../../src/StyleHandler";
 import { saveSessionResponse } from "../../src/screens/Console/consoleSlice";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import ListObjectsTable from "../../src/screens/Console/Buckets/ListBuckets/Objects/ListObjects/ListObjectsTable";
 import FilterObjectsSB from "../../src/screens/Console/ObjectBrowser/FilterObjectsSB";
 import {
@@ -44,7 +42,6 @@ import PreviewFileModal from "../../src/screens/Console/Buckets/ListBuckets/Obje
 import { ModalBox, DensityProvider } from "mds";
 import { KBarProvider, useKBar } from "kbar";
 import CommandBar from "../../src/screens/Console/CommandBar";
-registerScreenTranslations(zhScreens);
 store.dispatch(
   saveSessionResponse({
     permissions: { "arn:aws:s3:::*": ["s3:*", "admin:*"] },

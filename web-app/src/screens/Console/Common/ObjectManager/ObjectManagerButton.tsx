@@ -26,7 +26,7 @@ import { activeTask } from "./taskModel";
 
 const Badge = styled.span`
   position: absolute;
-  right: -1px;
+  insetinlineend: -1px;
   top: -1px;
   border-radius: 10px;
   padding: 0 4px;

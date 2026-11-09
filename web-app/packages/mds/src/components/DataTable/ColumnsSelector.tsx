@@ -66,7 +66,7 @@ const Item = styled.button`
   color: var(--muted-foreground);
   background: transparent;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   &&:focus-visible {
     outline: none;
   }

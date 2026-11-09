@@ -7,18 +7,15 @@
 
 import { fileURLToPath } from "node:url";
 import { Browser, Page, chromium, expect, test } from "@playwright/test";
-import { pt } from "../src/i18n/pt";
-import { ptScreens } from "../src/i18n/ptScreens";
+import pt from "../src/i18n/locales/pt-BR/chrome";
+import ptScreens from "../src/i18n/locales/pt-BR/screens";
 import { browserExecutable } from "./fixtures/browserExecutable";
 import { buildHarness } from "./fixtures/buildHarness";
 
 test.describe.configure({ mode: "serial" });
 
 type CatalogHarness = {
-  pendingScreenLoads: () => number;
-  releaseScreens: () => void;
   setPortuguese: () => void;
-  waitBriefly: () => Promise<unknown>;
 };
 declare const catalogHarness: CatalogHarness;
 
@@ -32,7 +29,10 @@ test.beforeAll(async () => {
   const result = await buildHarness({
     configFile: false,
     logLevel: "silent",
-    define: { "process.env.NODE_ENV": '"production"' },
+    define: {
+      "process.env.NODE_ENV": '"production"',
+      "import.meta.env.DEV": "false",
+    },
     resolve: { tsconfigPaths: true },
     build: {
       write: false,
@@ -63,30 +63,34 @@ test.beforeEach(async () => {
 test.afterEach(() => page.close());
 test.afterAll(() => browser.close());
 
-test("repeated clicks keep cycling while a catalogue download is stalled", async () => {
+test("dropdown selection updates mounted Portuguese copy synchronously", async () => {
   await toggle().click();
-  await expect(toggle()).toHaveAccessibleName("Mudar para português");
-
-  await toggle().click();
-  await expect(toggle()).toHaveAccessibleName("Switch to English");
-  await toggle().click();
-  await expect(toggle()).toHaveAccessibleName("切换到中文");
+  await page
+    .getByRole("option", { name: "Português (Brasil)", exact: true })
+    .click();
+  await expect(page.locator("#common")).toHaveText(pt.Login as string);
+  await expect(page.locator("#screen")).toHaveText(
+    ptScreens["Remote host:"] as string,
+  );
 });
 
-test("a stalled download does not hold back first paint", async () => {
+test("changing languages preserves unsaved input and memoized copy updates", async () => {
+  await page.locator("#unsaved").fill("draft");
   await page.evaluate(() => catalogHarness.setPortuguese());
-  await page.evaluate(() => catalogHarness.waitBriefly());
+  await expect(page.locator("#screen")).toHaveText(
+    ptScreens["Remote host:"] as string,
+  );
+  await toggle().click();
+  await page.getByRole("option", { name: "English", exact: true }).click();
   await expect(page.locator("#screen")).toHaveText("Remote host:");
+  await expect(page.locator("#unsaved")).toHaveValue("draft");
 });
 
-test("a language change alone loads the catalogue and updates mounted copy", async () => {
+test("language changes work without a network connection", async () => {
+  await page.context().setOffline(true);
   await page.evaluate(() => catalogHarness.setPortuguese());
-  await expect
-    .poll(() => page.evaluate(() => catalogHarness.pendingScreenLoads()))
-    .toBeGreaterThan(0);
-  await expect(page.locator("#common")).toHaveText("Login");
-
-  await page.evaluate(() => catalogHarness.releaseScreens());
-  await expect(page.locator("#screen")).toHaveText(ptScreens["Remote host:"]);
-  await expect(page.locator("#common")).toHaveText(pt.Login);
+  await expect(page.locator("#common")).toHaveText(pt.Login as string);
+  await expect(page.locator("#screen")).toHaveText(
+    ptScreens["Remote host:"] as string,
+  );
 });

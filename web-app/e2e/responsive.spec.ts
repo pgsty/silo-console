@@ -612,21 +612,13 @@ test("mobile actions retain language, theme and Help; login hero starts at 768",
   await page
     .getByRole("menuitem", { name: "Switch to light mode", exact: true })
     .click();
-  await overflow.click();
-  await page.getByRole("menuitem", { name: "切换到中文", exact: true }).click();
+  await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "简体中文", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "打开菜单", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "页面操作", exact: true }).click();
-  await page
-    .getByRole("menuitem", { name: "Mudar para português", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Ações da página", exact: true })
-    .click();
-  await page
-    .getByRole("menuitem", { name: "Switch to English", exact: true })
-    .click();
+  await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "English", exact: true }).click();
   for (const width of [390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.getByRole("button", { name: "Open help", exact: true }).click();

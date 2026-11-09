@@ -21,11 +21,11 @@ import HelpTip from "../HelpTip/HelpTip";
 
 const CustomLabel = styled.label<InputLabelProps>(({ sx }) => ({
   fontWeight: 400,
-  marginRight: 10,
+  marginInlineEnd: 10,
   fontSize: "var(--fs-body,13px)",
   lineHeight: "var(--lh-body,20px)",
   color: "var(--foreground)",
-  textAlign: "left" as const,
+  textAlign: "start" as const,
   alignItems: "center",
   display: "flex",
   userSelect: "none",
@@ -43,11 +43,11 @@ const CustomLabel = styled.label<InputLabelProps>(({ sx }) => ({
     },
   },
   "@media (max-width: 767.98px)": {
-    marginRight: 0,
+    marginInlineEnd: 0,
     "& > span": { width: "auto", minWidth: 0 },
   },
   '[data-field-layout="stacked"] &': {
-    marginRight: 0,
+    marginInlineEnd: 0,
     "& > span": { width: "auto", minWidth: 0 },
   },
   ...sx,

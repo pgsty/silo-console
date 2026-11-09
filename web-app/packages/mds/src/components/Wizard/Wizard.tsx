@@ -84,7 +84,7 @@ const WizardMain = styled.div<WizardConstruct>(({ theme, sx, forModal }) => ({
     },
   },
   "& .verticalSteps": {
-    borderRight: `1px solid ${get(
+    borderInlineEnd: `1px solid ${get(
       theme,
       "borderColor",
       lightColors.borderColor,
@@ -109,7 +109,7 @@ const WizardMain = styled.div<WizardConstruct>(({ theme, sx, forModal }) => ({
         "borderColor",
         lightColors.borderColor,
       )}`,
-      textAlign: "left",
+      textAlign: "start",
       padding: "10px 15px",
       color: get(
         theme,

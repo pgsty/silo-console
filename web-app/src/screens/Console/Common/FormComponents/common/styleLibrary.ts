@@ -32,7 +32,7 @@ export const modalBasic = {
     color: "var(--foreground)",
     fontWeight: 600,
     fontSize: 14,
-    marginRight: 10,
+    marginInlineEnd: 10,
     outline: "0",
     padding: "16px 25px 16px 25px",
     cursor: "pointer",
@@ -58,11 +58,11 @@ export const actionsTray = {
     marginBottom: "1rem",
     "@media (max-width: 767px)": {
       "& > :first-child": { width: "100%", minWidth: 0 },
-      "& button": { marginLeft: 0 },
+      "& button": { marginInlineStart: 0 },
     },
     "& button": {
       flexGrow: 0,
-      marginLeft: 8,
+      marginInlineStart: 8,
     },
   },
 };
@@ -89,7 +89,7 @@ export const typesSelection = {
     alignItems: "center",
     justifyContent: "start",
     marginBottom: 16,
-    marginRight: 8,
+    marginInlineEnd: 8,
     cursor: "pointer",
     padding: 0,
     overflow: "hidden",
@@ -115,7 +115,7 @@ export const typesSelection = {
     color: "var(--foreground)",
     fontSize: 16,
     fontFamily: "var(--font-sans)",
-    paddingLeft: 18,
+    paddingInlineStart: 18,
   },
 };
 
@@ -177,7 +177,7 @@ export const widgetCommon = (_theme: unknown) => ({
     height: 8,
     minWidth: 8,
     borderRadius: 2,
-    marginRight: 8,
+    marginInlineEnd: 8,
   },
   "& .legendLabel": {
     fontSize: "var(--fs-caption)",
@@ -226,7 +226,7 @@ export const tooltipCommon = {
     height: 6,
     display: "block" as const,
     borderRadius: "100%",
-    marginRight: 8,
+    marginInlineEnd: 8,
   },
   itemValue: {
     fontSize: "var(--fs-caption)",

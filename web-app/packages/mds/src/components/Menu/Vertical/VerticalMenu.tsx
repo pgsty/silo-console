@@ -44,7 +44,7 @@ const VerticalMenuDrawer = styled.div<MenuConstructProps>(({ theme, sx }) => {
       "menu.vertical.background",
       lightColors.menuBackground,
     ),
-    borderRight: "1px solid var(--border)",
+    borderInlineEnd: "1px solid var(--border)",
     "@media (prefers-reduced-motion: reduce)": {
       transition: "none",
     },
@@ -55,7 +55,7 @@ const VerticalMenuDrawer = styled.div<MenuConstructProps>(({ theme, sx }) => {
       flexDirection: "column",
       "& .collapseButton": {
         position: "absolute",
-        right: 11,
+        insetInlineEnd: 11,
         top: 10,
         "& > svg": {
           width: 12,
@@ -107,7 +107,7 @@ const VerticalMenuDrawer = styled.div<MenuConstructProps>(({ theme, sx }) => {
       background: "transparent",
       color: "inherit",
       font: "inherit",
-      textAlign: "left",
+      textAlign: "start",
       cursor: "pointer",
       "&:focus-visible": {
         outline: "2px solid var(--focus-ring, #6B97FF)",
@@ -170,8 +170,8 @@ const VerticalMenuDrawer = styled.div<MenuConstructProps>(({ theme, sx }) => {
         },
       },
       "& .menuHeader": {
-        marginLeft: 0,
-        marginRight: 0,
+        marginInlineStart: 0,
+        marginInlineEnd: 0,
         marginTop: 0,
       },
       "& .labelContainer": {
@@ -243,7 +243,7 @@ const VerticalMenuDrawer = styled.div<MenuConstructProps>(({ theme, sx }) => {
         background: "transparent",
         color: "var(--foreground)",
         font: "inherit",
-        textAlign: "left",
+        textAlign: "start",
         cursor: "pointer",
         transition: "background var(--dur-fast, 80ms) var(--ease-fast, ease)",
         "&:hover": { background: "var(--hover)" },

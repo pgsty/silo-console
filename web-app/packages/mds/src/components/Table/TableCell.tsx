@@ -32,7 +32,7 @@ const TableCellMain = styled.td<TableComponentsExtraProps>(({ theme, sx }) => ({
     "borderColor",
     lightColors.borderColor,
   )}`,
-  textAlign: "left",
+  textAlign: "start",
   padding: 16,
   color: get(theme, "secondaryText", lightColors.mainGrey),
   ...sx,

@@ -90,9 +90,9 @@ const EntityReplicationLookup = () => {
         </Box>
         <Box
           sx={{
-            marginLeft: -25,
+            marginInlineStart: -25,
             [`@media (max-width: ${breakPoints.sm}px)`]: {
-              marginLeft: 0,
+              marginInlineStart: 0,
             },
           }}
         >

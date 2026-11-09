@@ -42,7 +42,7 @@ const ReportedUsageMain = styled.div({
   "& .unit-type": {
     fontSize: "var(--fs-subtitle)",
     fontWeight: 550,
-    marginLeft: 4,
+    marginInlineStart: 4,
     color: "var(--muted-foreground)",
   },
 });

@@ -1232,9 +1232,9 @@ const ListObjects = () => {
                                 onChange={setDeletedAction}
                                 checked={showDeleted}
                                 sx={{
-                                  marginLeft: 5,
+                                  marginInlineStart: 5,
                                   "@media (max-width: 600px)": {
-                                    marginLeft: 0,
+                                    marginInlineStart: 0,
                                     flexDirection: "row" as const,
                                   },
                                 }}

@@ -5,6 +5,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+import { localeTag } from "i18n/lang";
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -26,7 +27,7 @@ import {
 } from "../../../common/ui";
 import { hasPermission } from "../../../common/SecureComponent";
 import { niceBytes } from "../../../common/utils";
-import { formatText, localeTag, useLanguage, useT } from "i18n";
+import { formatText, useLanguage, useT } from "i18n";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { setHelpName } from "../../../systemSlice";
 import { selSession } from "../consoleSlice";

@@ -50,14 +50,14 @@ const WizardPageMain = styled.div<WizardConstruct>(({ theme }) => ({
     padding: "16px 0 0",
     borderTop: `1px solid ${get(theme, "borderColor", "#E2E2E2")}`,
     "& button": {
-      marginLeft: 0,
+      marginInlineStart: 0,
     },
     "&.forModal": {
       paddingBottom: 0,
     },
   },
   "@media (max-width: 575px)": {
-    "& .forModal .buttonInnerContainer": { flexDirection: "column", gap: 8, marginRight: 0, "& button": { marginLeft: 0, width: "100%" } },
+    "& .forModal .buttonInnerContainer": { flexDirection: "column", gap: 8, marginInlineEnd: 0, "& button": { marginInlineStart: 0, width: "100%" } },
     "& .wizardModal": { minHeight: 0, maxHeight: "none", padding: 0 },
   },
   "& .buttonInnerContainer": {

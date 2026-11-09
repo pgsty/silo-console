@@ -87,11 +87,12 @@ export function useListPopup(
         Math.min(450, above ? availableAbove : availableBelow),
       );
       const width = matchWidth ? bounds.width : popup.current.offsetWidth;
+      const alignRight = (align === "end") !== (getComputedStyle(anchor).direction === "rtl");
       setPosition({
         left: Math.max(
           8,
           Math.min(
-            align === "end" ? bounds.right - width : bounds.left,
+            alignRight ? bounds.right - width : bounds.left,
             window.innerWidth - width - 8,
           ),
         ),

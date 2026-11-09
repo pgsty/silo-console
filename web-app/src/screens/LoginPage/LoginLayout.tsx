@@ -39,8 +39,8 @@ const BrandPanel = styled.aside({
   "&::after": {
     content: '""',
     position: "absolute",
-    left: 0,
-    right: 0,
+    insetInlineStart: 0,
+    insetInlineEnd: 0,
     bottom: 0,
     height: 150,
     zIndex: 1,
@@ -167,7 +167,7 @@ const FormPanel = styled.section(({ theme }) => ({
   "& .headerActions": {
     position: "absolute",
     top: 8,
-    right: 8,
+    insetInlineEnd: 8,
     zIndex: 10,
     display: "flex",
     alignItems: "center",
@@ -214,7 +214,7 @@ const FormPanel = styled.section(({ theme }) => ({
     fontWeight: 550,
     fontSize: 11,
     letterSpacing: "0.42em",
-    paddingLeft: "0.42em",
+    paddingInlineStart: "0.42em",
     textTransform: "uppercase",
     color: "var(--muted-foreground)",
     margin: 0,
@@ -273,8 +273,7 @@ interface LoginLayoutProps {
 const LoginLayout = ({ children, footer }: LoginLayoutProps) => {
   const t = useT();
   const language = useLanguage();
-  const pgstyURL =
-    language === "zh" ? "https://pgsty.com/zh" : "https://pgsty.com/";
+  const pgstyURL = useLocalizedLink()("https://pgsty.com/");
   const firstLine = useRef<HTMLSpanElement>(null);
   const secondLine = useRef<HTMLSpanElement>(null);
   useEffect(() => {

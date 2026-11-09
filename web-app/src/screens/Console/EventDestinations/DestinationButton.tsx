@@ -38,7 +38,7 @@ const DestinationButtonBase = styled.button({
   alignItems: "center",
   justifyContent: "start",
   marginBottom: 16,
-  marginRight: 8,
+  marginInlineEnd: 8,
   cursor: "pointer",
   overflow: "hidden",
   "&:hover": {
@@ -68,7 +68,7 @@ const DestinationLabel = styled.span`
   ${type("title")}
   color: var(--foreground);
   padding: 0 16px;
-  text-align: left;
+  text-align: start;
   min-width: 0;
   overflow-wrap: anywhere;
 `;

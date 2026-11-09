@@ -35,7 +35,7 @@ const SelectBase = styled.button`
   justify-content: space-between;
   gap: 8px;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   .truncate {
     white-space: nowrap;
     overflow: hidden;
@@ -71,7 +71,7 @@ const InputContainer = styled.div<InputContainerProps>(({ theme, sx }) => ({
     top: "50%",
     transform: "translateY(-50%)",
     marginTop: "2px",
-    right: "5px",
+    insetInlineEnd: "5px",
     "& svg": {
       width: 26,
       height: 26,

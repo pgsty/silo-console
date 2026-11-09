@@ -60,7 +60,7 @@ const Panel = styled.section`
     min-width: 0;
   }
   .inputLabel {
-    margin-right: 8px;
+    margin-inline-end: 8px;
   }
   .inputLabel > span {
     min-width: 0;

@@ -185,7 +185,7 @@ const ListPolicies = () => {
               ...actionsTray.actionsTray,
               justifyContent: "flex-start",
               gap: 12,
-              "& button": { marginLeft: 0 },
+              "& button": { marginInlineStart: 0 },
             }}
           >
             <SearchBox
@@ -202,7 +202,12 @@ const ListPolicies = () => {
               id="policy-type-filter"
               label={t("Type")}
               noLabelMinWidth
-              sx={{ maxWidth: 220, flexGrow: 0, gap: 8, marginRight: "auto" }}
+              sx={{
+                maxWidth: 220,
+                flexGrow: 0,
+                gap: 8,
+                marginInlineEnd: "auto",
+              }}
               value={typeFilter}
               onChange={(value) => setTypeFilter(value as PolicyFilter)}
               options={[

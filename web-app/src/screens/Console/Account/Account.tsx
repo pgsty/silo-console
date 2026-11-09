@@ -250,13 +250,13 @@ const Account = () => {
             sx={{
               ...actionsTray.actionsTray,
               gap: 12,
-              "& button": { marginLeft: 0 },
+              "& button": { marginInlineStart: 0 },
             }}
           >
             <SearchBox
               placeholder={t("Search Access Keys")}
               onChange={setFilter}
-              sx={{ marginRight: "auto", maxWidth: 380 }}
+              sx={{ marginInlineEnd: "auto", maxWidth: 380 }}
               value={filter}
             />
             <Box

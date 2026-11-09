@@ -31,7 +31,7 @@ const NetworkPutBase = styled.div(({ theme }) => ({
     "& .unitText": {
       fontSize: "var(--fs-subtitle)",
       fontWeight: 550,
-      marginLeft: 4,
+      marginInlineStart: 4,
       color: "var(--muted-foreground)",
     },
     [`@media (max-width: ${breakPoints.sm}px)`]: {

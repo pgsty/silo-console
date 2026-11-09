@@ -71,6 +71,11 @@ export default defineConfig({
           // so lazy vendors cannot own React or create initialization cycles.
           groups: [
             {
+              name: "languages",
+              test: /\/src\/i18n\/locales\//,
+              priority: 110,
+            },
+            {
               name: "react-vendor",
               test: /\/node_modules\/(?:react|react-dom|react-router|react-router-dom|react-redux|redux|redux-thunk|@reduxjs\/toolkit|immer|reselect|scheduler|use-sync-external-store)\//,
               priority: 100,

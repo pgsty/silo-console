@@ -34,7 +34,7 @@ import { useModalPresence } from "../../global/ModalState";
 const InputBase = styled.input`
   ${fieldChrome}
   display: block;
-  padding-right: calc(var(--field-height, var(--control-height, 36px)) + 4px);
+  padding-inline-end: calc(var(--field-height, var(--control-height, 36px)) + 4px);
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
@@ -63,7 +63,7 @@ const InputContainer = styled.div<InputContainerProps>(({ sx }) => ({
   "& .overlayArrow": {
     position: "absolute",
     top: 0,
-    right: 0,
+    insetInlineEnd: 0,
     height: "var(--field-height, var(--control-height,36px))",
     width: "var(--field-height, var(--control-height,36px))",
   },

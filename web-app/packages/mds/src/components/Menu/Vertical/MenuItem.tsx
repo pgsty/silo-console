@@ -38,7 +38,7 @@ const commonStyle = (theme: any) => ({
   padding: "0 var(--control-padding, 12px)",
   borderRadius: "var(--radius-control, 8px)",
   fontWeight: "var(--fw-normal, 400)",
-  textAlign: "left" as const,
+  textAlign: "start" as const,
   color: get(theme, "menu.vertical.textColor", lightColors.menuCommonColor),
   position: "relative" as const,
   zIndex: 1,
@@ -71,7 +71,7 @@ const MenuItemContainer = styled.div(({ theme }) => ({
   "& > .subItemsBox": {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1fr)",
-    paddingLeft: 20,
+    paddingInlineStart: 20,
     width: "100%",
   },
   "& .statusArrow": {
@@ -130,7 +130,7 @@ const OptionElement = styled.span(({ theme }) => ({
       fill: get(theme, "menu.vertical.notificationColor", lightColors.mainRed),
       position: "absolute",
       top: 4,
-      right: 3,
+      insetInlineEnd: 3,
     },
   },
   "& .labelContainer": {

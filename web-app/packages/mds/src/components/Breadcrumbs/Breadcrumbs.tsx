@@ -38,7 +38,7 @@ const BoxParent = styled.div<BreadcrumbsContainerProps>(({ theme, sx }) => {
     display: "flex",
     alignItems: "center",
     backgroundColor: get(theme, "breadcrumbs.backgroundColor", "#FCFCFD"),
-    marginRight: 10,
+    marginInlineEnd: 10,
     "& a": {
       textDecoration: "none",
       color: get(theme, "breadcrumbs.linksColor", "#969FA8"),
@@ -61,11 +61,11 @@ const BoxParent = styled.div<BreadcrumbsContainerProps>(({ theme, sx }) => {
         "breadcrumbs.backButton.backgroundColor",
         "#FFF",
       ),
-      borderLeft: 0,
+      borderInlineStart: 0,
       borderRadius: 0,
       width: 38,
       height: 38,
-      marginRight: "10px",
+      marginInlineEnd: "10px",
       "& > svg": {
         fill: get(theme, "breadcrumbs.textColor", "#969FA8"),
         color: get(theme, "breadcrumbs.textColor", "#969FA8"),
@@ -77,9 +77,9 @@ const BoxParent = styled.div<BreadcrumbsContainerProps>(({ theme, sx }) => {
       whiteSpace: "nowrap" as const,
       display: "inline-block" as const,
       flexGrow: 1,
-      textAlign: "left" as const,
-      marginLeft: 15,
-      marginRight: 10,
+      textAlign: "start" as const,
+      marginInlineStart: 15,
+      marginInlineEnd: 10,
       width: 0, // WA to avoid overflow if child elements in flexbox list.**
     },
     "& .slashSpacingStyle": {

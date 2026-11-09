@@ -48,8 +48,8 @@ const messageForConsoleMsg = (log: LogMessage) => {
         display: "table",
         tableLayout: "fixed",
         width: "100%",
-        paddingLeft: 12,
-        paddingRight: 12,
+        paddingInlineStart: 12,
+        paddingInlineEnd: 12,
       }}
     >
       <div
@@ -60,7 +60,7 @@ const messageForConsoleMsg = (log: LogMessage) => {
           overflowX: "auto",
         }}
       >
-        <pre>{fullMessage}</pre>
+        <pre dir="ltr">{fullMessage}</pre>
       </div>
     </div>
   );
@@ -198,8 +198,8 @@ const LogLine = (props: { log: LogMessage }) => {
       <TableRow
         sx={{
           cursor: "pointer",
-          borderLeft: "0",
-          borderRight: "0",
+          borderInlineStart: "0",
+          borderInlineEnd: "0",
         }}
       >
         <TableCell
@@ -260,8 +260,8 @@ const LogLine = (props: { log: LogMessage }) => {
               display: "table",
               tableLayout: "fixed",
               width: "100%",
-              paddingLeft: 12,
-              paddingRight: 12,
+              paddingInlineStart: 12,
+              paddingInlineEnd: 12,
             }}
           >
             <Box
@@ -272,7 +272,7 @@ const LogLine = (props: { log: LogMessage }) => {
                 overflow: "hidden",
               }}
             >
-              {titleLogMessage}
+              <bdi dir="ltr">{titleLogMessage}</bdi>
             </Box>
           </Box>
         </TableCell>
@@ -304,7 +304,7 @@ const LogLine = (props: { log: LogMessage }) => {
               paddingTop: 0,
               width: 200,
               verticalAlign: "top",
-              textAlign: "right",
+              textAlign: "end",
               color: "var(--muted-foreground)",
               fontWeight: 550,
             }}
@@ -327,7 +327,7 @@ const LogLine = (props: { log: LogMessage }) => {
                 },
               }}
             >
-              {fullMessage}
+              <div dir="ltr">{fullMessage}</div>
             </Box>
           </TableCell>
           <TableCell sx={{ paddingBottom: 0, paddingTop: 0, width: 40 }} />

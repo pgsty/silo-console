@@ -17,24 +17,15 @@ import {
   PLACEHOLDER_PATTERN,
   translate,
   translateLegend,
+  translatePlural,
 } from "./lang";
 
-const useCatalogRevision = (): number =>
-  useSelector((state: AppState) => state.system.catalogRevision);
-
-export const useLanguage = (): Lang => {
-  useCatalogRevision();
-  return useSelector((state: AppState) => state.system.language);
-};
+export const useLanguage = (): Lang =>
+  useSelector((state: AppState) => state.system.language);
 
 export const useT = (): ((text: string) => string) => {
   const lang = useLanguage();
-  const revision = useCatalogRevision();
-  return useMemo(
-    () => (text: string) => translate(lang, text),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lang, revision],
-  );
+  return useMemo(() => (text: string) => translate(lang, text), [lang]);
 };
 
 export const useLocalizedLink = (): ((url: string) => string) => {
@@ -44,12 +35,7 @@ export const useLocalizedLink = (): ((url: string) => string) => {
 
 export const useLegendT = (): ((text: string) => string) => {
   const lang = useLanguage();
-  const revision = useCatalogRevision();
-  return useMemo(
-    () => (text: string) => translateLegend(lang, text),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lang, revision],
-  );
+  return useMemo(() => (text: string) => translateLegend(lang, text), [lang]);
 };
 
 // Renders a translated template with React nodes in {slot} positions, so
@@ -84,3 +70,18 @@ export const interpolate = (
 };
 
 export * from "./lang";
+
+export const useTN = () => {
+  const lang = useLanguage();
+  return useMemo(
+    () =>
+      (
+        count: number,
+        one: string,
+        other: string,
+        variables: Readonly<Record<string, unknown>> = {},
+      ) =>
+        translatePlural(lang, count, one, other, variables),
+    [lang],
+  );
+};

@@ -74,7 +74,7 @@ const HealthInfoResults = ({ serverHealthInfo }: IHealthInfoResults) => {
   return (
     <Box
       sx={{
-        textAlign: "left",
+        textAlign: "start",
         marginBottom: 24,
       }}
     >

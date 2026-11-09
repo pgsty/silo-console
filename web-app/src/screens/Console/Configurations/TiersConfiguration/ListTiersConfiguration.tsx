@@ -296,14 +296,17 @@ const ListTiersConfiguration = () => {
             <Grid
               item
               xs={12}
-              sx={{ ...actionsTray.actionsTray, "& button": { marginLeft: 0 } }}
+              sx={{
+                ...actionsTray.actionsTray,
+                "& button": { marginInlineStart: 0 },
+              }}
             >
               <SearchBox
                 placeholder={t("Filter")}
                 onChange={setFilter}
                 value={filter}
                 sx={{
-                  marginRight: "auto",
+                  marginInlineEnd: "auto",
                   maxWidth: mobile ? "100%" : 380,
                   width: mobile ? "100%" : undefined,
                 }}

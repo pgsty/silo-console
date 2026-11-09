@@ -19,6 +19,7 @@ import { ActionsListPanelProps, ActionsListProps } from "./ActionsList.types";
 import styled from "styled-components";
 import Tooltip from "../Tooltip/Tooltip";
 import ObjectActionButton from "./ObjectActionButton";
+import { useControlLabels } from "../../global/ControlLabels";
 import get from "lodash/get";
 
 const ActionsListPanel = styled.div<
@@ -74,11 +75,12 @@ const ActionsListPanel = styled.div<
 }));
 
 const ActionsList: FC<ActionsListProps> = ({ sx, items, title }) => {
+  const labels = useControlLabels();
   return (
     <ActionsListPanel sx={sx}>
       <div className={"titleLabel"}>{title}</div>
       <ul className={"objectActions"}>
-        <li>Actions:</li>
+        <li>{labels.actions}</li>
         {items.map((actionItem, index) => {
           return (
             <li key={`action-element-${index.toString()}`}>

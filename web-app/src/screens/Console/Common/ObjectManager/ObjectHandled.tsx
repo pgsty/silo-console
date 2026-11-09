@@ -117,7 +117,7 @@ const Card = styled.article`
     ${type("caption")}
   }
   details ul {
-    padding-left: 20px;
+    padding-inline-start: 20px;
   }
   details li {
     margin-top: 8px;

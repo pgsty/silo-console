@@ -17,8 +17,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
-import { store, syncLanguageCatalogBriefly } from "./store";
+import { store } from "./store";
 import MainRouter from "./MainRouter";
+import { setLanguage } from "./systemSlice";
 import StyleHandler from "./StyleHandler";
 import RootErrorBoundary from "./common/RootErrorBoundary";
 
@@ -39,4 +40,11 @@ const render = () =>
     </React.StrictMode>,
   );
 
-syncLanguageCatalogBriefly().then(render);
+const start = async () => {
+  if (import.meta.env.DEV) {
+    const { initializePseudoLocale } = await import("./i18n/pseudo");
+    if (await initializePseudoLocale()) store.dispatch(setLanguage("en"));
+  }
+  render();
+};
+void start();

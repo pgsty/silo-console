@@ -5,10 +5,11 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+import { localeTag } from "i18n/lang";
 import React, { ReactNode, useId } from "react";
 import { Box } from "mds";
 import styled from "styled-components";
-import { localeTag, useLanguage } from "i18n";
+import { useLanguage } from "i18n";
 import { typography } from "./typography";
 import { statCardTone } from "./statCardTone";
 
@@ -67,7 +68,7 @@ const Progress = styled.div`
   margin-top: var(--silo-space-12);
   > span {
     ${typography.caption} display: block;
-    text-align: right;
+    text-align: end;
     color: var(--silo-text-secondary);
     margin-bottom: var(--silo-space-4);
   }

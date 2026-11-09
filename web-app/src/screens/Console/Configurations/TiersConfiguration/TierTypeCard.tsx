@@ -27,7 +27,7 @@ const TierButtonBase = styled.button(({ theme }) => ({
   alignItems: "center",
   justifyContent: "start",
   marginBottom: 16,
-  marginRight: 8,
+  marginInlineEnd: 8,
   cursor: "pointer",
   overflow: "hidden",
   "&:hover": {
@@ -48,7 +48,7 @@ const TierButtonBase = styled.button(({ theme }) => ({
     color: get(theme, "buttons.callAction.enabled.background", "#07193E"),
     fontSize: 16,
     fontFamily: "var(--font-sans)",
-    paddingLeft: 18,
+    paddingInlineStart: 18,
     fontWeight: "bold",
   },
 }));

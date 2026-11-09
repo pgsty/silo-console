@@ -96,7 +96,7 @@ const DataTableWrapper = styled(Box)<DataTableWrapperProps>(
     },
     "& .overlayColumnSelection": {
       position: "absolute",
-      right: 0,
+      insetInlineEnd: 0,
       top: 0,
       "& .popoverContent": {
         maxHeight: 250,
@@ -226,25 +226,25 @@ const DataTableWrapper = styled(Box)<DataTableWrapperProps>(
       overflow: "hidden",
     },
     "& .ReactVirtualized__Table__headerColumn": {
-      marginRight: 10,
+      marginInlineEnd: 10,
       minWidth: 0,
       "&:first-of-type": {
-        marginLeft: 10,
+        marginInlineStart: 10,
       },
       "& svg": {
         width: 12,
         height: 12,
-        marginLeft: 4,
+        marginInlineStart: 4,
         flexShrink: 0,
       },
     },
     "& .ReactVirtualized__Table__rowColumn": {
-      marginRight: 10,
+      marginInlineEnd: 10,
       minWidth: 0,
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
       "&:first-of-type": {
-        marginLeft: 10,
+        marginInlineStart: 10,
       },
     },
     "& .ReactVirtualized__Table__sortableHeaderColumn": {
@@ -289,7 +289,7 @@ const DataTableWrapper = styled(Box)<DataTableWrapperProps>(
       },
     },
     "& .text-right": {
-      textAlign: "right",
+      textAlign: "end",
       "& .sortHeader": {
         justifyContent: "flex-end",
       },

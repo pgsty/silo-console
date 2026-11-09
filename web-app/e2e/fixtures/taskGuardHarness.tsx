@@ -26,8 +26,6 @@ import { useTaskSession } from "../../src/screens/Console/Common/ObjectManager/u
 import VersionsNavigator from "../../src/screens/Console/Buckets/ListBuckets/Objects/ObjectDetails/VersionsNavigator";
 import { saveSessionResponse } from "../../src/screens/Console/consoleSlice";
 import StyleHandler from "../../src/StyleHandler";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import TaskDepartureGuard from "../../src/screens/Console/Common/ObjectManager/TaskDepartureGuard";
 import {
   setNewObject,
@@ -40,7 +38,6 @@ import {
   registerTaskControl,
   resetTaskRuntime,
 } from "../../src/screens/Console/ObjectBrowser/transferManager";
-registerScreenTranslations(zhScreens);
 const params = new URLSearchParams(location.search);
 const versionFixture = params.has("versions");
 const base = params.get("base") || "/";

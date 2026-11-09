@@ -125,7 +125,7 @@ const PrometheusGuidance = ({
         sx={{
           width: "100%",
           maxWidth: 760,
-          textAlign: "left",
+          textAlign: "start",
           display: "grid",
           gap: 16,
         }}

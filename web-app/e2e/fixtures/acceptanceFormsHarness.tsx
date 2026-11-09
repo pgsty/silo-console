@@ -45,8 +45,6 @@ import {
 } from "mds";
 import { store } from "../../src/store";
 import { setDarkMode, setLanguage } from "../../src/systemSlice";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import {
   darkTokens,
   lightTokens,
@@ -78,7 +76,6 @@ import { saveSessionResponse } from "../../src/screens/Console/consoleSlice";
 import { useT } from "../../src/i18n";
 
 const query = new URLSearchParams(location.search);
-registerScreenTranslations(zhScreens);
 store.dispatch(setLanguage(query.get("lang") === "zh" ? "zh" : "en"));
 store.dispatch(setDarkMode(query.get("theme") === "dark"));
 if (["overview", "browser-controls"].includes(query.get("case") || "")) {

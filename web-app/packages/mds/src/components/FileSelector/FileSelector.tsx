@@ -45,7 +45,7 @@ const FileSelectorContainer = styled.div<FileSelectorConstructorProps>(
     },
     "& .overlayAction": {
       position: "absolute",
-      right: 5,
+      insetInlineEnd: 5,
       top: 6,
     },
     "& .valueString": {

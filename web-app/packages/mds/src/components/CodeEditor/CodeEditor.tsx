@@ -33,7 +33,7 @@ const CodeEditorBase = styled.div<CodeEditorBaseProps>(
       border: `${get(theme, "borderColor", lightColors.borderColor)} 1px solid`,
     },
     "& .tooltipContainer": {
-      marginLeft: 5,
+      marginInlineStart: 5,
       display: "flex",
       alignItems: "center",
       "& .min-icon": {
@@ -214,14 +214,14 @@ const CodeEditorBase = styled.div<CodeEditorBaseProps>(
       border: `${get(theme, "borderColor", lightColors.borderColor)} 1px solid`,
       borderTop: 0,
       padding: "2px",
-      paddingRight: "5px",
+      paddingInlineEnd: "5px",
       justifyContent: "flex-end",
       "& button": {
         height: "26px",
         width: "26px",
         padding: "2px",
         " .min-icon": {
-          marginLeft: "0",
+          marginInlineStart: "0",
         },
       },
     },
@@ -267,7 +267,7 @@ const CodeMirrorWrapper: FC<CodeEditorProps> = ({
           )}
         </InputLabel>
       )}
-      <Box className={"editorContainer"}>
+      <Box className={"editorContainer"} dir="ltr">
         <CodeEditor
           aria-label={ariaLabel || label || undefined}
           value={value}

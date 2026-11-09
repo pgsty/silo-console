@@ -141,7 +141,7 @@ const HelpMenuContainer = styled(Elevated).attrs({
 })({
   position: "absolute",
   top: "calc(100% + 8px)",
-  right: "var(--page-header-inline-padding, 12px)",
+  insetInlineEnd: "var(--page-header-inline-padding, 12px)",
   zIndex: "20",
   border: 0,
   borderRadius: "var(--radius-popover)",
@@ -169,7 +169,7 @@ const HelpMenuContainer = styled(Elevated).attrs({
     display: "flex",
     alignItems: "center",
     gap: 8,
-    marginLeft: "auto",
+    marginInlineStart: "auto",
   },
   "& .tabsPanels": {
     padding: "16px 0 0",
@@ -414,7 +414,7 @@ const HelpMenu = ({
   const helpContent = (
     <Box className={"helpContainer"}>
       {headerDocs && (
-        <div style={{ paddingLeft: 16, paddingRight: 16 }}>
+        <div style={{ paddingInlineStart: 16, paddingInlineEnd: 16 }}>
           <div>
             <Suspense fallback={helpLoading}>
               <ReactMarkdown components={{ h1: "h2" }}>
@@ -453,7 +453,7 @@ const HelpMenu = ({
       </VideoNotice>
       {headerVideo && (
         <Fragment>
-          <div style={{ paddingLeft: 16, paddingRight: 16 }}>
+          <div style={{ paddingInlineStart: 16, paddingInlineEnd: 16 }}>
             <Suspense fallback={helpLoading}>
               <ReactMarkdown components={{ h1: "h2" }}>
                 {t(headerVideo)}

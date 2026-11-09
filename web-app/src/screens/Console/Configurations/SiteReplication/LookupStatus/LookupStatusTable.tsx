@@ -28,7 +28,7 @@ const LookupTableBase = styled.div(({ theme }) => ({
     "& .feature-cell": {
       fontWeight: 600,
       fontSize: 14,
-      paddingLeft: 15,
+      paddingInlineStart: 15,
     },
     "& .status-cell": {
       textAlign: "center",

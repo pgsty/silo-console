@@ -1,9 +1,10 @@
 // Copyright (c) 2026 Urbanize
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { localeTag } from "i18n/lang";
 import React from "react";
 import styled from "styled-components";
-import { useT, formatText, localeTag, useLanguage } from "i18n";
+import { useT, formatText, useLanguage } from "i18n";
 import { typography } from "../../../../common/ui/typography";
 import { useBucketUsageView } from "./useBucketUsage";
 
@@ -78,8 +79,6 @@ export function BucketUsageStatus({ bucket }: { bucket: string }) {
 export function BucketUsageNotice() {
   const usage = useBucketUsageView();
   const t = useT();
-  // Chinese sentences end in full-width punctuation and need no extra space.
-  const gap = useLanguage() === "zh" ? "" : " ";
   if (!usage) return null;
   const rows = Object.values(usage.records);
   const pending = rows.filter(
@@ -92,41 +91,44 @@ export function BucketUsageNotice() {
     usage.coverage?.observer_alive &&
     usage.coverage.connected &&
     usage.coverage.reconciled;
+  const summary = usage.requesting
+    ? t("Requesting usage updates…")
+    : pending
+      ? formatText(
+          t(
+            "{count} usage updates queued or running. Last completed totals remain visible.",
+          ),
+          { count: pending },
+        )
+      : t("Refresh requests a new metadata scan of all listed buckets.");
+  const monitoring = usage.error
+    ? t("Usage status is unavailable. Retrying…")
+    : usage.enabled
+      ? watching
+        ? t("Automatic change monitoring is active.")
+        : t(
+            "Automatic change monitoring is recovering; totals may be out of date.",
+          )
+      : usage.enabled === false
+        ? t(
+            "Automatic updates are not configured. Refresh calculates usage while this page is open.",
+          )
+        : t("Checking automatic updates…");
+  let message = formatText(t("{summary} {monitoring}"), {
+    summary,
+    monitoring,
+  });
+  if (failed > 0)
+    message = formatText(t("{summary} {warning}"), {
+      summary: message,
+      warning: formatText(
+        t("{count} updates need attention. Use Refresh to retry."),
+        { count: failed },
+      ),
+    });
   return (
     <div role="status" aria-live="polite" style={{ marginBottom: 12 }}>
-      {usage.requesting
-        ? t("Requesting usage updates…")
-        : pending
-          ? formatText(
-              t(
-                "{count} usage updates queued or running. Last completed totals remain visible.",
-              ),
-              { count: pending },
-            )
-          : t("Refresh requests a new metadata scan of all listed buckets.")}
-      {gap}
-      {usage.error
-        ? t("Usage status is unavailable. Retrying…")
-        : usage.enabled
-          ? watching
-            ? t("Automatic change monitoring is active.")
-            : t(
-                "Automatic change monitoring is recovering; totals may be out of date.",
-              )
-          : usage.enabled === false
-            ? t(
-                "Automatic updates are not configured. Refresh calculates usage while this page is open.",
-              )
-            : t("Checking automatic updates…")}
-      {failed > 0 && (
-        <>
-          {gap}
-          {formatText(
-            t("{count} updates need attention. Use Refresh to retry."),
-            { count: failed },
-          )}
-        </>
-      )}
+      {message}
     </div>
   );
 }

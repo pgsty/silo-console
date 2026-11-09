@@ -57,10 +57,10 @@ test("initial graph follows static imports, deduplicates files and handles cycle
 });
 
 test("gzip limits are inclusive and cover lazy chunks as well as login", () => {
-  const initial = new Set(["assets/index.js", "assets/shared.js"]);
+  const initial = new Set(["assets/languages-hash.js", "assets/index.js"]);
   const chunks = [
-    { file: "assets/index.js", gzip: BUDGETS.loginInitial - 1 },
-    { file: "assets/shared.js", gzip: 1 },
+    { file: "assets/languages-hash.js", gzip: BUDGETS.languages },
+    { file: "assets/index.js", gzip: BUDGETS.loginInitial - BUDGETS.languages },
     { file: "assets/editor-lazy.js", gzip: BUDGETS.chunk },
   ];
   expect(evaluateBundle(chunks, initial).errors).toEqual([]);

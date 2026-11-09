@@ -383,6 +383,8 @@ export interface ThemeDefinitionProps {
 }
 
 export interface SelectorType {
+  lang?: string;
+  dir?: "ltr" | "rtl";
   label: string;
   value: string;
   icon?: React.ReactNode;

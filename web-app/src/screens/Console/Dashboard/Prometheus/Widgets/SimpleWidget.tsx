@@ -42,15 +42,15 @@ const SimpleWidgetMain = styled.span({
   "& .icon": {
     color: "var(--muted-foreground)",
     fill: "var(--muted-foreground)",
-    marginRight: 4,
-    marginLeft: 12,
+    marginInlineEnd: 4,
+    marginInlineStart: 12,
   },
   "& .widgetLabel": {
     fontWeight: 550,
-    marginRight: 8,
+    marginInlineEnd: 8,
   },
   "& .widgetValue": {
-    marginRight: 24,
+    marginInlineEnd: 24,
   },
 });
 

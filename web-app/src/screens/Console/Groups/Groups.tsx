@@ -201,7 +201,10 @@ const Groups = () => {
           <Grid
             item
             xs={12}
-            sx={{ ...actionsTray.actionsTray, "& button": { marginLeft: 0 } }}
+            sx={{
+              ...actionsTray.actionsTray,
+              "& button": { marginInlineStart: 0 },
+            }}
           >
             <SecureComponent
               resource={CONSOLE_UI_RESOURCE}

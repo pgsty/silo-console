@@ -56,7 +56,7 @@ interface ITagModal {
 
 const DeleteTag = styled.b(({ theme }) => ({
   color: get(theme, "signalColors.danger", "#C83B51"),
-  marginLeft: 5,
+  marginInlineStart: 5,
 }));
 
 const AddTagModal = ({

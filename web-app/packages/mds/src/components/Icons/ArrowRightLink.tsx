@@ -22,6 +22,7 @@ const ArrowRightLink = (props: SVGProps<SVGSVGElement>) => {
       xmlns="http://www.w3.org/2000/svg"
       className={`min-icon`}
       fill={"currentcolor"}
+      data-directional="true"
       {...props}
       viewBox="0 0 12.621 7.619"
     >

@@ -26,13 +26,7 @@ import {
   IAM_SCOPES,
 } from "../../../common/SecureComponent/permissions";
 import { SiloBrand } from "../../../common/SiloBrand";
-import {
-  i18nKey,
-  interpolate,
-  useLanguage,
-  useLocalizedLink,
-  useT,
-} from "i18n";
+import { i18nKey, interpolate, useLocalizedLink, useT } from "i18n";
 import {
   LEGAL_DOCUMENT_PATHS,
   REPOSITORY_URL,
@@ -67,7 +61,7 @@ const LicenseSheet = styled.section`
   }
   & a[target="_blank"]::after {
     content: "↗";
-    padding-left: 4px;
+    padding-inline-start: 4px;
     color: var(--muted-foreground);
     font-size: var(--fs-micro);
   }
@@ -150,7 +144,7 @@ const LicenseRecord = styled.dl`
   }
   & .what {
     ${type("caption")}
-    padding-left: 8px;
+    padding-inline-start: 8px;
     color: var(--muted-foreground);
   }
   & .prose {
@@ -174,7 +168,6 @@ const LicenseRecord = styled.dl`
 const License = () => {
   const localize = useLocalizedLink();
   const t = useT();
-  const language = useLanguage();
   const consoleVersion = version.startsWith("v") ? version : `v${version}`;
   const source = sourceReference();
 
@@ -260,11 +253,7 @@ const License = () => {
                 ),
                 pigsty: (
                   <a
-                    href={
-                      language === "zh"
-                        ? "https://pgsty.com/zh"
-                        : "https://pgsty.com/"
-                    }
+                    href={localize("https://pgsty.com/")}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

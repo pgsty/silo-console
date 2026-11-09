@@ -90,7 +90,7 @@ const CapacityItemMain = styled.div({
       color: "var(--muted-foreground)",
       fontWeight: 550,
       fontSize: "var(--fs-subtitle)",
-      marginLeft: 4,
+      marginInlineStart: 4,
     },
   },
   "& .ofUsed": {

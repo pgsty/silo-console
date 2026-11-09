@@ -34,7 +34,7 @@ const Container = styled.div`
   }
   th,
   td {
-    ${type("body", { compact: true })} text-align: left;
+    ${type("body", { compact: true })} text-align: start;
     padding: 8px;
     vertical-align: top;
     overflow-wrap: anywhere;

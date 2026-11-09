@@ -139,8 +139,8 @@ const Login = () => {
               justifyContent: "center",
               rowGap: 8,
               "& .separator": {
-                marginLeft: 4,
-                marginRight: 4,
+                marginInlineStart: 4,
+                marginInlineEnd: 4,
               },
             }}
           >

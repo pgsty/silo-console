@@ -32,7 +32,7 @@ const InvalidRule = ({ ruleText }: IInvalidRule) => {
           justifyContent: "flex-start",
         }}
       >
-        <Grid item xs={1} sx={{ paddingRight: 1 }}>
+        <Grid item xs={1} sx={{ paddingInlineEnd: 1 }}>
           <ConfirmDeleteIcon width={"16px"} height={"16px"} />
         </Grid>
         <Grid
@@ -42,7 +42,7 @@ const InvalidRule = ({ ruleText }: IInvalidRule) => {
             color: "var(--destructive-text)",
             display: "flex",
             justifyContent: "flex-start",
-            paddingLeft: 1,
+            paddingInlineStart: 1,
           }}
         >
           {ruleText}

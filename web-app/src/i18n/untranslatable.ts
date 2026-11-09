@@ -5,7 +5,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Exact, case-sensitive names/acronyms that retain their spelling in Chinese.
+// Exact, case-sensitive names/acronyms that retain their spelling in every UI language.
 // Do not add ordinary UI copy here to bypass a missing translation.
 export const untranslatable: readonly string[] = [
   // Product names.

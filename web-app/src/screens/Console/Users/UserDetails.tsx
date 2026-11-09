@@ -468,7 +468,7 @@ const UserDetailsContent = () => {
                   alignItems: "center",
                   gap: 8,
                   width: "auto",
-                  marginLeft: "auto",
+                  marginInlineStart: "auto",
                   justifyContent: "flex-end",
                 },
               }}

@@ -91,11 +91,11 @@ const Shell = styled.div`
     outline-offset: -2px;
   }
   .bucketNumber {
-    text-align: right;
+    text-align: end;
   }
   @media (min-width: 1200px) {
     .bucketNumber {
-      padding-right: 12px;
+      padding-inline-end: 12px;
     }
   }
   .bucketCheck {
@@ -359,7 +359,7 @@ export default function BucketsTable({
       sort: "name",
       render: ({ bucket, obOnly }) => (
         <>
-          <span className="bucketName" title={bucket.name}>
+          <span dir="ltr" className="bucketName" title={bucket.name}>
             {bucketCapabilities(bucket.name, obOnly).browse ? (
               <Link
                 to={`/browser/${encodeURIComponent(bucket.name)}`}

@@ -5,6 +5,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+import { localeTag } from "i18n/lang";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -34,7 +35,7 @@ import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import withSuspense from "../Common/Components/withSuspense";
 import { useMobile } from "common/ui/useMediaQuery";
 import { OverflowItem } from "common/ui/OverflowMenu";
-import { formatText, localeTag, useLanguage, useT } from "i18n";
+import { formatText, useLanguage, useT } from "i18n";
 import { bucketTabs } from "./bucketTabs";
 import { bucketStatistic } from "./bucketMetadata";
 
@@ -115,7 +116,7 @@ const Metadata = styled.div`
   @media (min-width: 768px) {
     > span + span::before {
       content: "·";
-      margin-right: 4px;
+      margin-inline-end: 4px;
     }
   }
 `;

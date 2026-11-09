@@ -256,7 +256,7 @@ const LDAPEntitiesQuery = () => {
                           style={{
                             width: 14,
                             height: 14,
-                            marginRight: 5,
+                            marginInlineEnd: 5,
                             color: "var(--muted-foreground)",
                           }}
                         />

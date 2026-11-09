@@ -289,6 +289,8 @@ const DropdownSelector: FC<DropdownSelectorProps> = ({
           data-fluid-key={option.value}
           tabIndex={-1}
           className={selectedOption === option.value ? "selected" : ""}
+          lang={option.lang}
+          dir={option.dir}
           label={option.label}
           onClick={() => select(index)}
         >

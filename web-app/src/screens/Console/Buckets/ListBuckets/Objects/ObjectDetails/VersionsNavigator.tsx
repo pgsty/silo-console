@@ -58,7 +58,7 @@ import { downloadObject } from "../../../../ObjectBrowser/utils";
 import { BucketObject } from "api/consoleApi";
 import { api } from "api";
 import { errorToHandler } from "api/errors";
-import { formatText, useT } from "i18n";
+import { formatText, useT, useTN } from "i18n";
 import { hasPermission } from "../../../../../../common/SecureComponent";
 import { IAM_SCOPES } from "../../../../../../common/SecureComponent/permissions";
 import { objectActionState } from "../objectActionState";
@@ -90,6 +90,7 @@ const VersionsNavigator = ({
 }: IVersionsNavigatorProps) => {
   const dispatch = useAppDispatch();
   const t = useT();
+  const tn = useTN();
 
   const searchVersions = useSelector(
     (state: AppState) => state.objectBrowser.searchVersions,
@@ -503,9 +504,9 @@ const VersionsNavigator = ({
               sx={{
                 position: "relative",
                 "& .detailsSpacer": {
-                  marginRight: 18,
+                  marginInlineEnd: 18,
                   "@media (max-width: 600px)": {
-                    marginRight: 0,
+                    marginInlineEnd: 0,
                   },
                 },
                 [`@media (max-width: ${breakPoints.md}px)`]: {
@@ -537,10 +538,10 @@ const VersionsNavigator = ({
                   <Fragment>
                     <span className={"detailsSpacer"}>
                       <strong>
-                        {formatText(
-                          versions.length === 1
-                            ? t("{count} Version")
-                            : t("{count} Versions"),
+                        {tn(
+                          versions.length,
+                          "{count} Version",
+                          "{count} Versions",
                           {
                             count: `${versions.length}${
                               moreVersionsThanLimit ? "+" : ""
@@ -567,7 +568,7 @@ const VersionsNavigator = ({
                           }}
                           icon={<RefreshIcon />}
                           variant={"regular"}
-                          style={{ marginLeft: 50 }}
+                          style={{ marginInlineStart: 50 }}
                         />
                       </TooltipWrapper>
                     )}
@@ -584,7 +585,7 @@ const VersionsNavigator = ({
                         }}
                         icon={<SelectMultipleIcon />}
                         variant={selectEnabled ? "callAction" : "regular"}
-                        style={{ marginRight: 8 }}
+                        style={{ marginInlineEnd: 8 }}
                       />
                     </TooltipWrapper>
                     {selectEnabled && (
@@ -598,7 +599,7 @@ const VersionsNavigator = ({
                           onClick={openDeleteSelectedVersions}
                           icon={<DeleteIcon />}
                           variant={"danger"}
-                          style={{ marginRight: 8 }}
+                          style={{ marginInlineEnd: 8 }}
                           disabled={deleteSelectedState.disabled}
                         />
                       </ObjectActionTooltip>
@@ -615,7 +616,7 @@ const VersionsNavigator = ({
                         }}
                         icon={<DeleteNonCurrentIcon />}
                         variant={"danger"}
-                        style={{ marginRight: 15 }}
+                        style={{ marginInlineEnd: 15 }}
                         disabled={deleteNonCurrentState.disabled}
                       />
                     </ObjectActionTooltip>

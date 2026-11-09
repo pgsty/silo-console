@@ -318,13 +318,11 @@ test("actual user and group tabs keep each section directly below the entity hea
     }
     if (scenario.name === "analysts") {
       await page.locator("#language-activator").click();
+      await page.getByRole("option", { name: "简体中文", exact: true }).click();
       await expect(page.locator("#group-status")).toHaveAccessibleName("状态");
       await expect(page.locator("#group-status")).toBeChecked();
       await page.locator("#language-activator").click();
-      await expect(page.locator("#group-status")).toHaveAccessibleName(
-        "Status",
-      );
-      await page.locator("#language-activator").click();
+      await page.getByRole("option", { name: "English", exact: true }).click();
       await open(`${scenario.path}?access=read-only`);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(
         scenario.name,
@@ -800,6 +798,7 @@ test("language changes preserve an unsaved policy override without refetching, a
   expect(initialReads).toHaveLength(3);
 
   await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "简体中文", exact: true }).click();
   await expect(editor).toHaveAccessibleName("策略原文");
   await expect(editor).toHaveValue(draft);
   await expect(editor).toHaveJSProperty("readOnly", false);
@@ -827,7 +826,8 @@ test("language changes preserve an unsaved policy override without refetching, a
         triggerReceivesPointer: hit !== null && trigger.contains(hit),
       };
     });
-  await expect(page.getByRole("tooltip")).toHaveText("Mudar para português");
+  await page.locator("#language-activator").hover();
+  await expect(page.getByRole("tooltip")).toHaveText("语言");
   await test.info().attach("language-before-error", {
     body: JSON.stringify(await tooltipGeometry(), null, 2),
     contentType: "application/json",
@@ -866,9 +866,7 @@ test("language changes preserve an unsaved policy override without refetching, a
     contentType: "application/json",
   });
   await page.locator("#language-activator").click();
-  await expect(editor).toHaveAccessibleName("Política bruta");
-  await expect(editor).toHaveValue(draft);
-  await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "English", exact: true }).click();
   await expect(editor).toHaveAccessibleName("Raw Policy");
   await expect(editor).toHaveValue(draft);
   await expect(editor).toHaveJSProperty("readOnly", false);

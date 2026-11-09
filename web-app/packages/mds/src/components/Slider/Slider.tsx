@@ -93,7 +93,7 @@ const SliderContainer = styled.div<SliderContainerProps>(
       minWidth: 160,
     },
     "& .tooltipContainer": {
-      marginLeft: 5,
+      marginInlineStart: 5,
       display: "flex",
       alignItems: "center",
       "& .min-icon": {

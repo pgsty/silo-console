@@ -57,13 +57,13 @@ const ReadBoxBase = styled.div<ReadBoxBaseProps>(({ sx }) => ({
     },
   },
   "& .includesActionButton": {
-    paddingRight: 45,
+    paddingInlineEnd: 45,
     position: "relative" as const,
   },
   "& .overlayShareOption": {
     position: "absolute" as const,
     width: 45,
-    right: 0,
+    insetInlineEnd: 0,
     top: "50%",
     transform: "translate(0, -50%)",
   },
@@ -100,7 +100,7 @@ const ReadBox: FC<ReadBoxProps> = ({
           actionButton ? "includesActionButton" : ""
         }`}
       >
-        <Box className={multiLine ? "innerContentMultiline" : "innerContent"}>
+        <Box dir="auto" className={multiLine ? "innerContentMultiline" : "innerContent"}>
           {children}
         </Box>
         {actionButton && (

@@ -295,7 +295,7 @@ const LogsSearchMain = () => {
               >
                 <Box
                   sx={{
-                    marginLeft: 15,
+                    marginInlineStart: 15,
                     marginBottom: 15,
                     fontSize: 12,
                     color: "var(--muted-foreground)",

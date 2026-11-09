@@ -24,7 +24,7 @@ const FieldHelp = ({ text }: { text: string }) => (
     data-field-help="true"
     size="small"
     label={text}
-    sx={{ marginLeft: 4, flexShrink: 0, "&& svg": { width: 13, height: 13 } }}
+    sx={{ marginInlineStart: 4, flexShrink: 0, "&& svg": { width: 13, height: 13 } }}
   >
     <HelpIcon />
   </IconButton>

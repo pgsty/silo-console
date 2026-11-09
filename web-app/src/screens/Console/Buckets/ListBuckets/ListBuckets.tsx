@@ -52,7 +52,7 @@ import { useRecentBuckets } from "../../../../navigation/RecentBucketsProvider";
 import PageHeaderWrapper from "../../Common/PageHeaderWrapper/PageHeaderWrapper";
 import withSuspense from "../../Common/Components/withSuspense";
 import SearchBox from "../../Common/SearchBox";
-import { formatText, useT } from "i18n";
+import { formatText, useT, useTN } from "i18n";
 import BucketListItem from "./BucketListItem";
 import { BucketUsageProvider, useBucketUsage } from "./useBucketUsage";
 import { BucketUsageNotice } from "./BucketUsageStatus";
@@ -93,7 +93,7 @@ const Toolbar = styled.div`
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 8px;
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   .bucketView {
     display: flex;
@@ -116,10 +116,10 @@ const Toolbar = styled.div`
       gap: 8px;
     }
     .bucketView {
-      margin-right: auto;
+      margin-inline-end: auto;
     }
     .bucketActions > #create-bucket {
-      margin-left: auto;
+      margin-inline-start: auto;
     }
   }
 `;
@@ -150,6 +150,7 @@ const ListBuckets = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const t = useT();
+  const tn = useTN();
   const mobile = useMobile();
   const session = useAppSelector(selSession);
   const obOnly = !!session.features?.includes("object-browser-only");
@@ -471,15 +472,10 @@ const ListBuckets = () => {
         <BucketUsageNotice />
         {selected.length > 0 && (
           <Selection role="status">
-            {formatText(
-              t(
-                selected.length === 1
-                  ? "1 bucket selected"
-                  : "{count} buckets selected",
-              ),
-              {
-                count: selected.length,
-              },
+            {tn(
+              selected.length,
+              "{count} bucket selected",
+              "{count} buckets selected",
             )}
           </Selection>
         )}

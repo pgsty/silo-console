@@ -143,8 +143,8 @@ const DaysSelector = ({
     },
     "& input": {
       textAlign: "center" as const,
-      paddingRight: 10,
-      paddingLeft: 10,
+      paddingInlineEnd: 10,
+      paddingInlineStart: 10,
       width: 40,
     },
   };
@@ -170,8 +170,8 @@ const DaysSelector = ({
             flexFlow: "row-reverse",
             "& > label": {
               fontWeight: 400,
-              marginLeft: 15,
-              marginRight: 25,
+              marginInlineStart: 15,
+              marginInlineEnd: 25,
             },
           },
         }}
@@ -234,7 +234,7 @@ const DaysSelector = ({
           alignItems: "center",
           justifyContent: "flex-start",
           marginTop: 25,
-          marginLeft: 10,
+          marginInlineStart: 10,
           marginBottom: 15,
           "& .validityText": {
             fontSize: 14,
@@ -249,12 +249,12 @@ const DaysSelector = ({
               color: "var(--muted-foreground)",
               width: 15,
               height: 15,
-              marginRight: 10,
+              marginInlineEnd: 10,
             },
           },
           "& .validTill": {
             fontWeight: "bold",
-            marginLeft: 15,
+            marginInlineStart: 15,
           },
           "& .invalidDurationText": {
             marginTop: 15,

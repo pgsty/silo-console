@@ -230,16 +230,13 @@ test("owned custom policy shows exact deletion impact, Cancel focus and a langua
       reads++;
   });
   await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "简体中文", exact: true }).click();
   await expect(editor).toHaveValue(content);
   await expect(page.locator("#language-activator")).toHaveAccessibleName(
-    "Mudar para português",
+    "语言",
   );
   await page.locator("#language-activator").click();
-  await expect(editor).toHaveValue(content);
-  await expect(page.locator("#language-activator")).toHaveAccessibleName(
-    "Switch to English",
-  );
-  await page.locator("#language-activator").click();
+  await page.getByRole("option", { name: "English", exact: true }).click();
   await expect(editor).toHaveValue(content);
   expect(reads).toBe(0);
 });

@@ -129,11 +129,11 @@ select {
 #root .helpbox-container .leftItems .min-icon {
   width: 16px;
   height: 16px;
-  margin-right: 12px;
+  margin-inline-end: 12px;
   flex-shrink: 0;
 }
 #root .helpbox-container .helpText {
-  padding-left: 28px;
+  padding-inline-start: 28px;
   margin-top: 8px;
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -187,23 +187,13 @@ input.removeArrows[type="number"],
 
 /* CJK typography: the wide uppercase tracking used on login chrome scatters
    Chinese glyphs. Scoped by the <html lang> that StyleHandler keeps in sync. */
-html[lang="zh-CN"] #root .eyebrow,
-html[lang="zh-CN"] #root .consoleTag,
-html[lang="zh-CN"] #root .footer a {
+html:is(:lang(zh), :lang(ja)) #root .eyebrow,
+html:is(:lang(zh), :lang(ja)) #root .consoleTag,
+html:is(:lang(zh), :lang(ja)) #root .footer a {
   letter-spacing: 0.08em;
 }
-html[lang="zh-CN"] #root .consoleTag {
-  padding-left: 0.08em;
-}
-
-/* MDS ActionsList still exposes its heading only as a vendor string. */
-html[lang="zh-CN"] #root ul.objectActions > li:first-of-type {
-  font-size: 0;
-}
-html[lang="zh-CN"] #root ul.objectActions > li:first-of-type::after {
-  content: "可用操作：";
-  font-size: 14px;
-  font-weight: bold;
+html:is(:lang(zh), :lang(ja)) #root .consoleTag {
+  padding-inline-start: 0.08em;
 }
 
 .recovery-page {
@@ -243,4 +233,32 @@ html[lang="zh-CN"] #root ul.objectActions > li:first-of-type::after {
   [data-silo-motion] {
     animation: silo-reduced-fade var(--dur-fast) ease-out !important;
   }
+}
+
+/* UI direction follows the chosen locale. Protocol text stays readable in LTR. */
+:lang(ar) {
+  letter-spacing: normal;
+}
+html:lang(de) :is(button, label, h1, h2, h3) {
+  hyphens: auto;
+}
+:where(pre, code, kbd, [data-silo-raw], .silo-ltr) {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
+}
+:where(
+  input[type="url"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"]
+) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+:root[dir="rtl"] [data-directional="true"] {
+  transform: scaleX(-1);
+}
+.recharts-wrapper {
+  direction: ltr;
 }

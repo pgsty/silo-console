@@ -11,7 +11,7 @@
 // Tools, and shared components. Generated from per-area translation passes,
 // then reconciled for glossary consistency; keep keys byte-identical to code.
 
-export const zhScreens: Record<string, string> = {
+const zhScreens: Record<string, string> = {
   "Users inherit policies from their groups. Access is denied unless explicitly granted.":
     "用户继承所属组的策略；未被明确授予的访问默认被拒绝。",
   "Policies define allowed actions and resources for users and groups.":
@@ -133,7 +133,7 @@ export const zhScreens: Record<string, string> = {
   "Bucket view": "存储桶视图",
   Cards: "卡片",
   "{count} buckets selected": "已选择 {count} 个存储桶",
-  "1 bucket selected": "已选择 1 个存储桶",
+  "{count} bucket selected": "已选择 {count} 个存储桶",
   "No buckets match “{q}”": "没有匹配“{q}”的存储桶",
   "Clear filter": "清除筛选",
   "Built-in · Modified": "内置 · 已修改",
@@ -451,7 +451,6 @@ export const zhScreens: Record<string, string> = {
   "AccessKey is required": "访问密钥 ID 不能为空",
   "Account Key": "账户密钥",
   "Account Name": "账户名称",
-  "Actions:": "操作：",
   Active: "活跃",
   "Active for": "有效期",
   'AD/LDAP server address e.g. "myldapserver.com:636"':
@@ -2084,3 +2083,5 @@ export const zhScreens: Record<string, string> = {
   "delete Tiers": "删除分层",
   "manage Access Keys": "管理访问密钥",
 };
+
+export default zhScreens;

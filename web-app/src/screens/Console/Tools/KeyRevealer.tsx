@@ -50,7 +50,7 @@ const KeyRevealer = ({ value }: { value: string }) => {
       <Button
         id={"show-hide-key"}
         style={{
-          marginLeft: "10px",
+          marginInlineStart: "10px",
         }}
         variant="callAction"
         onClick={() => setShown(!shown)}

@@ -59,13 +59,13 @@ const ServerStatItemMain = styled.div(({ theme }) => ({
         alignItems: "center",
         justifyContent: "center",
         flexFlow: "column",
-        marginLeft: 4,
+        marginInlineStart: 4,
         maxWidth: "40px",
         "&:first-of-type(svg)": {
           fill: "var(--muted-foreground)",
         },
         "& .stat-indicator": {
-          marginRight: "0px",
+          marginInlineEnd: "0px",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
@@ -100,7 +100,7 @@ const ServerInfoItemMain = styled.div(({ theme }) => ({
   flexFlow: "column",
   flex: 1,
   "& .server-state": {
-    marginLeft: "8px",
+    marginInlineStart: "8px",
     "& .min-icon": {
       height: "14px",
       width: "14px",
@@ -180,7 +180,7 @@ const ServerInfoItem = ({ server }: ICardProps) => {
           gap: 16,
           justifyContent: "space-between",
           width: "100%",
-          paddingLeft: 16,
+          paddingInlineStart: 16,
           flexFlow: "row",
           [`@media (max-width: ${breakPoints.md}px)`]: {
             flexFlow: "column",
@@ -250,7 +250,7 @@ const ServerInfoItem = ({ server }: ICardProps) => {
 
                 "& .label": {
                   fontWeight: 550,
-                  marginRight: 4,
+                  marginInlineEnd: 4,
                 },
               }}
             >

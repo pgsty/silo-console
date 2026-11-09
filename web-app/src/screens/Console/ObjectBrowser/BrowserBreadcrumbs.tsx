@@ -58,21 +58,21 @@ const BreadcrumbsMain = styled.div((): CSSObject => ({
   rowGap: 15,
   "& .breadcrumbs-bar": {
     minWidth: 0,
-    marginRight: 0,
+    marginInlineEnd: 0,
     width: "auto",
     flex: "0 1 auto",
     [`@media (max-width: ${breakPoints.lg}px)`]: { flex: "1 1 240px" },
   },
   "& .additionalOptions": {
     flex: "1 0 auto",
-    paddingRight: "10px",
+    paddingInlineEnd: "10px",
     display: "flex",
     alignItems: "center",
     [`@media (max-width: ${breakPoints.lg}px)`]: {
       order: 1,
       flexBasis: "100%",
       marginBottom: 5,
-      paddingRight: 0,
+      paddingInlineEnd: 0,
       justifyContent: "flex-start",
       "& > div": {
         fontSize: 12,
@@ -82,7 +82,7 @@ const BreadcrumbsMain = styled.div((): CSSObject => ({
       },
     },
   },
-  "& .create-path-action": { marginLeft: 8 },
+  "& .create-path-action": { marginInlineStart: 8 },
   "& .slashSpacingStyle": {
     margin: "0 5px",
   },
@@ -278,7 +278,7 @@ const BrowserBreadcrumbs = ({
             dispatch(setVersionsModeEnabled({ status: false, objectName: "" }));
           }}
         >
-          {bucketName}
+          <bdi dir="ltr">{bucketName}</bdi>
         </Link>
       )}
     </Fragment>,
@@ -371,7 +371,7 @@ const BrowserBreadcrumbs = ({
               width: 40,
               height: 40,
               flexShrink: 0,
-              marginRight: 4,
+              marginInlineEnd: 4,
             },
           }}
           goBackFunction={goBackFunction}

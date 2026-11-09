@@ -20,7 +20,7 @@ import styled from "styled-components";
 import { api } from "api";
 import { ServerProperties } from "api/consoleApi";
 import { SiloBrand } from "../../../../common/SiloBrand";
-import { formatText, useT } from "i18n";
+import { formatText, useT, useTN } from "i18n";
 
 interface ITestWrapper {
   title: any;
@@ -35,6 +35,7 @@ const ReportTitle = styled.h2`
 
 const TestWrapper = ({ title, children }: ITestWrapper) => {
   const t = useT();
+  const tn = useTN();
   const [version, setVersion] = useState<string>("N/A");
   const [totalNodes, setTotalNodes] = useState<number>(0);
   const [totalDrives, setTotalDrives] = useState<number>(0);
@@ -104,15 +105,9 @@ const TestWrapper = ({ title, children }: ITestWrapper) => {
             >
               <DrivesIcon />
               <span>
-                {formatText(
-                  totalNodes === 1 ? t("{count} node") : t("{count} nodes"),
-                  { count: totalNodes },
-                )}
+                {tn(totalNodes, "{count} node", "{count} nodes")}
                 {" · "}
-                {formatText(
-                  totalDrives === 1 ? t("{count} drive") : t("{count} drives"),
-                  { count: totalDrives },
-                )}
+                {tn(totalDrives, "{count} drive", "{count} drives")}
               </span>
             </Box>
             <Box

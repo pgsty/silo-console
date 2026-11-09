@@ -240,7 +240,7 @@ const Trace = () => {
                 gap: "8px 16px",
                 minWidth: 0,
                 "& .inputItem": { margin: 0 },
-                "& label": { marginRight: 0 },
+                "& label": { marginInlineEnd: 0 },
               }}
             >
               <Checkbox
@@ -449,19 +449,31 @@ const Trace = () => {
                   elementKey: "ptime",
                   renderFunction: (time: Date) => {
                     const formatted = timeFromDate(new Date(time));
-                    return mobile ? formatted.slice(0, 8) : formatted;
+                    return (
+                      <bdi dir="ltr">
+                        {mobile ? formatted.slice(0, 8) : formatted}
+                      </bdi>
+                    );
                   },
                   width: mobile ? 76 : 104,
                   priority: "high",
                 },
-                { label: t("Name"), elementKey: "api", priority: "high" },
+                {
+                  label: t("Name"),
+                  elementKey: "api",
+                  priority: "high",
+                  renderFunction: (name: string) => <bdi dir="ltr">{name}</bdi>,
+                },
                 {
                   label: t("Status"),
                   elementKey: "statusCode",
-                  renderFunction: (event: TraceMessage) =>
-                    mobile
-                      ? event.statusCode
-                      : `${event.statusCode} ${event.statusMsg}`,
+                  renderFunction: (event: TraceMessage) => (
+                    <bdi dir="ltr">
+                      {mobile
+                        ? event.statusCode
+                        : `${event.statusCode} ${event.statusMsg}`}
+                    </bdi>
+                  ),
                   renderFullObject: true,
                   width: mobile ? 64 : 112,
                   priority: "high",
@@ -469,8 +481,9 @@ const Trace = () => {
                 {
                   label: t("Location"),
                   elementKey: "host",
-                  renderFunction: (event: TraceMessage) =>
-                    `${event.host} ${event.client}`,
+                  renderFunction: (event: TraceMessage) => (
+                    <bdi dir="ltr">{`${event.host} ${event.client}`}</bdi>
+                  ),
                   renderFullObject: true,
                   priority: "low",
                 },

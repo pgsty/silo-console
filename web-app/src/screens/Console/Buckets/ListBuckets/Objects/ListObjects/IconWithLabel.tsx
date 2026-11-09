@@ -34,7 +34,7 @@ const IconWithLabel = ({ icon, strings }: IIconWithLabel) => {
         "& .min-icon": {
           width: 16,
           height: 16,
-          marginRight: 4,
+          marginInlineEnd: 4,
           minWidth: 16,
           minHeight: 16,
         },
@@ -46,7 +46,7 @@ const IconWithLabel = ({ icon, strings }: IIconWithLabel) => {
       }}
     >
       {icon}
-      <span className={"fileNameText"}>
+      <span dir="ltr" className={"fileNameText"}>
         {replaceUnicodeChar(strings[strings.length - 1])}
       </span>
     </Box>

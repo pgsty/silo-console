@@ -159,7 +159,7 @@ const AddPolicyScreen = () => {
                     }
                   />
                 </Grid>
-                <Grid item xs={12} sx={{ textAlign: "right" }}>
+                <Grid item xs={12} sx={{ textAlign: "end" }}>
                   <Box
                     sx={{
                       display: "flex",

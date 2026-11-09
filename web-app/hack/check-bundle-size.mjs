@@ -12,10 +12,14 @@ import { fileURLToPath } from "node:url";
 import { gunzipSync, gzipSync } from "fflate";
 
 // Decimal KB, using the same gzip settings as gzip-embed.mjs.
-// T04: 246.65 KB initial JS + 5%, rounded up to the next KB. The 200 KB
-// design target needs a separate locale/store loading change: all Chinese
-// dictionaries and the shared Redux/API/Luxon graph still load at login.
-export const BUDGETS = { loginInitial: 259_000, chunk: 350_000 };
+// Ten UI languages are bundled statically. This explicitly trades ~0.55 MB
+// of compressed catalogs for synchronous, offline language switching. Keep
+// non-language application/vendor chunks under the existing per-chunk budget.
+export const BUDGETS = {
+  loginInitial: 850_000,
+  chunk: 350_000,
+  languages: 630_000,
+};
 
 /** @param {Record<string, {file: string, imports?: string[], isEntry?: boolean}>} manifest */
 export function initialFiles(manifest) {
@@ -65,7 +69,8 @@ async function asset(path) {
 export async function readBundle(buildDirectory) {
   // optimize-embed.sh compresses the manifest too, then deletes its source.
   const { raw } = await asset(join(buildDirectory, ".vite/manifest.json"));
-  const initial = initialFiles(JSON.parse(raw.toString("utf8")));
+  const manifest = JSON.parse(raw.toString("utf8"));
+  const initial = initialFiles(manifest);
   const names = new Set(
     (await readdir(join(buildDirectory, "assets")))
       .filter((name) => /\.js(?:\.gz)?$/.test(name))
@@ -104,8 +109,11 @@ export function evaluateBundle(chunks, initial, budgets = BUDGETS) {
     errors.push(`Login initial JS: ${total} bytes > ${budgets.loginInitial}`);
   }
   for (const { file, gzip } of chunks) {
-    if (gzip > budgets.chunk) {
-      errors.push(`${file}: ${gzip} bytes > ${budgets.chunk}`);
+    const limit = /^languages[-~]/.test(basename(file))
+      ? (budgets.languages ?? budgets.chunk)
+      : budgets.chunk;
+    if (gzip > limit) {
+      errors.push(`${file}: ${gzip} bytes > ${limit}`);
     }
   }
   return { total, errors };
@@ -126,7 +134,9 @@ async function main() {
   console.log(
     `Login initial JS: ${(total / 1000).toFixed(2)} / ${BUDGETS.loginInitial / 1000} KB gzip`,
   );
-  console.log(`Single chunk budget: ${BUDGETS.chunk / 1000} KB gzip`);
+  console.log(
+    `Application/vendor chunk budget: ${BUDGETS.chunk / 1000} KB gzip; languages: ${BUDGETS.languages / 1000} KB gzip`,
+  );
   if (errors.length) {
     for (const error of errors) console.error(error);
     process.exitCode = 1;

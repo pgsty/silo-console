@@ -580,7 +580,7 @@ const AddReplicationSites = () => {
                     overflowWrap: "anywhere",
                     "& ul": {
                       margin: "8px 0 0",
-                      paddingLeft: 24,
+                      paddingInlineStart: 24,
                       listStyle: "disc",
                     },
                     "& ul ul": {

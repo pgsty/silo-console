@@ -13,7 +13,7 @@ const stackedField: CSSObject = {
   gap: 8,
   "& > .inputLabel": {
     minHeight: "auto",
-    marginRight: 0,
+    marginInlineEnd: 0,
     marginBottom: 0,
     alignSelf: "stretch",
   },

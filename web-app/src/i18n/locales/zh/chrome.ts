@@ -9,7 +9,11 @@
 // strings — including any meaningful whitespace; never trim keys here.
 // Untranslated strings simply fall back to English at runtime.
 
-export const zh: Record<string, string> = {
+const zh: Record<string, string> = {
+  "{summary} {monitoring}": "{summary}{monitoring}",
+  "{summary} {warning}": "{summary}{warning}",
+  Language: "语言",
+  "Actions:": "可用操作：",
   "Retained: {size}": "保留：{size}",
   "Not scanned": "尚未扫描",
   "Update queued": "更新已排队",
@@ -376,3 +380,5 @@ export const zh: Record<string, string> = {
   Progress: "进度",
   Remove: "移除",
 };
+
+export default zh;

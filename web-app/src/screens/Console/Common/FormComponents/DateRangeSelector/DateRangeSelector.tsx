@@ -67,15 +67,15 @@ const DateRangeSelector = ({
         "& .MuiInputBase-adornedEnd.filter-date-date-time-input": {
           width: "100%",
           border: "1px solid var(--border)",
-          paddingLeft: "8px",
-          paddingRight: "8px",
+          paddingInlineStart: "8px",
+          paddingInlineEnd: "8px",
           borderRadius: "var(--radius-control, 4px)",
         },
 
         "& .MuiInputAdornment-root button": {
           height: "20px",
           width: "20px",
-          marginRight: "5px",
+          marginInlineEnd: "5px",
         },
         "& .filter-date-input-wrapper": {
           height: "30px",
@@ -111,7 +111,7 @@ const DateRangeSelector = ({
         }}
       >
         <Box
-          sx={{ fontSize: "14px", fontWeight: 500, marginRight: "5px" }}
+          sx={{ fontSize: "14px", fontWeight: 500, marginInlineEnd: "5px" }}
           className={"muted"}
         >
           {t(label)}
@@ -124,8 +124,8 @@ const DateRangeSelector = ({
             alignItems: "center",
             gridTemplateColumns: "1fr 1fr",
             gap: "8px",
-            paddingLeft: "8px",
-            paddingRight: "8px",
+            paddingInlineStart: "8px",
+            paddingInlineEnd: "8px",
             [`@media (max-width: ${breakPoints.md}px)`]: {
               height: "auto",
               gridTemplateColumns: "1fr",

@@ -40,7 +40,9 @@
     "playwright": "VITE_COVERAGE=true vite",
     "find-deadcode": "knip",
     "format": "prettier . --write --log-level warn",
-    "check:bundle": "node hack/check-bundle-size.mjs"
+    "check:bundle": "node hack/check-bundle-size.mjs",
+    "i18n:report": "node hack/i18n-report.mjs",
+    "i18n:rename": "node hack/i18n-rename.mjs"
   },
   "eslintConfig": {
     "extends": "react-app",

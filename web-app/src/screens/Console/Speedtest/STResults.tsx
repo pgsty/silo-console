@@ -39,7 +39,7 @@ import { SiloBrand } from "../../../common/SiloBrand";
 
 const STResultsContainer = styled.div(({ theme }) => ({
   "& .actionButtons": {
-    textAlign: "right",
+    textAlign: "end",
   },
   "& .descriptorLabel": {
     fontWeight: "bold",
@@ -73,7 +73,7 @@ const STResultsContainer = styled.div(({ theme }) => ({
     width: "100%",
     marginTop: 15,
     "& thead > tr > th": {
-      textAlign: "left",
+      textAlign: "start",
       padding: 15,
       fontSize: 14,
       fontWeight: "bold",
@@ -89,10 +89,10 @@ const STResultsContainer = styled.div(({ theme }) => ({
         padding: 15,
         fontSize: 14,
         "&:first-of-type": {
-          borderLeft: `${get(theme, "borderColor", "#E2E2E2")} 1px solid`,
+          borderInlineStart: `${get(theme, "borderColor", "#E2E2E2")} 1px solid`,
         },
         "&:last-of-type": {
-          borderRight: `${get(theme, "borderColor", "#E2E2E2")} 1px solid`,
+          borderInlineEnd: `${get(theme, "borderColor", "#E2E2E2")} 1px solid`,
         },
       },
     },
@@ -132,7 +132,7 @@ const STResultsContainer = styled.div(({ theme }) => ({
   },
   "& .versionIcon": {
     display: "inline-flex",
-    marginRight: 20,
+    marginInlineEnd: 20,
   },
   "& .editorContainer": {
     maxHeight: "none",

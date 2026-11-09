@@ -151,7 +151,7 @@ const CreatePathModal = ({
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 fontSize: 14,
-                textAlign: "left",
+                textAlign: "start",
               }}
               dir={"rtl"}
             >

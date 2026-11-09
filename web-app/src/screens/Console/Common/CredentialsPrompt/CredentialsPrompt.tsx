@@ -39,7 +39,7 @@ const WarningBlock = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   "& svg ": {
-    marginRight: ".3rem",
+    marginInlineEnd: ".3rem",
     height: 16,
     width: 16,
   },

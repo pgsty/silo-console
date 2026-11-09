@@ -22,7 +22,12 @@ import {
 } from "../../packages/mds/src/global/utils";
 
 import get from "lodash/get.js";
-import { i18nKey, getStoredLanguage, translate } from "../i18n/lang";
+import {
+  i18nKey,
+  getStoredLanguage,
+  translate,
+  translatePlural,
+} from "../i18n/lang";
 
 export const units = [
   "B",
@@ -176,16 +181,15 @@ export const niceDays = (secondsValue: string, timeVariant: string = "s") => {
   return niceDaysInt(seconds, timeVariant);
 };
 
-// Joins a count with its unit word. The caller decides singular vs plural so the
-// English output keeps the exact wording each branch had before; other languages
-// take whichever form the dictionary carries.
+// Locale plural rules own unit inflection, including Russian and Arabic.
+// Retain the old boolean parameter until callers are migrated.
 const countWithUnit = (
   value: number,
-  plural: boolean,
+  _plural: boolean,
   singular: string,
   pluralForm: string,
 ) =>
-  `${value} ${translate(getStoredLanguage(), plural ? pluralForm : singular)}`;
+  `${value} ${translatePlural(getStoredLanguage(), value, singular, pluralForm)}`;
 
 // niceDaysInt returns the string in the max unit found e.g. 92400 seconds -> 1 day
 export const niceDaysInt = (seconds: number, timeVariant: string = "s") => {

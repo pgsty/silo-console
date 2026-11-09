@@ -24,9 +24,7 @@ import ObjectManagerButton from "../ObjectManager/ObjectManagerButton";
 import DarkModeActivator, {
   useThemeAction,
 } from "../DarkModeActivator/DarkModeActivator";
-import LanguageActivator, {
-  useLanguageAction,
-} from "../LanguageActivator/LanguageActivator";
+import LanguageActivator from "../LanguageActivator/LanguageActivator";
 import HeaderIconButton from "./HeaderIconButton";
 import { useResponsiveMenu } from "../../Menu/ResponsiveMenu";
 import HelpMenu from "../../HelpMenu";
@@ -75,7 +73,6 @@ const PageHeaderWrapper = ({
   const t = useT();
   const mobile = useMobile();
   const menu = useResponsiveMenu();
-  const language = useLanguageAction();
   const theme = useThemeAction();
   const actionButton = (action: HeaderAction, primary = false) =>
     action.iconOnly ? (
@@ -135,6 +132,7 @@ const PageHeaderWrapper = ({
           {!mobile && secondaryActions.map((action) => actionButton(action))}
           {primaryAction && actionButton(primaryAction, true)}
           <GlobalTools>
+            <LanguageActivator />
             {toggleHelp && (
               <HeaderIconButton
                 ref={helpRef}
@@ -148,7 +146,6 @@ const PageHeaderWrapper = ({
             )}
             {!mobile && (
               <>
-                <LanguageActivator />
                 <DarkModeActivator />
               </>
             )}
@@ -159,7 +156,6 @@ const PageHeaderWrapper = ({
                 items={[
                   ...secondaryActions,
                   { label: t("Keyboard shortcuts"), onClick: openShortcutHelp },
-                  language,
                   theme,
                 ]}
               />

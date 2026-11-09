@@ -63,7 +63,7 @@ const FileVersionStyled = styled.div(({ theme }) => {
       width: "2px",
       height: "calc(100% + 2px)",
       backgroundColor: get(theme, "borderColor", "#F8F8F8"),
-      left: "24px",
+      insetInlineStart: "24px",
     },
     "& .mainFileVersionItem": {
       borderBottom: `${get(theme, "borderColor", "#F8F8F8")} 1px solid`,
@@ -93,13 +93,13 @@ const FileVersionStyled = styled.div(({ theme }) => {
         height: 18,
         minWidth: 18,
         minHeight: 18,
-        marginRight: 10,
+        marginInlineEnd: 10,
       },
     },
     "& .buttonContainer": {
-      textAlign: "right",
+      textAlign: "end",
       "& button": {
-        marginLeft: "1.5rem",
+        marginInlineStart: "1.5rem",
       },
     },
     "& .versionID": {
@@ -111,14 +111,14 @@ const FileVersionStyled = styled.div(({ theme }) => {
       overflow: "hidden",
     },
     "& .versionData": {
-      marginRight: "10px",
+      marginInlineEnd: "10px",
       fontSize: 12,
       color: "var(--muted-foreground)",
     },
     "@media (max-width: 600px)": {
       "& .buttonContainer": {
         "& button": {
-          marginLeft: "5px",
+          marginInlineStart: "5px",
         },
       },
     },

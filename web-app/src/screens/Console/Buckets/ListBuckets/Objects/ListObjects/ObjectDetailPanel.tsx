@@ -79,7 +79,7 @@ import SetLegalHoldModal from "../ObjectDetails/SetLegalHoldModal";
 import TagsModal from "../ObjectDetails/TagsModal";
 import InspectObject from "./InspectObject";
 import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
-import { formatText, useT } from "i18n";
+import { formatText, useT, useTN } from "i18n";
 import {
   canDisplayObjectVersions,
   exactObjectVersions,
@@ -123,6 +123,7 @@ const ObjectDetailPanel = ({
 }: IObjectDetailPanelProps) => {
   const dispatch = useAppDispatch();
   const t = useT();
+  const tn = useTN();
 
   const distributedSetup = useSelector(selDistSet);
   const versionsMode = useSelector(
@@ -785,7 +786,7 @@ const ObjectDetailPanel = ({
               textOverflow: "ellipsis",
               overflow: "hidden",
               alignItems: "center",
-              marginLeft: 8,
+              marginInlineStart: 8,
             },
             "& .capitalizeFirst": {
               textTransform: "capitalize",
@@ -803,7 +804,9 @@ const ObjectDetailPanel = ({
             title={
               <div className={"ObjectDetailsTitle"}>
                 {displayFileIconName(objectName || "", true)}
-                <span className={"objectNameContainer"}>{objectName}</span>
+                <span className={"objectNameContainer"}>
+                  <bdi dir="ltr">{objectName}</bdi>
+                </span>
               </div>
             }
             items={multiActionButtons}
@@ -841,7 +844,9 @@ const ObjectDetailPanel = ({
           <Box className={"detailContainer"}>
             <strong>{t("Name:")}</strong>
             <br />
-            <div style={{ overflowWrap: "break-word" }}>{objectName}</div>
+            <div style={{ overflowWrap: "break-word" }}>
+              <bdi dir="ltr">{objectName}</bdi>
+            </div>
           </Box>
           {explicitVersion && (
             <Box className={"detailContainer"}>
@@ -859,10 +864,10 @@ const ObjectDetailPanel = ({
             <Box className={"detailContainer"}>
               <strong>{t("Versions:")}</strong>
               <br />
-              {formatText(
-                versions.length === 1
-                  ? t("{count} version, {size}")
-                  : t("{count} versions, {size}"),
+              {tn(
+                versions.length,
+                "{count} version, {size}",
+                "{count} versions, {size}",
                 {
                   count: `${versions.length}${
                     moreVersionsThanLimit ? "+" : ""

@@ -17,8 +17,7 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 
-import { loadLanguage } from "./i18n/lang";
-import systemReducer, { languageCatalogLoaded } from "./systemSlice";
+import systemReducer from "./systemSlice";
 import loginReducer from "./screens/LoginPage/loginSlice";
 import traceReducer from "./screens/Console/Trace/traceSlice";
 import logReducer from "./screens/Console/Logs/logsSlice";
@@ -59,35 +58,6 @@ export const store = configureStore({
       taskMiddleware,
       objectBrowserWSMiddleware(objectsWS),
     ),
-});
-
-const LANGUAGE_WAIT_MS = 1500;
-
-const syncLanguageCatalog = () =>
-  loadLanguage(store.getState().system.language).then(
-    (changed) => {
-      if (changed) {
-        store.dispatch(languageCatalogLoaded());
-      }
-    },
-    () => undefined,
-  );
-
-// First paint waits briefly to avoid an English flash, but a stalled download
-// must not hold back login or the Console: the late catalogue re-renders them.
-export const syncLanguageCatalogBriefly = () =>
-  Promise.race([
-    syncLanguageCatalog(),
-    new Promise((resolve) => setTimeout(resolve, LANGUAGE_WAIT_MS)),
-  ]);
-
-let syncedLanguage = store.getState().system.language;
-store.subscribe(() => {
-  const { language } = store.getState().system;
-  if (language !== syncedLanguage) {
-    syncedLanguage = language;
-    void syncLanguageCatalog();
-  }
 });
 
 if (process.env.NODE_ENV !== "production" && import.meta.hot) {

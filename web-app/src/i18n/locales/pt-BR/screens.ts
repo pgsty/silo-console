@@ -1,4 +1,5 @@
 // Copyright (c) 2026 Pigsty
+// Brazilian Portuguese translation: Eduardo Andrade Machado (PR #83).
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -7,7 +8,7 @@
 
 // Brazilian Portuguese dictionary for feature screens. Keys are the exact English
 // source strings used at t() call sites; keep them byte-identical to code.
-export const ptScreens: Record<string, string> = {
+const ptScreens: Record<string, string> = {
   "Users inherit policies from their groups. Access is denied unless explicitly granted.":
     "Os usuários herdam as políticas dos seus grupos. O acesso é negado, a menos que seja concedido explicitamente.",
   "Policies define allowed actions and resources for users and groups.":
@@ -128,7 +129,7 @@ export const ptScreens: Record<string, string> = {
   "Bucket view": "Visualização de buckets",
   Cards: "Cartões",
   "{count} buckets selected": "{count} buckets selecionados",
-  "1 bucket selected": "1 bucket selecionado",
+  "{count} bucket selected": "{count} bucket selecionado",
   "No buckets match “{q}”": "Nenhum bucket corresponde a “{q}”",
   "Clear filter": "Limpar filtro",
   "Built-in · Modified": "Embutida · Modificada",
@@ -478,7 +479,6 @@ export const ptScreens: Record<string, string> = {
   "AccessKey is required": "A chave de acesso é obrigatória",
   "Account Key": "Chave da conta",
   "Account Name": "Nome da conta",
-  "Actions:": "Ações:",
   Active: "Ativo",
   "Active for": "Ativo por",
   'AD/LDAP server address e.g. "myldapserver.com:636"':
@@ -2186,3 +2186,5 @@ export const ptScreens: Record<string, string> = {
   "delete Tiers": "excluir camadas",
   "manage Access Keys": "gerenciar chaves de acesso",
 };
+
+export default ptScreens;

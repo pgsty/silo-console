@@ -29,12 +29,12 @@ const TextSurface = styled(PreviewSurface)<{ $wrap: boolean }>(({ $wrap }) => ({
   },
   "& .lineNumber": {
     flex: "0 0 7ch",
-    textAlign: "right",
-    paddingRight: 12,
+    textAlign: "end",
+    paddingInlineEnd: 12,
     userSelect: "none",
     color: "var(--preview-secondary)",
     background: "var(--preview-surface)",
-    borderRight: "1px solid var(--preview-border)",
+    borderInlineEnd: "1px solid var(--preview-border)",
   },
   "& pre": {
     margin: 0,

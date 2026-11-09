@@ -28,6 +28,12 @@ const Control = styled.div<{
 }>`
   ${type("body")}
   min-width: 0;
+  --switch-direction: 1;
+  &:dir(rtl) {
+    --switch-direction: -1;
+    .switch-thumb { transform-origin: right center; }
+    input:checked + .switchRail .switch-thumb { transform-origin: left center; }
+  }
   .switch-row,
   .switch-control {
     display: flex;
@@ -73,7 +79,7 @@ const Control = styled.div<{
   }
   .switch-thumb {
     position: absolute;
-    left: 2px;
+    inset-inline-start: 2px;
     top: 2px;
     width: ${({ $compact }) => ($compact ? 12 : 16)}px;
     height: ${({ $compact }) => ($compact ? 12 : 16)}px;
@@ -88,7 +94,7 @@ const Control = styled.div<{
     background: var(--brand);
   }
   input:checked + .switchRail .switch-thumb {
-    transform: translateX(${({ $compact }) => ($compact ? 12 : 14)}px);
+    transform: translateX(calc(var(--switch-direction) * ${({ $compact }) => ($compact ? 12 : 14)}px));
     transform-origin: right center;
   }
   @media (hover: hover) and (pointer: fine) {
@@ -96,7 +102,7 @@ const Control = styled.div<{
       transform: scaleX(${({ $compact }) => ($compact ? 14 / 12 : 18 / 16)});
     }
     input:checked:hover:not(:disabled) + .switchRail .switch-thumb {
-      transform: translateX(${({ $compact }) => ($compact ? 12 : 14)}px)
+      transform: translateX(calc(var(--switch-direction) * ${({ $compact }) => ($compact ? 12 : 14)}px))
         scaleX(${({ $compact }) => ($compact ? 14 / 12 : 18 / 16)});
     }
   }
@@ -107,7 +113,7 @@ const Control = styled.div<{
     );
   }
   input:checked:active:not(:disabled) + .switchRail .switch-thumb {
-    transform: translateX(${({ $compact }) => ($compact ? 12 : 14)}px)
+    transform: translateX(calc(var(--switch-direction) * ${({ $compact }) => ($compact ? 12 : 14)}px))
       scale(
         ${({ $compact }) => ($compact ? 16 / 12 : 20 / 16)},
         ${({ $compact }) => ($compact ? 8 / 12 : 12 / 16)}
@@ -143,7 +149,7 @@ const Control = styled.div<{
       gap: 8px;
     }
     .inputLabel {
-      margin-right: 0;
+      margin-inline-end: 0;
     }
   }
   @media (pointer: coarse) {
@@ -162,7 +168,7 @@ const Control = styled.div<{
       gap: 8px;
     }
     .inputLabel {
-      margin-right: 0;
+      margin-inline-end: 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {

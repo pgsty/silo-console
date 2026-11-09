@@ -13,15 +13,12 @@ import { ThemeProvider } from "styled-components";
 import { DataTable, DensityProvider } from "mds";
 import { store } from "../../src/store";
 import { globalSetDistributedSetup, setLanguage } from "../../src/systemSlice";
-import { registerScreenTranslations } from "../../src/i18n/lang";
-import { zhScreens } from "../../src/i18n/zhScreens";
 import { lightTokens, tokenCssVariables } from "../../src/common/ui/tokens";
 import { siloLightThemeOverrides } from "../../src/common/siloTheme";
 import { useBoundedTable } from "../../src/common/ui/useBoundedTable";
 import { OverflowMenu } from "../../src/common/ui/OverflowMenu";
 import Inspect from "../../src/screens/Console/Tools/Inspect";
 
-registerScreenTranslations(zhScreens);
 store.dispatch(globalSetDistributedSetup(true));
 for (const [name, value] of Object.entries(tokenCssVariables(lightTokens)))
   document.documentElement.style.setProperty(name, value);

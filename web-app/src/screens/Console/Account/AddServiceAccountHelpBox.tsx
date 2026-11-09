@@ -35,7 +35,7 @@ const FeatureItem = ({
       sx={{
         display: "flex",
         "& .min-icon": {
-          marginRight: "10px",
+          marginInlineEnd: "10px",
           height: "23px",
           width: "23px",
           marginBottom: "10px",
@@ -77,7 +77,7 @@ const AddServiceAccountHelpBox = () => {
           "& .min-icon": {
             height: "21px",
             width: "21px",
-            marginRight: "15px",
+            marginInlineEnd: "15px",
           },
         }}
       >

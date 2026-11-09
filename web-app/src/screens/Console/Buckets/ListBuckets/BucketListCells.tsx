@@ -5,11 +5,12 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+import { localeTag } from "i18n/lang";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderIcon, SettingsIcon, TrashIcon } from "mds";
 import { DateTime } from "luxon";
-import { formatText, interpolate, localeTag, useLanguage, useT } from "i18n";
+import { formatText, interpolate, useLanguage, useT } from "i18n";
 import type { Bucket } from "../../../../api/consoleApi";
 import { hasPermission } from "../../../../common/SecureComponent";
 import {
@@ -68,7 +69,7 @@ export const BucketUsage = ({
   const totals = row?.last_good?.totals;
   if (totals)
     return field === "objects" ? (
-      <>{totals.current_objects.toLocaleString(language)}</>
+      <>{totals.current_objects.toLocaleString(localeTag(language))}</>
     ) : (
       <>
         <span title={`${totals.current_bytes} B`}>
@@ -106,7 +107,9 @@ export const BucketUsage = ({
     </Hint>
   ) : (
     <>
-      {field === "size" ? niceBytesInt(value) : value.toLocaleString(language)}
+      {field === "size"
+        ? niceBytesInt(value)
+        : value.toLocaleString(localeTag(language))}
     </>
   );
 };

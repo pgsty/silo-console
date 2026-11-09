@@ -1,10 +1,11 @@
 // Copyright (c) 2026 Urbanize
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { localeTag } from "i18n/lang";
 import React from "react";
 import styled from "styled-components";
 import { Button, Checkbox } from "mds";
-import { localeTag, useLanguage, useT } from "i18n";
+import { useLanguage, useT } from "i18n";
 import { typography } from "../../../common/ui/typography";
 import { formatUsageBytes } from "./prefixUsage";
 import type { usePrefixUsage } from "./usePrefixUsage";

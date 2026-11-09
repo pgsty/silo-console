@@ -47,14 +47,14 @@ const MarkdownSurface = styled(PreviewSurface)({
   "& pre code": { padding: 0 },
   "& a": { color: "var(--preview-primary)", textDecoration: "underline" },
   "& blockquote": {
-    marginLeft: 0,
-    paddingLeft: 16,
-    borderLeft: "4px solid var(--preview-border)",
+    marginInlineStart: 0,
+    paddingInlineStart: 16,
+    borderInlineStart: "4px solid var(--preview-border)",
     color: "var(--preview-secondary)",
   },
   "& table": {
     borderTop: "1px solid var(--preview-border)",
-    borderLeft: "1px solid var(--preview-border)",
+    borderInlineStart: "1px solid var(--preview-border)",
   },
 });
 

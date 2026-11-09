@@ -128,7 +128,7 @@ const Profile = () => {
               alignItems: "center",
               gap: "8px 16px",
               "& .inputItem, & .inputItem:not(:last-of-type)": { margin: 0 },
-              "& label": { marginRight: 0 },
+              "& label": { marginInlineEnd: 0 },
             }}
           >
             <Box

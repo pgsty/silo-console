@@ -242,7 +242,7 @@ const StrategyForm = ({ redirectRules }: { redirectRules: RedirectRule[] }) => {
               item
               xs={12}
               sx={{
-                textAlign: "right",
+                textAlign: "end",
                 marginTop: 24,
               }}
             >

@@ -55,7 +55,7 @@ const PreviewCsv = ({
                 scope="col"
                 style={{
                   width: "1%",
-                  textAlign: "right",
+                  textAlign: "end",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -71,7 +71,7 @@ const PreviewCsv = ({
           <tbody>
             {rows.slice(1).map((row, index) => (
               <tr key={index}>
-                <th scope="row" style={{ textAlign: "right" }}>
+                <th scope="row" style={{ textAlign: "end" }}>
                   {index + 2}
                 </th>
                 {Array.from({ length: columns }, (_, column) => (

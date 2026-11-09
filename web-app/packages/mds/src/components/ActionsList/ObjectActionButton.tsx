@@ -42,7 +42,7 @@ const CustomButton = styled.button<
   },
   "& svg": {
     width: 11,
-    marginRight: 8,
+    marginInlineEnd: 8,
   },
   "&:disabled": {
     color: get(theme, "actionsList.disabledOptionsTextColor", "#EBEBEB"),

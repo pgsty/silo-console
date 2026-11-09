@@ -29,9 +29,9 @@ import DropdownSelector from "../DropdownSelector/DropdownSelector";
 
 const AutocompleteBase = styled.input`
   ${fieldChrome}
-  padding-right: 36px;
+  padding-inline-end: 36px;
   &.withIcon {
-    padding-left: 36px;
+    padding-inline-start: 36px;
   }
 `;
 const InputContainer = styled.div<InputContainerProps>(({ sx }) => ({
@@ -48,7 +48,7 @@ const InputContainer = styled.div<InputContainerProps>(({ sx }) => ({
     position: "absolute",
     top: "calc(var(--field-height, var(--control-height, 36px)) / 2)",
     transform: "translateY(-50%)",
-    right: 12,
+    insetInlineEnd: 12,
     pointerEvents: "none",
     "& svg": {
       width: "var(--icon-size,16px)",
@@ -61,7 +61,7 @@ const InputContainer = styled.div<InputContainerProps>(({ sx }) => ({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    left: 12,
+    insetInlineStart: 12,
     height: "var(--field-height, var(--control-height,36px))",
     pointerEvents: "none",
     "& svg": {

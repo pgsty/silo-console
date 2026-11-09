@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { localeTag, useT } from "i18n";
+import { useT, localeTag, localeSpec } from "i18n";
 import React, { Fragment, useLayoutEffect } from "react";
 import { GlobalStyles, ThemeHandler, ControlLabelsProvider } from "mds";
 import { createGlobalStyle, ThemeProvider } from "styled-components";
@@ -53,11 +53,14 @@ const StyleHandler = ({ children }: IStyleHandler) => {
   const darkMode = useSelector((state: AppState) => state.system.darkMode);
   const language = useSelector((state: AppState) => state.system.language);
 
-  // Keep <html lang> in sync for accessibility and the zh CSS overrides in
-  // index.css; this wraps both the login page and the console. Layout effect
-  // so a persisted Chinese preference applies before first paint.
+  // Apply language and direction before paint, for login and Console alike.
   useLayoutEffect(() => {
-    document.documentElement.lang = localeTag(language);
+    const pseudo = import.meta.env.DEV
+      ? document.documentElement.dataset.pseudoLocale
+      : undefined;
+    document.documentElement.lang = pseudo || localeTag(language);
+    document.documentElement.dir =
+      pseudo === "ar-XB" ? "rtl" : localeSpec(language).dir;
   }, [language]);
 
   useLayoutEffect(() => {
@@ -86,6 +89,7 @@ const StyleHandler = ({ children }: IStyleHandler) => {
       <ControlLabelsProvider
         labels={{
           close: t("Close"),
+          actions: t("Actions:"),
           showPassword: t("Show password"),
           hidePassword: t("Hide password"),
           inputAction: t("Input action"),

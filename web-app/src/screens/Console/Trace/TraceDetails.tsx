@@ -66,7 +66,7 @@ const TraceDetails = ({
           {fields.map(([label, value]) => (
             <Fragment key={label}>
               <dt>{label}</dt>
-              <dd>{value}</dd>
+              <dd dir="ltr">{value}</dd>
             </Fragment>
           ))}
         </dl>

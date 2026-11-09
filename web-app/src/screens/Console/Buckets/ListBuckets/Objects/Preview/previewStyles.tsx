@@ -25,7 +25,7 @@ export const PreviewSurface = styled.div<{ $fullscreen?: boolean }>(
     minHeight: 180,
     maxHeight: $fullscreen ? "calc(100vh - 260px)" : "min(60vh, 560px)",
     overflow: "auto",
-    textAlign: "left",
+    textAlign: "start",
     fontSize: 14,
     lineHeight: "20px",
     fontVariantNumeric: "tabular-nums",
@@ -40,7 +40,7 @@ export const PreviewSurface = styled.div<{ $fullscreen?: boolean }>(
     },
     "& th, & td": {
       borderBottom: "1px solid var(--preview-border)",
-      borderRight: "1px solid var(--preview-border)",
+      borderInlineEnd: "1px solid var(--preview-border)",
       padding: "8px 12px",
       verticalAlign: "top",
       whiteSpace: "pre-wrap",
@@ -61,7 +61,7 @@ export const PreviewToolbar = styled.div(({ theme }) => ({
   alignItems: "center",
   gap: 8,
   marginBottom: 12,
-  textAlign: "left",
+  textAlign: "start",
   "& button[aria-pressed='true']": {
     background: "var(--silo-primarySoft, rgba(127, 184, 232, 0.14))",
     color: `var(--silo-primary, ${get(theme, "linkColor", "#1D588C")})`,
@@ -88,5 +88,5 @@ export const PreviewNotice = styled.div(({ theme }) => ({
   background: `var(--silo-surface, ${get(theme, "boxBackground", "#FAFAFA")})`,
   color: "inherit",
   fontSize: 13,
-  textAlign: "left",
+  textAlign: "start",
 }));

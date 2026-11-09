@@ -37,7 +37,7 @@ const CallBackContainer = styled.div(({ theme }) => ({
     color: get(theme, "fontColor", "#000"),
     fontSize: 18,
     fontWeight: "bold",
-    marginLeft: 5,
+    marginInlineStart: 5,
   },
   "& .simpleError": {
     marginTop: 5,

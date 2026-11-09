@@ -27,7 +27,7 @@ const minDropWidth = 180;
 const SubItemsBoxContainer = styled.div(({ theme }) => ({
   position: "fixed",
   top: 0,
-  left: 0,
+  insetInlineStart: 0,
   width: "100vw",
   height: "100vh",
   backgroundColor: "transparent",
@@ -85,7 +85,7 @@ const SubItemsBox: FC<SubItemsBoxProps> = ({
     if (!anchorEl) {
       return {
         top: 0,
-        left: 0,
+        insetInlineStart: 0,
       };
     }
 
@@ -96,7 +96,7 @@ const SubItemsBox: FC<SubItemsBoxProps> = ({
     if (calcEndPosition > windowWidth) {
       return {
         top: bounds.top + bounds.height,
-        right: 0,
+        insetInlineEnd: 0,
       };
     }
 

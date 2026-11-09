@@ -6,7 +6,7 @@
 // (at your option) any later version.
 
 import { DateTime } from "luxon";
-import { formatText, Lang, localeTag, translate } from "../../i18n/lang";
+import { formatText, Lang, translate, localeTag } from "../../i18n/lang";
 
 export const freshnessText = ({
   at,

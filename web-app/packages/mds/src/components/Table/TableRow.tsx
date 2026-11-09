@@ -26,8 +26,8 @@ const TableRowMain = styled.tr<TableComponentsExtraProps>(({ theme, sx }) => ({
   verticalAlign: "middle",
   outline: 0,
   cursor: "pointer",
-  borderLeft: 0,
-  borderRight: 0,
+  borderInlineStart: 0,
+  borderInlineEnd: 0,
   backgroundColor: get(theme, "bgColor", lightColors.white),
   ...sx,
 }));

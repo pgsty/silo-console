@@ -13,13 +13,16 @@ import { MenuProps } from "../Menu.types";
 import VerticalMenu from "../Vertical/VerticalMenu";
 
 const slideIn = keyframes`
-  from { transform: translateX(-100%); }
+  from { transform: translateX(var(--drawer-offset, -100%)); }
   to { transform: translateX(0); }
 `;
 
 const Drawer = styled.dialog`
   position: fixed;
-  inset: 0 auto 0 0;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  &:dir(rtl) { --drawer-offset: 100%; }
   margin: 0;
   padding: 0;
   border: 0;

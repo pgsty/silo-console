@@ -452,3 +452,19 @@ The parser is exported as `parseByteMeasurement`, so Console's text formatter
 (`niceBytes`) treats blank, null, hexadecimal and negative input as N/A exactly
 as `calculateBytes` does. `scaleBytes` carries a value that rounds up to the
 next unit, so 1048575 bytes renders as 1 MiB rather than 1024 KiB.
+
+### Multilingual controls and RTL
+
+The shared control-label provider supplies the Actions heading. Dropdown items
+accept `lang` and `dir` for language autonyms, and popup start/end alignment
+follows the anchor's direction. Spacing, borders and edge positioning use logical
+CSS properties. Mobile drawers open from inline start; switch thumbs and marked
+navigation arrows follow RTL direction. Editors keep source text LTR, and read
+values use isolated direction. Physical viewport geometry used by portals and
+hover highlights is retained. Console's nine-language and pseudo-locale browser
+tests cover keyboard selection, small screens, live language changes and payload
+isolation alongside the existing English/Chinese regression suite.
+
+The shared DropdownSelector popup is statically imported so the language menu
+works without a network after initial load. Popup visibility, modal presence,
+keyboard interaction and exit transitions still use the existing shared hooks.

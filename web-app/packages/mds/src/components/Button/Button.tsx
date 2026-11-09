@@ -110,10 +110,10 @@ const CustomButton = styled.button<{
     $icon &&
     ($side === "start"
       ? css`
-          padding-left: ${$compact ? 8 : 12}px;
+          padding-inline-start: ${$compact ? 8 : 12}px;
         `
       : css`
-          padding-right: ${$compact ? 8 : 12}px;
+          padding-inline-end: ${$compact ? 8 : 12}px;
         `)}
   .button-surface {
     position: absolute;
@@ -201,7 +201,7 @@ const CustomButton = styled.button<{
     width: 16px;
     height: 16px;
     border: 1.5px solid currentColor;
-    border-right-color: transparent;
+    border-inline-end-color: transparent;
     border-radius: 50%;
     animation: ${spin} 800ms linear infinite;
   }

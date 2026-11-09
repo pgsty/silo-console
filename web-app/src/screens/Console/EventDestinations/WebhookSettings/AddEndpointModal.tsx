@@ -226,7 +226,7 @@ const AddEndpointModal = ({ open, type, onCloseEndpoint }: IEndpointModal) => {
             onClick={onCloseEndpoint}
             label={t("Cancel")}
             sx={{
-              marginRight: 10,
+              marginInlineEnd: 10,
             }}
           />
           <Button

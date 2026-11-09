@@ -117,7 +117,7 @@ const ListKeys = () => {
               alignItems: "center",
               justifyContent: "flex-end",
               "& button": {
-                marginLeft: "8px",
+                marginInlineStart: "8px",
               },
             }}
           >

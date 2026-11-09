@@ -32,7 +32,7 @@ const ParentContainer = styled.div<
   "--page-header-inline-padding": "24px",
   gap: 16,
   backgroundColor: get(theme, `pageHeader.background`, "#fff"),
-  left: 0,
+  insetInlineStart: 0,
   borderBottom: `1px solid ${get(theme, `pageHeader.border`, "#E5E5E5")}`,
   flexWrap: "nowrap",
   justifyContent: "space-between",
@@ -103,7 +103,7 @@ const PageHeader: FC<PageHeaderProps> = ({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              marginRight: 8,
+              marginInlineEnd: 8,
               flexShrink: 0,
             }}
           >

@@ -34,7 +34,7 @@ const SpeedTestUnitBase = styled.table(({ theme }) => ({
     fontSize: 60,
     color: get(theme, "signalColors.main", "#07193E"),
     fontWeight: "bold",
-    textAlign: "right",
+    textAlign: "end",
   },
   "& .metricValContainer": {
     lineHeight: 1,
@@ -45,7 +45,7 @@ const SpeedTestUnitBase = styled.table(({ theme }) => ({
     marginTop: 6,
     color: get(theme, "mutedText", "#87888d"),
     fontWeight: "bold",
-    textAlign: "right",
+    textAlign: "end",
   },
   "& .objectsUnit": {
     color: get(theme, "mutedText", "#87888d"),

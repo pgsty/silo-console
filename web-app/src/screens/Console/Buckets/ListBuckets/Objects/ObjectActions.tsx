@@ -40,7 +40,7 @@ const ActionPanel = styled.div({
     borderRadius: "var(--radius-control)",
     padding: "8px",
     font: "inherit",
-    textAlign: "left",
+    textAlign: "start",
     background: "transparent",
     border: 0,
     color: "var(--muted-foreground)",

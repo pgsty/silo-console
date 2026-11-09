@@ -41,7 +41,7 @@ const CustomLogin = styled.div(({ theme }) => {
         minHeight: 200,
         position: "absolute",
         bottom: "0",
-        right: 0,
+        insetInlineEnd: 0,
         filter: get(theme, "login.bgFilter", "none"),
         "& .posterBG": {
           width: "100%",
@@ -53,7 +53,7 @@ const CustomLogin = styled.div(({ theme }) => {
           "linear-gradient(45deg,rgba(172,223,234,0) 0,#7fc0e4 100%)",
         position: "absolute",
         width: 500,
-        left: 0,
+        insetInlineStart: 0,
       },
       "& .promoContainer": {
         zIndex: 5,
@@ -66,7 +66,7 @@ const CustomLogin = styled.div(({ theme }) => {
         "& .promoHeader": {
           color: get(theme, "login.promoHeader", "#fff"),
           fontSize: "46px",
-          textAlign: "left",
+          textAlign: "start",
           fontWeight: "900",
           lineHeight: "60px",
         },
@@ -75,7 +75,7 @@ const CustomLogin = styled.div(({ theme }) => {
           maxWidth: "542px",
           color: get(theme, "login.promoText", "#fff"),
           fontSize: "18px",
-          textAlign: "left",
+          textAlign: "start",
           fontWeight: "300",
           lineHeight: "30px",
           textShadow: "0 0 5ppx #000",

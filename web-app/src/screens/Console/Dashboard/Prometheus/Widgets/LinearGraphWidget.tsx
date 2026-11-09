@@ -77,7 +77,7 @@ const LinearGraphMain = styled.div(({ theme }) => ({
     position: "relative",
     justifyContent: "flex-start",
     gap: 4,
-    paddingLeft: 12,
+    paddingInlineStart: 12,
     color: get(theme, "mutedText", "#87888d"),
     fontWeight: 400,
     fontSize: "var(--fs-caption)",

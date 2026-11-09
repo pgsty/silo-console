@@ -75,7 +75,7 @@ const MenuItem = styled.button<{ $danger?: boolean }>`
   border: 0;
   border-radius: var(--radius-control, 8px);
   background: transparent;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   outline: none;
   color: ${({ $danger }) =>

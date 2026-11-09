@@ -56,7 +56,7 @@ const TabsContainer = styled.div<{ $horizontal: boolean; $sx?: CSSObject }>`
   }
   [aria-orientation="vertical"] [role="tab"] {
     justify-content: flex-start;
-    text-align: left;
+    text-align: start;
     min-height: var(--control-height, 36px);
   }
   [aria-orientation="vertical"] [role="tab"] > svg {
@@ -162,8 +162,9 @@ const Tabs: FC<TabsProps> = ({
           aria-orientation={horizontal ? "horizontal" : "vertical"}
           className={`optionsList ${variant === "subtle" ? "subtle" : ""}`}
           onKeyDown={(event) => {
-            const forward = horizontal ? "ArrowRight" : "ArrowDown";
-            const backward = horizontal ? "ArrowLeft" : "ArrowUp";
+            const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+            const forward = horizontal ? (rtl ? "ArrowLeft" : "ArrowRight") : "ArrowDown";
+            const backward = horizontal ? (rtl ? "ArrowRight" : "ArrowLeft") : "ArrowUp";
             if (![forward, backward, "Home", "End"].includes(event.key)) return;
             const items = Array.from(
               list.current?.querySelectorAll<HTMLButtonElement>(
