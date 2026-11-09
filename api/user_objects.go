@@ -1014,8 +1014,14 @@ func uploadFiles(ctx context.Context, client MinioClient, params objectApi.PostB
 
 	for {
 		p, err := mr.NextPart()
+		// Only an unwrapped io.EOF marks the closing boundary. A truncated
+		// body yields a wrapped EOF and malformed headers other errors; none
+		// of them return a part.
 		if err == io.EOF {
 			break
+		}
+		if err != nil {
+			return err
 		}
 
 		size, err := strconv.ParseInt(p.FormName(), 10, 64)
