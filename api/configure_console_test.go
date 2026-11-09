@@ -158,6 +158,80 @@ func TestFileServerMiddlewareMethods(t *testing.T) {
 	})
 }
 
+func TestPrecompressedAssetCachePolicy(t *testing.T) {
+	var compressed bytes.Buffer
+	zw := gzip.NewWriter(&compressed)
+	_, err := zw.Write([]byte("translated UI"))
+	require.NoError(t, err)
+	require.NoError(t, zw.Close())
+
+	fsys := fstest.MapFS{
+		"assets/language-tr-A1b2_C3-.js.gz": {Data: compressed.Bytes()},
+		"assets/style-Abcd1234.css.gz":      {Data: compressed.Bytes()},
+		"assets/config.js.gz":               {Data: compressed.Bytes()},
+		"manifest.json.gz":                  {Data: compressed.Bytes()},
+		"assets/broken-Abcd1234.js.gz":      {Data: []byte("invalid gzip")},
+	}
+	handler := precompressedAssetsHandler(fsys, http.NotFoundHandler())
+	for _, tc := range []struct {
+		path      string
+		immutable bool
+		status    int
+	}{
+		{"/assets/language-tr-A1b2_C3-.js", true, http.StatusOK},
+		{"/assets/style-Abcd1234.css", true, http.StatusOK},
+		{"/assets/config.js", false, http.StatusOK},
+		{"/assets/config.js?v=Abcd1234", false, http.StatusOK},
+		{"/manifest.json", false, http.StatusOK},
+		{"/assets/missing-Abcd1234.js", false, http.StatusNotFound},
+	} {
+		for _, encoding := range []string{"gzip", "identity"} {
+			for _, method := range []string{http.MethodGet, http.MethodHead} {
+				t.Run(method+" "+tc.path+" "+encoding, func(t *testing.T) {
+					req := httptest.NewRequest(method, tc.path, nil)
+					req.Header.Set("Accept-Encoding", encoding)
+					recorder := httptest.NewRecorder()
+					handler.ServeHTTP(recorder, req)
+					assert.Equal(t, tc.status, recorder.Code)
+					if tc.immutable {
+						assert.Equal(t, "public, max-age=31536000, immutable", recorder.Header().Get("Cache-Control"))
+						assert.Contains(t, recorder.Header().Values("Vary"), "Accept-Encoding")
+					} else {
+						assert.Empty(t, recorder.Header().Get("Cache-Control"))
+					}
+				})
+			}
+		}
+	}
+	t.Run("decompression errors are not immutable", func(t *testing.T) {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/assets/broken-Abcd1234.js", nil))
+		assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		assert.Empty(t, recorder.Header().Get("Cache-Control"))
+	})
+}
+
+func TestFileServerMiddlewareCachePolicy(t *testing.T) {
+	handler := FileServerMiddleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	for _, route := range []string{"/", "/login", "/assets/missing-Abcd1234.js"} {
+		t.Run(route, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, route, nil))
+			assert.Equal(t, http.StatusOK, recorder.Code)
+			assert.Equal(t, "private, no-cache", recorder.Header().Get("Cache-Control"))
+		})
+	}
+	t.Run("API cache policy stays under the API handler's control", func(t *testing.T) {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/api/test", nil))
+		assert.Equal(t, http.StatusNoContent, recorder.Code)
+		assert.Equal(t, "no-store", recorder.Header().Get("Cache-Control"))
+	})
+}
+
 func Test_parseSubPath(t *testing.T) {
 	type args struct {
 		v string

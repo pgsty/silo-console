@@ -505,6 +505,9 @@ func (w *notFoundRedirectRespWr) Write(p []byte) (int, error) {
 
 // handleSPA handles the serving of the React Single Page Application
 func handleSPA(w http.ResponseWriter, r *http.Request) {
+	// The entry point selects the current asset hashes and can be customized
+	// for an embedded Console session. Never cache it like immutable assets.
+	w.Header().Set("Cache-Control", "private, no-cache")
 	basePath := "/"
 	// For SPA mode we will replace root base with a sub path if configured unless we received cp=y and cpb=/NEW/BASE
 	if v := r.URL.Query().Get("cp"); v == "y" {
@@ -670,6 +673,10 @@ func requestBounce(handler http.Handler) http.Handler {
 	})
 }
 
+// Vite emits eight-character content hashes for production JS and CSS.
+// Match only actual assets; a missing hashed URL must not cache the SPA fallback.
+var contentHashedAsset = regexp.MustCompile(`^assets/[^/]+-[A-Za-z0-9_-]{8}\.(js|css)$`)
+
 // precompressedAssetsHandler serves static assets that were gzip-compressed
 // at build time (web-app/optimize-embed.sh), so the binary embeds ~1/3 of the
 // raw payload. Assets are emitted as-is with Content-Encoding: gzip for the
@@ -697,28 +704,28 @@ func precompressedAssetsHandler(fsys fs.FS, fallback http.Handler) http.Handler 
 			w.Header().Set("Content-Type", mimedb.TypeByExtension(filepath.Ext(name)))
 		}
 		w.Header().Add("Vary", "Accept-Encoding")
+		body := gzBytes
 		if acceptsGzip(r.Header.Get("Accept-Encoding")) {
 			w.Header().Set("Content-Encoding", "gzip")
-			w.Header().Set("Content-Length", strconv.Itoa(len(gzBytes)))
-			if r.Method != http.MethodHead {
-				w.Write(gzBytes)
+		} else {
+			zr, err := gzip.NewReader(bytes.NewReader(gzBytes))
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
 			}
-			return
+			defer zr.Close()
+			body, err = io.ReadAll(zr)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
 		}
-		zr, err := gzip.NewReader(bytes.NewReader(gzBytes))
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
+		if contentHashedAsset.MatchString(name) {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		}
-		defer zr.Close()
-		raw, err := io.ReadAll(zr)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Length", strconv.Itoa(len(raw)))
+		w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 		if r.Method != http.MethodHead {
-			w.Write(raw)
+			w.Write(body)
 		}
 	})
 }

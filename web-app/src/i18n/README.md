@@ -12,13 +12,17 @@ under `locales/<id>/`: `chrome.ts`, `help.ts`, and `screens.ts`; import them and
 add the language to `LOCALES` and `CATALOGS` in the registry. Type checking requires
 the two maps to contain the same languages.
 
-All dictionaries are bundled statically in the cached `languages` asset. The
-three files organize translation work; they are not loading phases. Their
+All dictionaries are statically imported and emitted as one precompressed
+`language-<id>-<hash>.js.gz` asset per language. The Go server serves these
+content-hashed assets with `Cache-Control: public, max-age=31536000, immutable`;
+HTML entry points use `private, no-cache` to discover current asset names.
+The three source files organize translation work; they are not loading phases. Their
 precedence is chrome > screens > help. Language switching is synchronous and
 works offline after the application has loaded. There are no locale fetches,
 loading states, timers, retry loops or additional runtime dependencies. The
-bundle budget explicitly includes all ten languages and still bounds unrelated
-application and vendor chunks separately.
+bundle budget includes all ten languages, checks the aggregate catalog size and
+requires every language asset to be in the initial static dependency graph.
+The existing per-chunk limit also applies to each language asset.
 
 Use `t()` for UI strings and `i18nKey()` for strings translated later. Use
 `tn(count, one, other)` for quantities; translated plural objects live under the

@@ -78,11 +78,12 @@ yarn check:bundle
 [`hack/check-bundle-size.mjs`](hack/check-bundle-size.mjs) reads the Vite
 manifest, sums the unique entry and static-import JavaScript files required by
 Login, and checks every emitted JavaScript chunk. Fixed gzip gates are
-**259,000 bytes** for the initial Login graph and **350,000 bytes** per chunk
-(decimal bytes, not KiB). It rejects charts, PDF, Markdown or editor vendors in
-the eager graph. The separate 200,000-byte Login aspiration is not the enforced
-gate. Measure after a fresh build; do not raise the gates to accommodate a
-regression.
+**850,000 bytes** for the initial Login graph, **630,000 bytes** for all language
+assets combined and **350,000 bytes** per chunk (decimal bytes, not KiB).
+Each language has an independently cached gzip asset but remains in the initial
+static dependency graph. The checker rejects lazy language assets and charts,
+PDF, Markdown or editor vendors in the eager graph. Measure after a fresh build;
+do not raise the gates to accommodate a regression.
 
 `check-warnings.sh` performs another build. It writes to `yarn.log` by default;
 set `CHECK_WARNINGS_LOG` to an absolute external file path to keep the log

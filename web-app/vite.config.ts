@@ -4,6 +4,7 @@ import istanbul from "vite-plugin-istanbul";
 
 const VIRTUAL_REFRACTOR_JSON = "\0virtual:refractor-json";
 const VIRTUAL_JSPDF_STUB = "\0virtual:jspdf-stub";
+const LOCALE_MODULE = /[\\/]src[\\/]i18n[\\/]locales[\\/]([^\\/]+)[\\/]/;
 
 function consoleBundleTrimPlugin(): Plugin {
   return {
@@ -74,8 +75,14 @@ export default defineConfig({
           // so lazy vendors cannot own React or create initialization cycles.
           groups: [
             {
-              name: "languages",
-              test: /\/src\/i18n\/locales\//,
+              debugName: "languages",
+              // Keep the runtime imports eager while giving each language
+              // its own content hash and independently reusable gzip asset.
+              name: (id) => {
+                const language = id.match(LOCALE_MODULE)?.[1];
+                return language ? `language-${language}` : null;
+              },
+              test: LOCALE_MODULE,
               priority: 110,
             },
             {

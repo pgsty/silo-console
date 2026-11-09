@@ -75,8 +75,8 @@ export const isLanguage = (value: unknown): value is Lang =>
   localeSpec(value as Lang).enabled !== false;
 export const languages = (Object.keys(LOCALES) as Lang[]).filter(isLanguage);
 
-// All dictionaries are bundled statically: switching language needs no network
-// request, loading state or retry. Keep precedence chrome > screens > help.
+// All dictionaries are statically imported and bundled by language: switching
+// needs no network request, loading state or retry. Precedence: chrome > screens > help.
 export const CATALOGS: Record<Lang, Dictionary> = {
   en: {},
   zh: { ...zh_help, ...zh_screens, ...zh_chrome },

@@ -12,9 +12,9 @@ import { fileURLToPath } from "node:url";
 import { gunzipSync, gzipSync } from "fflate";
 
 // Decimal KB, using the same gzip settings as gzip-embed.mjs.
-// Ten UI languages are bundled statically. This explicitly trades ~0.55 MB
+// Ten UI languages are bundled statically. This explicitly trades ~0.57 MB
 // of compressed catalogs for synchronous, offline language switching. Keep
-// non-language application/vendor chunks under the existing per-chunk budget.
+// the aggregate language budget independent of the per-chunk budget.
 export const BUDGETS = {
   loginInitial: 850_000,
   chunk: 350_000,
@@ -108,15 +108,24 @@ export function evaluateBundle(chunks, initial, budgets = BUDGETS) {
   if (total > budgets.loginInitial) {
     errors.push(`Login initial JS: ${total} bytes > ${budgets.loginInitial}`);
   }
+  let languageTotal = 0;
   for (const { file, gzip } of chunks) {
-    const limit = /^languages[-~]/.test(basename(file))
-      ? (budgets.languages ?? budgets.chunk)
-      : budgets.chunk;
-    if (gzip > limit) {
-      errors.push(`${file}: ${gzip} bytes > ${limit}`);
+    if (/^languages?[-~]/.test(basename(file))) {
+      languageTotal += gzip;
+      if (!initial.has(file)) {
+        errors.push(`Language asset is not eagerly loaded: ${file}`);
+      }
+    }
+    if (gzip > budgets.chunk) {
+      errors.push(`${file}: ${gzip} bytes > ${budgets.chunk}`);
     }
   }
-  return { total, errors };
+  if (languageTotal > budgets.languages) {
+    errors.push(
+      `All language assets: ${languageTotal} bytes > ${budgets.languages}`,
+    );
+  }
+  return { total, languageTotal, errors };
 }
 
 async function main() {
@@ -124,7 +133,7 @@ async function main() {
     ? resolve(process.argv[2])
     : fileURLToPath(new URL("../build", import.meta.url));
   const { chunks, initial } = await readBundle(buildDirectory);
-  const { total, errors } = evaluateBundle(chunks, initial);
+  const { total, languageTotal, errors } = evaluateBundle(chunks, initial);
   console.log("gzip KB  Login  JavaScript chunk (largest first)");
   for (const { file, gzip } of chunks) {
     console.log(
@@ -135,7 +144,7 @@ async function main() {
     `Login initial JS: ${(total / 1000).toFixed(2)} / ${BUDGETS.loginInitial / 1000} KB gzip`,
   );
   console.log(
-    `Application/vendor chunk budget: ${BUDGETS.chunk / 1000} KB gzip; languages: ${BUDGETS.languages / 1000} KB gzip`,
+    `All language assets: ${(languageTotal / 1000).toFixed(2)} / ${BUDGETS.languages / 1000} KB gzip; per chunk: ${BUDGETS.chunk / 1000} KB gzip`,
   );
   if (errors.length) {
     for (const error of errors) console.error(error);

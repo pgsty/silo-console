@@ -57,20 +57,43 @@ test("initial graph follows static imports, deduplicates files and handles cycle
 });
 
 test("gzip limits are inclusive and cover lazy chunks as well as login", () => {
-  const initial = new Set(["assets/languages-hash.js", "assets/index.js"]);
+  const initial = new Set([
+    "assets/language-zh-hash.js",
+    "assets/language-tr-hash.js",
+    "assets/index.js",
+  ]);
   const chunks = [
-    { file: "assets/languages-hash.js", gzip: BUDGETS.languages },
+    { file: "assets/language-zh-hash.js", gzip: BUDGETS.languages / 2 },
+    { file: "assets/language-tr-hash.js", gzip: BUDGETS.languages / 2 },
     { file: "assets/index.js", gzip: BUDGETS.loginInitial - BUDGETS.languages },
     { file: "assets/editor-lazy.js", gzip: BUDGETS.chunk },
   ];
   expect(evaluateBundle(chunks, initial).errors).toEqual([]);
-  chunks[1].gzip++;
   chunks[2].gzip++;
+  chunks[3].gzip++;
   const result = evaluateBundle(chunks, initial);
   expect(result.total).toBe(BUDGETS.loginInitial + 1);
   expect(result.errors).toHaveLength(2);
   expect(result.errors[0]).toContain("Login initial JS");
   expect(result.errors[1]).toContain("editor-lazy.js");
+});
+
+test("language limits apply to the aggregate and every catalog must be eager", () => {
+  const chunks = [
+    { file: "assets/language-zh-hash.js", gzip: BUDGETS.languages / 2 },
+    { file: "assets/language-tr-hash.js", gzip: BUDGETS.languages / 2 + 1 },
+  ];
+  const initial = new Set(chunks.map(({ file }) => file));
+  const result = evaluateBundle(chunks, initial);
+  expect(result.languageTotal).toBe(BUDGETS.languages + 1);
+  expect(result.errors).toEqual([
+    `All language assets: ${BUDGETS.languages + 1} bytes > ${BUDGETS.languages}`,
+  ]);
+  chunks[1].gzip--;
+  initial.delete(chunks[1].file);
+  expect(evaluateBundle(chunks, initial).errors).toEqual([
+    `Language asset is not eagerly loaded: ${chunks[1].file}`,
+  ]);
 });
 
 test("missing assets and heavy vendors in login fail even below the size limits", () => {
