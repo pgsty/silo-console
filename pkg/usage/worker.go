@@ -233,13 +233,15 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	if err != nil {
 		return
 	}
-	events = client.ListenNotification(streamCtx, "", "", []string{"s3:ObjectCreated:*", "s3:ObjectRemoved:*"})
+	// Bucket events matter too: a force delete removes every object but
+	// emits only s3:BucketRemoved.
+	events = client.ListenNotification(streamCtx, "", "", []string{"s3:ObjectCreated:*", "s3:ObjectRemoved:*", "s3:BucketCreated:*", "s3:BucketRemoved:*"})
 	// The storage server drops notifications for a subscriber that stops
 	// reading, without closing the stream. Consume the stream continuously, so
 	// reconciliation and database writes on the loop below cannot lose changes
 	// while coverage still reports a reconciled connection. Pending work is one
 	// entry per bucket, bounded by the inventory rather than the event rate.
-	pending := &pendingChanges{buckets: map[string]time.Time{}}
+	pending := &pendingChanges{buckets: map[string]pendingChange{}}
 	streamDone = make(chan struct{})
 	go func() {
 		defer close(streamDone)
@@ -252,7 +254,7 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 			}
 			for _, event := range info.Records {
 				if bucket, at, ok := changedBucket(event); ok {
-					pending.add(bucket, at)
+					pending.add(bucket, pendingChange{at: at, removed: strings.HasPrefix(event.EventName, "s3:BucketRemoved:")})
 				}
 			}
 		}
@@ -269,13 +271,19 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	var observedEpoch uint64
 	flushEvents := func() bool {
 		batch := pending.take()
-		for bucket, at := range batch {
+		for bucket, change := range batch {
 			parent := ctx
 			if ctx.Err() != nil {
 				parent = context.Background()
 			}
 			operation, stop := context.WithTimeout(parent, c.Heartbeat)
-			err := s.Queue(operation, bucket, false, c.EventDebounce, c.MinScanInterval, &at)
+			var err error
+			if change.removed {
+				err = s.Removed(operation, bucket, c.EventDebounce)
+			}
+			if err == nil {
+				err = s.Queue(operation, bucket, false, c.EventDebounce, c.MinScanInterval, &change.at)
+			}
 			stop()
 			if err != nil {
 				pending.restore(batch)
@@ -363,33 +371,45 @@ func observeLease(ctx context.Context, s *Store, c Config, owner string) {
 	}
 }
 
+// pendingChange is the newest event time for a bucket and whether the
+// bucket was deleted since the last flush.
+type pendingChange struct {
+	at      time.Time
+	removed bool
+}
+
 // pendingChanges coalesces received notifications into one invalidation per
-// bucket until the observer loop persists them.
+// bucket until the observer loop persists them. A deletion is kept even when
+// a later event, such as re-creating the bucket, arrives in the same batch.
 type pendingChanges struct {
 	sync.Mutex
-	buckets map[string]time.Time
+	buckets map[string]pendingChange
 }
 
-func (p *pendingChanges) add(bucket string, at time.Time) {
+func (p *pendingChanges) add(bucket string, change pendingChange) {
 	p.Lock()
 	defer p.Unlock()
-	if previous, exists := p.buckets[bucket]; !exists || at.After(previous) {
-		p.buckets[bucket] = at
+	if previous, exists := p.buckets[bucket]; exists {
+		if previous.at.After(change.at) {
+			change.at = previous.at
+		}
+		change.removed = change.removed || previous.removed
 	}
+	p.buckets[bucket] = change
 }
 
-func (p *pendingChanges) take() map[string]time.Time {
+func (p *pendingChanges) take() map[string]pendingChange {
 	p.Lock()
 	defer p.Unlock()
 	batch := p.buckets
-	p.buckets = map[string]time.Time{}
+	p.buckets = map[string]pendingChange{}
 	return batch
 }
 
 // restore returns unpersisted changes without discarding newer arrivals.
-func (p *pendingChanges) restore(batch map[string]time.Time) {
-	for bucket, at := range batch {
-		p.add(bucket, at)
+func (p *pendingChanges) restore(batch map[string]pendingChange) {
+	for bucket, change := range batch {
+		p.add(bucket, change)
 	}
 }
 
@@ -400,6 +420,8 @@ func changedBucket(event notification.Event) (string, time.Time, bool) {
 	switch {
 	case strings.HasPrefix(event.EventName, "s3:ObjectCreated:"):
 	case strings.HasPrefix(event.EventName, "s3:ObjectRemoved:"):
+	case strings.HasPrefix(event.EventName, "s3:BucketCreated:"):
+	case strings.HasPrefix(event.EventName, "s3:BucketRemoved:"):
 	default:
 		return "", time.Time{}, false
 	}

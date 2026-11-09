@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/minio/minio-go/v7/pkg/notification"
 )
@@ -75,6 +76,30 @@ func TestChangeEventsQueueBucketsWithoutCollectingRequestOrObjectData(t *testing
 	event.EventTime = "invalid"
 	if _, at, ok = changedBucket(event); !ok || at.IsZero() {
 		t.Fatal("bad source timestamp silently dropped a real deletion")
+	}
+	// A force delete emits only the bucket event.
+	for _, name := range []string{"s3:BucketCreated:*", "s3:BucketRemoved:*"} {
+		event.EventName = name
+		if bucket, _, ok := changedBucket(event); !ok || bucket != "changed" {
+			t.Fatalf("%s did not invalidate the bucket", name)
+		}
+	}
+}
+
+func TestPendingChangesKeepADeletionFollowedByRecreation(t *testing.T) {
+	pending := &pendingChanges{buckets: map[string]pendingChange{}}
+	removed := time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC)
+	pending.add("b", pendingChange{at: removed, removed: true})
+	pending.add("b", pendingChange{at: removed.Add(time.Second)})
+	pending.add("b", pendingChange{at: removed.Add(-time.Second)})
+	batch := pending.take()
+	if change := batch["b"]; !change.removed || !change.at.Equal(removed.Add(time.Second)) {
+		t.Fatalf("coalescing lost the deletion or the newest time: %+v", change)
+	}
+	pending.add("b", pendingChange{at: removed.Add(2 * time.Second)})
+	pending.restore(batch)
+	if change := pending.take()["b"]; !change.removed || !change.at.Equal(removed.Add(2*time.Second)) {
+		t.Fatalf("restore lost the deletion or a newer arrival: %+v", change)
 	}
 }
 

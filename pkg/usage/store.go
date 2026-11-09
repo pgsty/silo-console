@@ -341,6 +341,23 @@ func (s *Store) Release(ctx context.Context, job Record) error {
 	return nil
 }
 
+// Removed forgets a deleted bucket's results at once. A force delete removes
+// every object but emits only s3:BucketRemoved, so without this a bucket
+// re-created under the same name, possibly by another owner, would show the
+// old bucket's totals until the next full reconciliation. A scan in progress
+// loses its lease. The queued rescan then either retires the row through
+// MissingBucket or measures the re-created bucket.
+func (s *Store) Removed(ctx context.Context, bucket string, debounce time.Duration) error {
+	if bucket == "" || len(bucket) > 63 || debounce < 0 {
+		return errors.New("invalid usage bucket")
+	}
+	_, err := s.pool.Exec(ctx, `UPDATE console_usage_buckets SET state='queued',generation=generation+1,
+ last_good=NULL,progress=NULL,checkpoint=NULL,last_completed_at=NULL,lease_token=NULL,lease_until=NULL,
+ attempts=0,error_code='',priority=GREATEST(priority,10),next_run_at=clock_timestamp()+$3::bigint*interval '1 millisecond'
+ WHERE scope=$1 AND bucket=$2`, s.scope, bucket, debounce.Milliseconds())
+	return err
+}
+
 // Discover queues new buckets without invalidating healthy existing results.
 // Frequent inventory checks are cheap; full safety-net scans are independent.
 func (s *Store) Discover(ctx context.Context, bucket string, debounce time.Duration) error {
