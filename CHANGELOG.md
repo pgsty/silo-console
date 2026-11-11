@@ -1,5 +1,25 @@
 # Changelog
 
+## Release v2.7.1
+
+- Preserve dynamic parent-policy inheritance when editing service-account
+  metadata, and use an explicit empty policy document only when clearing an
+  existing inline restriction (#88, #89).
+- Omit preloaded user-policy JSON when the inline restriction toggle is turned
+  off on service-account creation forms, block empty inline submissions
+  (including null statements, case-insensitive or Unicode-folded JSON field
+  names, and duplicate keys), and surface policy-lookup errors in the UI.
+  Preserve unchanged historical empty inline policies during metadata-only
+  edits.
+- Reject unknown JSON fields, trailing tokens, empty principal objects,
+  unsupported `NotPrincipal` blocks, and non-object inputs during IAM,
+  service-account, and custom bucket policy write validation so misspelled keys
+  cannot silently strip conditions or reset a service account to inherited
+  permissions.
+- Require Go 1.27.4 across source, CI, and container builds, upgrade GoReleaser
+  to v2.20.1, refresh pinned container bases, and adopt released silo-pkg
+  v3.16.1 and mcli 20261112 (`v0.0.0-20261111180825-a37a9f054fba`).
+
 ## Release v2.7.0
 
 - Add a shared ten-language UI and locale-aware formatting, with Arabic RTL

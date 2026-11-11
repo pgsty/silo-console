@@ -34,6 +34,7 @@ import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { DateTime } from "luxon";
 import { i18nKey, formatText, useLocalizedLink, useT } from "i18n";
 import {
+  isServiceAccountUpdatePolicyValid,
   policyForServiceAccountUpdate,
   ServiceAccountPolicyMode,
 } from "./serviceAccountPolicy";
@@ -130,11 +131,14 @@ const EditServiceAccount = ({
     !!selectedAccessKey &&
     initialPolicy?.accessKey === selectedAccessKey;
   const disabled = readOnly || loading || !loaded;
-  const validPolicy =
-    policyMode === "inherited" ||
-    (initialPolicy?.mode === "inline" &&
-      policyDefinition === initialPolicy.definition) ||
-    policyDefinition.trim() !== "";
+  const validPolicy = initialPolicy
+    ? isServiceAccountUpdatePolicyValid({
+        initialMode: initialPolicy.mode,
+        mode: policyMode,
+        policyDefinition,
+        initialPolicyDefinition: initialPolicy.definition,
+      })
+    : false;
 
   const setPolicy = (event: React.FormEvent) => {
     event.preventDefault();

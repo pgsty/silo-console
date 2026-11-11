@@ -45,3 +45,84 @@ export const policyForServiceAccountUpdate = ({
   }
   return policyDefinition;
 };
+
+export interface ServiceAccountPolicyCreateInput {
+  isRestrictedByPolicy: boolean;
+  policyDefinition: string;
+}
+
+export const policyForServiceAccountCreate = ({
+  isRestrictedByPolicy,
+  policyDefinition,
+}: ServiceAccountPolicyCreateInput): string => {
+  if (!isRestrictedByPolicy) {
+    return "";
+  }
+  return policyDefinition;
+};
+
+const ALLOWED_POLICY_KEYS = new Set(["VERSION", "ID", "STATEMENT"]);
+
+const isEmptyInlinePolicyDocument = (raw: string): boolean => {
+  const trimmed = raw.trim();
+  if (trimmed === "") {
+    return true;
+  }
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return false;
+    }
+    const fields = Object.entries(parsed);
+    // Uppercase also folds the long s (ſ) accepted by encoding/json.
+    if (fields.some(([key]) => !ALLOWED_POLICY_KEYS.has(key.toUpperCase()))) {
+      return false;
+    }
+    const statements = fields
+      .filter(([key]) => key.toUpperCase() === "STATEMENT")
+      .map(([, value]) => value);
+    // JSON.parse loses duplicate-key order. With case aliases, an empty value
+    // can win in Go even when it is not last in Object.entries; reject any
+    // empty alternative instead of guessing which restriction will be saved.
+    return (
+      statements.length === 0 ||
+      statements.some(
+        (value) =>
+          value === null || (Array.isArray(value) && value.length === 0),
+      )
+    );
+  } catch {
+    return false;
+  }
+};
+
+export const isServiceAccountUpdatePolicyValid = ({
+  initialMode,
+  mode,
+  policyDefinition,
+  initialPolicyDefinition,
+}: ServiceAccountPolicyUpdateInput): boolean => {
+  if (mode === "inherited") {
+    return true;
+  }
+  if (
+    initialMode === "inline" &&
+    policyDefinition === initialPolicyDefinition
+  ) {
+    return true;
+  }
+  return !isEmptyInlinePolicyDocument(policyDefinition);
+};
+
+export const isServiceAccountCreatePolicyValid = ({
+  isRestrictedByPolicy,
+  policyDefinition,
+}: ServiceAccountPolicyCreateInput): boolean => {
+  return (
+    !isRestrictedByPolicy || !isEmptyInlinePolicyDocument(policyDefinition)
+  );
+};

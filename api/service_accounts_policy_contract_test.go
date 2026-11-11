@@ -50,6 +50,18 @@ func TestServiceAccountPolicyUpdateContract(t *testing.T) {
 			wantPolicy: `{"Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"]}]}`,
 		},
 		{name: "malformed JSON", policy: `{"Statement":`, invalidPolicy: true},
+		{name: "json null string", policy: `null`, invalidPolicy: true},
+		{name: "whitespace json null string", policy: " \nnull\t", invalidPolicy: true},
+		{
+			name:          "unknown top-level Statements field",
+			policy:        `{"Version":"2012-10-17","Statements":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"]}]}`,
+			invalidPolicy: true,
+		},
+		{
+			name:          "unknown statement Conditions field",
+			policy:        `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Conditions":{"IpAddress":{"aws:SourceIp":["10.0.0.0/8"]}}}]}`,
+			invalidPolicy: true,
+		},
 		{
 			name:          "invalid action",
 			policy:        `{"Statement":[{"Effect":"Allow","Action":["s3:NotAnAction"],"Resource":["*"]}]}`,

@@ -13,7 +13,7 @@ RUN yarn build && ./optimize-embed.sh
 FROM scratch AS web-assets
 COPY --from=uilayer /app/build /build
 
-FROM golang:1.27.3-alpine@sha256:d530cf60723abf1ffae0cd16bb546b379ec0550d2f3815e5b16ed69dbc00fba4 AS golayer
+FROM golang:1.27.4-alpine@sha256:0a5f7fe796599ff487605987432e7619ae45beeb2fba4c2ce0b907879932aebf AS golayer
 WORKDIR /console
 COPY go.mod go.sum ./
 RUN go mod download
@@ -38,7 +38,7 @@ RUN release_version="${build_release_version:-${build_version#v}}"; \
 # spills large multipart uploads to /tmp. The bundle is architecture-neutral,
 # so it is built once on the builder platform, with the same blocklist as the
 # pgsty/silo and pgsty/mc images.
-FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi9/ubi:latest@sha256:16e9e43d99e181463513cc84a514859b1abb9460f1c4d9e208da4b4e51cd5cc3 AS certs
+FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi9/ubi:latest@sha256:8b212f75a0e5a156ac28b1c5c030d2e8a07715254e19d522286118279399af81 AS certs
 # Native root blocklist mitigation: https://access.redhat.com/security/vulnerabilities/RHSB-2026-012
 RUN dnf -y install ca-certificates && \
     if [ -d /etc/pki/ca-trust/source/blocklist ]; then \

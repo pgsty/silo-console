@@ -1,6 +1,6 @@
 module github.com/minio/console
 
-go 1.27.3
+go 1.27.4
 
 tool github.com/go-swagger/go-swagger/cmd/swagger
 
@@ -19,7 +19,7 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 replace github.com/mattn/go-runewidth => github.com/mattn/go-runewidth v0.0.29
 
 // Use Pigsty's maintained mc fork while preserving upstream imports.
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261111180825-a37a9f054fba
 
 // v22.7.0 does not compile on NetBSD because its unix implementation uses
 // CLOCK_MONOTONIC, which is unavailable there. Keep the last portable release
@@ -29,7 +29,7 @@ replace github.com/coreos/go-systemd/v22 => github.com/coreos/go-systemd/v22 v22
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cheggaaa/pb/v3 v3.2.1
-	github.com/dustin/go-humanize v1.0.1
+	github.com/dustin/go-humanize v1.1.0
 	github.com/fatih/color v1.19.0
 	github.com/go-openapi/errors v0.22.9
 	github.com/go-openapi/loads v0.25.3
@@ -45,9 +45,9 @@ require (
 	github.com/go-openapi/validate v1.0.1
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.11.0
+	github.com/jackc/pgx/v5 v5.12.0
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/klauspost/compress v1.20.3
+	github.com/klauspost/compress v1.20.4
 	github.com/minio/cli v1.24.2
 	github.com/minio/highwayhash v1.0.4
 	github.com/minio/kes v0.24.0
@@ -58,16 +58,16 @@ require (
 	github.com/minio/selfupdate v0.6.0
 	github.com/minio/websocket v1.6.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pgsty/silo-pkg/v3 v3.16.0
+	github.com/pgsty/silo-pkg/v3 v3.16.1
 	github.com/rs/xid v1.6.0
 	github.com/secure-io/sio-go v0.3.1
 	github.com/stretchr/testify v1.12.1
-	github.com/unrolled/secure v1.17.0
+	github.com/unrolled/secure v1.18.0
 	// Includes the GO-2026-5932 openpgp carve-out fix.
 	golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2
 	// Includes the GO-2026-6860 and GO-2026-6866 HTML parser fixes.
 	golang.org/x/net v0.62.0
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/oauth2 v0.38.0
 )
 
 require (
@@ -122,14 +122,14 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
 	github.com/grafana/regexp v0.0.0-20250905093917-f7b3be9d1853 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/huandu/xstrings v1.6.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.8.3 // indirect
 	github.com/juju/ratelimit v1.0.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
@@ -203,7 +203,7 @@ require (
 	github.com/valyala/fastjson v1.6.10 // indirect
 	github.com/vbauerster/cupwriter v0.0.5 // indirect
 	github.com/vbauerster/mpb/v8 v8.16.3 // indirect
-	github.com/xo/terminfo v1.2.0 // indirect
+	github.com/xo/terminfo v1.2.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.etcd.io/etcd/api/v3 v3.7.3 // indirect
@@ -212,17 +212,17 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/mod v0.42.0 // indirect
-	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/mod v0.43.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/term v0.48.0 // indirect
 	// Added to include security fix for
 	// https://github.com/golang/go/issues/56152
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261019180522-ce908d29299b // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261026165753-2ffab32bce7e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
-	google.golang.org/grpc v1.84.0 // indirect
+	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

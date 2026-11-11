@@ -47,10 +47,12 @@ func integrationStore(t *testing.T) *Store {
 	})
 	return store
 }
+
 func observation(bytes uint64) Snapshot {
 	now := time.Now().UTC()
 	return Snapshot{Totals: Counts{CurrentBytes: bytes, CurrentObjects: 1}.Stats(), ScannedEntries: 1, StartedAt: now, UpdatedAt: now}
 }
+
 func TestQueueCoalescesAndRequeuesChangesDuringScan(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -103,6 +105,7 @@ func TestQueueCoalescesAndRequeuesChangesDuringScan(t *testing.T) {
 		t.Fatalf("duplicate events left extra jobs: %v", err)
 	}
 }
+
 func TestManualRequestsJoinActiveWorkAndTakePriority(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -142,6 +145,7 @@ func TestManualRequestsJoinActiveWorkAndTakePriority(t *testing.T) {
 		t.Fatal("background work was lost")
 	}
 }
+
 func TestOnlyOneWorkerCanClaimEachBucket(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -183,6 +187,7 @@ func TestOnlyOneWorkerCanClaimEachBucket(t *testing.T) {
 		t.Fatalf("claimed %d of %d buckets", len(seen), count)
 	}
 }
+
 func TestExpiredWorkerCannotPublishOrRenew(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -214,6 +219,7 @@ func TestExpiredWorkerCannotPublishOrRenew(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
 func TestFailurePreservesLastCompleteObservationAndPartialProgress(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -266,6 +272,7 @@ func TestFailurePreservesLastCompleteObservationAndPartialProgress(t *testing.T)
 		t.Fatalf("explicit refresh could not retry: %v", err)
 	}
 }
+
 func TestDebounceScopeIsolationAndInvalidObservations(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -353,6 +360,7 @@ func TestCheckpointYieldAndLeaseRecoveryPreserveSafeCursor(t *testing.T) {
 		t.Fatal("completed job retained a stale continuation")
 	}
 }
+
 func TestYieldGivesOtherBucketsTheirTurn(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -502,6 +510,7 @@ type listingFunc func(context.Context, string, minio.ListObjectsOptions) <-chan 
 func (f listingFunc) ListObjects(ctx context.Context, bucket string, opts minio.ListObjectsOptions) <-chan minio.ObjectInfo {
 	return f(ctx, bucket, opts)
 }
+
 func TestScanSlicesResumeAfterWholeVersionGroupsWithoutDoubleCounting(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()
@@ -577,6 +586,7 @@ func TestScanSlicesResumeAfterWholeVersionGroupsWithoutDoubleCounting(t *testing
 		t.Fatalf("resume skipped or double-counted versions: %+v", saved.LastGood)
 	}
 }
+
 func TestScanErrorsAndBudgetsNeverPublishPartialAsComplete(t *testing.T) {
 	for _, tc := range []struct {
 		name, code string
@@ -661,6 +671,7 @@ func TestMissingBucketRetiresOldWorkWithoutDiscardingANewerMutation(t *testing.T
 		}
 	}
 }
+
 func TestDirtyCompletionUsesCooldownAndManualRefreshCanExpediteIt(t *testing.T) {
 	s := integrationStore(t)
 	ctx := context.Background()

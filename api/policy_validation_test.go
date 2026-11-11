@@ -158,3 +158,69 @@ func TestOptionalPolicyWriteValidation(t *testing.T) {
 		t.Fatalf("valid optional policy was rewritten to %q", normalized)
 	}
 }
+
+func TestPolicyWriteValidationRejectsUnknownFieldsAndNonObjectJSON(t *testing.T) {
+	invalidDocs := []struct {
+		name string
+		doc  string
+	}{
+		{name: "json null", doc: `null`},
+		{name: "whitespace json null", doc: " \n\tnull\n "},
+		{name: "json array", doc: `[]`},
+		{name: "trailing object", doc: `{}{}`},
+		{name: "top-level Statements typo", doc: `{"Version":"2012-10-17","Statements":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"]}]}`},
+		{name: "statement Conditions typo", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Conditions":{"IpAddress":{"aws:SourceIp":["10.0.0.0/8"]}}}]}`},
+		{name: "statement NotResources typo", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:GetObject"],"NotResources":["arn:aws:s3:::secret/*"]}]}`},
+	}
+
+	for _, tc := range invalidDocs {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := parsePolicyForWrite(tc.doc); !errors.Is(err, ErrInvalidPolicyDocument) {
+				t.Fatalf("parsePolicyForWrite(%q) error = %v, want ErrInvalidPolicyDocument", tc.doc, err)
+			}
+			if _, err := normalizeOptionalPolicyForWrite(tc.doc); !errors.Is(err, ErrInvalidPolicyDocument) {
+				t.Fatalf("normalizeOptionalPolicyForWrite(%q) error = %v, want ErrInvalidPolicyDocument", tc.doc, err)
+			}
+		})
+	}
+
+	for _, resetDoc := range []string{`{}`, `{"Statement":[]}`, `{"Version":"2012-10-17","Statement":[]}`} {
+		p, err := parsePolicyForWrite(resetDoc)
+		if err != nil {
+			t.Fatalf("parsePolicyForWrite(%q) unexpected error: %v", resetDoc, err)
+		}
+		if !p.IsEmpty() {
+			t.Fatalf("parsePolicyForWrite(%q) expected empty policy", resetDoc)
+		}
+		if _, err := parseNamedPolicyForWrite(resetDoc); !errors.Is(err, ErrInvalidPolicyDocument) {
+			t.Fatalf("parseNamedPolicyForWrite(%q) error = %v, want ErrInvalidPolicyDocument", resetDoc, err)
+		}
+	}
+}
+
+func TestBucketPolicyWriteValidationRejectsUnknownFields(t *testing.T) {
+	validBucketDoc := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"]}]}`
+	if err := validateBucketPolicyForWrite(validBucketDoc, "bucktest1"); err != nil {
+		t.Fatalf("validateBucketPolicyForWrite(valid) unexpected error: %v", err)
+	}
+
+	invalidBucketDocs := []struct {
+		name string
+		doc  string
+	}{
+		{name: "json null", doc: `null`},
+		{name: "top-level Statements typo", doc: `{"Version":"2012-10-17","Statements":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"]}]}`},
+		{name: "statement Conditions typo", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"],"Conditions":{"IpAddress":{"aws:SourceIp":["10.0.0.0/8"]}}}]}`},
+		{name: "principal unknown key", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"],"Service":["ec2.amazonaws.com"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"]}]}`},
+		{name: "principal empty object", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"]}]}`},
+		{name: "statement unsupported NotPrincipal", doc: `{"Version":"2012-10-17","Statement":[{"Effect":"Deny","Principal":{"AWS":["*"]},"NotPrincipal":{"AWS":["arn:aws:iam::123456789012:root"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucktest1/*"]}]}`},
+	}
+
+	for _, tc := range invalidBucketDocs {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := validateBucketPolicyForWrite(tc.doc, "bucktest1"); !errors.Is(err, ErrInvalidPolicyDocument) {
+				t.Fatalf("validateBucketPolicyForWrite(%q) error = %v, want ErrInvalidPolicyDocument", tc.doc, err)
+			}
+		})
+	}
+}

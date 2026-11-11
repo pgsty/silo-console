@@ -372,7 +372,11 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	// handle debug logging
 	next = DebugLogMiddleware(next)
 
+	tlsHost := GetSecureTLSHost()
 	sslHostFn := secure.SSLHostFunc(func(host string) string {
+		if tlsHost != "" {
+			return tlsHost
+		}
 		xhost, err := xnet.ParseHost(host)
 		if err != nil {
 			return host
@@ -388,7 +392,6 @@ func setupGlobalMiddleware(handler http.Handler) http.Handler {
 		HostsProxyHeaders:               GetSecureHostsProxyHeaders(),
 		SSLRedirect:                     GetTLSRedirect() == "on" && len(GlobalPublicCerts) > 0,
 		SSLHostFunc:                     &sslHostFn,
-		SSLHost:                         GetSecureTLSHost(),
 		STSSeconds:                      GetSecureSTSSeconds(),
 		STSIncludeSubdomains:            GetSecureSTSIncludeSubdomains(),
 		STSPreload:                      GetSecureSTSPreload(),

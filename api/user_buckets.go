@@ -596,6 +596,11 @@ func setBucketAccessPolicy(ctx context.Context, client MinioClient, bucketName s
 
 	bucketAccessPolicy := policy.BucketAccessPolicy{Version: minioIAMPolicy.DefaultVersion}
 	if access == models.BucketAccessCUSTOM {
+		if strings.TrimSpace(policyDefinition) != "" {
+			if err := validateBucketPolicyForWrite(policyDefinition, bucketName); err != nil {
+				return err
+			}
+		}
 		err := client.setBucketPolicyWithContext(ctx, bucketName, policyDefinition)
 		if err != nil {
 			return err

@@ -34,21 +34,22 @@
 > sponsored by MinIO, Inc. The MinIO name is used only to identify the upstream
 > project and compatibility lineage.
 
-## SILO Console 2.7.0
+## SILO Console 2.7.1
 
-**SILO Console 2.7.0** ships ten UI languages with Arabic RTL, independently
-cached language assets, container HTTPS and temporary-file fixes, usage-worker
-TLS and scheduling fixes, folder sizes over plain HTTP, and updated Go
-dependencies and API documentation. Release artifacts are available on
-[GitHub Releases](https://github.com/pgsty/silo-console/releases/tag/v2.7.0)
-and documented in the [2.7.0 release notes](https://silo.pgsty.com/blog/release/console-2.7.0/).
+**SILO Console 2.7.1** hardens service-account inline policy tri-state editing
+and strict IAM and bucket policy JSON validation, adopts Go 1.27.4, silo-pkg
+v3.16.1, and mcli 20261112, and retains all 2.7.0 ten-language UI, Arabic RTL,
+container HTTPS/temp-file, and usage-worker capabilities. Release artifacts are
+available on [GitHub Releases](https://github.com/pgsty/silo-console/releases/tag/v2.7.1)
+and changes are detailed in [CHANGELOG.md](CHANGELOG.md#release-v271); see also
+the [2.7.0 release notes](https://silo.pgsty.com/blog/release/console-2.7.0/).
 
 [English](README.md) · [简体中文](README_ZH.md)
 
-**2.7.0** uses **Go 1.27.3**, **silo-pkg v3.16.0** and the **official mcli
-20261109 release**. MC's tag `RELEASE.2026-11-09T00-00-00Z` is a calendar tag,
+**2.7.1** uses **Go 1.27.4**, **silo-pkg v3.16.1** and the **official mcli
+20261112 release**. MC's tag `RELEASE.2026-11-12T00-00-00Z` is a calendar tag,
 so Go represents its exact released commit as
-`v0.0.0-20261109021353-e1d4cc5abfe0`. The `github.com/minio/mc` import path is
+`v0.0.0-20261111180825-a37a9f054fba`. The `github.com/minio/mc` import path is
 retained through a replacement with `github.com/pgsty/mc`; this is the released
 source, not a pre-release or floating branch. Exact tags and source commits are
 recorded in [hack/deps-release.json](hack/deps-release.json). Console v2.6.0 retains its
@@ -64,7 +65,7 @@ versioning checks, and bucket table layout across widths and fallback fonts.
 The Go security graph includes the fixed x/crypto and x/net selections recorded
 in `go.mod`; existing policy semantics and output compatibility selections remain.
 See [GitHub Releases](https://github.com/pgsty/silo-console/releases) for publication
-status and artifacts, and [CHANGELOG.md](CHANGELOG.md#release-v270) for 2.7.0 changes.
+status and artifacts, and [CHANGELOG.md](CHANGELOG.md#release-v271) for 2.7.1 changes.
 
 SILO Server 20261109 embeds Console v2.7.0 (`4e91ae506e70`); historical Server
 20261026 embeds Console v2.5.1 (including the IAM cache repair required by
@@ -242,7 +243,7 @@ modules:
 <!-- silo-replacements:begin -->
 ```go
 replace (
-	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
+	github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261111180825-a37a9f054fba
 )
 ```
 <!-- silo-replacements:end -->

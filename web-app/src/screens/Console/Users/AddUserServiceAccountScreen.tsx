@@ -51,6 +51,10 @@ import AddUserServiceAccountHelpBox from "./AddUserServiceAccountHelpBox";
 import PageHeaderWrapper from "../Common/PageHeaderWrapper/PageHeaderWrapper";
 import PanelTitle from "../Common/PanelTitle/PanelTitle";
 import { formatText, useLocalizedLink, useT } from "i18n";
+import {
+  isServiceAccountCreatePolicyValid,
+  policyForServiceAccountCreate,
+} from "../Account/serviceAccountPolicy";
 
 const AddServiceAccount = () => {
   const dispatch = useAppDispatch();
@@ -85,7 +89,10 @@ const AddServiceAccount = () => {
             userName,
           )}/service-account-credentials`,
           {
-            policy: policyJSON,
+            policy: policyForServiceAccountCreate({
+              isRestrictedByPolicy,
+              policyDefinition: policyJSON,
+            }),
             accessKey: accessKey,
             secretKey: secretKey,
             description: description,
@@ -111,6 +118,7 @@ const AddServiceAccount = () => {
     addSending,
     setAddSending,
     dispatch,
+    isRestrictedByPolicy,
     policyJSON,
     userName,
     accessKey,
@@ -130,17 +138,26 @@ const AddServiceAccount = () => {
           setPolicyJSON(JSON.stringify(JSON.parse(res.policy), null, 4));
         })
         .catch((err: ErrorResponseHandler) => {
-          setErrorSnackMessage(err);
+          dispatch(setErrorSnackMessage(err));
         });
     }
-  }, [isRestrictedByPolicy, userName]);
+  }, [dispatch, isRestrictedByPolicy, userName]);
+
+  const validPolicy = isServiceAccountCreatePolicyValid({
+    isRestrictedByPolicy,
+    policyDefinition: policyJSON,
+  });
 
   const addUserServiceAccount = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validPolicy || addSending) {
+      return;
+    }
     setAddSending(true);
   };
 
   const resetForm = () => {
+    setPolicyJSON("");
     setNewServiceAccount(null);
     setAccessKey("");
     setSecretKey("");
@@ -345,6 +362,7 @@ const AddServiceAccount = () => {
                   type="submit"
                   variant="callAction"
                   color="primary"
+                  disabled={!validPolicy || addSending}
                   label={t("Create")}
                 />
               </Grid>
@@ -353,7 +371,7 @@ const AddServiceAccount = () => {
                   user: userName,
                   accessKey,
                   customSecret: Boolean(secretKey),
-                  policy: Boolean(policyJSON),
+                  policy: isRestrictedByPolicy && Boolean(policyJSON.trim()),
                   name,
                   description,
                   expiry: expiry?.isValid ? expiry.toUTC().toISO() : undefined,

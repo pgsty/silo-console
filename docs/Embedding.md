@@ -1,5 +1,9 @@
 # Embedding Console in a SILO server
 
+The current development tree requires Go 1.27.4. Release version metadata and
+the published component pins below remain unchanged until the next release
+candidate is finalized.
+
 Console 2.7.0 source uses silo-pkg v3.16.0 and the published
 mcli 20261109 source, recorded in `hack/deps-release.json`, with Go 1.27.3 and upstream
 minio-go `v7.4.2-0.20261025165926-320af050c445`. This SDK revision includes
