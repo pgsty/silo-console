@@ -28,7 +28,7 @@ import { api } from "api";
 import { errorToHandler } from "api/errors";
 import CodeMirrorWrapper from "../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
 import { useAppDispatch } from "store";
-import { setErrorSnackMessage, setModalErrorSnackMessage } from "systemSlice";
+import { setModalErrorSnackMessage } from "systemSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { DateTime } from "luxon";
@@ -162,7 +162,7 @@ const EditServiceAccount = ({
       })
       .catch((res) => {
         setLoading(false);
-        dispatch(setErrorSnackMessage(errorToHandler(res?.error || res)));
+        dispatch(setModalErrorSnackMessage(errorToHandler(res?.error || res)));
       });
   };
 
