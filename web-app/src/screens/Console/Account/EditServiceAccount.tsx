@@ -27,13 +27,16 @@ import {
 import { api } from "api";
 import { errorToHandler } from "api/errors";
 import CodeMirrorWrapper from "../Common/FormComponents/CodeMirrorWrapper/CodeMirrorWrapper";
-import { ApiError } from "api/consoleApi";
 import { useAppDispatch } from "store";
 import { setErrorSnackMessage, setModalErrorSnackMessage } from "systemSlice";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { DateTime } from "luxon";
 import { i18nKey, formatText, useLocalizedLink, useT } from "i18n";
+import {
+  policyForServiceAccountUpdate,
+  ServiceAccountPolicyMode,
+} from "./serviceAccountPolicy";
 
 interface IServiceAccountPolicyProps {
   open: boolean;
@@ -52,7 +55,14 @@ const EditServiceAccount = ({
   const t = useT();
   const localize = useLocalizedLink();
   const [loading, setLoading] = useState<boolean>(false);
-  const [policyDefinition, setPolicyDefinition] = useState<any>("");
+  const [policyDefinition, setPolicyDefinition] = useState<string>("");
+  const [policyMode, setPolicyMode] =
+    useState<ServiceAccountPolicyMode>("inherited");
+  const [initialPolicy, setInitialPolicy] = useState<{
+    accessKey: string;
+    mode: ServiceAccountPolicyMode;
+    definition: string;
+  } | null>(null);
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -60,41 +70,88 @@ const EditServiceAccount = ({
   const [status, setStatus] = useState<string | undefined>("enabled");
 
   useEffect(() => {
-    if (!loading && selectedAccessKey !== "") {
-      setLoading(true);
-      api.serviceAccounts
-        .getServiceAccount(selectedAccessKey || "")
-        .then((res) => {
-          setLoading(false);
-          const saInfo = res.data;
+    let active = true;
+    setInitialPolicy(null);
+    setPolicyMode("inherited");
+    setPolicyDefinition("");
 
-          setName(saInfo?.name || "");
-
-          if (saInfo?.expiration) {
-            setExpiry(DateTime.fromISO(saInfo?.expiration));
-          }
-
-          setDescription(saInfo?.description || "");
-          setStatus(saInfo.accountStatus);
-
-          setPolicyDefinition(saInfo.policy || "");
-        })
-        .catch((err) => {
-          setLoading(false);
-          dispatch(setModalErrorSnackMessage(errorToHandler(err)));
-        });
+    if (!open || !selectedAccessKey) {
+      setLoading(false);
+      return () => {
+        active = false;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAccessKey]);
 
-  const setPolicy = (event: React.FormEvent, newPolicy: string) => {
+    setLoading(true);
+    api.serviceAccounts
+      .getServiceAccount(selectedAccessKey)
+      .then((res) => {
+        if (!active) return;
+        const saInfo = res.data;
+        const initialMode: ServiceAccountPolicyMode = saInfo?.impliedPolicy
+          ? "inherited"
+          : "inline";
+        const returnedPolicy = saInfo?.policy || "";
+
+        setName(saInfo?.name || "");
+
+        if (saInfo?.expiration) {
+          setExpiry(DateTime.fromISO(saInfo.expiration));
+        } else {
+          setExpiry(undefined);
+        }
+
+        setDescription(saInfo?.description || "");
+        setStatus(saInfo.accountStatus);
+        setInitialPolicy({
+          accessKey: selectedAccessKey,
+          mode: initialMode,
+          definition: initialMode === "inline" ? returnedPolicy : "",
+        });
+        setPolicyMode(initialMode);
+        // Keep the effective parent policy available when the user enables a
+        // restriction, but never use it as an implicit update payload.
+        setPolicyDefinition(returnedPolicy);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setLoading(false);
+        dispatch(setModalErrorSnackMessage(errorToHandler(err?.error || err)));
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [dispatch, open, selectedAccessKey]);
+
+  const loaded =
+    open &&
+    !!selectedAccessKey &&
+    initialPolicy?.accessKey === selectedAccessKey;
+  const disabled = readOnly || loading || !loaded;
+  const validPolicy =
+    policyMode === "inherited" ||
+    (initialPolicy?.mode === "inline" &&
+      policyDefinition === initialPolicy.definition) ||
+    policyDefinition.trim() !== "";
+
+  const setPolicy = (event: React.FormEvent) => {
     event.preventDefault();
-    if (readOnly) {
+    if (disabled || !validPolicy || !initialPolicy) {
       return;
     }
+    setLoading(true);
     api.serviceAccounts
       .updateServiceAccount(selectedAccessKey || "", {
-        policy: newPolicy,
+        // The generated API keeps policy required. An empty string is the
+        // server contract for leaving the current policy unchanged.
+        policy: policyForServiceAccountUpdate({
+          initialMode: initialPolicy.mode,
+          mode: policyMode,
+          policyDefinition,
+          initialPolicyDefinition: initialPolicy.definition,
+        }),
         description: description,
         expiry: expiry,
         name: name,
@@ -103,9 +160,9 @@ const EditServiceAccount = ({
       .then(() => {
         closeModalAndRefresh();
       })
-      .catch(async (res) => {
-        const err = (await res.json()) as ApiError;
-        dispatch(setErrorSnackMessage(errorToHandler(err)));
+      .catch((res) => {
+        setLoading(false);
+        dispatch(setErrorSnackMessage(errorToHandler(res?.error || res)));
       });
   };
 
@@ -131,33 +188,52 @@ const EditServiceAccount = ({
         noValidate
         autoComplete="off"
         onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-          setPolicy(e, policyDefinition);
+          setPolicy(e);
         }}
       >
         <Grid container>
           <Grid item xs={12}>
-            <CodeMirrorWrapper
-              label={t("Access Key Policy")}
-              value={policyDefinition}
-              onChange={(value) => {
-                setPolicyDefinition(value);
+            <Switch
+              value="serviceAccountPolicy"
+              id="serviceAccountPolicy"
+              name="serviceAccountPolicy"
+              checked={policyMode === "inline"}
+              disabled={disabled}
+              onChange={(event) => {
+                setPolicyMode(event.target.checked ? "inline" : "inherited");
               }}
-              editorHeight={"350px"}
-              readOnly={readOnly}
-              helptip={
-                <Fragment>
-                  <a
-                    target="blank"
-                    href={localize(
-                      "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
-                    )}
-                  >
-                    {t("Guide to access policy structure")}
-                  </a>
-                </Fragment>
-              }
+              label={t("Restrict beyond user policy")}
+              description={t(
+                "You can specify an optional JSON-formatted IAM policy to further restrict Access Key access to a subset of the actions and resources explicitly allowed for the parent user. Additional access beyond that of the parent user cannot be implemented through these policies.",
+              )}
             />
           </Grid>
+          {(policyMode === "inline" || readOnly) && (
+            <Grid item xs={12}>
+              <CodeMirrorWrapper
+                label={t("Access Key Policy")}
+                value={policyDefinition}
+                onChange={(value) => {
+                  setPolicyDefinition(value);
+                }}
+                editorHeight={"350px"}
+                readOnly={readOnly}
+                disabled={disabled}
+                helptip={
+                  <Fragment>
+                    <a
+                      target="blank"
+                      href={localize(
+                        "https://silo.pgsty.com/administration/identity-access-management/policy-based-access-control/#policy-document-structure",
+                      )}
+                    >
+                      {t("Guide to access policy structure")}
+                    </a>
+                  </Fragment>
+                }
+              />
+            </Grid>
+          )}
           <Box
             sx={{
               marginBottom: "15px",
@@ -175,7 +251,7 @@ const EditServiceAccount = ({
               label={t("Expiry")}
               timeFormat={"24h"}
               secondsSelector={false}
-              disabled={readOnly}
+              disabled={disabled}
             />
           </Box>
           <Grid
@@ -191,7 +267,7 @@ const EditServiceAccount = ({
               id={"name"}
               name={"name"}
               type={"text"}
-              disabled={readOnly}
+              disabled={disabled}
               placeholder={t("Enter a name")}
               onChange={(e) => {
                 setName(e.target.value);
@@ -211,7 +287,7 @@ const EditServiceAccount = ({
               id={"description"}
               name={"description"}
               type={"text"}
-              disabled={readOnly}
+              disabled={disabled}
               placeholder={t("Enter a description")}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -245,7 +321,7 @@ const EditServiceAccount = ({
                 id="saStatus"
                 name="saStatus"
                 label=""
-                disabled={readOnly}
+                disabled={disabled}
                 onChange={(e) => {
                   setStatus(e.target.checked ? "on" : "off");
                 }}
@@ -270,7 +346,7 @@ const EditServiceAccount = ({
                 type="submit"
                 variant="callAction"
                 color="primary"
-                disabled={loading}
+                disabled={disabled || !validPolicy}
                 label={t("Update")}
               />
             )}
