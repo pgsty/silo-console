@@ -8,12 +8,12 @@ SILO 对象存储的 Web 管理控制台，由 Pigsty 社区维护。前端使�
 
 这是从开源 MinIO Console 延续而来的独立项目，与 MinIO, Inc. 无隶属、赞助或背书关系。MinIO 名称用于说明上游来源与兼容谱系。
 
-## SILO Console 2.7.1
+## SILO Console 2.7.2
 
-**SILO Console 2.7.1** 修复并强化服务账户三态内联策略编辑与 IAM／桶策略严格 JSON 校验，升级至 Go 1.27.4、silo-pkg v3.16.1 与 mcli 20261112，并保留 2.7.0 的十种界面语言、阿拉伯语 RTL、容器 HTTPS／临时文件与用量后台任务修复。
-发布制品见 [GitHub Releases](https://github.com/pgsty/silo-console/releases/tag/v2.7.1)，变更清单见 [CHANGELOG.md](CHANGELOG.md#release-v271)，背景特性参见 [Console 2.7.0 发布说明](https://silo.pgsty.com/zh/blog/release/console-2.7.0/)。
+**SILO Console 2.7.2** 同步内嵌发布元数据与嵌入／依赖文档以配套 SILO Server `20261112` 交付，完整包含 2.7.1 的服务账户三态内联策略编辑（含在编辑弹窗内直接显示保存报错）、IAM／桶策略严格 JSON 校验及 `--host 0.0.0.0` 下 HTTP→HTTPS 重定向保留请求主机名（未显式设置 `CONSOLE_SECURE_TLS_HOST` 时），基于 Go 1.27.4、silo-pkg v3.16.1 与 mcli 20261112 构建，并保留 2.7.0 的十种界面语言、阿拉伯语 RTL、容器 HTTPS／临时文件与用量后台任务修复。
+发布制品见 [GitHub Releases](https://github.com/pgsty/silo-console/releases/tag/v2.7.2)，变更清单见 [CHANGELOG.md](CHANGELOG.md#release-v272)，背景特性参见 [Console 2.7.1 发布说明](https://silo.pgsty.com/zh/blog/release/console-2.7.1/) 与 [Console 2.7.0 发布说明](https://silo.pgsty.com/zh/blog/release/console-2.7.0/)。
 
-**2.7.1** 使用 **Go 1.27.4**、**silo-pkg v3.16.1** 与 **mcli 20261112 正式版**。
+**2.7.2** 使用 **Go 1.27.4**、**silo-pkg v3.16.1** 与 **mcli 20261112 正式版**。
 MC 的 `RELEASE.2026-11-12T00-00-00Z` 是日历标签，Go 用伪版本
 `v0.0.0-20261111180825-a37a9f054fba` 表示其准确发布提交。
 保留 `github.com/minio/mc` 导入路径，通过 replace 选择 `github.com/pgsty/mc` 的正式源码；
@@ -26,7 +26,7 @@ Console v2.6.0 已加入目录与存储桶用量扫描、按需刷新、持久�
 并强化存储桶数值校验、配额与复制处理、锁定桶版本控制检查，以及不同宽度和字体下的表格布局。
 Go 安全依赖图同步采用 `go.mod` 中修复后的 x/crypto 与 x/net 版本，保留既有策略语义和输出格式兼容性例外。
 发布状态与制品见 [GitHub Releases](https://github.com/pgsty/silo-console/releases)，
-2.7.1 变化见 [CHANGELOG.md](CHANGELOG.md#release-v271)。
+2.7.2 与 2.7.1 变化见 [CHANGELOG.md](CHANGELOG.md#release-v272)。
 
 SILO Server 20261109 已内嵌 Console v2.7.0（`4e91ae506e70`）；历史版本 Server 20261026 内嵌 Console v2.5.1（含策略“恢复默认”所需的 IAM 缓存修复）。
 单独更新独立版 Console 不会替换旧版 Server 的内嵌 Console；升级 SILO Server 可同步更新内嵌界面与服务端行为。
@@ -84,7 +84,7 @@ make console
 CONSOLE_MINIO_SERVER=http://127.0.0.1:9000 ./console server
 ```
 
-保留的 Go 模块路径没有 `/v2` 后缀。当前候选源码的依赖与 replacement 见 [Embedding.md](docs/Embedding.md) 和[英文 README](README.md#status-and-compatibility)。嵌入时使用所选提交的 Go 伪版本，并显式复制 MC replacement；Go 不会继承依赖的替换配置。共享代码直接使用 `github.com/pgsty/silo-pkg/v3`；经 `minio/colorjson` 引入的间接 `minio/pkg/v3` 保持独立，不替换为 silo-pkg。
+保留的 Go 模块路径没有 `/v2` 后缀。当前 v2.7.2 源码的依赖与 replacement 见 [Embedding.md](docs/Embedding.md) 和[英文 README](README.md#status-and-compatibility)。嵌入时使用所选提交的 Go 伪版本，并显式复制 MC replacement；Go 不会继承依赖的替换配置。共享代码直接使用 `github.com/pgsty/silo-pkg/v3`；经 `minio/colorjson` 引入的间接 `minio/pkg/v3` 保持独立，不替换为 silo-pkg。
 
 前端开发见 [DEVELOPMENT.md](DEVELOPMENT.md) 与 [web-app/README.md](web-app/README.md)。工具链及 TLS 兼容细节、功能截图和维护范围见[英文 README](README.md)。
 

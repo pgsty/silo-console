@@ -1,10 +1,21 @@
 # Changelog
 
+## Release v2.7.2
+
+- Sync embedded release metadata (`2.7.2`), `docs/Embedding.md`, `docs/README.md`,
+  `README.md`, `README_ZH.md`, and `CHANGELOG.md` for coordinated SILO Server
+  `20261112` embedding: record Go 1.27.4, `silo-pkg v3.16.1`, and `mcli 20261112`
+  (`v0.0.0-20261111180825-a37a9f054fba`), and document wildcard/interface
+  HTTP-to-HTTPS redirect host preservation (`--host 0.0.0.0` /
+  `CONSOLE_SECURE_TLS_HOST` with `github.com/unrolled/secure` v1.18.0) and
+  in-modal service-account save error reporting.
+
 ## Release v2.7.1
 
 - Preserve dynamic parent-policy inheritance when editing service-account
-  metadata, and use an explicit empty policy document only when clearing an
-  existing inline restriction (#88, #89).
+  metadata, use an explicit empty policy document only when clearing an
+  existing inline restriction, and render save errors directly inside the
+  service-account edit modal instead of behind the open dialog (#88, #89).
 - Omit preloaded user-policy JSON when the inline restriction toggle is turned
   off on service-account creation forms, block empty inline submissions
   (including null statements, case-insensitive or Unicode-folded JSON field
@@ -16,6 +27,10 @@
   service-account, and custom bucket policy write validation so misspelled keys
   cannot silently strip conditions or reset a service account to inherited
   permissions.
+- Preserve the incoming request hostname on HTTP-to-HTTPS redirects when
+  listening on wildcard or interface addresses such as `--host 0.0.0.0` unless
+  `CONSOLE_SECURE_TLS_HOST` is explicitly set, and upgrade
+  `github.com/unrolled/secure` to v1.18.0.
 - Require Go 1.27.4 across source, CI, and container builds, upgrade GoReleaser
   to v2.20.1, refresh pinned container bases, and adopt released silo-pkg
   v3.16.1 and mcli 20261112 (`v0.0.0-20261111180825-a37a9f054fba`).

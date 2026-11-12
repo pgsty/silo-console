@@ -1,27 +1,24 @@
 # Embedding Console in a SILO server
 
-The current development tree requires Go 1.27.4. Release version metadata and
-the published component pins below remain unchanged until the next release
-candidate is finalized.
-
-Console 2.7.0 source uses silo-pkg v3.16.0 and the published
-mcli 20261109 source, recorded in `hack/deps-release.json`, with Go 1.27.3 and upstream
+Console 2.7.2 source uses silo-pkg v3.16.1 and the published
+mcli 20261112 source, recorded in `hack/deps-release.json`, with Go 1.27.4 and upstream
 minio-go `v7.4.2-0.20261025165926-320af050c445`. This SDK revision includes
 post-v7.4.1 fixes; it is not a tagged v7.4.2 release.
 It retains the fixed `golang.org/x/net v0.62.0` and
 `golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2` revisions already used
-by Console v2.6.0. Use the README replacement block from the Console revision
-being embedded in a SILO server.
+by Console v2.6.0 and v2.7.0. Use the README replacement block from the Console
+revision being embedded in a SILO server.
 
-MC resolves to `v0.0.0-20261109021353-e1d4cc5abfe0`, the source commit
-`e1d4cc5abfe00b674eb36347399e7398990be467` tagged
-`RELEASE.2026-11-09T00-00-00Z`. The calendar tag is not Go SemVer.
-silo-pkg v3.16.0 resolves to `b7aeea85e84e8888d6ab424c7123a1297711bc3f`.
+MC resolves to `v0.0.0-20261111180825-a37a9f054fba`, the source commit
+`a37a9f054fba828a0bbbceb4e9ff247ccf09c28d` tagged
+`RELEASE.2026-11-12T00-00-00Z`. The calendar tag is not Go SemVer.
+silo-pkg v3.16.1 resolves to `433f7eefa714a30b72ca70c4dffcd5faca25804f`.
 These are released dependencies; see GitHub Releases for Console's own
 publication status.
-Published Console v2.6.0 used silo-pkg v3.15.2 and mcli 20261026; its
-[dependency record](https://github.com/pgsty/silo-console/blob/v2.6.0/hack/deps-release.json)
-remains attached to that release.
+Published Console v2.7.0 used silo-pkg v3.16.0 and mcli 20261109; Console v2.6.0
+used silo-pkg v3.15.2 and mcli 20261026; each release retains its own
+[dependency record](https://github.com/pgsty/silo-console/blob/v2.7.0/hack/deps-release.json)
+at its tag.
 
 The generator is go-swagger v0.36.7; its linked runtime and
 server-middleware are v0.33.4. Generated array context validators now continue
@@ -45,7 +42,7 @@ that one directive from the authoritative README block between the
 
 | Module graph | Status |
 | :-- | :-- |
-| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.16.0 requirement |
+| The single `pgsty/mc` replacement from the README | Supported. `downstream-embedder-compat` builds a minimal embedder from the published block and checks both the replacement and the inherited `pgsty/silo-pkg` v3.16.1 requirement |
 | No mc replacement | Best-effort compatibility probe, tested by the non-blocking `upstream-pkg-compat` job; this is not the released SILO graph and does not constrain maintained dependency versions |
 | The retired `minio/pkg => silo-pkg` or `minio-go => silo-go` replacements | Unsupported. silo-pkg v3.13.0 and later own `github.com/pgsty/silo-pkg/v3`, and minio-go now resolves upstream |
 
@@ -68,7 +65,7 @@ compile. `minio-go` is the explicit exception and resolves upstream by policy.
 
 This Console line has completed the migration described by silo-pkg v3.13.0:
 its source imports `github.com/pgsty/silo-pkg/v3`, and `go.mod` requires the
-current v3.16.0 release directly. A SILO server adopting this Console revision must make the same source
+current v3.16.1 release directly. A SILO server adopting this Console revision must make the same source
 import migration. Keeping old `github.com/minio/pkg/v3`
 imports while replacing that path with silo-pkg v3.13.0 or later produces
 `used for two different module paths`. Update the embedding server's imports
