@@ -89,7 +89,6 @@ const initialState: ObjectBrowserState = {
     unit: undefined,
     validity: 0,
   },
-  longFileOpen: false,
   maxShareLinkExpTime: 0,
   versionsLimit: 20,
 };
@@ -611,9 +610,6 @@ const objectBrowserSlice = createSlice({
     setSelectedBucket: (state, action: PayloadAction<string>) => {
       state.selectedBucket = action.payload;
     },
-    setLongFileOpen: (state, action: PayloadAction<boolean>) => {
-      state.longFileOpen = action.payload;
-    },
     setAnonymousAccessOpen: (state, action: PayloadAction<boolean>) => {
       state.anonymousAccessOpen = action.payload;
     },
@@ -679,7 +675,6 @@ export const {
   invalidateMutationView,
   setRetentionConfig,
   setSelectedBucket,
-  setLongFileOpen,
   setAnonymousAccessOpen,
   setMaxShareLinkExpTime,
   errorInConnection,

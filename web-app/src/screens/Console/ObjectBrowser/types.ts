@@ -60,7 +60,6 @@ export interface ObjectBrowserState {
   previewOpen: boolean;
   shareFileModalOpen: boolean;
   retentionConfig: GetBucketRetentionConfig | null;
-  longFileOpen: boolean;
   anonymousAccessOpen: boolean;
   connectionError: boolean;
   maxShareLinkExpTime: number;

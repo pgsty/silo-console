@@ -48,7 +48,13 @@ const RenameLongFileName = ({
 
   const doDownload = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    downloadObject(dispatch, bucketName, internalPaths, actualInfo);
+    downloadObject(
+      dispatch,
+      bucketName,
+      internalPaths,
+      actualInfo,
+      acceptLongName ? null : newFileName,
+    );
     closeModal();
   };
 
