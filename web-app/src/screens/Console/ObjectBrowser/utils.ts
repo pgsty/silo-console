@@ -14,14 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { getClientOS } from "../../../common/utils";
 import { makeid, storeCallForObjectWithID } from "./transferManager";
 import { download } from "../Buckets/ListBuckets/Objects/utils";
 import {
   cancelObjectInList,
   completeObject,
   failObject,
-  setLongFileOpen,
   setNewObject,
   updateProgress,
 } from "./objectBrowserSlice";
@@ -35,17 +33,11 @@ export const downloadObject = (
   bucketName: string,
   internalPaths: string,
   object: BucketObject,
+  overrideFileName: string | null = null,
 ) => {
   const identityDownload = encodeURIComponent(
     `${bucketName}-${object.name}-${new Date().getTime()}-${Math.random()}`,
   );
-
-  const isWinOs = getClientOS().toLowerCase().includes("win");
-
-  if ((object.name?.length || 0) > 200 && isWinOs) {
-    dispatch(setLongFileOpen(true));
-    return;
-  }
 
   const ID = makeid(8);
 
@@ -54,7 +46,7 @@ export const downloadObject = (
     internalPaths,
     object.version_id,
     object.size || 0,
-    null,
+    overrideFileName,
     ID,
     (progress) => {
       dispatch(
