@@ -167,8 +167,8 @@ func (m *AdminInfoResponse) validateServers(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Servers); i++ {
-		if typeutils.IsZero(m.Servers[i]) { // not required
-			continue
+		if m.Servers[i] == nil {
+			return validate.Required("servers"+"."+strconv.Itoa(i), "body", m.Servers[i])
 		}
 
 		if m.Servers[i] != nil {
@@ -209,8 +209,8 @@ func (m *AdminInfoResponse) validateWidgets(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Widgets); i++ {
-		if typeutils.IsZero(m.Widgets[i]) { // not required
-			continue
+		if m.Widgets[i] == nil {
+			return validate.Required("widgets"+"."+strconv.Itoa(i), "body", m.Widgets[i])
 		}
 
 		if m.Widgets[i] != nil {

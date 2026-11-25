@@ -196,8 +196,8 @@ func (m *KmsMetricsResponse) validateLatencyHistogram(formats strfmt.Registry) e
 	}
 
 	for i := 0; i < len(m.LatencyHistogram); i++ {
-		if typeutils.IsZero(m.LatencyHistogram[i]) { // not required
-			continue
+		if m.LatencyHistogram[i] == nil {
+			return validate.Required("latencyHistogram"+"."+strconv.Itoa(i), "body", m.LatencyHistogram[i])
 		}
 
 		if m.LatencyHistogram[i] != nil {

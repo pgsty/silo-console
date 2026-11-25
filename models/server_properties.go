@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ServerProperties server properties
@@ -79,8 +80,8 @@ func (m *ServerProperties) validateDrives(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Drives); i++ {
-		if typeutils.IsZero(m.Drives[i]) { // not required
-			continue
+		if m.Drives[i] == nil {
+			return validate.Required("drives"+"."+strconv.Itoa(i), "body", m.Drives[i])
 		}
 
 		if m.Drives[i] != nil {

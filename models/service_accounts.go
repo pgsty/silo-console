@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ServiceAccounts service accounts
@@ -39,8 +40,8 @@ func (m ServiceAccounts) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	for i := 0; i < len(m); i++ {
-		if typeutils.IsZero(m[i]) { // not required
-			continue
+		if m[i] == nil {
+			return validate.Required(strconv.Itoa(i), "body", m[i])
 		}
 
 		if m[i] != nil {

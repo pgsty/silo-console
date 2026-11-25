@@ -70,8 +70,8 @@ func (m *ListBucketsResponse) validateBuckets(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Buckets); i++ {
-		if typeutils.IsZero(m.Buckets[i]) { // not required
-			continue
+		if m.Buckets[i] == nil {
+			return validate.Required("buckets"+"."+strconv.Itoa(i), "body", m.Buckets[i])
 		}
 
 		if m.Buckets[i] != nil {

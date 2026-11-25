@@ -122,8 +122,8 @@ func (m *LoginDetails) validateRedirectRules(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.RedirectRules); i++ {
-		if typeutils.IsZero(m.RedirectRules[i]) { // not required
-			continue
+		if m.RedirectRules[i] == nil {
+			return validate.Required("redirectRules"+"."+strconv.Itoa(i), "body", m.RedirectRules[i])
 		}
 
 		if m.RedirectRules[i] != nil {

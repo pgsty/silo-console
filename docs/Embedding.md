@@ -1,13 +1,12 @@
 # Embedding Console in a SILO server
 
-Console 2.7.2 source uses silo-pkg v3.16.1 and the published
+The current Console source uses silo-pkg v3.16.1 and the published
 mcli 20261112 source, recorded in `hack/deps-release.json`, with Go 1.27.4 and upstream
 minio-go `v7.4.2-0.20261025165926-320af050c445`. This SDK revision includes
-post-v7.4.1 fixes; it is not a tagged v7.4.2 release.
-It retains the fixed `golang.org/x/net v0.62.0` and
-`golang.org/x/crypto v0.58.1-0.20261009181718-2f1f834330b2` revisions already used
-by Console v2.6.0 and v2.7.0. Use the README replacement block from the Console
-revision being embedded in a SILO server.
+the fixes after v7.4.1. The module selects `golang.org/x/net v0.63.0` and
+`golang.org/x/crypto v0.59.0`. Use the README replacement block from the Console
+revision being embedded. The versions shipped with Console 2.7.2 are recorded
+in its [tagged go.mod](https://github.com/pgsty/silo-console/blob/v2.7.2/go.mod).
 
 MC resolves to `v0.0.0-20261111180825-a37a9f054fba`, the source commit
 `a37a9f054fba828a0bbbceb4e9ff247ccf09c28d` tagged
@@ -20,10 +19,10 @@ used silo-pkg v3.15.2 and mcli 20261026; each release retains its own
 [dependency record](https://github.com/pgsty/silo-console/blob/v2.7.0/hack/deps-release.json)
 at its tag.
 
-The generator is go-swagger v0.36.7; its linked runtime and
-server-middleware are v0.33.4. Generated array context validators now continue
-past zero elements. The current schema has no `readOnly` constraints, so this
-does not introduce new contextual request restrictions. The default generated
+The generator is go-swagger v0.36.8. Its runtime and server-middleware use
+v0.33.5. Generated validators reject `null` entries in arrays of objects.
+For example, a bulk delete request with a null second entry reports an error
+at `files.1` before the handler runs. The default generated
 API documentation at `/api/v1/docs` loads Redoc 3 as an ES module from
 `cdn.jsdelivr.net`; its specification is served at `/swagger.json`.
 This concerns the API documentation middleware, not the bundled Console UI.

@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // MultiBucketResponseState multi bucket response state
@@ -58,8 +59,8 @@ func (m *MultiBucketResponseState) validateReplicationState(formats strfmt.Regis
 	}
 
 	for i := 0; i < len(m.ReplicationState); i++ {
-		if typeutils.IsZero(m.ReplicationState[i]) { // not required
-			continue
+		if m.ReplicationState[i] == nil {
+			return validate.Required("replicationState"+"."+strconv.Itoa(i), "body", m.ReplicationState[i])
 		}
 
 		if m.ReplicationState[i] != nil {

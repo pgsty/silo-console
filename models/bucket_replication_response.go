@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // BucketReplicationResponse bucket replication response
@@ -58,8 +59,8 @@ func (m *BucketReplicationResponse) validateRules(formats strfmt.Registry) error
 	}
 
 	for i := 0; i < len(m.Rules); i++ {
-		if typeutils.IsZero(m.Rules[i]) { // not required
-			continue
+		if m.Rules[i] == nil {
+			return validate.Required("rules"+"."+strconv.Itoa(i), "body", m.Rules[i])
 		}
 
 		if m.Rules[i] != nil {

@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // SiteReplicationInfoResponse site replication info response
@@ -67,8 +68,8 @@ func (m *SiteReplicationInfoResponse) validateSites(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.Sites); i++ {
-		if typeutils.IsZero(m.Sites[i]) { // not required
-			continue
+		if m.Sites[i] == nil {
+			return validate.Required("sites"+"."+strconv.Itoa(i), "body", m.Sites[i])
 		}
 
 		if m.Sites[i] != nil {

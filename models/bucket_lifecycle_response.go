@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // BucketLifecycleResponse bucket lifecycle response
@@ -58,8 +59,8 @@ func (m *BucketLifecycleResponse) validateLifecycle(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.Lifecycle); i++ {
-		if typeutils.IsZero(m.Lifecycle[i]) { // not required
-			continue
+		if m.Lifecycle[i] == nil {
+			return validate.Required("lifecycle"+"."+strconv.Itoa(i), "body", m.Lifecycle[i])
 		}
 
 		if m.Lifecycle[i] != nil {

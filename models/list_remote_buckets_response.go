@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ListRemoteBucketsResponse list remote buckets response
@@ -61,8 +62,8 @@ func (m *ListRemoteBucketsResponse) validateBuckets(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.Buckets); i++ {
-		if typeutils.IsZero(m.Buckets[i]) { // not required
-			continue
+		if m.Buckets[i] == nil {
+			return validate.Required("buckets"+"."+strconv.Itoa(i), "body", m.Buckets[i])
 		}
 
 		if m.Buckets[i] != nil {

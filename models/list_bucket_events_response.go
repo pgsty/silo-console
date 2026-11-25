@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ListBucketEventsResponse list bucket events response
@@ -61,8 +62,8 @@ func (m *ListBucketEventsResponse) validateEvents(formats strfmt.Registry) error
 	}
 
 	for i := 0; i < len(m.Events); i++ {
-		if typeutils.IsZero(m.Events[i]) { // not required
-			continue
+		if m.Events[i] == nil {
+			return validate.Required("events"+"."+strconv.Itoa(i), "body", m.Events[i])
 		}
 
 		if m.Events[i] != nil {

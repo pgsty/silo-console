@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // BucketVersioningResponse bucket versioning response
@@ -67,8 +68,8 @@ func (m *BucketVersioningResponse) validateExcludedPrefixes(formats strfmt.Regis
 	}
 
 	for i := 0; i < len(m.ExcludedPrefixes); i++ {
-		if typeutils.IsZero(m.ExcludedPrefixes[i]) { // not required
-			continue
+		if m.ExcludedPrefixes[i] == nil {
+			return validate.Required("excludedPrefixes"+"."+strconv.Itoa(i), "body", m.ExcludedPrefixes[i])
 		}
 
 		if m.ExcludedPrefixes[i] != nil {

@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // StartProfilingList start profiling list
@@ -61,8 +62,8 @@ func (m *StartProfilingList) validateStartResults(formats strfmt.Registry) error
 	}
 
 	for i := 0; i < len(m.StartResults); i++ {
-		if typeutils.IsZero(m.StartResults[i]) { // not required
-			continue
+		if m.StartResults[i] == nil {
+			return validate.Required("startResults"+"."+strconv.Itoa(i), "body", m.StartResults[i])
 		}
 
 		if m.StartResults[i] != nil {

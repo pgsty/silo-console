@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ResultTarget result target
@@ -64,8 +65,8 @@ func (m *ResultTarget) validateResult(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Result); i++ {
-		if typeutils.IsZero(m.Result[i]) { // not required
-			continue
+		if m.Result[i] == nil {
+			return validate.Required("result"+"."+strconv.Itoa(i), "body", m.Result[i])
 		}
 
 		if m.Result[i] != nil {

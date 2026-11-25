@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // LdapEntities ldap entities
@@ -75,8 +76,8 @@ func (m *LdapEntities) validateGroups(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Groups); i++ {
-		if typeutils.IsZero(m.Groups[i]) { // not required
-			continue
+		if m.Groups[i] == nil {
+			return validate.Required("groups"+"."+strconv.Itoa(i), "body", m.Groups[i])
 		}
 
 		if m.Groups[i] != nil {
@@ -105,8 +106,8 @@ func (m *LdapEntities) validatePolicies(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Policies); i++ {
-		if typeutils.IsZero(m.Policies[i]) { // not required
-			continue
+		if m.Policies[i] == nil {
+			return validate.Required("policies"+"."+strconv.Itoa(i), "body", m.Policies[i])
 		}
 
 		if m.Policies[i] != nil {
@@ -135,8 +136,8 @@ func (m *LdapEntities) validateUsers(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Users); i++ {
-		if typeutils.IsZero(m.Users[i]) { // not required
-			continue
+		if m.Users[i] == nil {
+			return validate.Required("users"+"."+strconv.Itoa(i), "body", m.Users[i])
 		}
 
 		if m.Users[i] != nil {

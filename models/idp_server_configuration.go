@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // IdpServerConfiguration idp server configuration
@@ -70,8 +71,8 @@ func (m *IdpServerConfiguration) validateInfo(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Info); i++ {
-		if typeutils.IsZero(m.Info[i]) { // not required
-			continue
+		if m.Info[i] == nil {
+			return validate.Required("info"+"."+strconv.Itoa(i), "body", m.Info[i])
 		}
 
 		if m.Info[i] != nil {

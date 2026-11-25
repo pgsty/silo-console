@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // RewindResponse rewind response
@@ -58,8 +59,8 @@ func (m *RewindResponse) validateObjects(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Objects); i++ {
-		if typeutils.IsZero(m.Objects[i]) { // not required
-			continue
+		if m.Objects[i] == nil {
+			return validate.Required("objects"+"."+strconv.Itoa(i), "body", m.Objects[i])
 		}
 
 		if m.Objects[i] != nil {

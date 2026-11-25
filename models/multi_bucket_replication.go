@@ -142,8 +142,8 @@ func (m *MultiBucketReplication) validateBucketsRelation(formats strfmt.Registry
 	}
 
 	for i := 0; i < len(m.BucketsRelation); i++ {
-		if typeutils.IsZero(m.BucketsRelation[i]) { // not required
-			continue
+		if m.BucketsRelation[i] == nil {
+			return validate.Required("bucketsRelation"+"."+strconv.Itoa(i), "body", m.BucketsRelation[i])
 		}
 
 		if m.BucketsRelation[i] != nil {

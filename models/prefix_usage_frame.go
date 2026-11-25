@@ -151,8 +151,8 @@ func (m *PrefixUsageFrame) validateFolders(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Folders); i++ {
-		if typeutils.IsZero(m.Folders[i]) { // not required
-			continue
+		if m.Folders[i] == nil {
+			return validate.Required("folders"+"."+strconv.Itoa(i), "body", m.Folders[i])
 		}
 
 		if m.Folders[i] != nil {
