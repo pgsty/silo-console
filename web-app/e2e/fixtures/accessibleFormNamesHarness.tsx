@@ -46,10 +46,13 @@ function Fields() {
         <RenameLongFileName
           open={open}
           closeModal={() => close()}
-          currentItem={originalName}
           bucketName="demo-data"
-          internalPaths={originalName}
-          actualInfo={{ name: originalName, size: 5 }}
+          object={{
+            name: originalName,
+            size: 5,
+            last_modified: "",
+            version_id: "",
+          }}
         />
       ) : scenario === "key" ? (
         <ModalWrapper

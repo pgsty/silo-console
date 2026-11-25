@@ -1014,8 +1014,6 @@ const messages: Dictionary = {
   "Enter Queue Directory": "キューディレクトリを入力",
   "Enter Queue Limit": "キュー上限を入力",
   "Enter Reconnect Interval": "再接続間隔を入力",
-  "Enter Replication Failed Workers": "失敗レプリケーションのワーカー数を入力",
-  "Enter Replication Workers": "レプリケーションワーカー数を入力",
   "Enter Requests Max": "最大リクエスト数を入力",
   "Enter Routing Key": "ルーティングキーを入力",
   "Enter SASL Mechanism": "SASL メカニズムを入力",
@@ -1234,6 +1232,9 @@ const messages: Dictionary = {
   "Max IO": "最大 IO",
   "Max Sleep": "最大スリープ時間",
   "Max Wait": "最大待ち時間",
+  "Maximum Replication Workers": "レプリケーションワーカーの最大数",
+  "Maximum number of replication workers (1–500, default 500)":
+    "レプリケーションワーカーの最大数（1～500、既定値 500）",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "修復処理の負荷を抑えるためのオブジェクト間の最大 IO リクエスト数（例: 3）",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1337,10 +1338,6 @@ const messages: Dictionary = {
     "保持する {unit} の数はゼロより大きくなければなりません",
   "Number of messages to publish without waiting for ACKs":
     "ACK を待たずに公開するメッセージの数",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "最近失敗したレプリカのレプリケーション ワーカーの数、デフォルトは 4",
-  "Number of replication workers, defaults to 100":
-    "レプリケーション ワーカーの数、デフォルトは 100",
   Object: "オブジェクト",
   "Object Date": "オブジェクトの日付",
   "Object Filters": "オブジェクトフィルター",
@@ -1486,7 +1483,6 @@ const messages: Dictionary = {
   "Replicate soft deletes": "論理削除をレプリケート",
   "Replicate versioned deletes": "バージョン削除をレプリケート",
   Replication: "レプリケーション",
-  "Replication Failed Workers": "レプリケーションに失敗したワーカー",
   "Replication Mode": "レプリケーションモード",
   "Replication Options": "レプリケーション オプション",
   "Replication Rules": "レプリケーションルール",
@@ -1494,7 +1490,6 @@ const messages: Dictionary = {
   "Replication status for {type}: {name}.":
     "{type}: {name} のレプリケーションステータス。",
   "Replication status from all Sites": "すべてのサイトからの複製ステータス",
-  "Replication Workers": "レプリケーション ワーカー",
   "Replication:": "レプリケーション:",
   "Reported Usage:": "報告された使用状況:",
   "Request Content Length": "リクエストコンテンツの長さ",

@@ -1016,8 +1016,6 @@ const messages: Dictionary = {
   "Enter Queue Directory": "أدخل دليل قائمة الانتظار",
   "Enter Queue Limit": "أدخل حد قائمة الانتظار",
   "Enter Reconnect Interval": "أدخل الفاصل الزمني لإعادة الاتصال",
-  "Enter Replication Failed Workers": "أدخل عمّال النسخ الفاشل",
-  "Enter Replication Workers": "أدخل عدد عمّال النسخ المتماثل",
   "Enter Requests Max": "أدخل أقصى عدد للطلبات",
   "Enter Routing Key": "أدخل مفتاح التوجيه",
   "Enter SASL Mechanism": "أدخل آلية SASL",
@@ -1235,6 +1233,9 @@ const messages: Dictionary = {
   "Max IO": "الحد الأقصى IO",
   "Max Sleep": "أقصى مدة سكون",
   "Max Wait": "أقصى مدة انتظار",
+  "Maximum Replication Workers": "الحد الأقصى لعمّال النسخ المتماثل",
+  "Maximum number of replication workers (1–500, default 500)":
+    "الحد الأقصى لعدد عمّال النسخ المتماثل (من 1 إلى 500، والقيمة الافتراضية 500)",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "الحد الأقصى لطلبات IO المسموح بها بين الكائنات لإبطاء عملية الإصلاح، مثل: 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1348,10 +1349,6 @@ const messages: Dictionary = {
     "يجب أن يكون عدد {unit} المراد الاحتفاظ به أكبر من الصفر",
   "Number of messages to publish without waiting for ACKs":
     "عدد الرسائل المراد نشرها دون انتظار ACK",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "عدد عمال النسخ المتماثل للنسخ المتماثلة الفاشلة مؤخرًا، القيمة الافتراضية هي 4",
-  "Number of replication workers, defaults to 100":
-    "عدد عمال النسخ، الافتراضي هو 100",
   Object: "كائن",
   "Object Date": "تاريخ الكائن",
   "Object Filters": "مرشّحات الكائنات",
@@ -1497,7 +1494,6 @@ const messages: Dictionary = {
   "Replicate soft deletes": "نسخ عمليات الحذف المنطقي",
   "Replicate versioned deletes": "نسخ عمليات حذف الإصدارات",
   Replication: "النسخ المتماثل",
-  "Replication Failed Workers": "عمّال النسخ المتماثل الفاشل",
   "Replication Mode": "وضع النسخ المتماثل",
   "Replication Options": "خيارات النسخ المتماثل",
   "Replication Rules": "قواعد النسخ المتماثل",
@@ -1505,7 +1501,6 @@ const messages: Dictionary = {
   "Replication status for {type}: {name}.":
     "حالة النسخ المتماثل لـ {type}: {name}.",
   "Replication status from all Sites": "حالة النسخ المتماثل من جميع المواقع",
-  "Replication Workers": "عمّال النسخ المتماثل",
   "Replication:": "النسخ :",
   "Reported Usage:": "الاستخدام المبلغ عنه:",
   "Request Content Length": "طول محتوى الطلب",

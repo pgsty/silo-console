@@ -523,10 +523,8 @@ const IDPLDAPConfigurationDetails = () => {
                                                 height: 20,
                                                 width: 20,
                                               },
-                                              "& span": {
-                                                height: 20,
-                                                display: "flex",
-                                                alignItems: "center",
+                                              "& .muted": {
+                                                display: "inline-flex",
                                               },
                                             }}
                                           >
@@ -542,7 +540,10 @@ const IDPLDAPConfigurationDetails = () => {
                                               )}
                                               placement={"right"}
                                             >
-                                              <span className={"muted"}>
+                                              <span
+                                                className={"muted"}
+                                                tabIndex={0}
+                                              >
                                                 <ConsoleIcon />
                                               </span>
                                             </Tooltip>

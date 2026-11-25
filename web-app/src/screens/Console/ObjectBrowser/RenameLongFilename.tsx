@@ -18,32 +18,33 @@ import React, { useState } from "react";
 import { Button, EditIcon, FormLayout, Grid, InputBox, Switch } from "mds";
 import { modalStyleUtils } from "../Common/FormComponents/common/styleLibrary";
 import { useAppDispatch } from "../../../store";
-import { downloadObject } from "./utils";
-import { BucketObject } from "api/consoleApi";
+import {
+  downloadFileName,
+  downloadObject,
+  windowsDownloadNameLimit,
+} from "./utils";
+import type { BucketObjectItem } from "../Buckets/ListBuckets/Objects/ListObjects/types";
 import ModalWrapper from "../Common/ModalWrapper/ModalWrapper";
 import { useT } from "i18n";
 
 interface IRenameLongFilename {
   open: boolean;
   bucketName: string;
-  internalPaths: string;
-  currentItem: string;
-  actualInfo: BucketObject;
+  object: BucketObjectItem;
   closeModal: () => void;
 }
 
 const RenameLongFileName = ({
   open,
   closeModal,
-  currentItem,
-  internalPaths,
-  actualInfo,
+  object,
   bucketName,
 }: IRenameLongFilename) => {
   const dispatch = useAppDispatch();
   const t = useT();
 
-  const [newFileName, setNewFileName] = useState<string>(currentItem);
+  const originalFileName = downloadFileName(object.name);
+  const [newFileName, setNewFileName] = useState(originalFileName);
   const [acceptLongName, setAcceptLongName] = useState<boolean>(false);
 
   const doDownload = (e: React.FormEvent<HTMLFormElement>) => {
@@ -51,8 +52,8 @@ const RenameLongFileName = ({
     downloadObject(
       dispatch,
       bucketName,
-      internalPaths,
-      actualInfo,
+      object.name,
+      object,
       acceptLongName ? null : newFileName,
     );
     closeModal();
@@ -93,7 +94,7 @@ const RenameLongFileName = ({
             type={"text"}
             value={newFileName}
             error={
-              newFileName.length > 200 && !acceptLongName
+              newFileName.length > windowsDownloadNameLimit && !acceptLongName
                 ? t("Filename should be less than 200 characters long.")
                 : ""
             }
@@ -106,7 +107,7 @@ const RenameLongFileName = ({
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setAcceptLongName(event.target.checked);
               if (event.target.checked) {
-                setNewFileName(currentItem);
+                setNewFileName(originalFileName);
               }
             }}
             label={t("Use Original Name")}
@@ -117,7 +118,9 @@ const RenameLongFileName = ({
               type="submit"
               variant="callAction"
               color="primary"
-              disabled={newFileName.length > 200 && !acceptLongName}
+              disabled={
+                newFileName.length > windowsDownloadNameLimit && !acceptLongName
+              }
               label={t("Download File")}
             />
           </Grid>

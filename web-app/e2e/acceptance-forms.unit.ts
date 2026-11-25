@@ -120,6 +120,7 @@ async function mount(
               {
                 key_values: [
                   { key: "requests_max", value: "0" },
+                  { key: "replication_max_workers", value: "500" },
                   {
                     key: "cors_allow_origin",
                     value: "https://first.example.invalid",
@@ -665,6 +666,83 @@ test("tablet content stacks form help and CORS rows while preserving label activ
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(768);
+});
+
+for (const provider of ["ldap", "openid-edit"]) {
+  test(`${provider} keeps the environment description out of the detail layout`, async () => {
+    await mount(provider);
+    const ldap = provider === "ldap";
+    const variable = ldap
+      ? "MINIO_IDENTITY_LDAP_SERVER_ADDR"
+      : "MINIO_IDENTITY_OPENID_CLIENT_ID_fixture";
+    const value = ldap ? "directory.example.test:389" : "example-client";
+    const response = ldap
+      ? [
+          {
+            key_values: [
+              { key: "server_addr", env_override: { name: variable, value } },
+            ],
+          },
+        ]
+      : { info: [{ key: "client_id", value, isEnv: true }] };
+    await page.route(
+      ldap ? "**/configs/identity_ldap" : "**/idp/openid/fixture",
+      (route) => route.fulfill({ json: response }),
+    );
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await expect(page.getByText(value, { exact: true })).toBeVisible();
+    const description = page
+      .locator(".label span[hidden]")
+      .filter({ hasText: variable });
+    await expect(description).toHaveCount(1);
+    for (const width of [1160, 390]) {
+      await page.setViewportSize({ width, height: 800 });
+      await expect(description).toBeHidden();
+      await expect(page.getByText(value, { exact: true })).toBeVisible();
+    }
+    const id = await description.getAttribute("id");
+    await page.locator(`[aria-describedby~="${id}"]`).focus();
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: variable }),
+    ).toBeVisible();
+  });
+}
+
+test("API settings submit only changed, supported fields", async () => {
+  await mount("configuration");
+  const save = page.getByRole("button", { name: "Save", exact: true });
+  const workers = page.getByLabel("Maximum Replication Workers", {
+    exact: true,
+  });
+  await expect(workers).toHaveValue("500");
+  await expect(save).toBeDisabled();
+  await expect(
+    page.locator("#replication_workers, #replication_failed_workers"),
+  ).toHaveCount(0);
+  await workers.fill("8");
+  await workers.fill("500");
+  await expect(save).toBeDisabled();
+  await workers.fill("8");
+
+  const writesToAPI: unknown[] = [];
+  await page.route("**/api/v1/configs/api", (route) => {
+    if (route.request().method() === "PUT") {
+      writesToAPI.push(route.request().postDataJSON());
+      return route.fulfill({ json: { restart: false } });
+    }
+    // A server advertising only requests_max must only offer that field.
+    return route.fulfill({
+      json: [{ key_values: [{ key: "requests_max", value: "0" }] }],
+    });
+  });
+  await save.click();
+  await expect(workers).toHaveCount(0);
+  await expect(page.locator("#requests_max")).toHaveValue("0");
+  await expect(page.locator("#cors_allow_origin-0")).toHaveCount(0);
+  await expect(save).toBeDisabled();
+  expect(writesToAPI).toEqual([
+    { key_values: [{ key: "replication_max_workers", value: "8" }] },
+  ]);
 });
 
 test("configuration navigation follows available tablet width and keeps API and CORS fields usable", async () => {

@@ -42,6 +42,7 @@ const ConfigurationsList = () => {
     >
       {validActiveConfig && (
         <EditConfiguration
+          key={configName}
           className={`${containerClassName}`}
           selectedConfiguration={validActiveConfig}
         />
