@@ -1019,9 +1019,6 @@ const ptScreens: Record<string, string> = {
   "Enter Queue Directory": "Digite o diretório da fila",
   "Enter Queue Limit": "Digite o limite da fila",
   "Enter Reconnect Interval": "Digite o intervalo de reconexão",
-  "Enter Replication Failed Workers":
-    "Digite os workers para réplicas com falha",
-  "Enter Replication Workers": "Digite os workers de replicação",
   "Enter Requests Max": "Digite o máximo de requisições",
   "Enter Routing Key": "Digite a chave de roteamento",
   "Enter SASL Mechanism": "Digite o mecanismo SASL",
@@ -1238,6 +1235,9 @@ const ptScreens: Record<string, string> = {
   "Max IO": "E/S máxima",
   "Max Sleep": "Pausa máxima",
   "Max Wait": "Espera máxima",
+  "Maximum Replication Workers": "Máximo de workers de replicação",
+  "Maximum number of replication workers (1–500, default 500)":
+    "Número máximo de workers de replicação (1–500, padrão 500)",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "Máximo de requisições de E/S permitidas entre objetos para desacelerar a operação de recuperação, por exemplo 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1338,10 +1338,6 @@ const ptScreens: Record<string, string> = {
     "O número de {unit} a reter deve ser maior que zero",
   "Number of messages to publish without waiting for ACKs":
     "Número de mensagens a publicar sem esperar ACKs",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "Número de workers de replicação para réplicas com falha recente; o padrão é 4",
-  "Number of replication workers, defaults to 100":
-    "Número de workers de replicação; o padrão é 100",
   Object: "Objeto",
   "Object Date": "Data do objeto",
   "Object Filters": "Filtros de objetos",
@@ -1487,7 +1483,6 @@ const ptScreens: Record<string, string> = {
   "Replicate soft deletes": "Replicar exclusões lógicas",
   "Replicate versioned deletes": "Replicar exclusões versionadas",
   Replication: "Replicação",
-  "Replication Failed Workers": "Workers para réplicas com falha",
   "Replication Mode": "Modo de replicação",
   "Replication Options": "Opções de replicação",
   "Replication Rules": "Regras de replicação",
@@ -1495,7 +1490,6 @@ const ptScreens: Record<string, string> = {
   "Replication status for {type}: {name}.":
     "Status da replicação de {type}: {name}.",
   "Replication status from all Sites": "Status da replicação de todos os sites",
-  "Replication Workers": "Workers de replicação",
   "Replication:": "Replicação:",
   "Reported Usage:": "Uso informado:",
   "Request Content Length": "Tamanho do conteúdo da requisição",

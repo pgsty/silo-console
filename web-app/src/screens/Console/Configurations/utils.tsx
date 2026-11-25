@@ -141,22 +141,13 @@ export const fieldsConfigurations: any = {
       placeholder: i18nKey("Enter allowed origin e.g. https://example.com"),
     },
     {
-      name: "replication_workers",
+      name: "replication_max_workers",
       required: false,
-      label: i18nKey("Replication Workers"),
-      tooltip: i18nKey("Number of replication workers, defaults to 100"),
-      type: "number",
-      placeholder: i18nKey("Enter Replication Workers"),
-    },
-    {
-      name: "replication_failed_workers",
-      required: false,
-      label: i18nKey("Replication Failed Workers"),
+      label: i18nKey("Maximum Replication Workers"),
       tooltip: i18nKey(
-        "Number of replication workers for recently failed replicas, defaults to 4",
+        "Maximum number of replication workers (1–500, default 500)",
       ),
       type: "number",
-      placeholder: i18nKey("Enter Replication Failed Workers"),
     },
   ],
   heal: [

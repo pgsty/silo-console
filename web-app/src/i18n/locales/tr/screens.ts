@@ -1023,8 +1023,6 @@ const messages: Dictionary = {
   "Enter Queue Directory": "Kuyruk dizini girin",
   "Enter Queue Limit": "Kuyruk sınırı girin",
   "Enter Reconnect Interval": "Yeniden bağlanma aralığı girin",
-  "Enter Replication Failed Workers": "Başarısız çoğaltma çalışanı girin",
-  "Enter Replication Workers": "Çoğaltma çalışanı girin",
   "Enter Requests Max": "Maks. istek girin",
   "Enter Routing Key": "Yönlendirme anahtarı girin",
   "Enter SASL Mechanism": "SASL mekanizması girin",
@@ -1242,6 +1240,9 @@ const messages: Dictionary = {
   "Max IO": "Maksimum IO",
   "Max Sleep": "Maksimum Uyku",
   "Max Wait": "Maksimum Bekleme",
+  "Maximum Replication Workers": "En fazla çoğaltma çalışanı",
+  "Maximum number of replication workers (1–500, default 500)":
+    "En fazla çoğaltma çalışanı sayısı (1–500, varsayılan 500)",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "Onarım işlemini yavaşlatmak için nesneler arasında izin verilen maksimum IO isteği, ör. 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1348,10 +1349,6 @@ const messages: Dictionary = {
     "Tutulacak {unit} sayısı sıfırdan büyük olmalıdır",
   "Number of messages to publish without waiting for ACKs":
     "ACK beklemeden yayınlanacak mesaj sayısı",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "Yakın zamanda başarısız olan replikalar için replikasyon çalışanlarının sayısı, varsayılan olarak 4'tür",
-  "Number of replication workers, defaults to 100":
-    "Çoğaltma çalışanlarının sayısı, varsayılan olarak 100'dür",
   Object: "Nesne",
   "Object Date": "Nesne Tarihi",
   "Object Filters": "Nesne Filtreleri",
@@ -1497,7 +1494,6 @@ const messages: Dictionary = {
   "Replicate soft deletes": "Yumuşak silme işlemlerini çoğaltın",
   "Replicate versioned deletes": "Sürümlendirilmiş silme işlemlerini çoğaltın",
   Replication: "Çoğaltma",
-  "Replication Failed Workers": "Başarısız Çoğaltma Çalışanları",
   "Replication Mode": "Çoğaltma Modu",
   "Replication Options": "Çoğaltma Seçenekleri",
   "Replication Rules": "Çoğaltma Kuralları",
@@ -1505,7 +1501,6 @@ const messages: Dictionary = {
   "Replication status for {type}: {name}.":
     "{type} için çoğaltma durumu: {name}.",
   "Replication status from all Sites": "Tüm Sitelerden çoğaltma durumu",
-  "Replication Workers": "Çoğaltma Çalışanları",
   "Replication:": "Çoğaltma:",
   "Reported Usage:": "Bildirilen Kullanım:",
   "Request Content Length": "İstek İçeriği Uzunluğu",

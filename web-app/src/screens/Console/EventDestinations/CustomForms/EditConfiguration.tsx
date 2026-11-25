@@ -15,13 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { ModalPresence } from "common/ui/ModalPresence";
-import React, { Fragment, useCallback, useEffect, useState } from "react";
-import get from "lodash/get";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Box, Button, Grid, Loader } from "mds";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { api } from "api";
-import { Configuration, ConfigurationKV } from "api/consoleApi";
+import { Configuration } from "api/consoleApi";
 import { errorToHandler } from "api/errors";
 import {
   fieldsConfigurations,
@@ -31,7 +29,6 @@ import {
 import {
   IConfigurationElement,
   IElementValue,
-  IOverrideEnv,
   KVField,
 } from "../../Configurations/types";
 import {
@@ -57,21 +54,48 @@ const EditConfiguration = ({
   className = "",
 }: IAddNotificationEndpointProps) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const { pathname = "" } = useLocation();
   const t = useT();
-
-  let selConfigTab = pathname.substring(pathname.lastIndexOf("/") + 1);
-  selConfigTab = selConfigTab === "settings" ? "region" : selConfigTab;
+  const configId = selectedConfiguration.configuration_id;
 
   //Local States
   const [valuesObj, setValueObj] = useState<IElementValue[]>([]);
   const [saving, setSaving] = useState<boolean>(false);
-  const [configValues, setConfigValues] = useState<IElementValue[]>([]);
   const [configSubsysList, setConfigSubsysList] = useState<Configuration[]>([]);
   const [resetConfigurationOpen, setResetConfigurationOpen] =
     useState<boolean>(false);
-  const [overrideEnvs, setOverrideEnvs] = useState<IOverrideEnv>({});
+  const storedValues = configSubsysList[0]?.key_values;
+  const fields = useMemo(() => {
+    const definitions: KVField[] = fieldsConfigurations[configId];
+    if (configId !== "api") return definitions;
+    return definitions.filter((field) =>
+      storedValues?.some((entry) => entry.key === field.name),
+    );
+  }, [configId, storedValues]);
+  const configValues = useMemo(
+    () =>
+      fields.map((field) => {
+        const entry = storedValues?.find((kv) => kv.key === field.name);
+        const value = entry?.value || "";
+        return {
+          key: field.name,
+          value: field.customValueProcess
+            ? field.customValueProcess(value)
+            : value,
+          env_override: entry?.env_override,
+        };
+      }),
+    [fields, storedValues],
+  );
+  const valuesToSave = removeEmptyFields(valuesObj).filter(
+    (field) =>
+      configId !== "api" ||
+      configValues.some(
+        (original) =>
+          original.key === field.key &&
+          !original.env_override &&
+          original.value !== field.value,
+      ),
+  );
 
   const loadingConfig = useSelector(
     (state: AppState) => state.system.loadingConfigurations,
@@ -79,85 +103,47 @@ const EditConfiguration = ({
 
   useEffect(() => {
     dispatch(configurationIsLoading(true));
-  }, [selConfigTab, dispatch]);
+  }, [configId, dispatch]);
 
   useEffect(() => {
-    if (loadingConfig) {
-      const configId = get(selectedConfiguration, "configuration_id", false);
-
-      if (configId) {
-        api.configs
-          .configInfo(configId)
-          .then((res) => {
-            setConfigSubsysList(res.data);
-            let values: ConfigurationKV[] = get(res.data[0], "key_values", []);
-
-            const fieldsConfig: KVField[] = fieldsConfigurations[configId];
-
-            const keyVals: IElementValue[] = fieldsConfig.map((field) => {
-              const includedValue = values.find(
-                (element: ConfigurationKV) => element.key === field.name,
-              );
-              const customValue = includedValue?.value || "";
-
-              return {
-                key: field.name,
-                value: field.customValueProcess
-                  ? field.customValueProcess(customValue)
-                  : customValue,
-                env_override: includedValue?.env_override,
-              };
-            });
-
-            setConfigValues(keyVals);
-            setOverrideEnvs(overrideFields(keyVals));
-            dispatch(configurationIsLoading(false));
-          })
-          .catch((err) => {
-            dispatch(configurationIsLoading(false));
-            dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-          });
-
-        return;
-      }
-      dispatch(configurationIsLoading(false));
-    }
-  }, [loadingConfig, selectedConfiguration, dispatch]);
-
-  useEffect(() => {
-    if (saving) {
-      const payload = {
-        key_values: removeEmptyFields(valuesObj),
-      };
-      api.configs
-        .setConfig(selectedConfiguration.configuration_id, payload)
-        .then((res) => {
-          setSaving(false);
-          dispatch(recordServerRestartRequirement(res.data.restart === true));
-          dispatch(configurationIsLoading(true));
-          if (!res.data.restart) {
-            dispatch(setSnackBarMessage(t("Configuration saved successfully")));
-          }
-        })
-        .catch((err) => {
-          setSaving(false);
-          dispatch(setErrorSnackMessage(errorToHandler(err.error)));
-        });
-    }
-  }, [saving, dispatch, selectedConfiguration, valuesObj, navigate, t]);
+    if (!loadingConfig) return;
+    let active = true;
+    api.configs
+      .configInfo(configId)
+      .then((res) => {
+        if (!active) return;
+        setConfigSubsysList(res.data);
+        dispatch(configurationIsLoading(false));
+      })
+      .catch((err) => {
+        if (!active) return;
+        dispatch(configurationIsLoading(false));
+        dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadingConfig, configId, dispatch]);
 
   //Fetch Actions
   const submitForm = (event: React.FormEvent) => {
     event.preventDefault();
+    if (saving || (configId === "api" && !valuesToSave.length)) return;
     setSaving(true);
+    api.configs
+      .setConfig(configId, { key_values: valuesToSave })
+      .then((res) => {
+        dispatch(recordServerRestartRequirement(res.data.restart === true));
+        dispatch(configurationIsLoading(true));
+        if (!res.data.restart) {
+          dispatch(setSnackBarMessage(t("Configuration saved successfully")));
+        }
+      })
+      .catch((err) => {
+        dispatch(setErrorSnackMessage(errorToHandler(err.error)));
+      })
+      .finally(() => setSaving(false));
   };
-
-  const onValueChange = useCallback(
-    (newValue: IElementValue[]) => {
-      setValueObj(newValue);
-    },
-    [setValueObj],
-  );
 
   const continueReset = (restart: boolean) => {
     setResetConfigurationOpen(false);
@@ -230,14 +216,10 @@ const EditConfiguration = ({
                     }}
                   >
                     <ConfTargetGeneric
-                      fields={
-                        fieldsConfigurations[
-                          selectedConfiguration.configuration_id
-                        ]
-                      }
-                      onChange={onValueChange}
+                      fields={fields}
+                      onChange={setValueObj}
                       defaultVals={configValues}
-                      overrideEnv={overrideEnvs}
+                      overrideEnv={overrideFields(configValues)}
                     />
                   </Grid>
                   <Grid
@@ -265,7 +247,9 @@ const EditConfiguration = ({
                       id={"save"}
                       type="submit"
                       variant="callAction"
-                      disabled={saving}
+                      disabled={
+                        saving || (configId === "api" && !valuesToSave.length)
+                      }
                       label={t("Save")}
                     />
                   </Grid>

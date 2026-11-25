@@ -1032,9 +1032,6 @@ const messages: Dictionary = {
   "Enter Queue Directory": "Введите каталог очереди",
   "Enter Queue Limit": "Введите лимит очереди",
   "Enter Reconnect Interval": "Введите интервал переподключения",
-  "Enter Replication Failed Workers":
-    "Введите число воркеров для сбойных репликаций",
-  "Enter Replication Workers": "Введите число воркеров репликации",
   "Enter Requests Max": "Введите макс. запросов",
   "Enter Routing Key": "Введите ключ маршрутизации",
   "Enter SASL Mechanism": "Введите механизм SASL",
@@ -1256,6 +1253,9 @@ const messages: Dictionary = {
   "Max IO": "Макс. I/O",
   "Max Sleep": "Макс. пауза",
   "Max Wait": "Макс. ожидание",
+  "Maximum Replication Workers": "Максимум воркеров репликации",
+  "Maximum number of replication workers (1–500, default 500)":
+    "Максимальное число воркеров репликации (1–500, по умолчанию 500)",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "Макс. число запросов ввода-вывода между объектами для замедления восстановления, напр., 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1366,10 +1366,6 @@ const messages: Dictionary = {
     "Число {unit} для сохранения должно быть больше нуля.",
   "Number of messages to publish without waiting for ACKs":
     "Количество сообщений для публикации без ожидания ACK.",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "Количество воркеров репликации для недавно сбойных реплик, по умолчанию 4",
-  "Number of replication workers, defaults to 100":
-    "Количество воркеров репликации, по умолчанию 100",
   Object: "Объект",
   "Object Date": "Дата объекта",
   "Object Filters": "Фильтры объектов",
@@ -1516,7 +1512,6 @@ const messages: Dictionary = {
   "Replicate soft deletes": "Реплицировать логические удаления",
   "Replicate versioned deletes": "Реплицировать удаления версий",
   Replication: "Репликация",
-  "Replication Failed Workers": "Воркеры для сбойных репликаций",
   "Replication Mode": "Режим репликации",
   "Replication Options": "Параметры репликации",
   "Replication Rules": "Правила репликации",
@@ -1524,7 +1519,6 @@ const messages: Dictionary = {
   "Replication status for {type}: {name}.":
     "Статус репликации для {type}: {name}.",
   "Replication status from all Sites": "Статус репликации со всех площадок",
-  "Replication Workers": "Воркеры репликации",
   "Replication:": "Репликация:",
   "Reported Usage:": "Заявленное использование:",
   "Request Content Length": "Длина содержимого запроса",

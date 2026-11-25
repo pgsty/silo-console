@@ -970,8 +970,6 @@ const zhScreens: Record<string, string> = {
   "Enter Queue Directory": "输入队列目录",
   "Enter Queue Limit": "输入队列上限",
   "Enter Reconnect Interval": "输入重连间隔",
-  "Enter Replication Failed Workers": "输入失败复制工作线程数",
-  "Enter Replication Workers": "输入复制工作线程数",
   "Enter Requests Max": "输入最大请求数",
   "Enter Routing Key": "输入路由键",
   "Enter SASL Mechanism": "输入 SASL 机制",
@@ -1179,6 +1177,9 @@ const zhScreens: Record<string, string> = {
   "Max IO": "最大 IO",
   "Max Sleep": "最大休眠时长",
   "Max Wait": "最大等待时间",
+  "Maximum Replication Workers": "最大复制工作线程数",
+  "Maximum number of replication workers (1–500, default 500)":
+    "复制工作线程数上限（1–500，默认 500）",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "处理对象之间允许的最大 IO 请求数，用于放缓修复速度，例如 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1276,10 +1277,6 @@ const zhScreens: Record<string, string> = {
     "保留的{unit}数必须大于零",
   "Number of messages to publish without waiting for ACKs":
     "无需等待 ACK 即可发布的消息数量",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "处理近期失败副本的复制工作线程数量，默认为 4",
-  "Number of replication workers, defaults to 100":
-    "复制工作线程的数量，默认为 100",
   Object: "对象",
   "Object Date": "对象日期",
   "Object Filters": "对象过滤条件",
@@ -1421,14 +1418,12 @@ const zhScreens: Record<string, string> = {
   "Replicate soft deletes": "复制软删除",
   "Replicate versioned deletes": "复制版本化删除",
   Replication: "复制",
-  "Replication Failed Workers": "失败复制工作线程数",
   "Replication Mode": "复制模式",
   "Replication Options": "复制选项",
   "Replication Rules": "复制规则",
   "Replication Status": "复制状态",
   "Replication status for {type}: {name}.": "{type} {name} 的复制状态。",
   "Replication status from all Sites": "所有站点的复制状态",
-  "Replication Workers": "复制工作线程数",
   "Replication:": "复制：",
   "Reported Usage:": "报告用量：",
   "Request Content Length": "请求内容长度",

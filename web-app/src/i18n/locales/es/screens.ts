@@ -1036,9 +1036,6 @@ const messages: Dictionary = {
   "Enter Queue Directory": "Ingresar directorio de cola",
   "Enter Queue Limit": "Ingresar límite de cola",
   "Enter Reconnect Interval": "Ingresar intervalo de reconexión",
-  "Enter Replication Failed Workers":
-    "Ingresar trabajadores fallidos en la replicación",
-  "Enter Replication Workers": "Ingresar los trabajadores de replicación",
   "Enter Requests Max": "Ingresar solicitudes máx.",
   "Enter Routing Key": "Ingresar clave de ruta",
   "Enter SASL Mechanism": "Ingresar mecanismo SASL",
@@ -1263,6 +1260,9 @@ const messages: Dictionary = {
   "Max IO": "Máx. IO",
   "Max Sleep": "Pausa máx.",
   "Max Wait": "Espera máxima",
+  "Maximum Replication Workers": "Máximo de trabajadores de replicación",
+  "Maximum number of replication workers (1–500, default 500)":
+    "Número máximo de trabajadores de replicación (1–500, valor predeterminado 500)",
   "Maximum IO requests allowed between objects to slow down heal operation, e.g. 3":
     "Máximo de solicitudes de E/S permitidas entre objetos para ralentizar la reparación, p. ej. 3",
   "Maximum limit for undelivered messages, defaults to '10000'":
@@ -1371,10 +1371,6 @@ const messages: Dictionary = {
     "El número de {unit} a retener debe ser mayor que cero",
   "Number of messages to publish without waiting for ACKs":
     "Número de mensajes a publicar sin esperar ACK",
-  "Number of replication workers for recently failed replicas, defaults to 4":
-    "Número de trabajadores de replicación para réplicas fallidas recientemente, el valor predeterminado es 4",
-  "Number of replication workers, defaults to 100":
-    "Número de trabajadores de replicación, el valor predeterminado es 100",
   Object: "Objeto",
   "Object Date": "Fecha del objeto",
   "Object Filters": "Filtros de objetos",
@@ -1521,7 +1517,6 @@ const messages: Dictionary = {
   "Replicate soft deletes": "Replicar eliminaciones lógicas",
   "Replicate versioned deletes": "Replicar eliminaciones de versiones",
   Replication: "Replicación",
-  "Replication Failed Workers": "Trabajadores fallidos en la replicación",
   "Replication Mode": "Modo de replicación",
   "Replication Options": "Opciones de replicación",
   "Replication Rules": "Reglas de replicación",
@@ -1530,7 +1525,6 @@ const messages: Dictionary = {
     "Estado de replicación para {type}: {name}.",
   "Replication status from all Sites":
     "Estado de replicación de todos los sitios",
-  "Replication Workers": "Trabajadores de replicación",
   "Replication:": "Replicación:",
   "Reported Usage:": "Uso reportado:",
   "Request Content Length": "Longitud del contenido de la solicitud",
