@@ -78,7 +78,6 @@ import DeleteObject from "../ListObjects/DeleteObject";
 import SetLegalHoldModal from "../ObjectDetails/SetLegalHoldModal";
 import TagsModal from "../ObjectDetails/TagsModal";
 import InspectObject from "./InspectObject";
-import RenameLongFileName from "../../../../ObjectBrowser/RenameLongFilename";
 import { formatText, useT, useTN } from "i18n";
 import {
   canDisplayObjectVersions,
@@ -160,7 +159,6 @@ const ObjectDetailPanel = ({
   const [inspectModalOpen, setInspectModalOpen] = useState<boolean>(false);
   const [deleteOpen, setDeleteOpen] = useState<boolean>(false);
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
-  const [longFileOpen, setLongFileOpen] = useState<boolean>(false);
   const dialogOpen =
     shareFileModalOpen ||
     retentionModalOpen ||
@@ -168,8 +166,7 @@ const ObjectDetailPanel = ({
     legalholdOpen ||
     inspectModalOpen ||
     deleteOpen ||
-    previewOpen ||
-    longFileOpen;
+    previewOpen;
   useLayoutEffect(() => {
     onDialogOpenChange?.(dialogOpen);
     return () => onDialogOpenChange?.(false);
@@ -353,10 +350,6 @@ const ObjectDetailPanel = ({
 
   const closeShareModal = () => {
     setShareFileModalOpen(false);
-  };
-
-  const closeFileOpen = () => {
-    setLongFileOpen(false);
   };
 
   const closeDeleteModal = (closeAndReload: boolean) => {
@@ -728,18 +721,6 @@ const ObjectDetailPanel = ({
             volumeName={bucketName}
             inspectPath={target.key}
             closeInspectModalAndRefresh={closeInspectModal}
-          />
-        )}
-      </ModalPresence>
-      <ModalPresence open={Boolean(longFileOpen)}>
-        {longFileOpen && (
-          <RenameLongFileName
-            open={longFileOpen}
-            closeModal={closeFileOpen}
-            currentItem={currentItem}
-            bucketName={bucketName}
-            internalPaths={target.key}
-            actualInfo={actualInfo}
           />
         )}
       </ModalPresence>

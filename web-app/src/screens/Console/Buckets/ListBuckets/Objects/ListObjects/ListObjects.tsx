@@ -1021,15 +1021,8 @@ const ListObjects = () => {
           <RenameLongFileName
             open={!!downloadRenameModal}
             closeModal={closeRenameModal}
-            currentItem={downloadRenameModal.name.split("/")?.pop() || ""}
             bucketName={bucketName}
-            internalPaths={internalPaths}
-            actualInfo={{
-              name: downloadRenameModal.name,
-              last_modified: "",
-              version_id: downloadRenameModal.version_id,
-              size: downloadRenameModal.size,
-            }}
+            object={downloadRenameModal}
           />
         )}
       </ModalPresence>

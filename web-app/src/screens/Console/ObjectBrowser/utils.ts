@@ -28,6 +28,10 @@ import { setSnackBarMessage } from "../../../systemSlice";
 import { BucketObject } from "api/consoleApi";
 import { getStoredLanguage, translate } from "i18n/lang";
 
+export const windowsDownloadNameLimit = 200;
+export const downloadFileName = (key: string) =>
+  key.slice(key.lastIndexOf("/") + 1);
+
 export const downloadObject = (
   dispatch: AppDispatch,
   bucketName: string,
