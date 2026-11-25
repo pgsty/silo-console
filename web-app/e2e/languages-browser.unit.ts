@@ -72,13 +72,14 @@ async function fit(page: Page) {
   await page.keyboard.press("Escape");
   await expect(button).toBeFocused();
 }
-for (const language of languages)
-  test(`login and site-replication form fit all target widths in ${language}`, async () => {
-    const page = await browser.newPage();
-    try {
-      await setup(page, language);
-      for (const width of [350, 768, 1440]) {
-        await page.setViewportSize({ width, height: 900 });
+
+const layoutWidths = [350, 768, 1440];
+for (const language of languages) {
+  for (const width of layoutWidths) {
+    test(`login and site-replication form fit at ${width}px in ${language}`, async () => {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      try {
+        await setup(page, language);
         await page.goto(`${base}/login`);
         await expect(page.locator("#accessKey")).toBeVisible();
         await expect(page.locator("html")).toHaveAttribute(
@@ -93,11 +94,13 @@ for (const language of languages)
         await page.goto(`${base}/e2e/fixtures/languages-harness.html`);
         await expect(page.locator("#language-activator")).toBeVisible();
         await fit(page);
+      } finally {
+        await page.close();
       }
-    } finally {
-      await page.close();
-    }
-  });
+    });
+  }
+}
+
 test("menu is keyboard accessible, persists selection, and defaults to English independently of browser language", async () => {
   const page = await browser.newPage({ locale: "ar-EG" });
   try {
@@ -128,16 +131,15 @@ test("menu is keyboard accessible, persists selection, and defaults to English i
   }
 });
 
-for (const language of languages)
-  test(`compact metrics and lifecycle labels fit their controls in ${language}`, async () => {
-    const page = await browser.newPage();
-    try {
-      await setup(page, language);
-      await page.route("**/api/v1/admin/tiers**", (r) =>
-        r.fulfill({ json: { items: [] } }),
-      );
-      for (const width of [350, 768, 1440]) {
-        await page.setViewportSize({ width, height: 900 });
+for (const language of languages) {
+  for (const width of layoutWidths) {
+    test(`compact metrics and lifecycle labels fit at ${width}px in ${language}`, async () => {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      try {
+        await setup(page, language);
+        await page.route("**/api/v1/admin/tiers**", (r) =>
+          r.fulfill({ json: { items: [] } }),
+        );
         await page.goto(
           `${base}/e2e/fixtures/languages-harness.html?screen=metrics`,
         );
@@ -193,11 +195,13 @@ for (const language of languages)
         expect(field.right).toBeLessThanOrEqual(width);
         expect(field.clipped).toBe(false);
         expect(field.pageOverflow).toBeLessThanOrEqual(1);
+      } finally {
+        await page.close();
       }
-    } finally {
-      await page.close();
-    }
-  });
+    });
+  }
+}
+
 test("all languages switch offline without discarding form input", async () => {
   const page = await browser.newPage();
   try {
