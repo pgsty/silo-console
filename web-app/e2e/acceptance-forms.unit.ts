@@ -668,6 +668,46 @@ test("tablet content stacks form help and CORS rows while preserving label activ
   ).toBeLessThanOrEqual(768);
 });
 
+for (const provider of ["ldap", "openid-edit"]) {
+  test(`${provider} keeps the environment description out of the detail layout`, async () => {
+    await mount(provider);
+    const ldap = provider === "ldap";
+    const variable = ldap
+      ? "MINIO_IDENTITY_LDAP_SERVER_ADDR"
+      : "MINIO_IDENTITY_OPENID_CLIENT_ID_fixture";
+    const value = ldap ? "directory.example.test:389" : "example-client";
+    const response = ldap
+      ? [
+          {
+            key_values: [
+              { key: "server_addr", env_override: { name: variable, value } },
+            ],
+          },
+        ]
+      : { info: [{ key: "client_id", value, isEnv: true }] };
+    await page.route(
+      ldap ? "**/configs/identity_ldap" : "**/idp/openid/fixture",
+      (route) => route.fulfill({ json: response }),
+    );
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await expect(page.getByText(value, { exact: true })).toBeVisible();
+    const description = page
+      .locator(".label span[hidden]")
+      .filter({ hasText: variable });
+    await expect(description).toHaveCount(1);
+    for (const width of [1160, 390]) {
+      await page.setViewportSize({ width, height: 800 });
+      await expect(description).toBeHidden();
+      await expect(page.getByText(value, { exact: true })).toBeVisible();
+    }
+    const id = await description.getAttribute("id");
+    await page.locator(`[aria-describedby~="${id}"]`).focus();
+    await expect(
+      page.getByRole("tooltip").filter({ hasText: variable }),
+    ).toBeVisible();
+  });
+}
+
 test("API settings submit only changed, supported fields", async () => {
   await mount("configuration");
   const save = page.getByRole("button", { name: "Save", exact: true });
