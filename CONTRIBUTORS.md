@@ -24,6 +24,7 @@ When a proposal was incorporated through a later repair, its adoption is credite
 | [@Vonng](https://github.com/Vonng) | Maintains SILO Console, including fixes, tests, releases, and documentation | [pgsty/silo-console: Merged PRs (44)](https://github.com/pgsty/silo-console/issues?q=author%3AVonng+is%3Apr+is%3Amerged)<br>[pgsty/silo-console: Closed issues (39)](https://github.com/pgsty/silo-console/issues?q=author%3AVonng+is%3Aissue+is%3Aclosed) |
 | [@cyberbret](https://github.com/cyberbret) | Contributed on-demand folder and bucket usage scans and the optional persistent usage worker | Merged PRs: [pgsty/silo-console#70](https://github.com/pgsty/silo-console/pull/70)<br>PR [#70](https://github.com/pgsty/silo-console/pull/70) was integrated through [#79](https://github.com/pgsty/silo-console/pull/79), retaining the original commits and authorship. Usage scans and the optional worker shipped in [Console v2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0). |
 | [@EduardoAndradeMachado](https://github.com/EduardoAndradeMachado) | Contributed Brazilian Portuguese translations to Console | Merged PRs: [pgsty/silo-console#83](https://github.com/pgsty/silo-console/pull/83)<br>PR [#83](https://github.com/pgsty/silo-console/pull/83) was merged with its original authored commits; the later ten-language implementation uses shared static dictionaries. Private security reporting is acknowledged with the reporter's agreement. |
+| [@m-aziz-algullu](https://github.com/m-aziz-algullu) | Fixed Windows downloads for long object keys and forwarded the chosen download name | [PR #91](https://github.com/pgsty/silo-console/pull/91) |
 
 ## Issue reports
 
@@ -32,6 +33,8 @@ When a proposal was incorporated through a later repair, its adoption is credite
 | [@kh0mka](https://github.com/kh0mka) | Reported lost bucket quotas during Console bucket creation, fixed through PR #74 | Closed issues: [pgsty/silo-console#72](https://github.com/pgsty/silo-console/issues/72) |
 | [@jiri-pejchal](https://github.com/jiri-pejchal) | Reported the Console share proxy's exposure of internal metrics | Closed issues: [pgsty/silo-console#52](https://github.com/pgsty/silo-console/issues/52) |
 | [@azataiot](https://github.com/azataiot) | Reported and analyzed high-latency Console health-report truncation during WebSocket close | Closed issues: [pgsty/silo-console#63](https://github.com/pgsty/silo-console/issues/63) |
+| [@MikeVL](https://github.com/MikeVL) | Traced broken CORS settings to retired replication fields in the API form | [Issue #92](https://github.com/pgsty/silo-console/issues/92) |
+| [@abjoseph](https://github.com/abjoseph) | Reported overlapping LDAP configuration details when environment variables are set | [Issue #93](https://github.com/pgsty/silo-console/issues/93) |
 
 ## Audit scope
 
