@@ -16,8 +16,34 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/minio/console/api/operations"
 	"github.com/minio/console/api/operations/bucket"
+	"github.com/minio/console/api/operations/object"
 	"github.com/stretchr/testify/require"
 )
+
+func TestBulkDeleteBindsOnlyObjectEntries(t *testing.T) {
+	route := &middleware.MatchedRoute{
+		Consumer: runtime.JSONConsumer(),
+		Formats:  strfmt.Default,
+		Params:   middleware.RouteParams{{Name: "bucket_name", Value: "test"}},
+	}
+	bind := func(body string) (object.DeleteMultipleObjectsParams, error) {
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/buckets/test/delete-objects", strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		params := object.NewDeleteMultipleObjectsParams()
+		err := params.BindRequest(request, route)
+		return params, err
+	}
+
+	params, err := bind(`[{"path":"one"},{"path":"two","versionID":"v2"}]`)
+	require.NoError(t, err)
+	require.Len(t, params.Files, 2)
+	require.Equal(t, "one", params.Files[0].Path)
+	require.Equal(t, "v2", params.Files[1].VersionID)
+
+	params, err = bind(`[{"path":"one"},null]`)
+	require.ErrorContains(t, err, "files.1")
+	require.Nil(t, params.Files)
+}
 
 func TestSwaggerDocumentationRoutes(t *testing.T) {
 	spec, err := loads.Embedded(SwaggerJSON, FlatSwaggerJSON)

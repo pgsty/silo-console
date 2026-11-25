@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ListAccessRulesResponse list access rules response
@@ -61,8 +62,8 @@ func (m *ListAccessRulesResponse) validateAccessRules(formats strfmt.Registry) e
 	}
 
 	for i := 0; i < len(m.AccessRules); i++ {
-		if typeutils.IsZero(m.AccessRules[i]) { // not required
-			continue
+		if m.AccessRules[i] == nil {
+			return validate.Required("accessRules"+"."+strconv.Itoa(i), "body", m.AccessRules[i])
 		}
 
 		if m.AccessRules[i] != nil {

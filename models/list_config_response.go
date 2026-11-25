@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ListConfigResponse list config response
@@ -61,8 +62,8 @@ func (m *ListConfigResponse) validateConfigurations(formats strfmt.Registry) err
 	}
 
 	for i := 0; i < len(m.Configurations); i++ {
-		if typeutils.IsZero(m.Configurations[i]) { // not required
-			continue
+		if m.Configurations[i] == nil {
+			return validate.Required("configurations"+"."+strconv.Itoa(i), "body", m.Configurations[i])
 		}
 
 		if m.Configurations[i] != nil {

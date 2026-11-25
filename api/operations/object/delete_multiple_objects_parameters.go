@@ -20,6 +20,7 @@ package object
 
 import (
 	stderrors "errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -99,7 +100,8 @@ func (o *DeleteMultipleObjectsParams) BindRequest(r *http.Request, route *middle
 			// validate array of body objects
 			for i := range body {
 				if body[i] == nil {
-					continue
+					res = append(res, errors.Required(fmt.Sprintf("%s.%v", "files", i), "body", body[i]))
+					break
 				}
 				if err := body[i].Validate(route.Formats); err != nil {
 					res = append(res, err)

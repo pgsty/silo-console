@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // Widget widget
@@ -97,8 +98,8 @@ func (m *Widget) validateTargets(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Targets); i++ {
-		if typeutils.IsZero(m.Targets[i]) { // not required
-			continue
+		if m.Targets[i] == nil {
+			return validate.Required("targets"+"."+strconv.Itoa(i), "body", m.Targets[i])
 		}
 
 		if m.Targets[i] != nil {

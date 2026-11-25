@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // ListPoliciesResponse list policies response
@@ -61,8 +62,8 @@ func (m *ListPoliciesResponse) validatePolicies(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Policies); i++ {
-		if typeutils.IsZero(m.Policies[i]) { // not required
-			continue
+		if m.Policies[i] == nil {
+			return validate.Required("policies"+"."+strconv.Itoa(i), "body", m.Policies[i])
 		}
 
 		if m.Policies[i] != nil {

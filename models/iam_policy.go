@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // IamPolicy iam policy
@@ -61,8 +62,8 @@ func (m *IamPolicy) validateStatement(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Statement); i++ {
-		if typeutils.IsZero(m.Statement[i]) { // not required
-			continue
+		if m.Statement[i] == nil {
+			return validate.Required("statement"+"."+strconv.Itoa(i), "body", m.Statement[i])
 		}
 
 		if m.Statement[i] != nil {

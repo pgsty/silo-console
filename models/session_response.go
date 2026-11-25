@@ -96,8 +96,8 @@ func (m *SessionResponse) validateAllowResources(formats strfmt.Registry) error 
 	}
 
 	for i := 0; i < len(m.AllowResources); i++ {
-		if typeutils.IsZero(m.AllowResources[i]) { // not required
-			continue
+		if m.AllowResources[i] == nil {
+			return validate.Required("allowResources"+"."+strconv.Itoa(i), "body", m.AllowResources[i])
 		}
 
 		if m.AllowResources[i] != nil {

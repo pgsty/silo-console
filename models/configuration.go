@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // Configuration configuration
@@ -61,8 +62,8 @@ func (m *Configuration) validateKeyValues(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.KeyValues); i++ {
-		if typeutils.IsZero(m.KeyValues[i]) { // not required
-			continue
+		if m.KeyValues[i] == nil {
+			return validate.Required("key_values"+"."+strconv.Itoa(i), "body", m.KeyValues[i])
 		}
 
 		if m.KeyValues[i] != nil {

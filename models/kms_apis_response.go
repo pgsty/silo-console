@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // KmsAPIsResponse kms APIs response
@@ -58,8 +59,8 @@ func (m *KmsAPIsResponse) validateResults(formats strfmt.Registry) error {
 	}
 
 	for i := 0; i < len(m.Results); i++ {
-		if typeutils.IsZero(m.Results[i]) { // not required
-			continue
+		if m.Results[i] == nil {
+			return validate.Required("results"+"."+strconv.Itoa(i), "body", m.Results[i])
 		}
 
 		if m.Results[i] != nil {

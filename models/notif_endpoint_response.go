@@ -27,6 +27,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag/jsonutils"
 	"github.com/go-openapi/swag/typeutils"
+	"github.com/go-openapi/validate"
 )
 
 // NotifEndpointResponse notif endpoint response
@@ -58,8 +59,8 @@ func (m *NotifEndpointResponse) validateNotificationEndpoints(formats strfmt.Reg
 	}
 
 	for i := 0; i < len(m.NotificationEndpoints); i++ {
-		if typeutils.IsZero(m.NotificationEndpoints[i]) { // not required
-			continue
+		if m.NotificationEndpoints[i] == nil {
+			return validate.Required("notification_endpoints"+"."+strconv.Itoa(i), "body", m.NotificationEndpoints[i])
 		}
 
 		if m.NotificationEndpoints[i] != nil {
